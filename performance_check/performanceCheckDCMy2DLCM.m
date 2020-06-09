@@ -9,7 +9,7 @@ function performanceCheckDCMy2DLCM
     N  = 12;                              % number of runs
     T  = 200;                             % number of observations (scans)
     TR = 2;                               % repetition time or timing
-    n  = 16;                               % number of regions or nodes
+    n  = 12;                               % number of regions or nodes
     t  = (1:T)*TR;                        % observation times
     
     % integrate states
@@ -27,6 +27,7 @@ function performanceCheckDCMy2DLCM
     % initialize parameters to save file or load previous one
     DLMAEs = zeros(maxK,N);
     DLinvTms = zeros(maxK,N);
+    DLCorr = zeros(maxK,N);
 
     % load spectrum DCM performance check result
     fname = ['performance_check/DCM_demo-rand' num2str(n) '-' num2str(N) 'x' num2str(maxK) '.mat'];
@@ -42,8 +43,8 @@ function performanceCheckDCMy2DLCM
         inControl = eye(n,n);
 
         % normalize signal to [0, 1] (not strictly)
-        si = dcm2LdcmSignal(si);
-        inSignal = dcm2LdcmSignal(inSignal);
+        si = dcmY2DlcmSignal(si);
+        inSignal = dcmY2DlcmSignal(inSignal);
 
         % do training or load DLCM network
         dlcmFile = ['performance_check/net-vsDCM-' num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];
@@ -80,15 +81,16 @@ function performanceCheckDCMy2DLCM
             DLinvTms(k,1) = netDLCM.trainTime + netDLCM.recoverTrainTime;
 
             %plotDlcmWeight(netDLCM);
-            save(dlcmFile, 'netDLCM', 'DLMAEs', 'DLinvTms');
+            save(dlcmFile, 'netDLCM', 'DLMAEs', 'DLinvTms', 'DLCorr');
         end
+        
+        % simulate DLCM network with 1st frame & exogenous input signal
+        [S, time] = simulateDlcmNetwork(si, inSignal, inControl, netDLCM);
+
+        % show original & simulated signal correlation        
+        figure; DLCorr(k,1) = plotTwoSignalsCorrelation(S, si);
+        save(dlcmFile, 'netDLCM', 'DLMAEs', 'DLinvTms', 'DLCorr');
     end
 end
 
-function Y = dcm2LdcmSignal(X)
-    minSi = min(min(X));
-    maxSi = max(max(X));
-    maxSi = floor((maxSi-minSi)*10) / 10;
-    minSi = ceil(minSi*10) / 10; % should be minus
-    Y = (X - minSi) / maxSi;
-end
+

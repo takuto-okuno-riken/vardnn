@@ -39,7 +39,7 @@ function reproductCheckSpm12DCMLargefMRI
     M.x  = sparse(n,5);
     M.g  = 'spm_gx_fmri';
 
-    maxK = 50; % number of trial
+    maxK = 20; % number of trial
 
     % load spectrum DCM performance check result
     fname = ['performance_check/DCM_demo-rand' num2str(n) '-' num2str(N) 'x' num2str(maxK) '.mat'];

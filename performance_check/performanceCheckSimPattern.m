@@ -117,14 +117,14 @@ function checkingPattern(si, inSignal, inControl, idx)
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
     
     % show original & simulated signal FC
-    FC = plotFunctionalConnectivity([si; inSignal], inputNum);
-    FC = plotFunctionalConnectivity([S; inSignal], inputNum);
+    figure; FC = plotFunctionalConnectivity([si; inSignal], inputNum);
+    figure; FC = plotFunctionalConnectivity([S; inSignal], inputNum);
     % show original & simulated signal granger causality index (gc-EC)
-    gcI = plotPairwiseGCI([si; inSignal],3,10, inputNum);
-    gcI = plotPairwiseGCI([S; inSignal],3,10, inputNum);
+    figure; gcI = plotPairwiseGCI([si; inSignal],3,10, inputNum);
+    figure; gcI = plotPairwiseGCI([S; inSignal],3,10, inputNum);
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
-    dlEC = plotDlcmECmeanWeight(netDLCM);
+    figure; dlEC = plotDlcmECmeanWeight(netDLCM);
 end
 

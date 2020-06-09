@@ -4,7 +4,7 @@
 % input:
 %  X      time series vector (1 x time series)
 %  Y      time series vector (1 x time series)
-%  lags   number of lags for autoregression
+%  p      number of lags for autoregression
 
 function gcI = calcPairGrangerCausality(X, Y, p)
     % input signal is time [1 ... last]
