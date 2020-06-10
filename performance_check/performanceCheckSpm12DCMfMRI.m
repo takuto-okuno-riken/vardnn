@@ -12,12 +12,12 @@ function performanceCheckSpm12DCMfMRI
     N  = 12;                               % number of runs
     T  = 200;                             % number of observations (scans)
     TR = 2;                               % repetition time or timing
-    n  = 8;                               % number of regions or nodes
+    n  = 16;                               % number of regions or nodes
     t  = (1:T)*TR;                        % observation times
 
     % priors
     % -------------------------------------------------------------------------
-    options.maxnodes   = 4;               % effective number of nodes
+    options.maxnodes   = n;               % effective number of nodes
 
     options.nonlinear  = 0;
     options.two_state  = 0;
@@ -44,13 +44,12 @@ function performanceCheckSpm12DCMfMRI
     M.x  = sparse(n,5);
     M.g   = 'spm_gx_fmri';
 
-    maxK = 20; % number of trial
+    maxK = 10; % number of trial
 
     % initialize parameters to save file or load previous one
     fname = ['performance_check/DCM_demo-rand' num2str(n) '-' num2str(N) 'x' num2str(maxK) '.mat'];
     if exist(fname, 'file')
         load(fname);
-        Corr = zeros(maxK,N);
     else
         pPs = cell(maxK,1);
         Uus = cell(maxK,N);
@@ -67,7 +66,7 @@ function performanceCheckSpm12DCMfMRI
     else
         startK = floor((idx(1)-1)/N + 1);
     end
-startK = 1;
+    
     % performance check of DCM inversion
     for k=startK:maxK
 
@@ -90,7 +89,7 @@ startK = 1;
         % find starting point
         rowTms = invTms(k,:);
         startI = find(rowTms==0);
-startI(1) = 1;
+
         % generate original connectivty with posterior expectations and generating
         % new data for Bayesian parameter averaging
         %==========================================================================
@@ -119,15 +118,15 @@ startI(1) = 1;
                 % response
                 % -----------------------------------------------------------------
                 DCM.Y.y  = y(ySt:end,:);
-%                dcmTicH = tic;
+                dcmTicH = tic;
                 % nonlinear system identification (Variational Laplace)
                 % =================================================================
                 CSD{end + 1} = spm_dcm_fmri_csd(DCM);
                 BPA          = spm_dcm_average(CSD,'simulation',1);
-%                invTms(k,i) = toc(dcmTicH);
+                invTms(k,i) = toc(dcmTicH);
 
                 BPAs{k,i} = BPA; % keep input & params to save
-%{
+
                 % MAP estimates
                 % -----------------------------------------------------------------
                 qp   = CSD{end}.Ep.A;
@@ -166,7 +165,6 @@ startI(1) = 1;
                 ylabel('RMS')
                 axis square
                 drawnow
-%}
 
                 % check signal differences between original & inverted
                 orgpP.A = BPA.Ep.A;
@@ -186,7 +184,7 @@ startI(1) = 1;
                 MAEs(k,i) = mae;
 
                 % show original & simulated signal correlation        
-                figure; Corr(k,1) = plotTwoSignalsCorrelation(y, orgY);
+                figure; Corr(k,i) = plotTwoSignalsCorrelation(y, orgY);
             catch exception
                 msgText = getReport(exception)
             end
