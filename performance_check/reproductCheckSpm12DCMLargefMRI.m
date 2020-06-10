@@ -15,7 +15,7 @@ function reproductCheckSpm12DCMLargefMRI
 
     % priors
     % -------------------------------------------------------------------------
-    options.maxnodes   = 4;               % effective number of nodes
+    options.maxnodes   = n;               % effective number of nodes
 
     options.nonlinear  = 0;
     options.two_state  = 0;
@@ -118,6 +118,11 @@ function reproductCheckSpm12DCMLargefMRI
 
             % MAE of signals
             mae = mean(mean(abs(y-orgY)))
+
+            % plot original A
+            figure; plotDcmEC(pP.A);
+            % plot predicted A
+            figure; plotDcmEC(BPA.Ep.A);
 
         catch exception
             msgText = getReport(exception)

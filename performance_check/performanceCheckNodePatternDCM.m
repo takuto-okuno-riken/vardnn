@@ -1,6 +1,6 @@
 
 
-function performanceCheckNodePattern
+function performanceCheckNodePatternDCM
     % load signals
     load('test/testTrain-rand500-rand1.mat');
     siOrg = si;
@@ -16,12 +16,11 @@ function performanceCheckNodePattern
 %}
     %% pattern 2 -------------------------------------------------
 %{
-%%{
     disp('node 2 and 6 are syncronized');
     si = siOrg(1:nodeNum, 1:sigLen);
     si(2,:) = si(6,:);
     checkingPattern(si, 2);
-%%}
+%}
     %% pattern 3 -------------------------------------------------
 %%{
     disp('node 2 is excited by node 6');
@@ -37,7 +36,7 @@ function performanceCheckNodePattern
     checkingPattern(si, 4);
 %%}
     %% pattern 5 -------------------------------------------------
-%}
+
 %%{
     disp('node 2,4 is excited by node 6');
     si = siOrg(1:nodeNum, 1:sigLen);
@@ -128,5 +127,48 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
     figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
 %    dlEC = plotDlcmECcorrDeltaWeight(netDLCM);
+
+    % DEM Structure: create random inputs
+    % -------------------------------------------------------------------------
+    N  = 12;                              % number of runs
+    T  = sigLen;                          % number of observations (scans)
+    TR = 2;                               % repetition time or timing
+    n  = nodeNum;                         % number of regions or nodes
+
+    % priors
+    % -------------------------------------------------------------------------
+    dcmopt.maxnodes   = nodeNum;          % effective number of nodes
+
+    dcmopt.nonlinear  = 0;
+    dcmopt.two_state  = 0;
+    dcmopt.stochastic = 0;
+    dcmopt.centre     = 1;
+    dcmopt.induced    = 1;
+
+    % initialize DCM stcuct
+    DCM = struct();
+    DCM.options = dcmopt;
+
+    DCM.a    = ones(n,n);
+    DCM.b    = zeros(n,n,0);
+    DCM.c    = zeros(n,1);
+    DCM.d    = zeros(n,n,0);
+
+    DCM.Y.dt = TR;
+    DCM.U.u  = zeros(T,1);
+    DCM.U.dt = TR;
+
+    CSD   = {};
+    % response
+    % -----------------------------------------------------------------
+    DCM.Y.y  = si.';
+
+    % nonlinear system identification (Variational Laplace)
+    % =================================================================
+    CSD{end + 1} = spm_dcm_fmri_csd(DCM);
+    BPA          = spm_dcm_average(CSD,'simulation',1);
+
+    A = BPA.Ep.A;
+    figure; plotDcmEC(A);
 end
 
