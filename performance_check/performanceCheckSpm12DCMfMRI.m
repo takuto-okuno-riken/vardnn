@@ -17,7 +17,7 @@ function performanceCheckSpm12DCMfMRI
 
     % priors
     % -------------------------------------------------------------------------
-    options.maxnodes   = n;               % effective number of nodes
+    options.maxnodes   = 4;  % effective number of nodes, 4 is better than n
 
     options.nonlinear  = 0;
     options.two_state  = 0;
