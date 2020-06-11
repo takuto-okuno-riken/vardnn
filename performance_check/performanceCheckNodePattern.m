@@ -123,11 +123,14 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
-    figure; dlEC = plotDlcmECmeanWeight(netDLCM);
-    figure; dlEC = plotDlcmECmeanAbsWeight(netDLCM);
-    figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
+%    figure; dlEC = plotDlcmECmeanWeight(netDLCM);
+%    figure; dlEC = plotDlcmECmeanAbsWeight(netDLCM);
+%    figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
     figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
     % show DLCM-GC
     figure; dlGC = plotDlcmGCI(si, [], [], netDLCM);
+    % show DLCM-weight-GC
+    figure; dlwGC = plotDlcmWeightGCI(netDLCM);
+    figure; dlwGC = plotDlcmDeltaWeightGCI(netDLCM);
 end
 
