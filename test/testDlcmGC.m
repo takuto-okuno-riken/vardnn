@@ -1,15 +1,15 @@
 
-function testRecoverTrain
+function testSimulation
     % load signals
     load('test/testTrain-rand500-rand1.mat');
     siOrg = si;
     nodeNum = 8;
-    inputNum = 4;
-    sigLen = 100;
+    inputNum = 0;
+    sigLen = 200;
     si = siOrg(1:nodeNum,1:sigLen);
-    inSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
+    inSignal = [];
     % control is all positive input
-    inControl = logical(ones(nodeNum,inputNum));
+    inControl = [];
 
     % set training options
     maxEpochs = 1000;
@@ -20,15 +20,15 @@ function testRecoverTrain
         'ExecutionEnvironment','cpu', ...
         'MaxEpochs',maxEpochs, ...
         'MiniBatchSize',miniBatchSize, ...
-        'L2Regularization',0.01, ...
         'Shuffle','every-epoch', ...
+        'L2Regularization',0.01, ...
         'GradientThreshold',1,...
         'Verbose',false);
 %            'Plots','training-progress');
 
     %% test pattern 1 
     % do training or load DLCM network
-    dlcmFile = 'test/dlcm-sim-test8-4.mat';
+    dlcmFile = ['test/dlcm-gc-test' num2str(nodeNum) '-' num2str(inputNum) '.mat'];
     if exist(dlcmFile, 'file')
         load(dlcmFile);
     else
@@ -38,32 +38,26 @@ function testRecoverTrain
         netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
         [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
-        %plotDlcmWeight(netDLCM);
+
+        % recoverty training
+        [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
         save(dlcmFile, 'netDLCM');
     end
     
-    % recoverty training
-    [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
-
-    % show result of recoverty training
+    % simulate DLCM network with 1st frame & exogenous input signal
     [S, time] = simulateDlcmNetwork(si, inSignal, inControl, netDLCM);
+
     [mae, maeerr] = plotTwoSignals(si, S);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
-    save(dlcmFile, 'netDLCM');
-%%{
+    
     % show original & simulated signal FC
     figure; FC = plotFunctionalConnectivity(si);
     figure; FC = plotFunctionalConnectivity(S);
     % show original & simulated signal granger causality index (gc-EC)
     figure; gcI = plotPairwiseGCI(si);
     figure; gcI = plotPairwiseGCI(S);
-    % show original time shifted correlation (tsc-FC)
-    %tscFC = plotTimeShiftedCorrelation(si);
-    % show deep-learning effective connectivity
-    figure; dlEC = plotDlcmECmeanWeight(netDLCM);
-    % plot correlation graph between original predicted node signals
-    figure; R = plotTwoSignalsCorrelation(si, S) % show R result
-    figure; R = getCosSimilarity(si, S) % show R result
-%%}
+
+    % show DLCM-GC
+    figure; dlGC = plotDlcmGCI(si, inSignal, inControl, netDLCM);
 end
 

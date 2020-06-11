@@ -122,11 +122,12 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
-    figure; dlEC = plotDlcmECmeanWeight(netDLCM);
-    figure; dlEC = plotDlcmECmeanAbsWeight(netDLCM);
-    figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
+%    figure; dlEC = plotDlcmECmeanWeight(netDLCM);
+%    figure; dlEC = plotDlcmECmeanAbsWeight(netDLCM);
+%    figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
     figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
-%    dlEC = plotDlcmECcorrDeltaWeight(netDLCM);
+    % show DLCM-GC
+    figure; dlGC = plotDlcmGCI(si, [], [], netDLCM);
 
     % DEM Structure: create random inputs
     % -------------------------------------------------------------------------
@@ -162,7 +163,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     % response
     % -----------------------------------------------------------------
     DCM.Y.y  = si.';
-
+%%{
     % nonlinear system identification (Variational Laplace)
     % =================================================================
     CSD{end + 1} = spm_dcm_fmri_csd(DCM);
@@ -170,5 +171,6 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 
     A = BPA.Ep.A;
     figure; plotDcmEC(A);
+%%}
 end
 

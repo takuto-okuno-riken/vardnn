@@ -48,14 +48,14 @@ function testSimulation
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
     
     % show original & simulated signal FC
-    FC = plotFunctionalConnectivity(si);
-    FC = plotFunctionalConnectivity(S);
+    figure; FC = plotFunctionalConnectivity(si);
+    figure; FC = plotFunctionalConnectivity(S);
     % show original & simulated signal granger causality index (gc-EC)
-    gcI = plotPairwiseGCI(si);
-    gcI = plotPairwiseGCI(S);
+    figure; gcI = plotPairwiseGCI(si);
+    figure; gcI = plotPairwiseGCI(S);
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
-    dlEC = plotDlcmECmeanWeight(netDLCM);
+    figure; dlEC = plotDlcmECmeanWeight(netDLCM);
 end
 
