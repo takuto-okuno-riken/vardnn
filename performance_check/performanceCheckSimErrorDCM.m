@@ -29,7 +29,7 @@ function performanceCheckSimError
         sigLen = 200;
         winLen = 100;
 
-        dlcmFile = ['performance_check/sim-err' num2str(i) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+        dlcmFile = ['performance_check/sim-errd' num2str(i) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
         load(dlcmFile);
         Mae = [Mae, eachMae];
         R = [R, eachR];
