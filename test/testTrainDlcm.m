@@ -1,7 +1,7 @@
 
 function testTrainDlcm
     % load signals
-    load('test/testTrain-rand500-rand1.mat');
+    load('test/testTrain-rand500-uniform.mat');
     si = si(1:36,1:182);
 %%{
     y  = si;

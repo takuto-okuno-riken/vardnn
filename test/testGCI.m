@@ -5,7 +5,7 @@ p = 3; % GC lag param
 % generate random signals
 %X = rand(nodeNum, sigLen); 
 
-load('D:/work/dlcm/test/testTrain-rand500-rand1.mat');
+load('test/testTrain-rand500-uniform.mat');
 X = si(1:8, 1:100);
 
 % set signal time lag 6->2, 6->4

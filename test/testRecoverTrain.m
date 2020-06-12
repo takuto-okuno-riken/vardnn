@@ -1,7 +1,7 @@
 
 function testRecoverTrain
     % load signals
-    load('test/testTrain-rand500-rand1.mat');
+    load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
     nodeNum = 8;
     inputNum = 4;

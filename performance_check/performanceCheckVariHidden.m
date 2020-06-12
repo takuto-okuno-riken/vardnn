@@ -1,7 +1,7 @@
 
 function performanceCheckVariHidden
     % load signals
-    load('test/testTrain-rand500-rand1.mat');
+    load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
     
     inputNum = 0;
