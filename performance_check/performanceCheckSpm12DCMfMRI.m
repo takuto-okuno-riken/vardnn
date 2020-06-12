@@ -9,10 +9,10 @@ function performanceCheckSpm12DCMfMRI
 
     % DEM Structure: create random inputs
     % -------------------------------------------------------------------------
-    N  = 12;                               % number of runs
+    N  = 8;                               % number of runs
     T  = 200;                             % number of observations (scans)
     TR = 2;                               % repetition time or timing
-    n  = 16;                               % number of regions or nodes
+    n  = 8;                               % number of regions or nodes
     t  = (1:T)*TR;                        % observation times
 
     % priors
@@ -44,7 +44,7 @@ function performanceCheckSpm12DCMfMRI
     M.x  = sparse(n,5);
     M.g   = 'spm_gx_fmri';
 
-    maxK = 10; % number of trial
+    maxK = 20; % number of trial
 
     % initialize parameters to save file or load previous one
     fname = ['performance_check/DCM_demo-rand' num2str(n) '-' num2str(N) 'x' num2str(maxK) '.mat'];
@@ -53,7 +53,6 @@ function performanceCheckSpm12DCMfMRI
     else
         pPs = cell(maxK,1);
         Uus = cell(maxK,N);
-        BPAs = cell(maxK,N);
         RMSs = zeros(maxK,N);
         MAEs = zeros(maxK,N);
         invTms = zeros(maxK,N);
@@ -79,11 +78,12 @@ function performanceCheckSpm12DCMfMRI
 
         DCM.a    = ones(n,n);
         DCM.b    = zeros(n,n,0);
-        DCM.c    = zeros(n,1);
+%        DCM.c    = zeros(n,1);
+        DCM.c    = eye(n,n);
         DCM.d    = zeros(n,n,0);
 
         DCM.Y.dt = TR;
-        DCM.U.u  = zeros(T,1);
+%        DCM.U.u  = zeros(T,1);
         DCM.U.dt = TR;
 
         % find starting point
@@ -97,7 +97,7 @@ function performanceCheckSpm12DCMfMRI
         orgpP = pP;
         pPs{k} = pP;
 
-        if startI(1)==1, CSD   = {}; end
+        if startI(1)==1, CSD = {}; BPAs = {}; end
         RMS   = [];
         Qp    = [];
         Pp    = pP.A - diag(diag(pP.A));
@@ -118,6 +118,7 @@ function performanceCheckSpm12DCMfMRI
                 % response
                 % -----------------------------------------------------------------
                 DCM.Y.y  = y(ySt:end,:);
+                DCM.U.u  = U.u(ySt:end,:);
                 dcmTicH = tic;
                 % nonlinear system identification (Variational Laplace)
                 % =================================================================
@@ -125,7 +126,7 @@ function performanceCheckSpm12DCMfMRI
                 BPA          = spm_dcm_average(CSD,'simulation',1);
                 invTms(k,i) = toc(dcmTicH);
 
-                BPAs{k,i} = BPA; % keep input & params to save
+%                BPAs{end + 1} = BPA; % keep input & params to save
 
                 % MAP estimates
                 % -----------------------------------------------------------------
@@ -190,7 +191,7 @@ function performanceCheckSpm12DCMfMRI
             end
 
             % save inversion result
-            save(fname, 'pPs', 'Uus', 'BPAs', 'RMSs', 'MAEs', 'invTms', 'CSD', 'Corr');
+            save(fname, 'pPs', 'Uus', 'RMSs', 'MAEs', 'invTms', 'CSD', 'Corr');
         end
 
     end % for k=1:maxK
