@@ -14,4 +14,4 @@ z = rand(1,seqLen);
 figure;
 plot(z);
 
-save(['test/testTrain-rand' num2str(regionNum) '-rand1.mat'], 'si', 'z');
+save(['test/testTrain-rand' num2str(regionNum) '-uniform.mat'], 'si', 'z');
