@@ -21,7 +21,7 @@ function [trainedNet, time, mae] = recoveryTrainDlcmNetwork(X, inSignal, inContr
     [mae, ~] = getTwoSignalsError(X, S);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
     if mae < maeTh
-        toc; return;
+        time = toc(ticH); return;
     end
 
     % recovery training whole DLCM network

@@ -1,0 +1,194 @@
+
+
+function performanceCheckNodePatternDCM2
+    % set global random stream and shuffle it
+    myStream=RandStream('mt19937ar');
+    RandStream.setGlobalStream(myStream);
+    rng('shuffle');
+
+    % DEM Structure: create random inputs
+    % -------------------------------------------------------------------------
+    N  = 8;
+    T  = 200;                             % number of observations (scans)
+    TR = 2;                               % repetition time or timing
+    n  = 8;                               % number of regions or nodes
+    t  = (1:T)*TR;                        % observation times
+
+    % priors
+    % -------------------------------------------------------------------------
+    options.maxnodes   = 4;  % effective number of nodes, 4 is better than n
+
+    options.nonlinear  = 0;
+    options.two_state  = 0;
+    options.stochastic = 0;
+    options.centre     = 1;
+    options.induced    = 1;
+
+    A   = ones(n,n);
+    B   = zeros(n,n,0);
+    C   = zeros(n,n);
+    D   = zeros(n,n,0);
+    pP  = spm_dcm_fmri_priors(A,B,C,D,options);
+
+    pP.C = eye(n,n);
+    pP.transit = randn(n,1)/16;
+
+    % integrate states
+    % -------------------------------------------------------------------------
+    U.dt = TR;
+    M.f  = 'spm_fx_fmri';
+    M.x  = sparse(n,5);
+    M.g   = 'spm_gx_fmri';
+
+
+    %% pattern 1 -------------------------------------------------
+%%{
+    disp('full random -- full independent nodes');
+    pP.A = rand(n,n)/2 - 0.25;
+    checkingPattern(pP,M,U,N,T,n,TR,options,1);
+%%}
+    %% pattern 2 -------------------------------------------------
+%{
+    disp('node 2 and 6 are syncronized');
+    pP.A = rand(n,n)/4 - 0.125;
+    checkingPattern(pP,M,U,N,T,n,TR,options,2);
+%}
+    %% pattern 3 -------------------------------------------------
+%%{
+    disp('node 2 is excited by node 6');
+    pP.A = rand(n,n)/4 - 0.125;
+    pP.A(2,6) = 1;
+    checkingPattern(pP,M,U,N,T,n,TR,options,3);
+%%}
+    %% pattern 4 -------------------------------------------------
+%%{
+    disp('node 2 is excited half by node 6');
+    pP.A = rand(n,n)/4 - 0.125;
+    pP.A(2,6) = 0.5;
+    checkingPattern(pP,M,U,N,T,n,TR,options,4);
+%%}
+    %% pattern 5 -------------------------------------------------
+%%{
+    disp('node 2,4 is excited by node 6');
+    pP.A = rand(n,n)/4 - 0.125;
+    pP.A(2,6) = 1;
+    pP.A(4,6) = 1;
+    checkingPattern(pP,M,U,N,T,n,TR,options,5);
+%%}
+    %% pattern 6 -------------------------------------------------
+%%{
+    disp('nodes are excited 6-.->2, 2-.->4');
+    pP.A = rand(n,n)/4 - 0.125;
+    pP.A(2,6) = 1;
+    pP.A(4,2) = 1;
+    checkingPattern(pP,M,U,N,T,n,TR,options,6);
+%%}
+end
+
+%% 
+function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
+    dlcmFile = ['performance_check/net-patdcm2-' num2str(n) 'x' num2str(T) '-N' num2str(N) '-TR' num2str(TR) '-' num2str(idx) '.mat'];
+    netDLCM = [];
+
+    % show original connection
+    figure; plotDcmEC(pP.A);
+    
+    if exist(dlcmFile, 'file')
+        load(dlcmFile);
+    else
+        % initialize DCM stcuct
+        DCM = struct();
+        DCM.options = options;
+
+        DCM.a    = ones(n,n);
+        DCM.b    = zeros(n,n,0);
+        DCM.c    = eye(n,n);
+        DCM.d    = zeros(n,n,0);
+
+        DCM.Y.dt = TR;
+        DCM.U.dt = TR;
+
+        CSD = {};
+        RMS = [];
+        Uus = {};
+        % performance check of DCM inversion
+        for k=1:N
+            % generate signal by DCM
+            U.u = spm_rand_mar(T+50,n,1/2)/8;       % endogenous fluctuations
+            y   = spm_int_J(pP,M,U);                % integrate with observer
+            y2  = y(51:end,:);
+            u2  = U.u(51:end,:);
+            si = y2.';
+            Uus{end + 1} = U.u;
+
+            % response
+            % -----------------------------------------------------------------
+            DCM.Y.y  = y2;
+            DCM.U.u  = u2;
+
+            % nonlinear system identification (Variational Laplace)
+            % =================================================================
+            CSD{end + 1} = spm_dcm_fmri_csd(DCM);
+            BPA          = spm_dcm_average(CSD,'simulation',1);
+
+            dp   = BPA.Ep.A - pP.A;
+            dp   = dp - diag(diag(dp));
+            RMS(end + 1) = sqrt(mean(dp(~~dp).^2))
+
+            A = BPA.Ep.A;
+        end
+        save(dlcmFile, 'netDLCM', 'pP', 'M', 'U', 'N','T','n','TR', 'y2', 'u2', 'si', 'A', 'Uus', 'RMS', 'CSD');
+    end
+    % show estimated A by DCM
+    figure; plotDcmEC(A);
+
+    % train DLCM
+    figure; plot(y2);
+    si = dcmY2DlcmSignal(si);
+    inSignal = dcmY2DlcmSignal(u2.');
+    inControl = eye(n,n);
+    nodeNum = size(si,1);
+    sigLen = size(si,2);
+    if isempty(netDLCM)
+        % layer parameters
+        netDLCM = initDlcmNetwork(si, inSignal, inControl);
+        % training DLCM network
+        maxEpochs = 1000;
+        miniBatchSize = ceil(sigLen / 3);
+        options = trainingOptions('adam', ...
+            'ExecutionEnvironment','cpu', ...
+            'MaxEpochs',maxEpochs, ...
+            'MiniBatchSize',miniBatchSize, ...
+            'Shuffle','every-epoch', ...
+            'GradientThreshold',1,...
+            'L2Regularization',0.1, ...
+            'Verbose',false);
+    %            'Plots','training-progress');
+
+        disp('start training');
+        netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+        % recoverty training
+        [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+        save(dlcmFile, 'netDLCM', 'pP', 'M', 'U', 'N','T','n','TR', 'y2', 'u2', 'si', 'A', 'Uus', 'RMS', 'CSD');
+    end
+
+    % show signals after training
+    figure; [S, t,mae,maeerr] = plotPredictSignals(si,inSignal,inControl,netDLCM);
+    disp(['t=' num2str(t) ', mae=' num2str(mae)]);
+
+    % show original signal FC
+    figure; FC = plotFunctionalConnectivity(si);
+    % show original signal granger causality index (gc-EC)
+    figure; gcI = plotPairwiseGCI(si);
+    % show original time shifted correlation (tsc-FC)
+    %tscFC = plotTimeShiftedCorrelation(si);
+    % show deep-learning effective connectivity
+%    figure; dlEC = plotDlcmECmeanWeight(netDLCM);
+%    figure; dlEC = plotDlcmECmeanAbsWeight(netDLCM);
+%    figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
+    figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
+    % show DLCM-GC
+    figure; dlGC = plotDlcmGCI(si, inSignal, inControl, netDLCM);
+
+end
+
