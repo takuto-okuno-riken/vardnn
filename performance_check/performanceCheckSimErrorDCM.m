@@ -1,8 +1,9 @@
 
-function performanceCheckSimError
+function performanceCheckSimErrorDCM
     % load signals
     load('test/testTrain-rand30-dcm.mat');
     siOrg = dcmY2DlcmSignal(si);
+    uuOrg = dcmY2DlcmSignal(uu);
 
     % do training and simulation and plot error graph
 %%{
@@ -13,7 +14,7 @@ function performanceCheckSimError
         winLen = 100;
 
         si = siOrg(1:nodeNum,1:sigLen);
-        inSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
+        inSignal = uuOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
         % control is all positive input
         inControl = logical(ones(nodeNum,inputNum));
 

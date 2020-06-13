@@ -44,14 +44,17 @@ pP.A = rand(n,n)/4 - 0.125;
 
 Uus = {};
 si = [];
+uu = [];
 for i=1:k
     U.u = spm_rand_mar(T+50,n,1/2)/8;       % endogenous fluctuations
     Uus{end+1} = U.u;
     y    = spm_int_J(pP,M,U);            % integrate with observer
     y2   = y(51:end,:);
+    u2   = U.u(51:end,:);
     si = [si; y2.'];
+    uu = [uu; u2.'];
     figure; plot(U.u);
     figure; plot(y2);
 end
 
-save(['test/testTrain-rand' num2str(n) '-dcm.mat'], 'si', 'pP', 'Uus', 'M', 'T', 'TR','n', 't');
+save(['test/testTrain-rand' num2str(n) '-dcm.mat'], 'si', 'uu', 'pP', 'Uus', 'M', 'T', 'TR','n', 't');
