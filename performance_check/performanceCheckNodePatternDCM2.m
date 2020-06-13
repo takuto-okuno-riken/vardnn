@@ -42,11 +42,11 @@ function performanceCheckNodePatternDCM2
 
 
     %% pattern 1 -------------------------------------------------
-%%{
+%{
     disp('full random -- full independent nodes');
     pP.A = rand(n,n)/2 - 0.25;
     checkingPattern(pP,M,U,N,T,n,TR,options,1);
-%%}
+%}
     %% pattern 2 -------------------------------------------------
 %{
     disp('node 2 and 6 are syncronized');
@@ -140,7 +140,7 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         save(dlcmFile, 'netDLCM', 'pP', 'M', 'U', 'N','T','n','TR', 'y2', 'u2', 'si', 'A', 'Uus', 'RMS', 'CSD');
     end
     % show estimated A by DCM
-    figure; plotDcmEC(A);
+    figure; plotDcmEC(A,0);
 
     % train DLCM
     figure; plot(y2);
@@ -179,7 +179,7 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     % show original signal FC
     figure; FC = plotFunctionalConnectivity(si);
     % show original signal granger causality index (gc-EC)
-    figure; gcI = plotPairwiseGCI(si);
+    figure; gcI = plotPairwiseGCI(si,3,0);
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
@@ -188,7 +188,7 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 %    figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
     figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
     % show DLCM-GC
-    figure; dlGC = plotDlcmGCI(si, inSignal, inControl, netDLCM);
+    figure; dlGC = plotDlcmGCI(si, inSignal, inControl, netDLCM, 0);
 
 end
 

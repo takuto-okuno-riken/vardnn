@@ -18,6 +18,11 @@ function [gcI] = plotMultivariateGCI(X, lag, range, rowcut)
         lag = 3;
     end
     gcI = calcMultivariateGCI(X, lag);
+    if range <= 0
+        amax = abs(max(max(gcI)));
+        amin = abs(min(min(gcI)));
+        range = max(amax,amin);
+    end
     if rowcut>0, gcI(end-rowcut+1:end,:) = []; end
     clims = [-range, range];
     imagesc(gcI,clims);

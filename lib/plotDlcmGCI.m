@@ -16,6 +16,12 @@ function [gcI] = plotDlcmGCI(X, inSignal, inControl, netDLCM, range, rowcut)
         range = 10;
     end
     gcI = calcDlcmGCI(X, inSignal, inControl, netDLCM);
+    if range <= 0
+        sigma = std(gcI(:),'omitnan');
+        avg = mean(gcI(:),'omitnan');
+        gcI = (gcI - avg) / sigma;
+        range = 5;
+    end
     if rowcut>0, gcI(end-rowcut+1:end,:) = []; end
     clims = [-range, range];
     imagesc(gcI,clims);

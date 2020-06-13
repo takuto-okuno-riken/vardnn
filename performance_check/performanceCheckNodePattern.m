@@ -74,43 +74,47 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     nodeNum = size(si,1);
     sigLen = size(si,2);
 
-    % layer parameters
-    netDLCM = initDlcmNetwork(si);
-
-    % show signals before training
-    %{
-    maxEpochs = 1;
-    miniBatchSize = 1;
-    options = trainingOptions('adam', ...
-        'ExecutionEnvironment','cpu', ...
-        'MaxEpochs',maxEpochs, ...
-        'MiniBatchSize',miniBatchSize, ...
-        'Shuffle','every-epoch', ...
-        'GradientThreshold',1,...
-        'Verbose',false);
-%            'Plots','training-progress');
-
-    disp('initial state before training');
-    netDLCM = trainDlcmNetwork(si, [], [], netDLCM, options);
-    [t,mae,maeerr] = plotNodeSignals(nodeNum,si,inSignal,netDLCM);
-    disp(['t=' num2str(t) ', mae=' num2str(mae)]);
-    %}
-    % training DLCM network
-    maxEpochs = 1000;
-    miniBatchSize = ceil(sigLen / 3);
-    options = trainingOptions('adam', ...
-        'ExecutionEnvironment','cpu', ...
-        'MaxEpochs',maxEpochs, ...
-        'MiniBatchSize',miniBatchSize, ...
-        'Shuffle','every-epoch', ...
-        'GradientThreshold',1,...
-        'Verbose',false);
-%            'Plots','training-progress');
-
-    disp('start training');
-    netDLCM = trainDlcmNetwork(si, [], [], netDLCM, options);
     dlcmFile = ['performance_check/net-pat-' num2str(idx) '.mat'];
-    save(dlcmFile, 'netDLCM');
+    if exist(dlcmFile, 'file')
+        load(dlcmFile);
+    else
+        % layer parameters
+        netDLCM = initDlcmNetwork(si);
+
+        % show signals before training
+        %{
+        maxEpochs = 1;
+        miniBatchSize = 1;
+        options = trainingOptions('adam', ...
+            'ExecutionEnvironment','cpu', ...
+            'MaxEpochs',maxEpochs, ...
+            'MiniBatchSize',miniBatchSize, ...
+            'Shuffle','every-epoch', ...
+            'GradientThreshold',1,...
+            'Verbose',false);
+    %            'Plots','training-progress');
+
+        disp('initial state before training');
+        netDLCM = trainDlcmNetwork(si, [], [], netDLCM, options);
+        [t,mae,maeerr] = plotNodeSignals(nodeNum,si,inSignal,netDLCM);
+        disp(['t=' num2str(t) ', mae=' num2str(mae)]);
+        %}
+        % training DLCM network
+        maxEpochs = 1000;
+        miniBatchSize = ceil(sigLen / 3);
+        options = trainingOptions('adam', ...
+            'ExecutionEnvironment','cpu', ...
+            'MaxEpochs',maxEpochs, ...
+            'MiniBatchSize',miniBatchSize, ...
+            'Shuffle','every-epoch', ...
+            'GradientThreshold',1,...
+            'Verbose',false);
+    %            'Plots','training-progress');
+
+        disp('start training');
+        netDLCM = trainDlcmNetwork(si, [], [], netDLCM, options);  
+        save(dlcmFile, 'netDLCM');
+    end
 
     % show signals after training
     figure; [S, t,mae,maeerr] = plotPredictSignals(si,[],[],netDLCM);
@@ -119,7 +123,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     % show original signal FC
     figure; FC = plotFunctionalConnectivity(si);
     % show original signal granger causality index (gc-EC)
-    figure; gcI = plotPairwiseGCI(si);
+    figure; gcI = plotPairwiseGCI(si, 3, 0);
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
@@ -128,9 +132,9 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 %    figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
     figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
     % show DLCM-GC
-    figure; dlGC = plotDlcmGCI(si, [], [], netDLCM);
+    figure; dlGC = plotDlcmGCI(si, [], [], netDLCM, 0);
     % show DLCM-weight-GC
-    figure; dlwGC = plotDlcmWeightGCI(netDLCM);
-    figure; dlwGC = plotDlcmDeltaWeightGCI(netDLCM);
+%    figure; dlwGC = plotDlcmWeightGCI(netDLCM);
+%    figure; dlwGC = plotDlcmDeltaWeightGCI(netDLCM);
 end
 
