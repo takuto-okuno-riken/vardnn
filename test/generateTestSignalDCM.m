@@ -9,7 +9,7 @@ T  = 1000;                            % number of observations (scans)
 TR = 2;                               % repetition time or timing
 n  = 30;                              % number of regions or nodes
 t  = (1:T)*TR;                        % observation times
-k  = 6;
+k  = 7;
 
 % priors
 % -------------------------------------------------------------------------
