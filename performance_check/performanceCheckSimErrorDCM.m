@@ -2,8 +2,8 @@
 function performanceCheckSimErrorDCM
     % load signals
     load('test/testTrain-rand30-dcm.mat');
-    siOrg = dcmY2DlcmSignal(si);
-    uuOrg = dcmY2DlcmSignal(uu);
+    siOrg = bold2dnnSignal(si);
+    uuOrg = bold2dnnSignal(uu);
 
     % do training and simulation and plot error graph
 %%{

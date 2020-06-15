@@ -42,9 +42,9 @@ function performanceCheckDCMy2DLCM
         inSignal = U.u(ySt:end,:).';
         inControl = eye(n,n);
 
-        % normalize signal to [0, 1] (not strictly)
-        si = dcmY2DlcmSignal(si);
-        inSignal = dcmY2DlcmSignal(inSignal);
+        % normalize signal to [0, 1] 
+        si = bold2dnnSignal(si);
+        inSignal = bold2dnnSignal(inSignal);
 
         % do training or load DLCM network
         dlcmFile = ['performance_check/net-vsDCM-' num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];
