@@ -8,7 +8,7 @@ function performanceCheckNodePatternDCM2
 
     % DEM Structure: create random inputs
     % -------------------------------------------------------------------------
-    N  = 8;
+    N  = 16;
     T  = 200;                             % number of observations (scans)
     TR = 2;                               % repetition time or timing
     n  = 8;                               % number of regions or nodes
@@ -50,38 +50,54 @@ function performanceCheckNodePatternDCM2
     %% pattern 2 -------------------------------------------------
 %{
     disp('node 2 and 6 are syncronized');
-    pP.A = rand(n,n)/4 - 0.125;
+    pP.A = rand(n,n)/5 - 0.1;
     checkingPattern(pP,M,U,N,T,n,TR,options,2);
 %}
     %% pattern 3 -------------------------------------------------
 %%{
     disp('node 2 is excited by node 6');
-    pP.A = rand(n,n)/4 - 0.125;
+    pP.A = rand(n,n)/5 - 0.1;
     pP.A(2,6) = 1;
     checkingPattern(pP,M,U,N,T,n,TR,options,3);
 %%}
     %% pattern 4 -------------------------------------------------
 %%{
     disp('node 2 is excited half by node 6');
-    pP.A = rand(n,n)/4 - 0.125;
+    pP.A = rand(n,n)/5 - 0.1;
     pP.A(2,6) = 0.5;
     checkingPattern(pP,M,U,N,T,n,TR,options,4);
 %%}
     %% pattern 5 -------------------------------------------------
 %%{
     disp('node 2,4 is excited by node 6');
-    pP.A = rand(n,n)/4 - 0.125;
+    pP.A = rand(n,n)/5 - 0.1;
     pP.A(2,6) = 1;
     pP.A(4,6) = 1;
     checkingPattern(pP,M,U,N,T,n,TR,options,5);
 %%}
     %% pattern 6 -------------------------------------------------
 %%{
-    disp('nodes are excited 6-.->2, 2-.->4');
-    pP.A = rand(n,n)/4 - 0.125;
+    disp('nodes are excited 6->2, 2->4');
+    pP.A = rand(n,n)/5 - 0.1;
     pP.A(2,6) = 1;
     pP.A(4,2) = 1;
     checkingPattern(pP,M,U,N,T,n,TR,options,6);
+%%}
+    %% pattern 7 -------------------------------------------------
+%%{
+    disp('nodes are excited 6->2, 4->2');
+    pP.A = rand(n,n)/5 - 0.1;
+    pP.A(2,6) = 1;
+    pP.A(2,4) = 1;
+    checkingPattern(pP,M,U,N,T,n,TR,options,7);
+%%}
+    %% pattern 8 -------------------------------------------------
+%%{
+    disp('nodes are excited 6->2, 5->1');
+    pP.A = rand(n,n)/5 - 0.1;
+    pP.A(2,6) = 1;
+    pP.A(1,5) = 1;
+    checkingPattern(pP,M,U,N,T,n,TR,options,8);
 %%}
 end
 
@@ -96,57 +112,60 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     if exist(dlcmFile, 'file')
         load(dlcmFile);
     else
-        % initialize DCM stcuct
-        DCM = struct();
-        DCM.options = options;
-
-        DCM.a    = ones(n,n);
-        DCM.b    = zeros(n,n,0);
-        DCM.c    = eye(n,n);
-        DCM.d    = zeros(n,n,0);
-
-        DCM.Y.dt = TR;
-        DCM.U.dt = TR;
-
         CSD = {};
         RMS = [];
         Uus = {};
-        % performance check of DCM inversion
-        for k=1:N
-            % generate signal by DCM
-            U.u = spm_rand_mar(T+50,n,1/2)/8;       % endogenous fluctuations
-            y   = spm_int_J(pP,M,U);                % integrate with observer
-            y2  = y(51:end,:);
-            u2  = U.u(51:end,:);
-            si = y2.';
-            Uus{end + 1} = U.u;
-
-            % response
-            % -----------------------------------------------------------------
-            DCM.Y.y  = y2;
-            DCM.U.u  = u2;
-
-            % nonlinear system identification (Variational Laplace)
-            % =================================================================
-            CSD{end + 1} = spm_dcm_fmri_csd(DCM);
-            BPA          = spm_dcm_average(CSD,'simulation',1);
-
-            dp   = BPA.Ep.A - pP.A;
-            dp   = dp - diag(diag(dp));
-            RMS(end + 1) = sqrt(mean(dp(~~dp).^2))
-
-            A = BPA.Ep.A;
-        end
-        save(dlcmFile, 'netDLCM', 'pP', 'M', 'U', 'N','T','n','TR', 'y2', 'u2', 'si', 'A', 'Uus', 'RMS', 'CSD');
     end
+
+    % initialize DCM stcuct
+    DCM = struct();
+    DCM.options = options;
+
+    DCM.a    = ones(n,n);
+    DCM.b    = zeros(n,n,0);
+    DCM.c    = eye(n,n);
+    DCM.d    = zeros(n,n,0);
+
+    DCM.Y.dt = TR;
+    DCM.U.dt = TR;
+
+    % performance check of DCM inversion
+    for k=length(CSD)+1:N
+        % generate signal by DCM
+        U.u = spm_rand_mar(T+50,n,1/2)/8;       % endogenous fluctuations
+        y   = spm_int_J(pP,M,U);                % integrate with observer
+        y2  = y(51:end,:);
+        u2  = U.u(51:end,:);
+        si = y2.';
+        Uus{end + 1} = U.u;
+
+        % response
+        % -----------------------------------------------------------------
+        DCM.Y.y  = y2;
+        DCM.U.u  = u2;
+
+        % nonlinear system identification (Variational Laplace)
+        % =================================================================
+        CSD{end + 1} = spm_dcm_fmri_csd(DCM);
+        BPA          = spm_dcm_average(CSD,'simulation',1);
+
+        dp   = BPA.Ep.A - pP.A;
+        dp   = dp - diag(diag(dp));
+        RMS(end + 1) = sqrt(mean(dp(~~dp).^2))
+
+        A = BPA.Ep.A;
+    end
+    save(dlcmFile, 'netDLCM', 'pP', 'M', 'U', 'N','T','n','TR', 'y2', 'u2', 'si', 'A', 'Uus', 'RMS', 'CSD');
+
     % show estimated A by DCM
     figure; plotDcmEC(A,0);
 
     % train DLCM
-    figure; plot(y2);
-    si = dcmY2DlcmSignal(si);
-    inSignal = dcmY2DlcmSignal(u2.');
+    si = bold2dnnSignal(y2.');
+    inSignal = bold2dnnSignal(u2.');
     inControl = eye(n,n);
+    figure; plot(si.');
+    figure; plot(inSignal.');
     nodeNum = size(si,1);
     sigLen = size(si,2);
     if isempty(netDLCM)
@@ -160,7 +179,7 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
             'MaxEpochs',maxEpochs, ...
             'MiniBatchSize',miniBatchSize, ...
             'Shuffle','every-epoch', ...
-            'GradientThreshold',1,...
+            'GradientThreshold',5,...
             'L2Regularization',0.1, ...
             'Verbose',false);
     %            'Plots','training-progress');
