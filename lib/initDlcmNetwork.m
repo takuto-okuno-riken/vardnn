@@ -21,7 +21,7 @@ function net = initDlcmNetwork(X, inSignal, inControl)
     end
 %    initWeight = estimateInitWeightByGCI(X);
     initWeight = [];
-    initBias = ones(hiddenNums(1),1) * 0.5;
+    initBias = zeros(hiddenNums(1),1);
 
     % layer parameters
     net = createDlcmNetwork(nodeNum, inputNum, hiddenNums, inControl, initWeight, initBias);
