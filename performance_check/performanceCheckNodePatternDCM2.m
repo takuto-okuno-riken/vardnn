@@ -8,7 +8,7 @@ function performanceCheckNodePatternDCM2
 
     % DEM Structure: create random inputs
     % -------------------------------------------------------------------------
-    N  = 16;
+    N  = 8;
     T  = 300;                             % number of observations (scans)
     TR = 2;                               % repetition time or timing
     n  = 8;                               % number of regions or nodes
@@ -54,6 +54,7 @@ function performanceCheckNodePatternDCM2
     checkingPattern(pP,M,U,N,T,n,TR,options,2);
 %}
     %% pattern 3 -------------------------------------------------
+%{
 %%{
     disp('node 2 is excited by node 6');
     pP.A = rand(n,n)/5 - 0.1;
@@ -98,6 +99,18 @@ function performanceCheckNodePatternDCM2
     pP.A(2,6) = 1;
     pP.A(1,5) = 1;
     checkingPattern(pP,M,U,N,T,n,TR,options,8);
+%%}
+%}
+    %% pattern 9 -------------------------------------------------
+%%{
+    disp('nodes are excited 6->2,6->1, 1->3,1->5, 5->4');
+    pP.A = rand(n,n)/20 - 0.025;
+    pP.A(2,6) = 0.7;
+    pP.A(1,6) = 0.7;
+    pP.A(3,1) = 0.7;
+    pP.A(5,1) = 0.7;
+    pP.A(4,5) = 0.7;
+    checkingPattern(pP,M,U,N,T,n,TR,options,9);
 %%}
 end
 

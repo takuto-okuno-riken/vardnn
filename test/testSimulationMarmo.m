@@ -6,9 +6,9 @@ function testSimulationMarmo
 %    figure; gcI = plotPairwiseGCI(si);
 
     siOrg = si;
-    nodeNum = 24;
+    nodeNum = 12;
     inputNum = 10;
-    sigLen = 100;
+    sigLen = 300;
     si = bold2dnnSignal(siOrg(1:nodeNum,1:sigLen), 0.2);
     inSignal = bold2dnnSignal(siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen), 0.2);
     % control is all positive input
@@ -24,7 +24,7 @@ function testSimulationMarmo
         'MaxEpochs',maxEpochs, ...
         'MiniBatchSize',miniBatchSize, ...
         'Shuffle','every-epoch', ...
-        'GradientThreshold',1,...
+        'GradientThreshold',5,...
         'L2Regularization',0.1, ... % for gaussian distribution (Marmo)
         'Verbose',false);
 %            'Plots','training-progress');

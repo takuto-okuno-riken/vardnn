@@ -1,18 +1,18 @@
 
 function performanceCheckSimError
     % load signals
-%%{
+%{
     load('test/testTrain-rand500-uniform.mat');
     prefix = '';
     l2 = 0.0005;
     siOrg = si;
-%%}
-%{
+%}
+%%{
     load('test/marmoset-aneth-sample2-roi225.mat');
     prefix = 'ms';
     l2 = 0.1;
     siOrg = bold2dnnSignal(si, 0.2);
-%}    
+%%}    
     % do training and simulation and plot error graph
 %%{
     for i=1:6

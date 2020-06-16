@@ -1,9 +1,9 @@
 % load experimental signals
-expfile = 'ROI_Subject001_Session001.mat';
+expfile = 'test/ROI_Subject001_Session001.mat';
 load(expfile);
 
-idx = 1;
-start = 20;
+idx = 2;
+start = 4;
 regionNum = 225 * 2;
 seqLen = size(data{1,start},1);
 names2 = names;
