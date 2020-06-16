@@ -6,13 +6,16 @@ function performanceCheckSimError
     prefix = '';
     l2 = 0.0005;
     siOrg = si;
+    uuOrg = si;
 %}
 %%{
     load('test/marmoset-aneth-sample2-roi225.mat');
-    prefix = 'ms';
-    l2 = 0.1;
     siOrg = bold2dnnSignal(si, 0.2);
-%%}    
+    load('test/testTrain-rand500-uniform.mat');
+    uuOrg = si;
+    prefix = 'ms';
+    l2 = 0.005;
+%%}
     % do training and simulation and plot error graph
 %%{
     for i=1:6
@@ -22,7 +25,7 @@ function performanceCheckSimError
         winLen = 100;
 
         si = siOrg(1:nodeNum,1:sigLen);
-        inSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
+        inSignal = uuOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
         % control is all positive input
         inControl = logical(ones(nodeNum,inputNum));
 
