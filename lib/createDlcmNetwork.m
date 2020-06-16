@@ -6,8 +6,9 @@
 %  hiddenNums     hidden layer (next of input) neuron numbers of single unit (vector)
 %  inControl      exogenous input control matrix (node x exogenous input) (optional)
 %  initialWeight  weight initialize matrix of hidden1 layer (optional)
+%  initialBias    bias initialize matrix of hidden1 layer (optional)
 
-function net = createDlcmNetwork(nodeNum, inputNum, hiddenNums, inControl, initialWeight)
+function net = createDlcmNetwork(nodeNum, inputNum, hiddenNums, inControl, initialWeight, initBias)
     if nargin < 6, initialWeight = []; end
     if nargin < 5, inControl = []; end
 
@@ -15,7 +16,7 @@ function net = createDlcmNetwork(nodeNum, inputNum, hiddenNums, inControl, initi
     for i=1:nodeNum
         nodeInControl = [];
         if ~isempty(inControl), nodeInControl = inControl(i,:); end
-        nodeLayers{i} = createDlcmLayers(nodeNum, inputNum, hiddenNums, nodeInControl, initialWeight, i);
+        nodeLayers{i} = createDlcmLayers(nodeNum, inputNum, hiddenNums, nodeInControl, initialWeight, initBias, i);
     end
     net.nodeLayers = nodeLayers;
     net.nodeNetwork = cell(nodeNum,1);

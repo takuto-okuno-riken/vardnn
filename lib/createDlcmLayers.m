@@ -6,16 +6,20 @@
 %  hiddenNums     hidden layer (next of input) neuron numbers of single unit (vector)
 %  nodeInControl  exogenous input control (1 x exogenous input) (optional)
 %  initialWeight  weight initialize matrix of hidden1 layer (optional)
+%  initialBias    bias initialize matrix of hidden1 layer (optional)
 
-function layers = createDlcmLayers(nodeNum, inputNum, hiddenNums, nodeInControl, initialWeight, currentNode)
+function layers = createDlcmLayers(nodeNum, inputNum, hiddenNums, nodeInControl, initialWeight, initBias, currentNode)
     if nargin < 6, initialWeight = []; currentNode = 0; end
     if nargin < 5, nodeInControl = []; end
 
     % init first fully connected layer
-    if isempty(initialWeight) && isempty(nodeInControl)
-        firstFCLayer = fullyConnectedLayer(hiddenNums(1), 'WeightsInitializer', @(sz) weightedHe(sz, nodeInControl, initialWeight, currentNode));
+    if isempty(initialWeight) && isempty(nodeInControl) && isempty(initBias)
+        firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
+            'WeightsInitializer', @(sz) weightedHe(sz, nodeInControl, initialWeight, currentNode));
     else
-        firstFCLayer = fullyConnectedLayer(hiddenNums(1), 'WeightsInitializer', @(sz) weightedHe(sz, nodeInControl, initialWeight, currentNode));
+        firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
+            'WeightsInitializer', @(sz) weightedHe(sz, nodeInControl, initialWeight, currentNode), ...
+            'Bias', initBias);
     end
     
     %

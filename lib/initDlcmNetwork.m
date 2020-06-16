@@ -15,12 +15,14 @@ function net = initDlcmNetwork(X, inSignal, inControl)
     % estimate neuron number of hidden layers
     hiddenNums = estimateHiddenNeurons(nodeNum, sigLen);
     
-    % estimate init weight by granger causality
+    % set initial weight
     if inputNum > 0
         X = [X; inSignal];
     end
 %    initWeight = estimateInitWeightByGCI(X);
+    initWeight = [];
+    initBias = ones(hiddenNums(1),1) * 0.5;
 
     % layer parameters
-    net = createDlcmNetwork(nodeNum, inputNum, hiddenNums, inControl, []);
+    net = createDlcmNetwork(nodeNum, inputNum, hiddenNums, inControl, initWeight, initBias);
 end
