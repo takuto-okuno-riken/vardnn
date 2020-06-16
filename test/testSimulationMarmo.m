@@ -1,13 +1,16 @@
 
-function testSimulation
+function testSimulationMarmo
     % load signals
-    load('test/testTrain-rand500-uniform.mat');
+    load('test/marmoset-aneth-sample2-roi225.mat');
+%    figure; FC = plotFunctionalConnectivity(si);
+%    figure; gcI = plotPairwiseGCI(si);
+
     siOrg = si;
-    nodeNum = 8;
-    inputNum = 4;
+    nodeNum = 24;
+    inputNum = 10;
     sigLen = 100;
-    si = siOrg(1:nodeNum,1:sigLen);
-    inSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
+    si = bold2dnnSignal(siOrg(1:nodeNum,1:sigLen), 0.2);
+    inSignal = bold2dnnSignal(siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen), 0.2);
     % control is all positive input
     inControl = logical(ones(nodeNum,inputNum));
 
@@ -22,12 +25,13 @@ function testSimulation
         'MiniBatchSize',miniBatchSize, ...
         'Shuffle','every-epoch', ...
         'GradientThreshold',1,...
+        'L2Regularization',0.1, ... % for gaussian distribution (Marmo)
         'Verbose',false);
 %            'Plots','training-progress');
 
     %% test pattern 1 
     % do training or load DLCM network
-    dlcmFile = 'test/dlcm-sim-test8-4.mat';
+    dlcmFile = ['test/dlcm-sim-marmo' num2str(nodeNum) '-' num2str(inputNum) '.mat'];
     if exist(dlcmFile, 'file')
         load(dlcmFile);
     else
@@ -35,24 +39,24 @@ function testSimulation
         netDLCM = initDlcmNetwork(si, inSignal, inControl);
         % training DLCM network
         netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+        % recover training 
+        [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
         [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
-        disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
-        %plotDlcmWeight(netDLCM);
-        save(dlcmFile, 'netDLCM');
+        disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);        save(dlcmFile, 'netDLCM');
     end
     
     % simulate DLCM network with 1st frame & exogenous input signal
     [S, time] = simulateDlcmNetwork(si, inSignal, inControl, netDLCM);
 
-    [mae, maeerr] = plotTwoSignals(si, S);
+    figure; [mae, maeerr] = plotTwoSignals(si, S);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
     
     % show original & simulated signal FC
     figure; FC = plotFunctionalConnectivity(si);
-    figure; FC = plotFunctionalConnectivity(S);
+%    figure; FC = plotFunctionalConnectivity(S);
     % show original & simulated signal granger causality index (gc-EC)
-    figure; gcI = plotPairwiseGCI(si);
-    figure; gcI = plotPairwiseGCI(S);
+    figure; gcI = plotPairwiseGCI(si,3,0);
+%    figure; gcI = plotPairwiseGCI(S,3,0);
     % show DLCM-GC
     figure; dlGC = plotDlcmGCI(si, inSignal, inControl, netDLCM, 0);
 end

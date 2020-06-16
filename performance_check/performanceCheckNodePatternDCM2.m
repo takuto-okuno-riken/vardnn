@@ -9,7 +9,7 @@ function performanceCheckNodePatternDCM2
     % DEM Structure: create random inputs
     % -------------------------------------------------------------------------
     N  = 16;
-    T  = 200;                             % number of observations (scans)
+    T  = 300;                             % number of observations (scans)
     TR = 2;                               % repetition time or timing
     n  = 8;                               % number of regions or nodes
     t  = (1:T)*TR;                        % observation times
@@ -155,7 +155,7 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 
         A = BPA.Ep.A;
     end
-    save(dlcmFile, 'netDLCM', 'pP', 'M', 'U', 'N','T','n','TR', 'y2', 'u2', 'si', 'A', 'Uus', 'RMS', 'CSD');
+    save(dlcmFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'A', 'Uus', 'RMS', 'CSD');
 
     % show estimated A by DCM
     figure; plotDcmEC(A,0);
