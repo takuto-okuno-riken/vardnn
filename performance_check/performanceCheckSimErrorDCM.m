@@ -2,8 +2,8 @@
 function performanceCheckSimErrorDCM
     % load signals
     load('test/testTrain-rand30-dcm.mat');
-    siOrg = bold2dnnSignal(si);
-    uuOrg = bold2dnnSignal(uu);
+    siOrg = bold2dnnSignal(si,1);
+    uuOrg = bold2dnnSignal(uu,1);
 
     % do training and simulation and plot error graph
 %%{
@@ -29,8 +29,9 @@ function performanceCheckSimErrorDCM
         inputNum = 10;
         sigLen = 200;
         winLen = 100;
+        k = 8;
 
-        dlcmFile = ['performance_check/sim-errd' num2str(i) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+        dlcmFile = ['performance_check/net-sim-errd' num2str(i) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
         load(dlcmFile);
         Mae = [Mae, eachMae];
         R = [R, eachR];
