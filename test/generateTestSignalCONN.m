@@ -1,5 +1,6 @@
 % load experimental signals
-expfile = 'test/ROI_Subject001_Session001.mat';
+idx = 1;
+expfile = ['test/ROI_Subject00' num2str(idx) '_Session001.mat'];
 load(expfile);
 
 idx = 2;
