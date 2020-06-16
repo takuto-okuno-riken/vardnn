@@ -1,8 +1,16 @@
 
 function performanceCheckSimError
     % load signals
+%{
     load('test/testTrain-rand500-uniform.mat');
+    prefix = '';
+    l2 = 0.0005;
     siOrg = si;
+%}
+    load('test/marmoset-aneth-sample2-roi225.mat');
+    prefix = 'ms';
+    l2 = 0.1;
+    siOrg = bold2dnnSignal(si, 0.2);
     
     % do training and simulation and plot error graph
 %%{
@@ -18,7 +26,7 @@ function performanceCheckSimError
         inControl = logical(ones(nodeNum,inputNum));
 
         % training and simulation
-        checkingPattern(si, inSignal, inControl, winLen, i);
+        checkingPattern(si, inSignal, inControl, winLen, i, prefix, l2);
     end
 %%}
     % plot wisker-box graph
@@ -29,7 +37,7 @@ function performanceCheckSimError
         sigLen = 200;
         winLen = 100;
 
-        dlcmFile = ['performance_check/sim-err' num2str(i) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+        dlcmFile = ['performance_check/sim-err' prefix num2str(i) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
         load(dlcmFile);
         Mae = [Mae, eachMae];
         R = [R, eachR];
@@ -59,7 +67,7 @@ function performanceCheckSimError
     bar(mTm);
 end
 
-function checkingPattern(si, inSignal, inControl, winLen, idx)
+function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2)
     % traial number
     maxTrain = 8;
     maxWin = 10;
@@ -73,7 +81,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx)
 
     for k = 1:maxTrain
         % do training or load DLCM network
-        dlcmFile = ['performance_check/net-sim-err' num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+        dlcmFile = ['performance_check/net-sim-err' prefix num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
         if exist(dlcmFile, 'file')
             load(dlcmFile);
         else
@@ -91,8 +99,8 @@ function checkingPattern(si, inSignal, inControl, winLen, idx)
                 'MiniBatchSize',miniBatchSize, ...
                 'Shuffle','every-epoch', ...
                 'GradientThreshold',5,...
+                'L2Regularization',l2, ...
                 'Verbose',false);
-%                'L2Regularization',0.1, ...
         %            'Plots','training-progress');
 
             % training DLCM network
@@ -106,7 +114,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx)
         end
 
         % simulate DLCM network with 1st frame & exogenous input signal
-        dlcmFile = ['performance_check/net-sim-err' num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) 'sim.mat'];
+        dlcmFile = ['performance_check/net-sim-err' prefix num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) 'sim.mat'];
         if exist(dlcmFile, 'file')
             load(dlcmFile);
         else
