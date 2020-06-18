@@ -9,13 +9,12 @@ function performanceCheckNodePattern
     sigLen = 100;
 
     %% pattern 1 -------------------------------------------------
-%{
+%%{
     disp('full random -- full independent nodes');
     si = siOrg(1:nodeNum,1:sigLen);
     checkingPattern(si, 1);
-%}
+%%}
     %% pattern 2 -------------------------------------------------
-%{
 %%{
     disp('node 2 and 6 are syncronized');
     si = siOrg(1:nodeNum, 1:sigLen);
@@ -37,7 +36,6 @@ function performanceCheckNodePattern
     checkingPattern(si, 4);
 %%}
     %% pattern 5 -------------------------------------------------
-%}
 %%{
     disp('node 2,4 is excited by node 6');
     si = siOrg(1:nodeNum, 1:sigLen);
@@ -123,14 +121,14 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     % show original signal FC
     figure; FC = plotFunctionalConnectivity(si);
     % show original signal granger causality index (gc-EC)
-    figure; gcI = plotPairwiseGCI(si, 3, 0);
+    figure; gcI = plotMultivariateGCI(si, 3, 0);
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
 %    figure; dlEC = plotDlcmECmeanWeight(netDLCM);
 %    figure; dlEC = plotDlcmECmeanAbsWeight(netDLCM);
 %    figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
-    figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
+%    figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
     % show DLCM-GC
     figure; dlGC = plotDlcmGCI(si, [], [], netDLCM, 0);
     % show DLCM-weight-GC
