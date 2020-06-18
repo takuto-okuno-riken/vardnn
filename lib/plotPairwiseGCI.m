@@ -5,6 +5,7 @@
 %  X       multivariate time series matrix (node x time series)
 %  lags    number of lags for autoregression (default:3)
 %  range   plotting minimum and maximum range of GCI (default:10)
+%          if range==0, range shows standard deviation [-5 sigma, 5 sigma]
 %  rowcut  cut bottom rows of result gcI matris (default:0)
 
 function [gcI] = plotPairwiseGCI(X, lag, range, rowcut)
@@ -19,9 +20,10 @@ function [gcI] = plotPairwiseGCI(X, lag, range, rowcut)
     end
     gcI = calcPairwiseGCI(X, lag);
     if range <= 0
-        amax = abs(max(max(gcI)));
-        amin = abs(min(min(gcI)));
-        range = max(amax,amin);
+        sigma = std(gcI(:),'omitnan');
+        avg = mean(gcI(:),'omitnan');
+        gcI = (gcI - avg) / sigma;
+        range = 5;
     end
     if rowcut>0, gcI(end-rowcut+1:end,:) = []; end
     clims = [-range, range];

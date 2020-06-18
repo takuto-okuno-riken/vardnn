@@ -8,7 +8,7 @@ function performanceCheckNodePatternDCM2
 
     % DEM Structure: create random inputs
     % -------------------------------------------------------------------------
-    N  = 8;
+    N  = 16;
     T  = 300;                             % number of observations (scans)
     TR = 2;                               % repetition time or timing
     n  = 8;                               % number of regions or nodes
@@ -44,7 +44,7 @@ function performanceCheckNodePatternDCM2
     %% pattern 1 -------------------------------------------------
 %{
     disp('full random -- full independent nodes');
-    pP.A = rand(n,n)/2 - 0.25;
+    pP.A = rand(n,n)/5 - 0.1;
     checkingPattern(pP,M,U,N,T,n,TR,options,1);
 %}
     %% pattern 2 -------------------------------------------------
@@ -54,7 +54,7 @@ function performanceCheckNodePatternDCM2
     checkingPattern(pP,M,U,N,T,n,TR,options,2);
 %}
     %% pattern 3 -------------------------------------------------
-%{
+%{    
 %%{
     disp('node 2 is excited by node 6');
     pP.A = rand(n,n)/5 - 0.1;
@@ -84,6 +84,7 @@ function performanceCheckNodePatternDCM2
     pP.A(4,2) = 1;
     checkingPattern(pP,M,U,N,T,n,TR,options,6);
 %%}
+%}
     %% pattern 7 -------------------------------------------------
 %%{
     disp('nodes are excited 6->2, 4->2');
@@ -100,16 +101,15 @@ function performanceCheckNodePatternDCM2
     pP.A(1,5) = 1;
     checkingPattern(pP,M,U,N,T,n,TR,options,8);
 %%}
-%}
     %% pattern 9 -------------------------------------------------
 %%{
     disp('nodes are excited 6->2,6->1, 1->3,1->5, 5->4');
     pP.A = rand(n,n)/20 - 0.025;
-    pP.A(2,6) = 0.7;
-    pP.A(1,6) = 0.7;
-    pP.A(3,1) = 0.7;
-    pP.A(5,1) = 0.7;
-    pP.A(4,5) = 0.7;
+    pP.A(2,6) = 0.6;
+    pP.A(1,6) = 0.6;
+    pP.A(3,1) = 0.6;
+    pP.A(5,1) = 0.6;
+    pP.A(4,5) = 0.6;
     checkingPattern(pP,M,U,N,T,n,TR,options,9);
 %%}
 end
@@ -211,14 +211,14 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     % show original signal FC
     figure; FC = plotFunctionalConnectivity(si);
     % show original signal granger causality index (gc-EC)
-    figure; gcI = plotPairwiseGCI(si,3,0);
+    figure; gcI = plotMultivariateGCI(si,3,0);
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
 %    figure; dlEC = plotDlcmECmeanWeight(netDLCM);
 %    figure; dlEC = plotDlcmECmeanAbsWeight(netDLCM);
 %    figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
-    figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
+%    figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
     % show DLCM-GC
     figure; dlGC = plotDlcmGCI(si, inSignal, inControl, netDLCM, 0);
 
