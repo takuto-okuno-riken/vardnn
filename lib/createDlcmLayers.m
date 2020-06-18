@@ -63,26 +63,20 @@ end
 function weights = weightedHe(sz, nodeInControl, initialWeight, currentNode)
     global dlcmInitWeights;
 
-    scale = 0.1;
+    if ~isempty(initialWeight)
+        weights = initialWeight(sz,10);
+    else
+        scale = 0.1;
+        filterSize = [sz(1) sz(2)];
+        numIn = filterSize(1) * filterSize(2);
 
-    filterSize = [sz(1) sz(2)];
-    numIn = filterSize(1) * filterSize(2);
-
-    varWeights = 2 / ((1 + scale^2) * numIn);
-    weights = randn(sz) * sqrt(varWeights);
+        varWeights = 2 / ((1 + scale^2) * numIn);
+        weights = randn(sz) * sqrt(varWeights);
+    end
     if ~isempty(nodeInControl)
         nodeNum = sz(2) - length(nodeInControl);
         filter = repmat(nodeInControl, size(weights,1), 1);
         weights(:, nodeNum+1:sz(2)) = weights(:, nodeNum+1:sz(2)) .* filter;
-    end
-    if ~isempty(initialWeight)
-        A = initialWeight(currentNode,:);
-        if ~isempty(nodeInControl)
-            nodeNum = sz(2) - length(nodeInControl);
-            A(:, nodeNum+1:sz(2)) = A(:, nodeNum+1:sz(2)) .* nodeInControl;
-        end
-        B = repmat(A,sz(1),1);
-        weights = weights + B;
     end
     dlcmInitWeights = weights;
 end
