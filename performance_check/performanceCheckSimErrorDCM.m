@@ -208,7 +208,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx)
     hold off;
     drawnow;
 
-    dlcmFile = ['performance_check/sim-err' num2str(idx) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+    dlcmFile = ['performance_check/sim-errd' num2str(idx) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
     save(dlcmFile, 'allErr', 'allrSi', 'allrS', 'allTime', 'eachMae', 'eachR', 'eachFCcos', 'eachGCcos');
 end
 

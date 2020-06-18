@@ -7,19 +7,23 @@ function performanceCheckSimError
     l2 = 0.0005;
     siOrg = si;
     uuOrg = si;
+    imax = 6;
+    inum = 30;
 %}
 %%{
-    load('test/marmoset-aneth-sample2-roi225.mat');
+    load('test/marmoset-aneth-sample1-roi225.mat');
     siOrg = bold2dnnSignal(si, 0.2);
     load('test/testTrain-rand500-uniform.mat');
     uuOrg = si;
     prefix = 'ms';
     l2 = 0.005;
+    imax = 1;
+    inum = 450;
 %%}
     % do training and simulation and plot error graph
 %%{
-    for i=1:6
-        nodeNum = 30 * i;
+    for i=1:imax
+        nodeNum = inum * i;
         inputNum = 10;
         sigLen = 200;
         winLen = 100;
@@ -35,8 +39,8 @@ function performanceCheckSimError
 %%}
     % plot wisker-box graph
     Mae = []; R = []; FCcos = []; GCcos = []; Tm = []; mTm = [];
-    for i=1:6
-        nodeNum = 30 * i;
+    for i=1:imax
+        nodeNum = inum * i;
         inputNum = 10;
         sigLen = 200;
         winLen = 100;
@@ -218,7 +222,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2)
     hold off;
     drawnow;
 
-    dlcmFile = ['performance_check/sim-err' num2str(idx) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+    dlcmFile = ['performance_check/sim-err' prefix num2str(idx) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
     save(dlcmFile, 'allErr', 'allrSi', 'allrS', 'allTime', 'eachMae', 'eachR', 'eachFCcos', 'eachGCcos');
 end
 
