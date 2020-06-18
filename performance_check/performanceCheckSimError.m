@@ -9,6 +9,7 @@ function performanceCheckSimError
     uuOrg = si;
     imax = 6;
     inum = 30;
+    bias = 0;
 %}
 %%{
     load('test/marmoset-aneth-sample1-roi225.mat');
@@ -19,6 +20,7 @@ function performanceCheckSimError
     l2 = 0.005;
     imax = 1;
     inum = 450;
+    bias = 0.5;
 %%}
     % do training and simulation and plot error graph
 %%{
@@ -34,7 +36,7 @@ function performanceCheckSimError
         inControl = logical(ones(nodeNum,inputNum));
 
         % training and simulation
-        checkingPattern(si, inSignal, inControl, winLen, i, prefix, l2);
+        checkingPattern(si, inSignal, inControl, winLen, i, prefix, l2, bias);
     end
 %%}
     % plot wisker-box graph
@@ -75,7 +77,7 @@ function performanceCheckSimError
     bar(mTm);
 end
 
-function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2)
+function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, bias)
     % traial number
     maxTrain = 8;
     maxWin = 10;
@@ -94,7 +96,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2)
             load(dlcmFile);
         else
             % init DLCM network
-            netDLCM = initDlcmNetwork(si, inSignal, inControl);
+            netDLCM = initDlcmNetwork(si, inSignal, inControl, bias);
 
             % set training options
             maxEpochs = 1000;

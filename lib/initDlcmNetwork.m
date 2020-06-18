@@ -5,7 +5,8 @@
 %  inSignal   multivariate time series matrix (exogenous input x time series) (optional)
 %  inControl  exogenous input control matrix for each node (node x exogenous input) (optional)
 
-function net = initDlcmNetwork(X, inSignal, inControl)
+function net = initDlcmNetwork(X, inSignal, inControl, bias)
+    if nargin < 4, bias = 0; end
     if nargin < 3, inControl = []; end
     if nargin < 2, inSignal = []; end
     nodeNum = size(X,1);
@@ -16,12 +17,14 @@ function net = initDlcmNetwork(X, inSignal, inControl)
     hiddenNums = estimateHiddenNeurons(nodeNum, sigLen);
     
     % set initial weight
-    if inputNum > 0
-        X = [X; inSignal];
+    % For uniform distribution, bias = 0 and empty initial weight is better
+    % For fMRI BOLD signal, bias = 0.5 and rough initial weight is better
+    if bias > 0
+        initWeight = estimateInitWeightRoughHe([hiddenNums(1) nodeNum], 10);
+    else
+        initWeight = [];
     end
-%    initWeight = estimateInitWeightByGCI(X);
-    initWeight = [];
-    initBias = zeros(hiddenNums(1),1);
+    initBias = ones(hiddenNums(1),1) * bias;
 
     % layer parameters
     net = createDlcmNetwork(nodeNum, inputNum, hiddenNums, inControl, initWeight, initBias);
