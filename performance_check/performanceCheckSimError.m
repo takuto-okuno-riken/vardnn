@@ -12,11 +12,11 @@ function performanceCheckSimError
     bias = 0;
 %}
 %%{
-    load('test/marmoset-aneth-sample1-roi225.mat');
+    load('test/marmoset-aneth-sample2-roi225.mat');
     siOrg = bold2dnnSignal(si, 0.2);
     load('test/testTrain-rand500-uniform.mat');
     uuOrg = si;
-    prefix = 'ms';
+    prefix = 'ms2';
     l2 = 0.005;
     imax = 1;
     inum = 450;

@@ -20,7 +20,7 @@ function net = initDlcmNetwork(X, inSignal, inControl, bias)
     % For uniform distribution, bias = 0 and empty initial weight is better
     % For fMRI BOLD signal, bias = 0.5 and rough initial weight is better
     if bias > 0
-        initWeight = estimateInitWeightRoughHe([hiddenNums(1) nodeNum], 10);
+        initWeight = estimateInitWeightRoughHe([hiddenNums(1) nodeNum+inputNum], 10);
     else
         initWeight = [];
     end
