@@ -4,19 +4,21 @@
 %  nodeNum        DLCM node number
 %  inputNum       DLCM exogenous input number
 %  hiddenNums     hidden layer (next of input) neuron numbers of single unit (vector)
-%  inControl      exogenous input control matrix (node x exogenous input) (optional)
-%  initialWeight  weight initialize matrix of hidden1 layer (optional)
-%  initialBias    bias initialize matrix of hidden1 layer (optional)
+%  inControl      exogenous input control matrix (node x exogenous input) (default:[])
+%  initWeightFunc initializing weight function for hidden1 layer (default:[])
+%  initBias       initializing bias value for hidden1 layer (default:0)
+%             For uniform distribution, bias = 0 and empty initial weight is better
+%             For fMRI BOLD signal, bias = 0.5 and rough initial weight is better
 
-function net = createDlcmNetwork(nodeNum, inputNum, hiddenNums, inControl, initialWeight, initBias)
-    if nargin < 6, initialWeight = []; end
+function net = createDlcmNetwork(nodeNum, inputNum, hiddenNums, inControl, initialWeightFunc, initBias)
+    if nargin < 6, initialWeightFunc = []; end
     if nargin < 5, inControl = []; end
 
     nodeLayers = cell(nodeNum,1);
     for i=1:nodeNum
         nodeInControl = [];
         if ~isempty(inControl), nodeInControl = inControl(i,:); end
-        nodeLayers{i} = createDlcmLayers(nodeNum, inputNum, hiddenNums, nodeInControl, initialWeight, initBias, i);
+        nodeLayers{i} = createDlcmLayers(nodeNum, inputNum, hiddenNums, nodeInControl, initialWeightFunc, initBias, i);
     end
     net.nodeLayers = nodeLayers;
     net.nodeNetwork = cell(nodeNum,1);

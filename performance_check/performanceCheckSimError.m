@@ -9,6 +9,7 @@ function performanceCheckSimError
     uuOrg = si;
     imax = 6;
     inum = 30;
+    weightFunc = [];
     bias = 0;
 %}
 %%{
@@ -20,6 +21,7 @@ function performanceCheckSimError
     l2 = 0.005;
     imax = 1;
     inum = 450;
+    weightFunc = @estimateInitWeightRoughHe;
     bias = 0.5;
 %%}
     % do training and simulation and plot error graph
@@ -36,7 +38,7 @@ function performanceCheckSimError
         inControl = logical(ones(nodeNum,inputNum));
 
         % training and simulation
-        checkingPattern(si, inSignal, inControl, winLen, i, prefix, l2, bias);
+        checkingPattern(si, inSignal, inControl, winLen, i, prefix, l2, weightFunc, bias);
     end
 %%}
     % plot wisker-box graph
@@ -77,7 +79,7 @@ function performanceCheckSimError
     bar(mTm);
 end
 
-function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, bias)
+function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weightFunc, bias)
     % traial number
     maxTrain = 8;
     maxWin = 10;
@@ -96,7 +98,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, bias)
             load(dlcmFile);
         else
             % init DLCM network
-            netDLCM = initDlcmNetwork(si, inSignal, inControl, bias);
+            netDLCM = initDlcmNetwork(si, inSignal, inControl, weightFunc, bias);
 
             % set training options
             maxEpochs = 1000;
