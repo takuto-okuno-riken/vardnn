@@ -1,7 +1,7 @@
 
 function testSimulationMarmo
     % load signals
-    load('data/marmoset-aneth-sample2-roi225.mat');
+    load('data/marmoset-aneth-sample1-roi52.mat');
 %    figure; FC = plotFunctionalConnectivity(si);
 %    figure; gcI = plotPairwiseGCI(si);
 
