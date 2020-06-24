@@ -13,7 +13,7 @@ function performanceCheckSimError
     bias = 0;
 %}
 %%{
-    load('test/marmoset-aneth-sample2-roi225.mat');
+    load('data/marmoset-aneth-sample2-roi225.mat');
     siOrg = bold2dnnSignal(si, 0.2);
     load('test/testTrain-rand500-uniform.mat');
     uuOrg = si;

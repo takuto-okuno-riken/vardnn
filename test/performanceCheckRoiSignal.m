@@ -1,8 +1,8 @@
 
 function performanceCheckRoiSignal
     subjects = { ...
-        'test/marmoset-aneth-sample1-roi52.mat', ...
-        'test/marmoset-aneth-sample2-roi52.mat'};
+        'data/marmoset-aneth-sample1-roi52.mat', ...
+        'data/marmoset-aneth-sample2-roi52.mat'};
 
     % training params
     prefix = 'pfc-roi52';

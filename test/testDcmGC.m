@@ -116,7 +116,7 @@ end
 
 %% 
 function [gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
-    dcmFile = ['test/dcm-gc-test' num2str(idx) '-' num2str(n) 'x' num2str(T) '.mat'];
+    dcmFile = ['results/dcm-gc-test' num2str(idx) '-' num2str(n) 'x' num2str(T) '.mat'];
     netDLCM = [];
 
     % show original connection

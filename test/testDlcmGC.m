@@ -28,7 +28,7 @@ function testSimulation
 
     %% test pattern 1 
     % do training or load DLCM network
-    dlcmFile = ['test/dlcm-gc-test' num2str(nodeNum) '-' num2str(inputNum) '.mat'];
+    dlcmFile = ['results/dlcm-gc-test' num2str(nodeNum) '-' num2str(inputNum) '.mat'];
     if exist(dlcmFile, 'file')
         load(dlcmFile);
     else

@@ -28,7 +28,7 @@ function testRecoverTrain
 
     %% test pattern 1 
     % do training or load DLCM network
-    dlcmFile = 'test/dlcm-sim-test8-4.mat';
+    dlcmFile = 'results/dlcm-sim-test8-4.mat';
     if exist(dlcmFile, 'file')
         load(dlcmFile);
     else

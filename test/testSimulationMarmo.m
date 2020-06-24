@@ -1,7 +1,7 @@
 
 function testSimulationMarmo
     % load signals
-    load('test/marmoset-aneth-sample2-roi225.mat');
+    load('data/marmoset-aneth-sample2-roi225.mat');
 %    figure; FC = plotFunctionalConnectivity(si);
 %    figure; gcI = plotPairwiseGCI(si);
 
@@ -31,7 +31,7 @@ function testSimulationMarmo
 
     %% test pattern 1 
     % do training or load DLCM network
-    dlcmFile = ['test/dlcm-sim-marmo' num2str(nodeNum) '-' num2str(inputNum) '.mat'];
+    dlcmFile = ['results/dlcm-sim-marmo' num2str(nodeNum) '-' num2str(inputNum) '.mat'];
     if exist(dlcmFile, 'file')
         load(dlcmFile);
     else

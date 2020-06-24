@@ -16,7 +16,7 @@ function testTrainDlcm
     si = y;
 %%}
     % load network or training network
-    dlcmFile = ['test/dlcm-net-test' num2str(size(si,1)) 'a.mat'];
+    dlcmFile = ['results/dlcm-net-test' num2str(size(si,1)) 'a.mat'];
     if exist(dlcmFile, 'file')
         load(dlcmFile);
     else

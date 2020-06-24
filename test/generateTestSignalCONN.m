@@ -1,11 +1,11 @@
 % load experimental signals
-subjectNum = 3;
+subjectNum = 1;
 roiNum = 52;
 start = 4;
 sig_a = 0.5;
 
 for idx=1:subjectNum
-    expfile = ['test/ROI_Subject00' num2str(idx) '_Session001.mat'];
+    expfile = ['data/ROI_Subject00' num2str(idx) '_Session001.mat'];
 
     %load conn ROI signal file
     load(expfile);
@@ -27,7 +27,7 @@ for idx=1:subjectNum
     plot(si.');
     title([num2str(roiNum) 'ROI signals (' num2str(idx) ')']);
 
-    outfName = ['test/marmoset-aneth-sample' num2str(idx) '-roi' num2str(roiNum) '.mat'];
+    outfName = ['data/marmoset-aneth-sample' num2str(idx) '-roi' num2str(roiNum) '.mat'];
     save(outfName, 'si', 'names', 'sig_a');
 
     % check translated bold signal histgram
