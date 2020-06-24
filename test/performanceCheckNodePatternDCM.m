@@ -108,7 +108,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 
     disp('start training');
     netDLCM = trainDlcmNetwork(si, [], [], netDLCM, options);
-    dlcmFile = ['performance_check/net-pat-' num2str(idx) '.mat'];
+    dlcmFile = ['results/net-pat-' num2str(idx) '.mat'];
     save(dlcmFile, 'netDLCM');
 
     % show signals after training

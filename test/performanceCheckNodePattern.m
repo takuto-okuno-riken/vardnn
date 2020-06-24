@@ -72,7 +72,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     nodeNum = size(si,1);
     sigLen = size(si,2);
 
-    dlcmFile = ['performance_check/net-pat-' num2str(idx) '.mat'];
+    dlcmFile = ['results/net-pat-' num2str(idx) '.mat'];
     if exist(dlcmFile, 'file')
         load(dlcmFile);
     else

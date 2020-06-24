@@ -30,7 +30,7 @@ function performanceCheckDCMy2DLCM
     DLCorr = zeros(maxK,N);
 
     % load spectrum DCM performance check result
-    fname = ['performance_check/DCM_demo-rand' num2str(n) '-' num2str(N) 'x' num2str(maxK) '.mat'];
+    fname = ['results/DCM_demo-rand' num2str(n) '-' num2str(N) 'x' num2str(maxK) '.mat'];
     load(fname);
 
     for k = 1:maxK
@@ -47,7 +47,7 @@ function performanceCheckDCMy2DLCM
         inSignal = bold2dnnSignal(inSignal);
 
         % do training or load DLCM network
-        dlcmFile = ['performance_check/net-vsDCM-' num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];
+        dlcmFile = ['results/net-vsDCM-' num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];
         if exist(dlcmFile, 'file')
             load(dlcmFile);
         else

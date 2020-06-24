@@ -34,7 +34,7 @@ function performanceCheckSignalLen
 
             disp(['training signal ' num2str(j) 'x' num2str(i)]);
             % performance check of hidden layers
-            dlcmFile = ['performance_check/net-sig' num2str(j) 'x' num2str(i) '-hdn' num2str(hiddenNums(1)) '-' num2str(hiddenNums(2)) '.mat'];
+            dlcmFile = ['results/net-sig' num2str(j) 'x' num2str(i) '-hdn' num2str(hiddenNums(1)) '-' num2str(hiddenNums(2)) '.mat'];
             if exist(dlcmFile, 'file')
                 continue;
             end
@@ -61,7 +61,7 @@ function performanceCheckSignalLen
         for j=1:stepMax2
             disp(['loading result of ' num2str(j*step2) 'x' num2str(i*step)]);
             % performance check of signal length
-            dlcmFile = ['performance_check/net-sig' num2str(j*step2) 'x' num2str(i*step) '-hdn' num2str(hiddenNums(1)) '-' num2str(hiddenNums(2)) '.mat'];
+            dlcmFile = ['results/net-sig' num2str(j*step2) 'x' num2str(i*step) '-hdn' num2str(hiddenNums(1)) '-' num2str(hiddenNums(2)) '.mat'];
             load(dlcmFile);
 
             % set signals
@@ -113,6 +113,6 @@ function performanceCheckSignalLen
     colorbar;
 
     % seve result file
-    filename = 'performance_check/result-sig-nodelen.mat';
+    filename = 'results/result-sig-nodelen.mat';
     save(filename, 'resultTime','resultLoss','resultRSME','resultRSMEAll','resultMAEAll','resultMAEErr');
 end

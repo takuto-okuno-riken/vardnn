@@ -34,7 +34,7 @@ function performanceCheckSignalLen
 
         disp(['training signal length ' num2str(i)]);
         % performance check of hidden layers
-        dlcmFile = ['performance_check/net-siglen-' num2str(i) '-hdn' num2str(hiddenNums(1)) '-' num2str(hiddenNums(2)) '.mat'];
+        dlcmFile = ['results/net-siglen-' num2str(i) '-hdn' num2str(hiddenNums(1)) '-' num2str(hiddenNums(2)) '.mat'];
         if exist(dlcmFile, 'file')
             continue;
         end
@@ -60,7 +60,7 @@ function performanceCheckSignalLen
     for i=1:stepMax
         disp(['loading result of ' num2str(i*step)]);
         % performance check of signal length
-        dlcmFile = ['performance_check/net-siglen-' num2str(i*step) '-hdn' num2str(hiddenNums(1)) '-' num2str(hiddenNums(2)) '.mat'];
+        dlcmFile = ['results/net-siglen-' num2str(i*step) '-hdn' num2str(hiddenNums(1)) '-' num2str(hiddenNums(2)) '.mat'];
         load(dlcmFile);
 
         % set signals
@@ -102,6 +102,6 @@ function performanceCheckSignalLen
     errorbar(start:step:step*stepMax, resultMAEAll, resultMAEErr);
 
     % seve result file
-    filename = 'performance_check/result-signal-length.mat';
+    filename = 'results/result-signal-length.mat';
     save(filename, 'resultTime','resultLoss','resultRSME','resultRSMEAll','resultMAEAll','resultMAEErr','resultErrs');
 end

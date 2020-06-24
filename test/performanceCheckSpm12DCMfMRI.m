@@ -47,7 +47,7 @@ function performanceCheckSpm12DCMfMRI
     maxK = 20; % number of trial
 
     % initialize parameters to save file or load previous one
-    fname = ['performance_check/DCM_demo-rand' num2str(n) '-' num2str(N) 'x' num2str(maxK) '.mat'];
+    fname = ['results/DCM_demo-rand' num2str(n) '-' num2str(N) 'x' num2str(maxK) '.mat'];
     if exist(fname, 'file')
         load(fname);
     else

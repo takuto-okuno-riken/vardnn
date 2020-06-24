@@ -49,7 +49,7 @@ function performanceCheckSimError
         sigLen = 200;
         winLen = 100;
 
-        dlcmFile = ['performance_check/sim-err' prefix num2str(i) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+        dlcmFile = ['results/sim-err' prefix num2str(i) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
         load(dlcmFile);
         Mae = [Mae, eachMae];
         R = [R, eachR];
@@ -93,7 +93,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weigh
 
     for k = 1:maxTrain
         % do training or load DLCM network
-        dlcmFile = ['performance_check/net-sim-err' prefix num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+        dlcmFile = ['results/net-sim-err' prefix num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
         if exist(dlcmFile, 'file')
             load(dlcmFile);
         else
@@ -126,7 +126,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weigh
         end
 
         % simulate DLCM network with 1st frame & exogenous input signal
-        dlcmFile = ['performance_check/net-sim-err' prefix num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) 'sim.mat'];
+        dlcmFile = ['results/net-sim-err' prefix num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) 'sim.mat'];
         if exist(dlcmFile, 'file')
             load(dlcmFile);
         else
@@ -226,7 +226,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weigh
     hold off;
     drawnow;
 
-    dlcmFile = ['performance_check/sim-err' prefix num2str(idx) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+    dlcmFile = ['results/sim-err' prefix num2str(idx) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
     save(dlcmFile, 'allErr', 'allrSi', 'allrS', 'allTime', 'eachMae', 'eachR', 'eachFCcos', 'eachGCcos');
 end
 

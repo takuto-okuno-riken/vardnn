@@ -5,8 +5,8 @@ function performanceCheckRoiSignal
         'data/marmoset-aneth-sample2-roi52.mat'};
 
     % training params
-    prefix = 'pfc-roi52';
-    l2 = 0.005;
+    prefix = 'ms2-roi52';
+    l2 = 0.05;
     weightFunc = @estimateInitWeightRoughHe;
     bias = 0.5;
     winLen = 200;
@@ -46,7 +46,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weigh
 
     for k = 1:maxTrain
         % do training or load DLCM network
-        dlcmFile = ['performance_check/' prefix '-' num2str(idx) '_' num2str(k) '.mat'];
+        dlcmFile = ['results/' prefix '-' num2str(idx) '_' num2str(k) '.mat'];
         if exist(dlcmFile, 'file')
             load(dlcmFile);
         else
@@ -79,7 +79,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weigh
         end
 
         % simulate DLCM network with 1st frame & exogenous input signal
-        dlcmFile = ['performance_check/' prefix '-' num2str(idx) '_' num2str(k) 'sim.mat'];
+        dlcmFile = ['results/' prefix '-' num2str(idx) '_' num2str(k) 'sim.mat'];
         if exist(dlcmFile, 'file')
             load(dlcmFile);
         else
@@ -179,7 +179,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weigh
     hold off;
     drawnow;
 
-    dlcmFile = ['performance_check/' prefix '-' num2str(idx) '_' num2str(k) 'result.mat'];
+    dlcmFile = ['results/' prefix '-' num2str(idx) '_' num2str(k) 'result.mat'];
     save(dlcmFile, 'allErr', 'allrSi', 'allrS', 'allTime', 'eachMae', 'eachR', 'eachFCcos', 'eachGCcos');
 end
 

@@ -81,7 +81,7 @@ function checkingPattern(si, inSignal, inControl, idx)
     sigLen = size(si,2);
 
     % do training or load DLCM network
-    dlcmFile = ['performance_check/net-sim-pat' num2str(idx) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+    dlcmFile = ['results/net-sim-pat' num2str(idx) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
     if exist(dlcmFile, 'file')
         load(dlcmFile);
     else

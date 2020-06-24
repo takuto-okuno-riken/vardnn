@@ -11,8 +11,9 @@
 %             For fMRI BOLD signal, bias = 0.5 and rough initial weight is better
 
 function net = createDlcmNetwork(nodeNum, inputNum, hiddenNums, inControl, initialWeightFunc, initBias)
-    if nargin < 6, initialWeightFunc = []; end
-    if nargin < 5, inControl = []; end
+    if nargin < 6, initBias = zeros(hiddenNums(1),1); end
+    if nargin < 5, initialWeightFunc = []; end
+    if nargin < 4, inControl = []; end
 
     nodeLayers = cell(nodeNum,1);
     for i=1:nodeNum

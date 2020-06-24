@@ -42,7 +42,7 @@ function reproductCheckSpm12DCMLargefMRI
     maxK = 20; % number of trial
 
     % load spectrum DCM performance check result
-    fname = ['performance_check/DCM_demo-rand' num2str(n) '-' num2str(N) 'x' num2str(maxK) '.mat'];
+    fname = ['results/DCM_demo-rand' num2str(n) '-' num2str(N) 'x' num2str(maxK) '.mat'];
     load(fname);
 
     % finding minimum error row

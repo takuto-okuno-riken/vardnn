@@ -38,7 +38,7 @@ function [trainedNet, time, mae] = recoveryTrainDlcmNetwork(X, inSignal, inContr
 
 % for debug ---------------
 %{
-dlcmFile = ['performance_check/net-sim-err-inRecov_' num2str(nodeNum) 'x' num2str(sigLen) '.mat'];
+dlcmFile = ['results/net-sim-err-inRecov_' num2str(nodeNum) 'x' num2str(sigLen) '.mat'];
 if exist(dlcmFile, 'file')
     load(dlcmFile);
 else

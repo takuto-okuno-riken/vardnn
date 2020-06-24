@@ -35,7 +35,7 @@ function performanceCheckVariHidden
 
             disp(['training signal ' num2str(j) 'x' num2str(i)]);
             % performance check of hidden layers
-            dlcmFile = ['performance_check/net-vari' num2str(j) 'x' num2str(i) '-hdn' num2str(hdnNums(1)) '-' num2str(hdnNums(2)) '.mat'];
+            dlcmFile = ['results/net-vari' num2str(j) 'x' num2str(i) '-hdn' num2str(hdnNums(1)) '-' num2str(hdnNums(2)) '.mat'];
             if exist(dlcmFile, 'file')
                 continue;
             end
@@ -66,7 +66,7 @@ function performanceCheckVariHidden
 
             disp(['loading result of ' num2str(nodeNum) 'x' num2str(sigLen)]);
             % performance check of signal length
-            dlcmFile = ['performance_check/net-vari' num2str(nodeNum) 'x' num2str(sigLen) '-hdn' num2str(hdnNums(1)) '-' num2str(hdnNums(2)) '.mat'];
+            dlcmFile = ['results/net-vari' num2str(nodeNum) 'x' num2str(sigLen) '-hdn' num2str(hdnNums(1)) '-' num2str(hdnNums(2)) '.mat'];
             load(dlcmFile);
 
             % set signals
@@ -116,6 +116,6 @@ function performanceCheckVariHidden
     colorbar;
 
     % seve result file
-    filename = 'performance_check/result-vari-hidden.mat';
+    filename = 'results/result-vari-hidden.mat';
     save(filename, 'resultTime','resultLoss','resultRSME','resultRSMEAll','resultMAEAll','resultMAEErr');
 end

@@ -32,7 +32,7 @@ function performanceCheckHiddenLayer
         for j=start:step:step*stepMax
             disp(['training hidden layer num ' num2str(i) '-' num2str(j)]);
             % performance check of hidden layers
-            dlcmFile = ['performance_check/net-hidden-' num2str(i) '-' num2str(j) '.mat'];
+            dlcmFile = ['results/net-hidden-' num2str(i) '-' num2str(j) '.mat'];
             if exist(dlcmFile, 'file')
                 continue;
             end
@@ -59,7 +59,7 @@ function performanceCheckHiddenLayer
         for j=1:stepMax
             disp(['loading result of ' num2str(i*step) '-' num2str(j*step)]);
             % performance check of hidden layers
-            dlcmFile = ['performance_check/net-hidden-' num2str(i*step) '-' num2str(j*step) '.mat'];
+            dlcmFile = ['results/net-hidden-' num2str(i*step) '-' num2str(j*step) '.mat'];
             load(dlcmFile);
 
             a=0; b=0; c=0; d=0; e=0;
@@ -101,6 +101,6 @@ function performanceCheckHiddenLayer
     colorbar;
 
     % seve result file
-    filename = 'performance_check/result-hidden-check.mat';
+    filename = 'results/result-hidden-check.mat';
     save(filename, 'resultTime','resultLoss','resultRSME','resultRSMEAll','resultMAEAll');
 end

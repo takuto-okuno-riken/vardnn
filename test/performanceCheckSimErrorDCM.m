@@ -31,7 +31,7 @@ function performanceCheckSimErrorDCM
         winLen = 100;
         k = 8;
 
-        dlcmFile = ['performance_check/net-sim-errd' num2str(i) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+        dlcmFile = ['results/net-sim-errd' num2str(i) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
         load(dlcmFile);
         Mae = [Mae, eachMae];
         R = [R, eachR];
@@ -75,7 +75,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx)
 
     for k = 1:maxTrain
         % do training or load DLCM network
-        dlcmFile = ['performance_check/net-sim-errd' num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+        dlcmFile = ['results/net-sim-errd' num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
         if exist(dlcmFile, 'file')
             load(dlcmFile);
         else
@@ -108,7 +108,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx)
         end
 
         % simulate DLCM network with 1st frame & exogenous input signal
-        dlcmFile = ['performance_check/net-sim-errd' num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) 'sim.mat'];
+        dlcmFile = ['results/net-sim-errd' num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) 'sim.mat'];
         if exist(dlcmFile, 'file')
             load(dlcmFile);
         else
@@ -208,7 +208,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx)
     hold off;
     drawnow;
 
-    dlcmFile = ['performance_check/sim-errd' num2str(idx) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+    dlcmFile = ['results/sim-errd' num2str(idx) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
     save(dlcmFile, 'allErr', 'allrSi', 'allrS', 'allTime', 'eachMae', 'eachR', 'eachFCcos', 'eachGCcos');
 end
 

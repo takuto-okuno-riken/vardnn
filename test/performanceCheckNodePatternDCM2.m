@@ -116,7 +116,7 @@ end
 
 %% 
 function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
-    dlcmFile = ['performance_check/net-patdcm2-' num2str(n) 'x' num2str(T) '-N' num2str(N) '-TR' num2str(TR) '-' num2str(idx) '.mat'];
+    dlcmFile = ['results/net-patdcm2-' num2str(n) 'x' num2str(T) '-N' num2str(N) '-TR' num2str(TR) '-' num2str(idx) '.mat'];
     netDLCM = [];
 
     % show original connection
