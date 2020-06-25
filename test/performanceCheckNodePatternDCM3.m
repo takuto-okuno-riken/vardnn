@@ -1,6 +1,6 @@
 
 
-function performanceCheckNodePatternDCM2
+function performanceCheckNodePatternDCM3
     % set global random stream and shuffle it
     myStream=RandStream('mt19937ar');
     RandStream.setGlobalStream(myStream);
@@ -50,7 +50,7 @@ function performanceCheckNodePatternDCM2
     checkingPattern(pP,M,U,N,T,n,TR,options,1);
 %}
     %% pattern 2 -------------------------------------------------
-%%{
+%{
     disp('network density 0.25');
     pP.A = eye(n,n) * 0.2;
     pP.A(5,1) = 0.3 + rand() * 0.3;
@@ -60,22 +60,71 @@ function performanceCheckNodePatternDCM2
     pP.A(7,6) = 0.3 + rand() * 0.3;
     pP.A(4,8) = 0.3 + rand() * 0.3;
     checkingPattern(pP,M,U,N,T,n,TR,options,2);
-%%}
+%}
     %% pattern 6 -------------------------------------------------
-%{
+%%{
     disp('network density 0.304');
     pP.A = eye(n,n) * 0.2;
-    pP.A(3,1) = 0.3 + rand() * 0.3;
-    pP.A(5,1) = 0.3 + rand() * 0.3;
-    pP.A(8,3) = 0.3 + rand() * 0.3;
-    pP.A(8,5) = 0.3 + rand() * 0.3;
-    pP.A(5,8) = 0.3 + rand() * 0.3;
-    pP.A(7,4) = 0.3 + rand() * 0.3;
-    pP.A(6,7) = 0.3 + rand() * 0.3;
-    pP.A(7,6) = 0.3 + rand() * 0.3;
-    pP.A(6,8) = 0.3 + rand() * 0.3;
+    pP.A = addPattern6(pP.A,0.3,0.2);
     checkingPattern(pP,M,U,N,T,n,TR,options,6);
+%%}
+    %% pattern 7 -------------------------------------------------
+%{
+    disp('network density 0.411');
+    pP.A = eye(n,n) * 0.15;
+    pP.A = addPattern6(pP.A,0.3,0.2);
+    pP.A = addPattern7(pP.A);
+    checkingPattern(pP,M,U,N,T,n,TR,options,7);
 %}
+    %% pattern 8 -------------------------------------------------
+%{
+    disp('network density 0.5');
+    pP.A = eye(n,n) * 0.1;
+    pP.A = addPattern6(pP.A,0.2,0.2);
+    pP.A = addPattern7(pP.A);
+    pP.A = addPattern8(pP.A);
+    checkingPattern(pP,M,U,N,T,n,TR,options,8);
+%}
+end
+
+function A = addPattern6(A,base,range)
+    A(3,1) = base + rand() * range;
+    A(5,1) = base + rand() * range;
+    A(8,3) = base + rand() * range;
+    A(8,5) = base + rand() * range;
+    A(5,8) = base + rand() * range;
+    A(7,4) = base + rand() * range;
+    A(6,7) = base + rand() * range;
+    A(7,6) = base + rand() * range;
+    A(6,8) = base + rand() * range;
+end
+function A = addPattern7(A)
+    A(1,4) = 0.1 + rand() * 0.2;
+    A(3,4) = 0.1 + rand() * 0.2;
+    A(5,4) = 0.1 + rand() * 0.2;
+    A(6,4) = 0.1 + rand() * 0.2;
+    A(3,5) = 0.1 + rand() * 0.2;
+    A(6,5) = 0.1 + rand() * 0.2;
+end
+function A = addPattern8(A)
+    A(2,4) = 0.1 + rand() * 0.2;
+    A(2,5) = 0.1 + rand() * 0.2;
+    A(2,6) = 0.1 + rand() * 0.2;
+    A(2,7) = 0.1 + rand() * 0.2;
+    A(2,8) = 0.1 + rand() * 0.2;
+end
+function A = addPatternD(A,n)
+    A(2,:) = NaN;
+    A(:,2) = NaN;
+    didx = find(eye(n,n)>0);
+    A(didx) = NaN;
+    idx = find(A>0);
+    len = length(idx);
+    idx = idx(randperm(len));
+    A(idx(1:len-20)) = 0;
+    idx = find(isnan(A));
+    A(idx) = 0;
+    A = A + eye(n,n) * (0.2);
 end
 
 %% 

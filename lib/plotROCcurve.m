@@ -4,13 +4,15 @@
 % input:
 %  X           target matrix (node x node) to get ROC curve
 %  G           ground truth matrix (node x node) (TRUE is G > Gth)
+%  step        step number of ground truth (default:100)
 %  ignoreDiag  ignore diagonal in the matrix (default:1)
 %  Gth         ground truth threshold (default:0)
 
-function [x, y, auc] = plotROCcurve(X, G, ignoreDiag, Gth)
-    if nargin < 4, Gth = 0; end
-    if nargin < 3, ignoreDiag = 1; end
-    [x, y, auc] = calcROCcurve(X, G, ignoreDiag, Gth);
+function [x, y, auc] = plotROCcurve(X, G, step, ignoreDiag, Gth)
+    if nargin < 5, Gth = 0; end
+    if nargin < 4, ignoreDiag = 1; end
+    if nargin < 3, step = 100; end
+    [x, y, auc] = calcROCcurve(X, G, step, ignoreDiag, Gth);
     plot(x, y);
     ylim([0 1]);
     xlim([0 1]);
