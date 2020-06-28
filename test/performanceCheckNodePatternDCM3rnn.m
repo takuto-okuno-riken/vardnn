@@ -6,36 +6,38 @@ function performanceCheckNodePatternDCM3rnn
     T  = 300;                             % number of observations (scans)
     n  = 8;                               % number of regions or nodes
 
+    prefix = 'net-pat3-';                 % original weight file prefix (result of *NodePatternDCM3d.m)
+
     %% pattern 1 -------------------------------------------------
 %%{
     disp('network density 0.191');
-    checkingPattern(N,T,n,1);
+    checkingPattern(N,T,n,prefix,1);
 %%}
     %% pattern 2 -------------------------------------------------
 %%{
     disp('network density 0.25');
-    checkingPattern(N,T,n,2);
+    checkingPattern(N,T,n,prefix,2);
 %%}
     %% pattern 6 -------------------------------------------------
 %%{
     disp('network density 0.304');
-    checkingPattern(N,T,n,6);
+    checkingPattern(N,T,n,prefix,6);
 %%}
     %% pattern 7 -------------------------------------------------
 %%{
     disp('network density 0.411');
-    checkingPattern(N,T,n,7);
+    checkingPattern(N,T,n,prefix,7);
 %%}
     %% pattern 8 -------------------------------------------------
 %%{
     disp('network density 0.5');
-    checkingPattern(N,T,n,8);
+    checkingPattern(N,T,n,prefix,8);
 %%}
 end
 
 %% 
-function checkingPattern(N,T,n,idx)
-    fname = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
+function checkingPattern(N,T,n,prefix,idx)
+    fname = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
     load(fname);
 
     % init
@@ -53,7 +55,7 @@ function checkingPattern(N,T,n,idx)
 
     % reading RNN-GC, TE(LIN UE), TE(BIN NUE) results
     for k=1:N
-        dlcmFile = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
+        dlcmFile = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
         load(dlcmFile);
 
         % show original connection
@@ -63,7 +65,7 @@ function checkingPattern(N,T,n,idx)
         % read RNN-GC result
         A = zeros(n,n);
         for j=1:rnnTrial
-            rnnFile = ['results/rnngc/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' sprintf('%02d',k) '_' num2str(j) '.txt'];
+            rnnFile = ['results/rnngc/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' sprintf('%02d',k) '_' num2str(j) '.txt'];
             Aj = readmatrix(rnnFile);
             A = A + Aj.';
             %figure; plotDcmEC(Aj.');
@@ -76,7 +78,7 @@ function checkingPattern(N,T,n,idx)
         
         % -----------------------------------------------------------------
         % read Transfer Entropy (LIN UE) result
-        linueFile = ['results/linue/linue_MultivAnalysis_net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
+        linueFile = ['results/linue/linue_MultivAnalysis_' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
         load(linueFile);
         A = outputToStore.reshapedMtx.';
 
@@ -85,7 +87,7 @@ function checkingPattern(N,T,n,idx)
 
         % -----------------------------------------------------------------
         % read Transfer Entropy (NearestNeighber NUE) result
-        nnnueFile = ['results/nnnue/nnnue_MultivAnalysis_net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
+        nnnueFile = ['results/nnnue/nnnue_MultivAnalysis_' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
         load(nnnueFile);
         A = outputToStore.reshapedMtx.';
 

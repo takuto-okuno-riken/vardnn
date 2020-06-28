@@ -9,6 +9,8 @@ function performanceCheckNodePatternDCM3d
     n  = 8;                               % number of regions or nodes
     t  = (1:T)*TR;                        % observation times
 
+    prefix = 'net-pat3-';                 % original weight file prefix (result of *NodePatternDCM3.m or *DCM4.m)
+
     % priors
     % -------------------------------------------------------------------------
     options.maxnodes   = 4;  % effective number of nodes, 4 is better than n
@@ -38,33 +40,33 @@ function performanceCheckNodePatternDCM3d
     %% pattern 1 -------------------------------------------------
 %%{
     disp('network density 0.191');
-    checkingPattern(pP,M,U,N,T,n,TR,options,1);
+    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,1);
 %%}
     %% pattern 2 -------------------------------------------------
 %%{
     disp('network density 0.25');
-    checkingPattern(pP,M,U,N,T,n,TR,options,2);
+    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,2);
 %%}
     %% pattern 6 -------------------------------------------------
 %%{
     disp('network density 0.304');
-    checkingPattern(pP,M,U,N,T,n,TR,options,6);
+    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,6);
 %%}
     %% pattern 7 -------------------------------------------------
 %%{
     disp('network density 0.411');
-    checkingPattern(pP,M,U,N,T,n,TR,options,7);
+    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,7);
 %%}
     %% pattern 8 -------------------------------------------------
 %%{
     disp('network density 0.5');
-    checkingPattern(pP,M,U,N,T,n,TR,options,8);
+    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,8);
 %%}
 end
 
 %% 
-function checkingPattern(pP,M,U,N,T,n,TR,options,idx)
-    fname = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
+function checkingPattern(pP,M,U,N,T,n,TR,options,prefix,idx)
+    fname = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
     load(fname);
 
     % init
@@ -75,13 +77,13 @@ function checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 
     % calc input signal and node BOLD signals
     for k=1:N
-        dlcmFile = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
+        dlcmFile = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
         load(dlcmFile);
 
         % show original connection
         figure(origf); plotDcmEC(pP.A);
 
-        dcmFile = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) 'd.mat'];
+        dcmFile = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) 'd.mat'];
         if exist(dcmFile, 'file')
             load(dcmFile);
         else
