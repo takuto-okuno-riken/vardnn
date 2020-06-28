@@ -1,6 +1,6 @@
 
 % this script should run after performanceCheckNodePatternDCM3
-function performanceCheckNodePatternDCM2
+function performanceCheckNodePatternDCM3d
     % DEM Structure: create random inputs
     % -------------------------------------------------------------------------
     N  = 8;
@@ -63,7 +63,7 @@ function performanceCheckNodePatternDCM2
 end
 
 %% 
-function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
+function checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     fname = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
     load(fname);
 
@@ -118,8 +118,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
             DCM.U.u  = u2;
 
             % nonlinear system identification (Variational Laplace)
-            % ==================================================
-            ===============
+            % =================================================================
             CSD{end + 1} = spm_dcm_fmri_csd(DCM);
             BPA          = spm_dcm_average(CSD,'simulation',1);
 

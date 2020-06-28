@@ -13,9 +13,14 @@ function [x, y, auc] = plotROCcurve(X, G, step, ignoreDiag, Gth)
     if nargin < 4, ignoreDiag = 1; end
     if nargin < 3, step = 100; end
     [x, y, auc] = calcROCcurve(X, G, step, ignoreDiag, Gth);
+    hold on;
     plot(x, y);
+    plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
+    hold off;    
     ylim([0 1]);
     xlim([0 1]);
     daspect([1 1 1]);
     title('ROC curve');
+    xlabel('False Positive Rate')
+    ylabel('True Positive Rate')
 end
