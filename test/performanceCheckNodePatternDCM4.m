@@ -41,16 +41,16 @@ function performanceCheckNodePatternDCM4
     M.g   = 'spm_gx_fmri';
 
     %% pattern 1 -------------------------------------------------
-%%{
+%{
     disp('network density 0.191');
     pP.A = rand(n,n)/5 - 0.1;
     pP.A(5,1) = 0.5 + rand() * 0.2;
     pP.A(8,3) = 0.5 + rand() * 0.2;
     pP.A(6,3) = 0.5 + rand() * 0.2;
     checkingPattern(pP,M,U,N,T,n,TR,options,1);
-%%}
+%}
     %% pattern 2 -------------------------------------------------
-%%{
+%{
     disp('network density 0.25');
     pP.A = rand(n,n)/5 - 0.1;
     pP.A(5,1) = 0.5 + rand() * 0.2;
@@ -60,29 +60,29 @@ function performanceCheckNodePatternDCM4
     pP.A(7,6) = 0.5 + rand() * 0.2;
     pP.A(4,8) = 0.5 + rand() * 0.2;
     checkingPattern(pP,M,U,N,T,n,TR,options,2);
-%%}
+%}
     %% pattern 6 -------------------------------------------------
 %%{
     disp('network density 0.304');
     pP.A = rand(n,n)/5 - 0.1;
-    pP.A = addPattern6(pP.A,0.5,0.1);
+    pP.A = addPattern6(pP.A,0.2,0.1);
     checkingPattern(pP,M,U,N,T,n,TR,options,6);
 %%}
     %% pattern 7 -------------------------------------------------
 %%{
     disp('network density 0.411');
     pP.A = rand(n,n)/5 - 0.1;
-    pP.A = addPattern6(pP.A,0.5,0.1);
-    pP.A = addPattern7(pP.A,0.5,0.1);
+    pP.A = addPattern6(pP.A,0.2,0.1);
+    pP.A = addPattern7(pP.A,0.2,0.1);
     checkingPattern(pP,M,U,N,T,n,TR,options,7);
 %%}
     %% pattern 8 -------------------------------------------------
 %%{
     disp('network density 0.5');
     pP.A = rand(n,n)/5 - 0.1;
-    pP.A = addPattern6(pP.A,0.5,0.1);
-    pP.A = addPattern7(pP.A,0.5,0.1);
-    pP.A = addPattern8(pP.A,0.5,0.1);
+    pP.A = addPattern6(pP.A,0.2,0.1);
+    pP.A = addPattern7(pP.A,0.2,0.1);
+    pP.A = addPattern8(pP.A,0.2,0.1);
     checkingPattern(pP,M,U,N,T,n,TR,options,8);
 %%}
 end
@@ -168,10 +168,10 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     
         % show original signal FC
         figure; FC = plotFunctionalConnectivity(si);
-        figure(fcRf); hold on; [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = plotROCcurve(FC, pP.A, 100, 1, 0.3); hold off;
+        figure(fcRf); hold on; [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = plotROCcurve(FC, pP.A, 100, 1, 0.2); hold off;
         % show original signal granger causality index (mvGC)
         figure; gcI = plotMultivariateGCI(si,3,0);
-        figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, pP.A, 100, 1, 0.3); hold off;
+        figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, pP.A, 100, 1, 0.2); hold off;
 
         % train DLCM    
         nodeNum = size(si,1);
@@ -207,7 +207,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure; dlGC = plotDlcmGCI(si, inSignal, inControl, netDLCM, 0);
         
         % calc ROC curve
-        figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A, 100, 1, 0.3); hold off;
+        figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A, 100, 1, 0.2); hold off;
     end
     fname = ['results/net-pat4-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];    
     save(fname, 'fcAUC', 'gcAUC', 'dlAUC', 'fcROC','gcROC','dlROC');
