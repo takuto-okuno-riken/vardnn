@@ -7,36 +7,37 @@ function performanceCheckNodePatternDCM3rnn
     n  = 8;                               % number of regions or nodes
 
     prefix = 'net-pat3-';                 % original weight file prefix (result of *NodePatternDCM3d.m)
+    Gth = 0;                            % 0 for pat3. 0.2 for pat4.
 
     %% pattern 1 -------------------------------------------------
 %%{
     disp('network density 0.191');
-    checkingPattern(N,T,n,prefix,1);
+    checkingPattern(N,T,n,prefix,Gth,1);
 %%}
     %% pattern 2 -------------------------------------------------
 %%{
     disp('network density 0.25');
-    checkingPattern(N,T,n,prefix,2);
+    checkingPattern(N,T,n,prefix,Gth,2);
 %%}
     %% pattern 6 -------------------------------------------------
 %%{
     disp('network density 0.304');
-    checkingPattern(N,T,n,prefix,6);
+    checkingPattern(N,T,n,prefix,Gth,6);
 %%}
     %% pattern 7 -------------------------------------------------
 %%{
     disp('network density 0.411');
-    checkingPattern(N,T,n,prefix,7);
+    checkingPattern(N,T,n,prefix,Gth,7);
 %%}
     %% pattern 8 -------------------------------------------------
 %%{
     disp('network density 0.5');
-    checkingPattern(N,T,n,prefix,8);
+    checkingPattern(N,T,n,prefix,Gth,8);
 %%}
 end
 
 %% 
-function checkingPattern(N,T,n,prefix,idx)
+function checkingPattern(N,T,n,prefix,Gth,idx)
     fname = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
     load(fname);
 
@@ -74,7 +75,7 @@ function checkingPattern(N,T,n,prefix,idx)
         %figure; plotDcmEC(A);
 
         % show ROC curve of RNN-GC
-        figure(rnnRf); hold on; [rnnROC{k,1}, rnnROC{k,2}, rnnAUC(k)] = plotROCcurve(A, pP.A); hold off;
+        figure(rnnRf); hold on; [rnnROC{k,1}, rnnROC{k,2}, rnnAUC(k)] = plotROCcurve(A, pP.A, 100, 1, Gth); hold off;
         
         % -----------------------------------------------------------------
         % read Transfer Entropy (LIN UE) result
@@ -83,7 +84,7 @@ function checkingPattern(N,T,n,prefix,idx)
         A = outputToStore.reshapedMtx.';
 
         % show ROC curve of TE(LIN UE)
-        figure(linueRf); hold on; [linueROC{k,1}, linueROC{k,2}, linueAUC(k)] = plotROCcurve(A, pP.A); hold off;        
+        figure(linueRf); hold on; [linueROC{k,1}, linueROC{k,2}, linueAUC(k)] = plotROCcurve(A, pP.A, 100, 1, Gth); hold off;        
 
         % -----------------------------------------------------------------
         % read Transfer Entropy (NearestNeighber NUE) result
@@ -92,7 +93,7 @@ function checkingPattern(N,T,n,prefix,idx)
         A = outputToStore.reshapedMtx.';
 
         % show ROC curve of TE(NearestNeighber NUE)
-        figure(nnnueRf); hold on; [nnnueROC{k,1}, nnnueROC{k,2}, nnnueAUC(k)] = plotROCcurve(A, pP.A); hold off;        
+        figure(nnnueRf); hold on; [nnnueROC{k,1}, nnnueROC{k,2}, nnnueAUC(k)] = plotROCcurve(A, pP.A, 100, 1, Gth); hold off;        
     end
     % save result
     save(fname, 'fcAUC','gcAUC','dlAUC','dcmAUC','rnnAUC','linueAUC','nnnueAUC', 'fcROC','gcROC','dlROC','dcmROC','rnnROC','linueROC','nnnueROC');

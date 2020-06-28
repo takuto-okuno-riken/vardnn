@@ -10,6 +10,7 @@ function performanceCheckNodePatternDCM3d
     t  = (1:T)*TR;                        % observation times
 
     prefix = 'net-pat3-';                 % original weight file prefix (result of *NodePatternDCM3.m or *DCM4.m)
+    Gth = 0;                            % 0 for pat3. 0.2 for pat4.
 
     % priors
     % -------------------------------------------------------------------------
@@ -40,32 +41,32 @@ function performanceCheckNodePatternDCM3d
     %% pattern 1 -------------------------------------------------
 %%{
     disp('network density 0.191');
-    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,1);
+    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,Gth,1);
 %%}
     %% pattern 2 -------------------------------------------------
 %%{
     disp('network density 0.25');
-    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,2);
+    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,Gth,2);
 %%}
     %% pattern 6 -------------------------------------------------
 %%{
     disp('network density 0.304');
-    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,6);
+    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,Gth,6);
 %%}
     %% pattern 7 -------------------------------------------------
 %%{
     disp('network density 0.411');
-    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,7);
+    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,Gth,7);
 %%}
     %% pattern 8 -------------------------------------------------
 %%{
     disp('network density 0.5');
-    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,8);
+    checkingPattern(pP,M,U,N,T,n,TR,options,prefix,Gth,8);
 %%}
 end
 
 %% 
-function checkingPattern(pP,M,U,N,T,n,TR,options,prefix,idx)
+function checkingPattern(pP,M,U,N,T,n,TR,options,prefix,Gth,idx)
     fname = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
     load(fname);
 
@@ -134,7 +135,7 @@ function checkingPattern(pP,M,U,N,T,n,TR,options,prefix,idx)
         % show estimated A by DCM
         BPA = spm_dcm_average(CSD,'simulation',1);
         figure; plotDcmEC(BPA.Ep.A,0);
-        figure(dcmRf); hold on; [dcmROC{k,1}, dcmROC{k,2}, dcmAUC(k)] = plotROCcurve(BPA.Ep.A, pP.A); hold off;
+        figure(dcmRf); hold on; [dcmROC{k,1}, dcmROC{k,2}, dcmAUC(k)] = plotROCcurve(BPA.Ep.A, pP.A, 100, 1, Gth); hold off;
     end
     save(fname, 'fcAUC','gcAUC','dlAUC','dcmAUC', 'fcROC','gcROC','dlROC','dcmROC');
 end
