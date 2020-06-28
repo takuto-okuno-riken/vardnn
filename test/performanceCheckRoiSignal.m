@@ -6,7 +6,7 @@ function performanceCheckRoiSignal
 
     % training params
     prefix = 'ms2-roi52';
-    l2 = 0.05;
+    l2 = 0.01;
     weightFunc = @estimateInitWeightRoughHe;
     bias = 0.5;
     winLen = 200;
