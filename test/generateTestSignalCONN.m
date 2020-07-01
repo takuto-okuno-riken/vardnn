@@ -1,8 +1,7 @@
 % load experimental signals
-subjectNum = 1;
+subjectNum = 3;
 roiNum = 52;
 start = 4;
-sig_a = 0.5;
 
 for idx=1:subjectNum
     expfile = ['data/ROI_Subject00' num2str(idx) '_Session001.mat'];
