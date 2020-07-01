@@ -28,11 +28,23 @@ for idx=1:subjectNum
     title([num2str(roiNum) 'ROI signals (' num2str(idx) ')']);
 
     outfName = ['data/marmoset-aneth-sample' num2str(idx) '-roi' num2str(roiNum) '.mat'];
-    save(outfName, 'si', 'names', 'sig_a');
+    save(outfName, 'si', 'names');
 
     % check translated bold signal histgram
-    si = bold2dnnSignal(si,sig_a);
-    figure;
-    histogram(si(:));
-    title([num2str(roiNum) 'ROI signal histogram (' num2str(idx) ')']);
+    figure; histogram(si(:));
+    title([num2str(roiNum) 'ROI signal original histogram (' num2str(idx) ')']);
+
+    % gaussian distribution to uniform like
+    [Y, sig, m, maxsi, minsi] = gaussian2uniformSignal(si);
+    figure; histogram(Y(:));
+    title([num2str(roiNum) 'ROI signal converted histogram (' num2str(idx) ')']);
+    
+    % uniform to gaussian distribution (invert)
+    si2 = uniform2gaussianSignal(Y, sig, m, maxsi, minsi);
+    figure; histogram(si2(:));
+    title([num2str(roiNum) 'ROI signal re-converted histogram (' num2str(idx) ')']);
+
+    % diff between original and re-converted
+    d = si - si2;
+    err = sum(sum(d.*d))
 end
