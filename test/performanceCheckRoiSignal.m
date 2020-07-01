@@ -2,11 +2,12 @@
 function performanceCheckRoiSignal
     subjects = { ...
         'data/marmoset-aneth-sample1-roi52.mat', ...
-        'data/marmoset-aneth-sample2-roi52.mat'};
+        'data/marmoset-aneth-sample2-roi52.mat',...;
+        'data/marmoset-aneth-sample3-roi52.mat'};
 
     % training params
-    prefix = 'ms2-roi52';
-    l2 = 0.01;
+    prefix = 'ms-l01-roi52';
+    l2 = 0.1;
     weightFunc = @estimateInitWeightRoughHe;
     bias = 0.5;
     winLen = 200;
