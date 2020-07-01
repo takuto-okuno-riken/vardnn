@@ -1,11 +1,11 @@
 %%
 % Caluclate multivariate Granger Causality
-% returns Granger causality index matrix (gcI)
+% returns Granger causality index matrix (gcI) and AIC, BIC (of node) vector
 % input:
 %  X      multivariate time series matrix (node x time series)
 %  lags   number of lags for autoregression
 
-function gcI = calcMultivariateGCI2(X, lags)
+function [gcI, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, lags)
     nodeNum = size(X,1);
     n = size(X,2);
     p = lags;
@@ -22,7 +22,9 @@ function gcI = calcMultivariateGCI2(X, lags)
         end
         Yjs{j} = Ytj;
     end
-        
+
+    nodeAIC = zeros(nodeNum,1);
+    nodeBIC = zeros(nodeNum,1);
     gcI = nan(nodeNum,nodeNum);
     for i=1:nodeNum
         % input signal is time [1 ... last]
@@ -38,7 +40,14 @@ function gcI = calcMultivariateGCI2(X, lags)
         % apply the regress function
         [b,bint,r] = regress(Xt,Xti);
         Vxt = var(r);
-        
+
+        % AIC and BIC of this node (assuming residuals are gausiann distribution)
+        T = n-p;
+        RSS = r'*r;
+        k = p * nodeNum + 1;
+        nodeAIC(i) = T*log(RSS/T) + 2 * k;
+        nodeBIC(i) = T*log(RSS/T) + k*log(T);
+
         for j=1:nodeNum
             if i==j, continue; end
             [b,bint,r] = regress(Xt,Yjs{j});
