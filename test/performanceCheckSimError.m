@@ -15,7 +15,7 @@ function performanceCheckSimError
 %}
 %%{
     load('data/marmoset-aneth-sample2-roi225.mat');
-    siOrg = gaussian2uniformSignal(si);
+    siOrg = bold2dnnSignal(si, 0.2);
     load('test/testTrain-rand500-uniform.mat');
     uuOrg = si;
     prefix = 'ms2';

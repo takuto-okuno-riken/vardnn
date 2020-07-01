@@ -9,8 +9,8 @@ function testSimulationMarmo
     nodeNum = 12;
     inputNum = 10;
     sigLen = 300;
-    si = gaussian2uniformSignal(siOrg(1:nodeNum,1:sigLen));
-    inSignal = gaussian2uniformSignal(siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen));
+    si = bold2dnnSignal(siOrg(1:nodeNum,1:sigLen), 0.2);
+    inSignal = bold2dnnSignal(siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen), 0.2);
     % control is all positive input
     inControl = logical(ones(nodeNum,inputNum));
 
