@@ -160,8 +160,8 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         end
 
         % show DCM signals
-        si = bold2dnnSignal(y2.');
-        inSignal = bold2dnnSignal(u2.');
+        si = gaussian2uniformSignal(y2.');
+        inSignal = gaussian2uniformSignal(u2.');
         inControl = eye(n,n);
         figure; plot(si.');
         %figure; plot(inSignal.');

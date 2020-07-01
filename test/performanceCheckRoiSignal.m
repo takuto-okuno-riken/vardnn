@@ -15,7 +15,7 @@ function performanceCheckRoiSignal
     for i=1:length(subjects)
         % load signals
         load(subjects{i});
-        siOrg = bold2dnnSignal(si, sig_a);
+        siOrg = gaussian2uniformSignal(si);
         load('test/testTrain-rand500-uniform.mat');
         uuOrg = si;
 

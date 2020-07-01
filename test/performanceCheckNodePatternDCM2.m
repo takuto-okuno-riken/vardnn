@@ -174,8 +174,8 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     figure; plotDcmEC(A,0);
 
     % train DLCM
-    si = bold2dnnSignal(y2.');
-    inSignal = bold2dnnSignal(u2.');
+    si = gaussian2uniformSignal(y2.');
+    inSignal = gaussian2uniformSignal(u2.');
     inControl = eye(n,n);
     figure; plot(si.');
     figure; plot(inSignal.');

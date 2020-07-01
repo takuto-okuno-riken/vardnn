@@ -43,8 +43,8 @@ function performanceCheckDCMy2DLCM
         inControl = eye(n,n);
 
         % normalize signal to [0, 1] 
-        si = bold2dnnSignal(si);
-        inSignal = bold2dnnSignal(inSignal);
+        si = gaussian2uniformSignal(si);
+        inSignal = gaussian2uniformSignal(inSignal);
 
         % do training or load DLCM network
         dlcmFile = ['results/net-vsDCM-' num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];
