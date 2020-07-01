@@ -9,6 +9,7 @@ function performanceCheckRoiSignal
     prefix = 'ms-l01-roi52';
     l2 = 0.1;
     weightFunc = @estimateInitWeightRoughHe;
+    weightParam = [10];
     bias = 0.5;
     winLen = 200;
 
@@ -29,11 +30,11 @@ function performanceCheckRoiSignal
         inControl = logical(ones(nodeNum,inputNum));
 
         % training and simulation
-        checkingPattern(si, inSignal, inControl, winLen, i, prefix, l2, weightFunc, bias);
+        checkingPattern(si, inSignal, inControl, winLen, i, prefix, l2, weightFunc, weightParam, bias);
     end
 end
 
-function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weightFunc, bias)
+function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weightFunc, weightParam, bias)
     % traial number
     maxTrain = 6;
     maxWin = 10;
@@ -52,7 +53,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weigh
             load(dlcmFile);
         else
             % init DLCM network
-            netDLCM = initDlcmNetwork(si, inSignal, inControl, weightFunc, bias);
+            netDLCM = initDlcmNetwork(si, inSignal, inControl, weightFunc, weightParam, bias);
 
             % set training options
             maxEpochs = 1000;

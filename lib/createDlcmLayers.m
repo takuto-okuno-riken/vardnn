@@ -8,17 +8,17 @@
 %  initialWeight  weight initialize matrix of hidden1 layer (optional)
 %  initialBias    bias initialize matrix of hidden1 layer (optional)
 
-function layers = createDlcmLayers(nodeNum, inputNum, hiddenNums, nodeInControl, initialWeight, initBias, currentNode)
-    if nargin < 6, initialWeight = []; currentNode = 0; end
+function layers = createDlcmLayers(nodeNum, inputNum, hiddenNums, nodeInControl, initWeightFunc, initWeightParam, initBias, currentNode)
+    if nargin < 6, initWeightFunc = []; initWeightParam = []; initBias = []; currentNode = 0; end
     if nargin < 5, nodeInControl = []; end
 
     % init first fully connected layer
-    if isempty(initialWeight) && isempty(nodeInControl) && isempty(initBias)
+    if isempty(initWeightFunc) && isempty(nodeInControl) && isempty(initBias)
         firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
-            'WeightsInitializer', @(sz) weightedHe(sz, nodeInControl, initialWeight, currentNode));
+            'WeightsInitializer', @(sz) weightInitializer(sz, nodeInControl, initWeightFunc, initWeightParam, currentNode));
     else
         firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
-            'WeightsInitializer', @(sz) weightedHe(sz, nodeInControl, initialWeight, currentNode), ...
+            'WeightsInitializer', @(sz) weightInitializer(sz, nodeInControl, initWeightFunc, initWeightParam, currentNode), ...
             'Bias', initBias);
     end
     
@@ -60,11 +60,11 @@ end
 %%
 % weight initializer
 % Returns He distribution + user specified weight
-function weights = weightedHe(sz, nodeInControl, initialWeight, currentNode)
+function weights = weightInitializer(sz, nodeInControl, initWeightFunc, initWeightParam, currentNode)
     global dlcmInitWeights;
 
-    if ~isempty(initialWeight)
-        weights = initialWeight(sz,10);
+    if ~isempty(initWeightFunc)
+        weights = initWeightFunc(sz,initWeightParam);
     else
         scale = 0.1;
         filterSize = [sz(1) sz(2)];

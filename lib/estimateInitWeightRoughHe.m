@@ -2,9 +2,10 @@
 % Estimate initial weight for DLCM
 % input:
 %  sz      vector of (neuron num) (node num) 
-%  scale   weight scale
+%  param   initial weight param [scale]
 
-function initWeight = estimateInitWeightRoughHe(sz, scale)
+function initWeight = estimateInitWeightRoughHe(sz, param)
+    scale = param(1);
     filterSize = [sz(1) sz(2)];
     numIn = filterSize(1) * filterSize(2);
     varscale = 0.1;

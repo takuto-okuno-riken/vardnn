@@ -1,5 +1,5 @@
 %%
-% Estimate initial weight for DLCM by Granger Causality Index
+% Estimate initial weight for DLCM by Granger Causality Index (no more use this)
 % input:
 %  X      multivariate time series matrix (node x time series)
 %  p      number of lags for autoregression (default:3)
