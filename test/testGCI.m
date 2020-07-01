@@ -25,7 +25,6 @@ title('pairwise Granger Causality Index');
 colorbar;
 
 gcI2 = calcMultivariateGCI(X, p); % calc granger causality index of lag |p|
-gcI3 = calcMultivariateGCI2(X, p); % calc granger causality index of lag |p|
 
 % plot matrix
 figure;
@@ -34,10 +33,28 @@ imagesc(gcI2,clims);
 title('multivariate Granger Causality Index');
 colorbar;
 
+% find best lag number
+maxLag = 10;
+gcI3 = zeros(nodeNum,nodeNum,maxLag);
+nodeAIC = zeros(nodeNum,maxLag);
+nodeBIC = zeros(nodeNum,maxLag);
+for k=1:maxLag
+    [gcI3(:,:,k), nodeAIC(:,k), nodeBIC(:,k)] = calcMultivariateGCI2(X, k); % calc granger causality index of lag |p|
+end
+% plot AIC and BIC of each node by each lag
+figure; plot(nodeAIC.');
+title('AIC of each node by each lag');
+figure; plot(nodeBIC.');
+title('BIC of each node by each lag');
+[M,I]=min(nodeAIC,[],2);
+lag = mode(I);
+figure; histogram(I);
+title('histogram of minimum AIC (lag) of each node');
+
 % plot matrix
 figure;
 clims = [-10 10];
-imagesc(gcI3,clims);
+imagesc(gcI3(:,:,lag),clims); % actually, this result is not so good...
 title('multivariate Granger Causality Index2');
 colorbar;
 
