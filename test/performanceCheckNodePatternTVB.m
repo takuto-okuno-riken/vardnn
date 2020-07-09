@@ -1,18 +1,20 @@
 function performanceCheckNodePatternTVB
-%    node_nums = [16, 16, 32, 32, 76];
     %node_nums = [16, 16, 16, 32, 32, 32];
-    %node_nums = [8, 8, 8, 8, 8, 8, 8, 8];
 %    node_nums = [16, 16, 16, 16, 16, 16];
 %    node_nums = [32, 32, 32, 32, 32, 32];
-%    node_nums = [76];
-%    node_nums = [16, 16, 32, 32, 76];
-    node_nums = [16, 32, 48, 64, 80, 96];
-%    Gths = [0.2, 0.2, 0.2, 0.2, 0.2];
 %    Gths = [0, 0, 0, 0, 0, 0];
-    Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
+    % test node number & density (42, 4020)
+    node_nums = [16, 16, 32, 32, 76];
+    Gths = [0.2, 0.2, 0.2, 0.2, 0.2];
+    num_scan = 4020;
+    % test node scale effective (same density) (45, 4050)
+    %node_nums = [16, 32, 48, 64, 80, 96];
+    %Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
+    %num_scan = 45;
+    % test sparse and full density
+    %node_nums = [8, 8, 8, 8, 8, 8, 8, 8];
     %Gths = [0, 0, 0, 0, 0.2, 0.2, 0.2, 0.2];
-%    Gths = [0.2];
-    num_scan = 45;
+    %num_scan = ??;
     hz = 64;
     N = 8;
 
@@ -27,23 +29,17 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     gcAUC = zeros(1,N);
     pgcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
-    rnnAUC = zeros(1,N);
     linueAUC = zeros(1,N);
-    nnnueAUC = zeros(1,N);
     fcROC = cell(N,2);
     gcROC = cell(N,2);
     pgcROC = cell(N,2);
     dlROC = cell(N,2);
-    rnnROC = cell(N,2);
     linueROC = cell(N,2);
-    nnnueROC = cell(N,2);
     fcRf = figure;
     gcRf = figure;
     pgcRf = figure;
     dlRf = figure;
-%    rnnRf = figure;
     linueRf = figure;
-%    nnnueRf = figure;
     origf = figure;
     origSigf = figure;
 
@@ -123,7 +119,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, weights); hold off;
         title(['ROC curve of DLCM-GC (pat=' num2str(i) ')']);
 %%}
-%{
+%%{
         % linue TE result
         linueFile = ['results/tvb-pat-linue/linue_MultivAnalysis_tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-' num2str(k) '-' num2str(lag) '.mat'];
         load(linueFile);
@@ -132,7 +128,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         % show ROC curve of TE(LIN UE)
         figure(linueRf); hold on; [linueROC{k,1}, linueROC{k,2}, linueAUC(k)] = plotROCcurve(A, weights, 100, 1, Gth); hold off;        
         title(['ROC curve of LINUE-TE (pat=' num2str(i) ')']);
-%}
+%%}
     end
     % show result AUC
     disp(['FC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(fcAUC))]);
@@ -143,5 +139,33 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
     % save result
     fname = ['results/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-result.mat'];
-    save(fname, 'fcAUC','gcAUC','pgcAUC','dlAUC','rnnAUC','linueAUC','nnnueAUC', 'fcROC','gcROC','pgcROC','dlROC','rnnROC','linueROC','nnnueROC');
+    save(fname, 'fcAUC','gcAUC','pgcAUC','dlAUC','linueAUC', 'fcROC','gcROC','pgcROC','dlROC','linueROC');
+
+    % show average ROC curve of DCM
+    figure; 
+    hold on;
+    plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
+    plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
+    plotErrorROCcurve(pgcROC, N, [0.0,0.5,0.0]);
+    plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
+%    plotErrorROCcurve(dcmROC, N, [0.2,0.2,0.8]);
+%    plotErrorROCcurve(rnnROC, N, [0.8,0.8,0.2]);
+    plotErrorROCcurve(linueROC, N, [0.2,0.6,0.8]);
+%    plotErrorROCcurve(nnnueROC, N, [0.8,0.2,0.8]);
+    plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
+    plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
+    plotAverageROCcurve(pgcROC, N, '--', [0.0,0.5,0.0],0.5);
+    plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);
+%    plotAverageROCcurve(dcmROC, N, '-', [0.2,0.2,0.8],0.5);
+%    plotAverageROCcurve(rnnROC, N, '--', [0.7,0.7,0.2],0.5);
+    plotAverageROCcurve(linueROC, N, '--', [0.2,0.5,0.7],0.5);
+%    plotAverageROCcurve(nnnueROC, N, '--', [0.7,0.2,0.7],0.5);
+    plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
+    hold off;
+    ylim([0 1]);
+    xlim([0 1]);
+    daspect([1 1 1]);
+    title(['averaged ROC curve idx' num2str(i)]);
+    xlabel('False Positive Rate')
+    ylabel('True Positive Rate')
 end
