@@ -18,5 +18,7 @@ function plotDcmEC(A, range)
     imagesc(A,clims);
     daspect([1 1 1]);
     title('DCM Effective Connectivity');
+    xlabel('Source Nodes');
+    ylabel('Target Nodes');
     colorbar;
 end

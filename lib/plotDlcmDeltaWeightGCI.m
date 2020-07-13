@@ -19,5 +19,7 @@ function [gcI] = plotDlcmDeltaWeightGCI(netDLCM, range)
     imagesc(gcI,clims);
     daspect([1 1 1]);
     title('DLCM delta weight Granger Causality');
+    xlabel('Source Nodes');
+    ylabel('Target Nodes');
     colorbar;
 end

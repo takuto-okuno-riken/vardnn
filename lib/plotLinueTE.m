@@ -30,5 +30,7 @@ function [TE, nodeAIC, nodeBIC] = plotLinueTE(X, lag, range, rowcut)
     imagesc(TE,clims);
     daspect([1 1 1]);
     title('Transfer Entropy (LINER)');
+    xlabel('Source Nodes');
+    ylabel('Target Nodes');
     colorbar;
 end

@@ -27,5 +27,7 @@ function [gcI] = plotDlcmGCI(X, inSignal, inControl, netDLCM, range, rowcut)
     imagesc(gcI,clims);
     daspect([1 1 1]);
     title('DLCM Granger Causality');
+    xlabel('Source Nodes');
+    ylabel('Target Nodes');
     colorbar;
 end

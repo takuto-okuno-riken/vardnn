@@ -1,13 +1,13 @@
 %%
 % Caluclate DLCM Granger Causality
-% returns DLCM Granger causality index matrix (gcI)
+% returns DLCM Granger causality index matrix (gcI) and AIC, BIC (of node) vector
 % input:
 %  X          multivariate time series matrix (node x time series)
 %  inSignal   multivariate time series matrix (exogenous input x time series) (optional)
 %  inControl  exogenous input control matrix for each node (node x exogenous input) (optional)
 %  netDLCM    trained DLCM network
 
-function gcI = calcDlcmGCI(X, inSignal, inControl, netDLCM)
+function [gcI, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, inControl, netDLCM)
     nodeNum = size(X,1);
     sigLen = size(X,2);
     
@@ -19,6 +19,8 @@ function gcI = calcDlcmGCI(X, inSignal, inControl, netDLCM)
     end
 
     % calc DLCM granger causality
+    nodeAIC = zeros(nodeNum,1);
+    nodeBIC = zeros(nodeNum,1);
     gcI = nan(nodeNum, nodeNum);
     for i=1:nodeNum
         nodeInput = nodeInputOrg;
@@ -31,6 +33,16 @@ function gcI = calcDlcmGCI(X, inSignal, inControl, netDLCM)
         Si = predict(netDLCM.nodeNetwork{i}, nodeInput);
         err = Si - nodeTeach;
         VarEi = var(err);
+
+        % AIC and BIC of this node (assuming residuals are gausiann distribution)
+        T = sigLen;
+        RSS = err*err';
+        k = nodeNum + size(inSignal, 1);
+        for j=2:2:length(netDLCM.nodeNetwork{i, 1}.Layers)
+            k = k + length(netDLCM.nodeNetwork{i, 1}.Layers(j, 1).Bias);
+        end
+        nodeAIC(i) = T*log(RSS/T) + 2 * k;
+        nodeBIC(i) = T*log(RSS/T) + k*log(T);
 
         % imparement node signals
         for j=1:nodeNum

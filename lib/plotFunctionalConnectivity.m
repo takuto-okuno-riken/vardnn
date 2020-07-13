@@ -16,5 +16,7 @@ function [FC] = plotFunctionalConnectivity(X, rowcut)
     imagesc(FC,clims);
     daspect([1 1 1]);
     title('Functional Connectivity');
+    xlabel('Source Nodes');
+    ylabel('Target Nodes');
     colorbar;
 end

@@ -29,6 +29,8 @@ function [gcI] = plotMultivariateGCI(X, lag, range, rowcut)
     clims = [-range, range];
     imagesc(gcI,clims);
     daspect([1 1 1]);
-    title('Granger Causality Index (GC-EC)');
+    title('multivariate Granger Causality Index');
+    xlabel('Source Nodes');
+    ylabel('Target Nodes');
     colorbar;
 end
