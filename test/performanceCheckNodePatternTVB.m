@@ -4,13 +4,13 @@ function performanceCheckNodePatternTVB
 %    node_nums = [32, 32, 32, 32, 32, 32];
 %    Gths = [0, 0, 0, 0, 0, 0];
     % test node number & density (42, 4020)
-    node_nums = [16, 16, 32, 32, 76];
-    Gths = [0.2, 0.2, 0.2, 0.2, 0.2];
-    num_scan = 4020;
+    %node_nums = [16, 16, 32, 32, 76];
+    %Gths = [0.2, 0.2, 0.2, 0.2, 0.2];
+    %num_scan = 4020;
     % test node scale effective (same density) (45, 4050)
-    %node_nums = [16, 32, 48, 64, 80, 96];
-    %Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
-    %num_scan = 45;
+    node_nums = [16, 32, 48, 64, 80, 96];
+    Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
+    num_scan = 45;
     % test sparse and full density
     %node_nums = [8, 8, 8, 8, 8, 8, 8, 8];
     %Gths = [0, 0, 0, 0, 0.2, 0.2, 0.2, 0.2];
@@ -18,7 +18,7 @@ function performanceCheckNodePatternTVB
     hz = 64;
     N = 8;
 
-    for i=1:length(node_nums)
+    for i=5:length(node_nums)
         checkingPattern(node_nums(i), num_scan, hz, Gths(i), N, i);
     end
 end
