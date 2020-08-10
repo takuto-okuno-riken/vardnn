@@ -13,23 +13,24 @@ function analyzeAlzheimerDLCM
     [mciSignals] = connData2signalsFile(base, pathesMCI, 'mci');
 
     % calculate connectivity
-    [cnFCs, meanCNFC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'fc');
-    [adFCs, meanADFC] = calculateConnectivity(adSignals, roiNames, 'ad', 'fc');
-    [mciFCs, meanMCIFC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'fc');
+    [cnFCs, meanCNFC, stdCNFC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'fc');
+    [adFCs, meanADFC, stdADFC] = calculateConnectivity(adSignals, roiNames, 'ad', 'fc');
+    [mciFCs, meanMCIFC, stdMCIFC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'fc');
 
-    [cnGCs, meanCNGC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'gc');
-    [adGCs, meanADGC] = calculateConnectivity(adSignals, roiNames, 'ad', 'gc');
-    [mciGCs, meanMCIGC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'gc');
+    [cnGCs, meanCNGC, stdCNGC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'gc');
+    [adGCs, meanADGC, stdADGC] = calculateConnectivity(adSignals, roiNames, 'ad', 'gc');
+    [mciGCs, meanMCIGC, stdMCIGC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'gc');
 
-    [cnTEs, meanCNTE] = calculateConnectivity(cnSignals, roiNames, 'cn', 'te');
-    [adTEs, meanADTE] = calculateConnectivity(adSignals, roiNames, 'ad', 'te');
-    [mciTEs, meanMCITE] = calculateConnectivity(mciSignals, roiNames, 'mci', 'te');
+    [cnTEs, meanCNTE, stdCNTE] = calculateConnectivity(cnSignals, roiNames, 'cn', 'te');
+    [adTEs, meanADTE, stdADTE] = calculateConnectivity(adSignals, roiNames, 'ad', 'te');
+    [mciTEs, meanMCITE, stdMCITE] = calculateConnectivity(mciSignals, roiNames, 'mci', 'te');
 
-    [cnDLs, meanCNDL] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm');
-    [adDLs, meanADDL] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm');
-    [mciDLs, meanMCIDL] = calculateConnectivity(mciSignals, roiNames, 'mci', 'dlcm');
+    [cnDLs, meanCNDL, stdCNDL] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm');
+    [adDLs, meanADDL, stdADDL] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm');
+    [mciDLs, meanMCIDL, stdMCIDL] = calculateConnectivity(mciSignals, roiNames, 'mci', 'dlcm');
     
     % normality test
+%{
     cnFCsNt = calculateNormalityTest(cnFCs, roiNames, 'cn', 'fc');
     adFCsNt = calculateNormalityTest(adFCs, roiNames, 'ad', 'fc');
     mciFCsNt = calculateNormalityTest(mciFCs, roiNames, 'mci', 'fc');
@@ -45,10 +46,113 @@ function analyzeAlzheimerDLCM
     cnDLsNt = calculateNormalityTest(cnDLs, roiNames, 'cn', 'dlcm');
     adDLsNt = calculateNormalityTest(adDLs, roiNames, 'ad', 'dlcm');
     mciDLsNt = calculateNormalityTest(mciDLs, roiNames, 'mci', 'dlcm');
+%}
+    % compalizon test (Wilcoxon, Mann?Whitney U test)
+    [cnadFCsUt, cnadFCsUtP, cnadFCsUtP2] = calculateWilcoxonTest(cnFCs, adFCs, roiNames, 'cn', 'ad', 'fc');
+    [cnadGCsUt, cnadGCsUtP, cnadGCsUtP2] = calculateWilcoxonTest(cnGCs, adGCs, roiNames, 'cn', 'ad', 'gc');
+    [cnadTEsUt, cnadTEsUtP, cnadTEsUtP2] = calculateWilcoxonTest(cnTEs, adTEs, roiNames, 'cn', 'ad', 'te');
+    [cnadDLsUt, cnadDLsUtP, cnadDLsUtP2] = calculateWilcoxonTest(cnDLs, adDLs, roiNames, 'cn', 'ad', 'dlcm');
+    
+    % box plot of minimum p-value relation
+    topNum = 50;
+    sigTh = 2;
 
+    % check sigma of healthy subject
+    [B, I] = boxPlotPValues(cnFCs, adFCs, cnadFCsUtP2, topNum);
+    sigCntCNFC = calcSigmaSubjects(cnFCs, meanADFC, stdADFC, I, topNum, sigTh);
+    sigCntADFC = calcSigmaSubjects(adFCs, meanADFC, stdADFC, I, topNum, sigTh);
+    [B, I] = boxPlotPValues(cnGCs, adGCs, cnadGCsUtP2, topNum);
+    sigCntCNGC = calcSigmaSubjects(cnGCs, meanADGC, stdADGC, I, topNum, sigTh);
+    sigCntADGC = calcSigmaSubjects(adGCs, meanADGC, stdADGC, I, topNum, sigTh);
+    [B, I] = boxPlotPValues(cnTEs, adTEs, cnadTEsUtP2, topNum);
+    sigCntCNTE = calcSigmaSubjects(cnTEs, meanADTE, stdADTE, I, topNum, sigTh);
+    sigCntADTE = calcSigmaSubjects(adTEs, meanADTE, stdADTE, I, topNum, sigTh);
+    [B, I] = boxPlotPValues(cnDLs, adDLs, cnadDLsUtP2, topNum);
+    sigCntCNDL = calcSigmaSubjects(cnDLs, meanADDL, stdADDL, I, topNum, sigTh);
+    sigCntADDL = calcSigmaSubjects(adDLs, meanADDL, stdADDL, I, topNum, sigTh);
+    
+    % calculate ROC curve
+    figure;
+    aucFC = plotAlzROCcurve(sigCntCNFC, sigCntADFC, '-', [0.8,0.2,0.2],0.5)
+    aucGC = plotAlzROCcurve(sigCntCNGC, sigCntADGC, '-', [0.1,0.8,0.1],0.5)
+    aucTE = plotAlzROCcurve(sigCntCNTE, sigCntADTE, '--', [0.2,0.5,0.7],0.5)
+    aucDL = plotAlzROCcurve(sigCntCNDL, sigCntADDL, '-', [0.2,0.2,0.2],1.2)
 end
 
-function [signals, roiNames] = connData2signalsFile(base, pathes, type)
+function auc = plotAlzROCcurve(control, target, line, col, width)
+    x = [0]; y = [0]; % start from (0,0)
+    st = max([control(:); target(:)]);
+    tpmax = length(control);
+    fpmax = length(target);
+    for i=st:-1:0
+        tp = length(find(control>=i));
+        fp = length(find(target>=i));
+        x = [x fp/fpmax];
+        y = [y tp/tpmax];
+    end
+    auc = trapz(x, y);
+
+    % plot ROC curve
+    hold on;
+    plot(x, y, line,'Color',col,'LineWidth',width);
+    plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
+    hold off;    
+    ylim([0 1]);
+    xlim([0 1]);
+    daspect([1 1 1]);
+    title('ROC curve');
+    xlabel('False Positive Rate')
+    ylabel('True Positive Rate')
+end
+
+function [B, I] = boxPlotPValues(control, target, utestP2, topNum)
+    ROINUM = size(control,1);
+    [B, I] = sort(utestP2(:));
+    X = [];
+    for k=1:topNum
+        i = floor(mod(I(k)-1,ROINUM) + 1);
+        j = floor((I(k)-1)/ROINUM + 1);
+        x = squeeze(control(i,j,:));
+        y = squeeze(target(i,j,:));
+        
+        if length(x) > length(y)
+            x2 = x;
+            y2 = nan(length(x),1);
+            y2(1:length(y),1) = y;
+        else
+            x2 = nan(length(y),1);
+            x2(1:length(x),1) = x;
+            y2 = y;
+        end
+        X = [X, x2, y2];
+    end
+    figure;
+    boxplot(X);
+end
+
+function sigCount = calcSigmaSubjects(weights, meanWeights, stdWeights, I, topNum, sigTh)
+    ROINUM = size(weights,1);
+    subjectNum = size(weights,3);
+    X = [];
+    sigCount = [];
+    for n=1:subjectNum
+        w2 = weights(:,:,n);
+        w2 = w2 - meanWeights;
+        sig = abs(w2 ./ stdWeights);
+        s = nan(topNum, 1);
+        for k=1:topNum
+            i = floor(mod(I(k)-1,ROINUM) + 1);
+            j = floor((I(k)-1)/ROINUM + 1);
+            s(k) = sig(i, j);
+        end
+        X = [X, s];
+        sigCount = [sigCount, length(find(s>=sigTh))];
+    end
+    figure; boxplot(X);
+    figure; bar(sigCount);
+end
+
+function [signals, roiNames] = connData2signalsFile(base, pathes, group)
     % constant value
     ROINUM = 132;
     START = 4;
@@ -60,7 +164,7 @@ function [signals, roiNames] = connData2signalsFile(base, pathes, type)
     roiNames2 = cell(1,ROINUM);
     idx = 0;
     
-    outfName = ['data/ad-signal-' type '-roi' num2str(ROINUM) '.mat'];
+    outfName = ['data/ad-signal-' group '-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
         return;
@@ -101,18 +205,18 @@ function [signals, roiNames] = connData2signalsFile(base, pathes, type)
             % show signals
             figure;
             plot(si.');
-            title([type ':' num2str(ROINUM) ' ROI signals (' num2str(idx) ')']);
+            title([group ':' num2str(ROINUM) ' ROI signals (' num2str(idx) ')']);
         end
     end
     save(outfName, 'signals', 'roiNames');
 end
 
-function [weights, meanWeight] = calculateConnectivity(signals, roiNames, type, algorithm)
+function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roiNames, group, algorithm)
     % constant value
     ROINUM = size(signals{1},1);
     LAG = 3;
 
-    outfName = ['data/ad-' algorithm '-' type '-roi' num2str(ROINUM) '.mat'];
+    outfName = ['data/ad-' algorithm '-' group '-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
     else
@@ -126,7 +230,7 @@ function [weights, meanWeight] = calculateConnectivity(signals, roiNames, type, 
             case 'te'
                 mat = calcLinueTE(signals{i}, LAG);
             case 'dlcm'
-                dlcmName = ['data/ad-' algorithm '-' type '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                dlcmName = ['data/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(dlcmName, 'file')
                     load(dlcmName);
                 else
@@ -162,44 +266,50 @@ function [weights, meanWeight] = calculateConnectivity(signals, roiNames, type, 
         end
         save(outfName, 'weights', 'roiNames');
     end
-    meanWeight = nanmean(weights, 3);
+    meanWeights = nanmean(weights, 3);
+    stdWeights = nanstd(weights, 1, 3);
+    % counting by source region and target region
+    meanSource = nanmean(meanWeights,1);
+    meanTarget = nanmean(meanWeights,2);
+    save(outfName, 'weights', 'meanWeights', 'stdWeights', 'roiNames', 'meanSource', 'meanTarget');
 
     % show functional conectivity
     figure; 
     switch(algorithm)
     case 'fc'
         clims = [-1,1];
-        titleStr = [type ' : Functional Connectivity'];
+        titleStr = [group ' : Functional Connectivity'];
+        sigWeights = meanWeights;
     case 'gc'
-        sigma = std(meanWeight(:),'omitnan');
-        avg = mean(meanWeight(:),'omitnan');
-        meanWeight = (meanWeight - avg) / sigma;
+        sigma = std(meanWeights(:),'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [type ' : multivariate Granger Causality Index'];
+        titleStr = [group ' : multivariate Granger Causality Index'];
     case 'te'
-        sigma = std(meanWeight(:),'omitnan');
-        avg = mean(meanWeight(:),'omitnan');
-        meanWeight = (meanWeight - avg) / sigma;
+        sigma = std(meanWeights(:),'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [type ' : Transfer Entropy (LINER)'];
+        titleStr = [group ' : Transfer Entropy (LINER)'];
     case 'dlcm'
-        sigma = std(meanWeight(:),'omitnan');
-        avg = mean(meanWeight(:),'omitnan');
-        meanWeight = (meanWeight - avg) / sigma;
+        sigma = std(meanWeights(:),'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [type ' : DLCM Granger Causality Index'];
+        titleStr = [group ' : DLCM Granger Causality Index'];
     end
-    imagesc(meanWeight,clims);
+    imagesc(sigWeights,clims);
     daspect([1 1 1]);
     title(titleStr);
     colorbar;
 end
 
-function [normalities, normalitiesP] = calculateNormalityTest(weights, roiNames, type, algorithm)
+function [normalities, normalitiesP] = calculateNormalityTest(weights, roiNames, group, algorithm)
     % constant value
     ROINUM = size(weights,1);
 
-    outfName = ['data/ad-' algorithm '-' type '-roi' num2str(ROINUM) '-normality.mat'];
+    outfName = ['data/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-normality.mat'];
     if exist(outfName, 'file')
         load(outfName);
     else
@@ -221,13 +331,70 @@ function [normalities, normalitiesP] = calculateNormalityTest(weights, roiNames,
     clims = [0,1];
     imagesc(normalities,clims);
     daspect([1 1 1]);
-    title([type '-' algorithm ' normality test result']);
+    title([group '-' algorithm ' normality test result']);
     colorbar;
     % normality test p values
     figure; 
     clims = [0,0.5];
     imagesc(normalitiesP,clims);
     daspect([1 1 1]);
-    title([type '-' algorithm ' normality test p values']);
+    title([group '-' algorithm ' normality test p values']);
+    colorbar;
+end
+
+
+function [utestH, utestP, utestP2] = calculateWilcoxonTest(control, target, roiNames, controlGroup, targetGroup, algorithm)
+    % constant value
+    ROINUM = size(control,1);
+
+    outfName = ['data/ad-' algorithm '-' controlGroup '_' targetGroup '-roi' num2str(ROINUM) '-utest.mat'];
+    if exist(outfName, 'file')
+        load(outfName);
+    else
+        utestH = nan(ROINUM, ROINUM);
+        utestP = nan(ROINUM, ROINUM);
+        utestP2 = nan(ROINUM, ROINUM);
+        for i=1:ROINUM
+            for j=1:ROINUM
+                if i==j, continue; end
+                x = squeeze(control(i,j,:));
+                y = squeeze(target(i,j,:));
+                if length(x) > length(y)
+                    x2 = x;
+                    y2 = nan(length(x),1);
+                    y2(1:length(y),1) = y;
+                else
+                    x2 = nan(length(y),1);
+                    x2(1:length(x),1) = x;
+                    y2 = y;
+                end
+                [p, h] = signrank(x2,y2);
+                utestH(i,j) = h;
+                utestP(i,j) = p;
+                if h > 0 && nanmean(x) > nanmean(y)
+                    utestP2(i,j) = p;
+                end
+            end
+        end
+        save(outfName, 'utestH', 'utestP', 'utestP2', 'roiNames');
+    end
+    % counting by source region and target region
+    countSource = nansum(utestH,1);
+    countTarget = nansum(utestH,2);
+    save(outfName, 'utestH', 'utestP', 'utestP2', 'roiNames', 'countSource', 'countTarget');
+
+    % U test result
+    figure; 
+    clims = [0,1];
+    imagesc(utestH,clims);
+    daspect([1 1 1]);
+    title([controlGroup '-' targetGroup ' : ' algorithm ' : u test result']);
+    colorbar;
+    % U test p values
+    figure; 
+    clims = [0,1];
+    imagesc(utestP, clims);
+    daspect([1 1 1]);
+    title([controlGroup '-' targetGroup ' : ' algorithm ' : u test p values']);
     colorbar;
 end
