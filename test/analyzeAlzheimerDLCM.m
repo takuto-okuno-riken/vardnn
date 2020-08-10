@@ -30,9 +30,9 @@ function analyzeAlzheimerDLCM
     [mciDLs, meanMCIDL] = calculateConnectivity(mciSignals, roiNames, 'mci', 'dlcm');
     
     % normality test
-%    cnFCsNt = calculateNormalityTest(cnFCs, roiNames, 'cn', 'fc');
-%    adFCsNt = calculateNormalityTest(adFCs, roiNames, 'ad', 'fc');
-%    mciFCsNt = calculateNormalityTest(mciFCs, roiNames, 'mci', 'fc');
+    cnFCsNt = calculateNormalityTest(cnFCs, roiNames, 'cn', 'fc');
+    adFCsNt = calculateNormalityTest(adFCs, roiNames, 'ad', 'fc');
+    mciFCsNt = calculateNormalityTest(mciFCs, roiNames, 'mci', 'fc');
 
     cnGCsNt = calculateNormalityTest(cnGCs, roiNames, 'cn', 'gc');
     adGCsNt = calculateNormalityTest(adGCs, roiNames, 'ad', 'gc');
@@ -42,9 +42,9 @@ function analyzeAlzheimerDLCM
     adTEsNt = calculateNormalityTest(adTEs, roiNames, 'ad', 'te');
     mciTEsNt = calculateNormalityTest(mciTEs, roiNames, 'mci', 'te');
 
-%    cnDLsNt = calculateNormalityTest(cnDLs, roiNames, 'cn', 'dlcm');
-%    adDLsNt = calculateNormalityTest(adDLs, roiNames, 'ad', 'dlcm');
-%    mciDLsNt = calculateNormalityTest(mciDLs, roiNames, 'mci', 'dlcm');
+    cnDLsNt = calculateNormalityTest(cnDLs, roiNames, 'cn', 'dlcm');
+    adDLsNt = calculateNormalityTest(adDLs, roiNames, 'ad', 'dlcm');
+    mciDLsNt = calculateNormalityTest(mciDLs, roiNames, 'mci', 'dlcm');
 
 end
 
@@ -225,7 +225,7 @@ function [normalities, normalitiesP] = calculateNormalityTest(weights, roiNames,
     colorbar;
     % normality test p values
     figure; 
-    clims = [0,1];
+    clims = [0,0.5];
     imagesc(normalitiesP,clims);
     daspect([1 1 1]);
     title([type '-' algorithm ' normality test p values']);
