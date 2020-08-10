@@ -21,9 +21,13 @@ function analyzeAlzheimerDLCM
     [adGCs, meanADGC] = calculateConnectivity(adSignals, roiNames, 'ad', 'gc');
     [mciGCs, meanMCIGC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'gc');
 
-    [cnTEs, meanCNTE] = calculateConnectivity(cnSignals, roiNames, 'cn', 'te');
-    [adTEs, meanADTE] = calculateConnectivity(adSignals, roiNames, 'ad', 'te');
-    [mciTEs, meanMCITE] = calculateConnectivity(mciSignals, roiNames, 'mci', 'te');
+%    [cnTEs, meanCNTE] = calculateConnectivity(cnSignals, roiNames, 'cn', 'te');
+%    [adTEs, meanADTE] = calculateConnectivity(adSignals, roiNames, 'ad', 'te');
+%    [mciTEs, meanMCITE] = calculateConnectivity(mciSignals, roiNames, 'mci', 'te');
+
+    [cnDLs, meanCNDL] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm');
+    [adDLs, meanADDL] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm');
+    [mciDLs, meanMCIDL] = calculateConnectivity(mciSignals, roiNames, 'mci', 'dlcm');
 end
 
 
@@ -104,6 +108,38 @@ function [weights, meanWeight] = calculateConnectivity(signals, roiNames, type, 
                 mat = calcMultivariateGCI(signals{i}, LAG);
             case 'te'
                 mat = calcLinueTE(signals{i}, LAG);
+            case 'dlcm'
+                dlcmName = ['data/ad-' algorithm '-' type '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                if exist(dlcmName, 'file')
+                    load(dlcmName);
+                else
+                    [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(signals{i});
+                    sigLen = size(si,2);
+                    inSignal = rand(ROINUM, sigLen);
+                    inControl = eye(ROINUM);
+                    netDLCM = initDlcmNetwork(si, inSignal, inControl); 
+                    % training DLCM network
+                    maxEpochs = 1000;
+                    miniBatchSize = ceil(sigLen / 3);
+                    options = trainingOptions('adam', ...
+                        'ExecutionEnvironment','cpu', ...
+                        'MaxEpochs',maxEpochs, ...
+                        'MiniBatchSize',miniBatchSize, ...
+                        'Shuffle','every-epoch', ...
+                        'GradientThreshold',5,...
+                        'L2Regularization',0.05, ...
+                        'Verbose',false);
+                %            'Plots','training-progress');
+
+                    disp('start training');
+                    netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+                    [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+                    disp(['end training : rsme=' num2str(rsme)]);
+                    % calc dlcm-gc
+                    mat = calcDlcmGCI(si, inSignal, inControl, netDLCM);
+                    
+                    save(dlcmName, 'netDLCM', 'si', 'inSignal', 'inControl', 'mat', 'sig', 'm', 'maxsi', 'minsi');
+                end
             end
             weights(:,:,i) = mat;
         end
@@ -129,6 +165,12 @@ function [weights, meanWeight] = calculateConnectivity(signals, roiNames, type, 
         meanWeight = (meanWeight - avg) / sigma;
         clims = [-5, 5];
         titleStr = [type ' : Transfer Entropy (LINER)'];
+    case 'dlcm'
+        sigma = std(meanWeight(:),'omitnan');
+        avg = mean(meanWeight(:),'omitnan');
+        meanWeight = (meanWeight - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [type ' : DLCM Granger Causality Index'];
     end
     imagesc(meanWeight,clims);
     daspect([1 1 1]);
