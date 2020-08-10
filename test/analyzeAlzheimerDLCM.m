@@ -28,8 +28,13 @@ function analyzeAlzheimerDLCM
     [cnDLs, meanCNDL] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm');
     [adDLs, meanADDL] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm');
     [mciDLs, meanMCIDL] = calculateConnectivity(mciSignals, roiNames, 'mci', 'dlcm');
-end
+    
+    % normality test
+    cnFCsNt = calculateNormalityTest(cnFCs, roiNames, 'cn', 'fc');
+    adFCsNt = calculateNormalityTest(adFCs, roiNames, 'ad', 'fc');
+    mciFCsNt = calculateNormalityTest(mciFCs, roiNames, 'mci', 'fc');
 
+end
 
 function [signals, roiNames] = connData2signalsFile(base, pathes, type)
     % constant value
@@ -92,9 +97,9 @@ end
 
 function [weights, meanWeight] = calculateConnectivity(signals, roiNames, type, algorithm)
     % constant value
-    ROINUM = 132;
+    ROINUM = size(signals{1},1);
     LAG = 3;
-    
+
     outfName = ['data/ad-' algorithm '-' type '-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
@@ -163,7 +168,7 @@ function [weights, meanWeight] = calculateConnectivity(signals, roiNames, type, 
         sigma = std(meanWeight(:),'omitnan');
         avg = mean(meanWeight(:),'omitnan');
         meanWeight = (meanWeight - avg) / sigma;
-        clims = [-5, 5];
+        clims = [-3, 3];
         titleStr = [type ' : Transfer Entropy (LINER)'];
     case 'dlcm'
         sigma = std(meanWeight(:),'omitnan');
@@ -175,5 +180,42 @@ function [weights, meanWeight] = calculateConnectivity(signals, roiNames, type, 
     imagesc(meanWeight,clims);
     daspect([1 1 1]);
     title(titleStr);
+    colorbar;
+end
+
+function [normalities, normalitiesP] = calculateNormalityTest(weights, roiNames, type, algorithm)
+    % constant value
+    ROINUM = size(weights,1);
+
+    outfName = ['data/ad-' algorithm '-' type '-roi' num2str(ROINUM) '-normality.mat'];
+    if exist(outfName, 'file')
+        load(outfName);
+    else
+        normalities = nan(ROINUM, ROINUM);
+        normalitiesP = nan(ROINUM, ROINUM);
+        for i=1:ROINUM
+            for j=1:ROINUM
+                if i==j, continue; end
+                x = squeeze(weights(i,j,:));
+                [h, p] = lillietest(x);
+                normalities(i,j) = 1 - h;
+                normalitiesP(i,j) = p;
+            end
+        end
+        save(outfName, 'normalities', 'normalitiesP');
+    end
+    % show normality test result
+    figure; 
+    clims = [0,1];
+    imagesc(normalities,clims);
+    daspect([1 1 1]);
+    title([type '-' algorithm ' normality test result']);
+    colorbar;
+    % normality test p values
+    figure; 
+    clims = [0,1];
+    imagesc(normalitiesP,clims);
+    daspect([1 1 1]);
+    title([type '-' algorithm ' normality test p values']);
     colorbar;
 end
