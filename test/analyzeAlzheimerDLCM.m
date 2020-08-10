@@ -21,9 +21,9 @@ function analyzeAlzheimerDLCM
     [adGCs, meanADGC] = calculateConnectivity(adSignals, roiNames, 'ad', 'gc');
     [mciGCs, meanMCIGC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'gc');
 
-%    [cnTEs, meanCNTE] = calculateConnectivity(cnSignals, roiNames, 'cn', 'te');
-%    [adTEs, meanADTE] = calculateConnectivity(adSignals, roiNames, 'ad', 'te');
-%    [mciTEs, meanMCITE] = calculateConnectivity(mciSignals, roiNames, 'mci', 'te');
+    [cnTEs, meanCNTE] = calculateConnectivity(cnSignals, roiNames, 'cn', 'te');
+    [adTEs, meanADTE] = calculateConnectivity(adSignals, roiNames, 'ad', 'te');
+    [mciTEs, meanMCITE] = calculateConnectivity(mciSignals, roiNames, 'mci', 'te');
 
     [cnDLs, meanCNDL] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm');
     [adDLs, meanADDL] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm');
