@@ -3,7 +3,7 @@ function analyzeAlzheimerDLCM
     base = '../fmri/';
 
     % CONN output path
-    pathesCN = {'ADNI2_65-70_F_CN_nii', 'ADNI2_65-70_M_CN_nii', 'ADNI2_70-75_F_CN_nii', 'ADNI2_70-75_M_CN_nii'};
+    pathesCN = {'ADNI2_65-78_F_CN_nii', 'ADNI2_65-78_M_CN_nii'};
     pathesAD = {'ADNI2_65-75_F_AD_nii', 'ADNI2_65-75_M_AD_nii'};
     pathesMCI = {'ADNI2_65-75_F_MCI_nii', 'ADNI2_65-75_M_MCI_nii'};
 
