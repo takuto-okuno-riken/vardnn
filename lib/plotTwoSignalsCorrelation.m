@@ -9,5 +9,7 @@ function [R] = plotTwoSignalsCorrelation(X, Y)
     s.MarkerEdgeColor = [0.65,0.65,0.65];
     s.MarkerFaceColor = [0.65,0.65,0.65];
     daspect([1 1 1]);
+    X = X(~isnan(X));
+    Y = Y(~isnan(Y));
     R = corr2(X(:),Y(:));
 end

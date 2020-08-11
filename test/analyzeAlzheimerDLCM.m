@@ -28,48 +28,74 @@ function analyzeAlzheimerDLCM
     [cnDLs, meanCNDL, stdCNDL] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm');
     [adDLs, meanADDL, stdADDL] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm');
     [mciDLs, meanMCIDL, stdMCIDL] = calculateConnectivity(mciSignals, roiNames, 'mci', 'dlcm');
+
+    % plot correlation and cos similarity
+    nanx = eye(size(meanADFC,1),size(meanADFC,2));
+    nanx(nanx==1) = NaN;
+%    figure; cnadFCr = plotTwoSignalsCorrelation(meanCNFC+nanx, meanADFC+nanx);
+%    figure; cnadGCr = plotTwoSignalsCorrelation(meanCNGC, meanADGC);
+%    figure; cnadTEr = plotTwoSignalsCorrelation(meanCNTE, meanADTE);
+%    figure; cnadDLr = plotTwoSignalsCorrelation(meanCNDL, meanADDL);
+    Y = zeros(4,1);
+    Y(1) = getCosSimilarity(meanCNFC+nanx, meanADFC+nanx);
+    Y(2) = getCosSimilarity(meanCNGC, meanADGC);
+    Y(3) = getCosSimilarity(meanCNTE, meanADTE);
+    Y(4) = getCosSimilarity(meanCNDL, meanADDL);
+    X = categorical({'FC','GC','TE','DLCM-GC'});
+    figure; bar(X, Y);
+    title('cos similarity between CN and AD by each algorithm');
     
     % normality test
 %{
-    cnFCsNt = calculateNormalityTest(cnFCs, roiNames, 'cn', 'fc');
-    adFCsNt = calculateNormalityTest(adFCs, roiNames, 'ad', 'fc');
-    mciFCsNt = calculateNormalityTest(mciFCs, roiNames, 'mci', 'fc');
+    cnFCsNt = calculateAlzNormalityTest(cnFCs, roiNames, 'cn', 'fc');
+    adFCsNt = calculateAlzNormalityTest(adFCs, roiNames, 'ad', 'fc');
+    mciFCsNt = calculateAlzNormalityTest(mciFCs, roiNames, 'mci', 'fc');
 
-    cnGCsNt = calculateNormalityTest(cnGCs, roiNames, 'cn', 'gc');
-    adGCsNt = calculateNormalityTest(adGCs, roiNames, 'ad', 'gc');
-    mciGCsNt = calculateNormalityTest(mciGCs, roiNames, 'mci', 'gc');
+    cnGCsNt = calculateAlzNormalityTest(cnGCs, roiNames, 'cn', 'gc');
+    adGCsNt = calculateAlzNormalityTest(adGCs, roiNames, 'ad', 'gc');
+    mciGCsNt = calculateAlzNormalityTest(mciGCs, roiNames, 'mci', 'gc');
 
-    cnTEsNt = calculateNormalityTest(cnTEs, roiNames, 'cn', 'te');
-    adTEsNt = calculateNormalityTest(adTEs, roiNames, 'ad', 'te');
-    mciTEsNt = calculateNormalityTest(mciTEs, roiNames, 'mci', 'te');
+    cnTEsNt = calculateAlzNormalityTest(cnTEs, roiNames, 'cn', 'te');
+    adTEsNt = calculateAlzNormalityTest(adTEs, roiNames, 'ad', 'te');
+    mciTEsNt = calculateAlzNormalityTest(mciTEs, roiNames, 'mci', 'te');
 
-    cnDLsNt = calculateNormalityTest(cnDLs, roiNames, 'cn', 'dlcm');
-    adDLsNt = calculateNormalityTest(adDLs, roiNames, 'ad', 'dlcm');
-    mciDLsNt = calculateNormalityTest(mciDLs, roiNames, 'mci', 'dlcm');
+    cnDLsNt = calculateAlzNormalityTest(cnDLs, roiNames, 'cn', 'dlcm');
+    adDLsNt = calculateAlzNormalityTest(adDLs, roiNames, 'ad', 'dlcm');
+    mciDLsNt = calculateAlzNormalityTest(mciDLs, roiNames, 'mci', 'dlcm');
 %}
     % compalizon test (Wilcoxon, Mann?Whitney U test)
-    [cnadFCsUt, cnadFCsUtP, cnadFCsUtP2] = calculateWilcoxonTest(cnFCs, adFCs, roiNames, 'cn', 'ad', 'fc');
-    [cnadGCsUt, cnadGCsUtP, cnadGCsUtP2] = calculateWilcoxonTest(cnGCs, adGCs, roiNames, 'cn', 'ad', 'gc');
-    [cnadTEsUt, cnadTEsUtP, cnadTEsUtP2] = calculateWilcoxonTest(cnTEs, adTEs, roiNames, 'cn', 'ad', 'te');
-    [cnadDLsUt, cnadDLsUtP, cnadDLsUtP2] = calculateWilcoxonTest(cnDLs, adDLs, roiNames, 'cn', 'ad', 'dlcm');
+    [cnadFCsUt, cnadFCsUtP, cnadFCsUtP2] = calculateAlzWilcoxonTest(cnFCs, adFCs, roiNames, 'cn', 'ad', 'fc');
+    [cnadGCsUt, cnadGCsUtP, cnadGCsUtP2] = calculateAlzWilcoxonTest(cnGCs, adGCs, roiNames, 'cn', 'ad', 'gc');
+    [cnadTEsUt, cnadTEsUtP, cnadTEsUtP2] = calculateAlzWilcoxonTest(cnTEs, adTEs, roiNames, 'cn', 'ad', 'te');
+    [cnadDLsUt, cnadDLsUtP, cnadDLsUtP2] = calculateAlzWilcoxonTest(cnDLs, adDLs, roiNames, 'cn', 'ad', 'dlcm');
     
-    % box plot of minimum p-value relation
+    % minimum 50 p-value relation
     topNum = 50;
     sigTh = 2;
+    N = 10;
+
+    fcAUC = zeros(1,N);
+    gcAUC = zeros(1,N);
+    dlAUC = zeros(1,N);
+    teAUC = zeros(1,N);
+    fcROC = cell(N,2);
+    gcROC = cell(N,2);
+    dlROC = cell(N,2);
+    teROC = cell(N,2);
 
     % check sigma of healthy subject
-    [B, I] = boxPlotPValues(cnFCs, adFCs, cnadFCsUtP2, topNum);
-    sigCntCNFC = calcSigmaSubjects(cnFCs, meanADFC, stdADFC, I, topNum, sigTh);
-    sigCntADFC = calcSigmaSubjects(adFCs, meanADFC, stdADFC, I, topNum, sigTh);
-    [B, I] = boxPlotPValues(cnGCs, adGCs, cnadGCsUtP2, topNum);
-    sigCntCNGC = calcSigmaSubjects(cnGCs, meanADGC, stdADGC, I, topNum, sigTh);
-    sigCntADGC = calcSigmaSubjects(adGCs, meanADGC, stdADGC, I, topNum, sigTh);
-    [B, I] = boxPlotPValues(cnTEs, adTEs, cnadTEsUtP2, topNum);
-    sigCntCNTE = calcSigmaSubjects(cnTEs, meanADTE, stdADTE, I, topNum, sigTh);
-    sigCntADTE = calcSigmaSubjects(adTEs, meanADTE, stdADTE, I, topNum, sigTh);
-    [B, I] = boxPlotPValues(cnDLs, adDLs, cnadDLsUtP2, topNum);
-    sigCntCNDL = calcSigmaSubjects(cnDLs, meanADDL, stdADDL, I, topNum, sigTh);
-    sigCntADDL = calcSigmaSubjects(adDLs, meanADDL, stdADDL, I, topNum, sigTh);
+    [B, I] = sortAndPairPValues(cnFCs, adFCs, cnadFCsUtP, topNum);
+    sigCntCNFC = calcAlzSigmaSubjects(cnFCs, meanADFC, stdADFC, I, topNum, sigTh);
+    sigCntADFC = calcAlzSigmaSubjects(adFCs, meanADFC, stdADFC, I, topNum, sigTh);
+    [B, I] = sortAndPairPValues(cnGCs, adGCs, cnadGCsUtP, topNum);
+    sigCntCNGC = calcAlzSigmaSubjects(cnGCs, meanADGC, stdADGC, I, topNum, sigTh);
+    sigCntADGC = calcAlzSigmaSubjects(adGCs, meanADGC, stdADGC, I, topNum, sigTh);
+    [B, I] = sortAndPairPValues(cnTEs, adTEs, cnadTEsUtP, topNum);
+    sigCntCNTE = calcAlzSigmaSubjects(cnTEs, meanADTE, stdADTE, I, topNum, sigTh);
+    sigCntADTE = calcAlzSigmaSubjects(adTEs, meanADTE, stdADTE, I, topNum, sigTh);
+    [B, I] = sortAndPairPValues(cnDLs, adDLs, cnadDLsUtP2, topNum);
+    sigCntCNDL = calcAlzSigmaSubjects(cnDLs, meanADDL, stdADDL, I, topNum, sigTh);
+    sigCntADDL = calcAlzSigmaSubjects(adDLs, meanADDL, stdADDL, I, topNum, sigTh);
     
     % calculate ROC curve
     figure;
@@ -105,7 +131,7 @@ function auc = plotAlzROCcurve(control, target, line, col, width)
     ylabel('True Positive Rate')
 end
 
-function [B, I] = boxPlotPValues(control, target, utestP2, topNum)
+function [B, I, X] = sortAndPairPValues(control, target, utestP2, topNum)
     ROINUM = size(control,1);
     [B, I] = sort(utestP2(:));
     X = [];
@@ -126,11 +152,9 @@ function [B, I] = boxPlotPValues(control, target, utestP2, topNum)
         end
         X = [X, x2, y2];
     end
-    figure;
-    boxplot(X);
 end
 
-function sigCount = calcSigmaSubjects(weights, meanWeights, stdWeights, I, topNum, sigTh)
+function sigCount = calcAlzSigmaSubjects(weights, meanWeights, stdWeights, I, topNum, sigTh)
     ROINUM = size(weights,1);
     subjectNum = size(weights,3);
     X = [];
@@ -157,7 +181,6 @@ function [signals, roiNames] = connData2signalsFile(base, pathes, group)
     ROINUM = 132;
     START = 4;
     ReLOCATE = [1	3	5	7	9	11	13	15	17	19	21	23	25	27	29	31	33	35	37	39	41	43	45	47	50	53	58	60	62	64	66	68	70	72	74	76	78	80	82	84	86	88	90	92	94	96	98	100	102	104	106	108	110	112	114	116	118	120	122	124	49	52	55	56	57	2	4	6	8	10	12	14	16	18	20	22	24	26	28	30	32	34	36	38	40	42	44	46	48	51	54	59	61	63	65	67	69	71	73	75	77	79	81	83	85	87	89	91	93	95	97	99	101	103	105	107	109	111	113	115	117	119	121	123	125	126	127	128	129	130	131	132];
-
 
     % init values
     signals = {};
@@ -305,7 +328,7 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
     colorbar;
 end
 
-function [normalities, normalitiesP] = calculateNormalityTest(weights, roiNames, group, algorithm)
+function [normalities, normalitiesP] = calculateAlzNormalityTest(weights, roiNames, group, algorithm)
     % constant value
     ROINUM = size(weights,1);
 
@@ -343,7 +366,7 @@ function [normalities, normalitiesP] = calculateNormalityTest(weights, roiNames,
 end
 
 
-function [utestH, utestP, utestP2] = calculateWilcoxonTest(control, target, roiNames, controlGroup, targetGroup, algorithm)
+function [utestH, utestP, utestP2] = calculateAlzWilcoxonTest(control, target, roiNames, controlGroup, targetGroup, algorithm)
     % constant value
     ROINUM = size(control,1);
 
