@@ -83,37 +83,41 @@ function analyzeAlzheimerDLCM
     dlROC = cell(N,2);
     teROC = cell(N,2);
 
+    sigCntCN = cell(N,4);
+    sigCntAD = cell(N,4);
     for k=1:N
         % check sigma of healthy subject
         [control, target, meanTarget, stdTarget] = getkFoldDataSet(cnFCs, adFCs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadFCsUtP, topNum);
-        sigCntCN = calcAlzSigmaSubjects(control, meanTarget, stdTarget, I, topNum, sigTh);
-        sigCntAD = calcAlzSigmaSubjects(target, meanTarget, stdTarget, I, topNum, sigTh);
-        [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = calcAlzROCcurve(sigCntCN, sigCntAD, topNum);
+        sigCntCN{k,1} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, I, topNum, sigTh);
+        sigCntAD{k,1} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, I, topNum, sigTh);
+        [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = calcAlzROCcurve(sigCntCN{k,1}, sigCntAD{k,1}, topNum);
 
         [control, target, meanTarget, stdTarget] = getkFoldDataSet(cnGCs, adGCs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadGCsUtP, topNum);
-        sigCntCN = calcAlzSigmaSubjects(control, meanTarget, stdTarget, I, topNum, sigTh);
-        sigCntAD = calcAlzSigmaSubjects(target, meanTarget, stdTarget, I, topNum, sigTh);
-        [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = calcAlzROCcurve(sigCntCN, sigCntAD, topNum);
+        sigCntCN{k,2} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, I, topNum, sigTh);
+        sigCntAD{k,2} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, I, topNum, sigTh);
+        [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = calcAlzROCcurve(sigCntCN{k,2}, sigCntAD{k,2}, topNum);
 
         [control, target, meanTarget, stdTarget] = getkFoldDataSet(cnTEs, adTEs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadTEsUtP, topNum);
-        sigCntCN = calcAlzSigmaSubjects(control, meanTarget, stdTarget, I, topNum, sigTh);
-        sigCntAD = calcAlzSigmaSubjects(target, meanTarget, stdTarget, I, topNum, sigTh);
-        [teROC{k,1}, teROC{k,2}, teAUC(k)] = calcAlzROCcurve(sigCntCN, sigCntAD, topNum);
+        sigCntCN{k,3} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, I, topNum, sigTh);
+        sigCntAD{k,3} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, I, topNum, sigTh);
+        [teROC{k,1}, teROC{k,2}, teAUC(k)] = calcAlzROCcurve(sigCntCN{k,3}, sigCntAD{k,3}, topNum);
 
         [control, target, meanTarget, stdTarget] = getkFoldDataSet(cnDLs, adDLs, k, N);
-        [B, I, X] = sortAndPairPValues(control, target, cnadDLsUtP2, topNum);
-        sigCntCN = calcAlzSigmaSubjects(control, meanTarget, stdTarget, I, topNum, sigTh);
-        sigCntAD = calcAlzSigmaSubjects(target, meanTarget, stdTarget, I, topNum, sigTh);
-        [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = calcAlzROCcurve(sigCntCN, sigCntAD, topNum);
+        [B, I, X] = sortAndPairPValues(control, target, cnadDLsUtP, topNum);
+        sigCntCN{k,4} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, I, topNum, sigTh);
+        sigCntAD{k,4} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, I, topNum, sigTh);
+        [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = calcAlzROCcurve(sigCntCN{k,4}, sigCntAD{k,4}, topNum);
     end
     figure; boxplot(X);
 
     % save result
     fname = ['results/ad-cn-ad-roi' num2str(132) '-result.mat'];
-    save(fname, 'cosSim', 'fcAUC','gcAUC','dlAUC','teAUC', 'fcROC','gcROC','dlROC','teROC');
+    save(fname, 'cosSim', 'fcAUC','gcAUC','dlAUC','teAUC', 'fcROC','gcROC','dlROC','teROC', 'sigCntCN', 'sigCntAD');
+    mean(dlAUC) % show result AUC
+    mean(fcAUC) % show result AUC
 
     % plot ROC curve
     figure;
@@ -138,10 +142,18 @@ end
 
 function [control, target, meanTarget, stdTarget] = getkFoldDataSet(orgControl, orgTarget, k, N)
     un = floor(size(orgControl,3) / N);
-    control = orgControl(:,:,(k-1)*un+1:k*un);
+    st = (k-1)*un+1;
+    ed = k*un;
+    if k==N, ed = size(orgControl,3); end
+    control = orgControl(:,:,st:ed);
     un = floor(size(orgTarget,3) / N);
-    target = orgTarget(:,:,(k-1)*un+1:k*un);
-    orgTarget(:,:,(k-1)*un+1:k*un) = [];
+    st = (k-1)*un+1;
+    ed = k*un;
+    if k==N, ed = size(orgTarget,3); end
+    target = orgTarget(:,:,st:ed);
+    if N > 1
+        orgTarget(:,:,st:ed) = [];
+    end
     meanTarget = nanmean(orgTarget, 3);
     stdTarget = nanstd(orgTarget, 1, 3);
 end
@@ -225,8 +237,9 @@ function [signals, roiNames] = connData2signalsFile(base, pathes, group)
     for k=1:length(pathes)
         % load experimental signals
         errorCount = 0;
-        subjectNum = 1;
-        while errorCount < 2
+        subjectNum = 0;
+        while errorCount < 3
+            subjectNum = subjectNum + 1;
             sbjfile = sprintf('ROI_Subject%03d_Session001.mat', subjectNum);
             expfile = [base pathes{k} '/conn_project01/data/' sbjfile];
 
@@ -237,7 +250,7 @@ function [signals, roiNames] = connData2signalsFile(base, pathes, group)
             end
             % load conn ROI signal file
             load(expfile);
-            subjectNum = subjectNum + 1;
+            errorCount = 0;
 
             seqLen = size(data{1,START},1);
             si = zeros(ROINUM,seqLen);
