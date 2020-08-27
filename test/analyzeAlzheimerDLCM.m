@@ -46,7 +46,7 @@ function analyzeAlzheimerDLCM
     title('cos similarity between CN and AD by each algorithm');
     
     % normality test
-%{
+%%{
     cnFCsNt = calculateAlzNormalityTest(cnFCs, roiNames, 'cn', 'fc');
     adFCsNt = calculateAlzNormalityTest(adFCs, roiNames, 'ad', 'fc');
     mciFCsNt = calculateAlzNormalityTest(mciFCs, roiNames, 'mci', 'fc');
@@ -62,7 +62,7 @@ function analyzeAlzheimerDLCM
     cnDLsNt = calculateAlzNormalityTest(cnDLs, roiNames, 'cn', 'dlcm');
     adDLsNt = calculateAlzNormalityTest(adDLs, roiNames, 'ad', 'dlcm');
     mciDLsNt = calculateAlzNormalityTest(mciDLs, roiNames, 'mci', 'dlcm');
-%}
+%%}
     % compalizon test (Wilcoxon, Mann?Whitney U test)
     [cnadFCsUt, cnadFCsUtP, cnadFCsUtP2] = calculateAlzWilcoxonTest(cnFCs, adFCs, roiNames, 'cn', 'ad', 'fc');
     [cnadGCsUt, cnadGCsUtP, cnadGCsUtP2] = calculateAlzWilcoxonTest(cnGCs, adGCs, roiNames, 'cn', 'ad', 'gc');
@@ -87,28 +87,28 @@ function analyzeAlzheimerDLCM
     sigCntAD = cell(N,4);
     for k=1:N
         % check sigma of healthy subject
-        [control, target, meanTarget, stdTarget] = getkFoldDataSet(cnFCs, adFCs, k, N);
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnFCs, adFCs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadFCsUtP, topNum);
-        sigCntCN{k,1} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, I, topNum, sigTh);
-        sigCntAD{k,1} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, I, topNum, sigTh);
+        sigCntCN{k,1} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntAD{k,1} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = calcAlzROCcurve(sigCntCN{k,1}, sigCntAD{k,1}, topNum);
 
-        [control, target, meanTarget, stdTarget] = getkFoldDataSet(cnGCs, adGCs, k, N);
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnGCs, adGCs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadGCsUtP, topNum);
-        sigCntCN{k,2} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, I, topNum, sigTh);
-        sigCntAD{k,2} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, I, topNum, sigTh);
+        sigCntCN{k,2} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntAD{k,2} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = calcAlzROCcurve(sigCntCN{k,2}, sigCntAD{k,2}, topNum);
 
-        [control, target, meanTarget, stdTarget] = getkFoldDataSet(cnTEs, adTEs, k, N);
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnTEs, adTEs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadTEsUtP, topNum);
-        sigCntCN{k,3} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, I, topNum, sigTh);
-        sigCntAD{k,3} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, I, topNum, sigTh);
+        sigCntCN{k,3} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntAD{k,3} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [teROC{k,1}, teROC{k,2}, teAUC(k)] = calcAlzROCcurve(sigCntCN{k,3}, sigCntAD{k,3}, topNum);
 
-        [control, target, meanTarget, stdTarget] = getkFoldDataSet(cnDLs, adDLs, k, N);
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDLs, adDLs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadDLsUtP, topNum);
-        sigCntCN{k,4} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, I, topNum, sigTh);
-        sigCntAD{k,4} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, I, topNum, sigTh);
+        sigCntCN{k,4} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntAD{k,4} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = calcAlzROCcurve(sigCntCN{k,4}, sigCntAD{k,4}, topNum);
     end
     figure; boxplot(X);
@@ -140,7 +140,7 @@ function analyzeAlzheimerDLCM
     ylabel('True Positive Rate')
 end
 
-function [control, target, meanTarget, stdTarget] = getkFoldDataSet(orgControl, orgTarget, k, N)
+function [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(orgControl, orgTarget, k, N)
     un = floor(size(orgControl,3) / N);
     st = (k-1)*un+1;
     ed = k*un;
@@ -156,6 +156,7 @@ function [control, target, meanTarget, stdTarget] = getkFoldDataSet(orgControl, 
     end
     meanTarget = nanmean(orgTarget, 3);
     stdTarget = nanstd(orgTarget, 1, 3);
+    meanControl = nanmean(orgControl, 3);
 end
 
 function [x, y, auc] = calcAlzROCcurve(control, target, start)
@@ -194,20 +195,31 @@ function [B, I, X] = sortAndPairPValues(control, target, utestP2, topNum)
     end
 end
 
-function sigCount = calcAlzSigmaSubjects(weights, meanWeights, stdWeights, I, topNum, sigTh)
+function sigCount = calcAlzSigmaSubjects(weights, meanWeights, stdWeights, meanControl, I, topNum, sigTh)
     ROINUM = size(weights,1);
     subjectNum = size(weights,3);
     X = [];
     sigCount = [];
+    isControlBig = meanControl - meanWeights;
     for n=1:subjectNum
         w2 = weights(:,:,n);
         w2 = w2 - meanWeights;
         sig = abs(w2 ./ stdWeights);
+%        sig = w2 ./ stdWeights;
         s = nan(topNum, 1);
         for k=1:topNum
             i = floor(mod(I(k)-1,ROINUM) + 1);
             j = floor((I(k)-1)/ROINUM + 1);
             s(k) = sig(i, j);
+%{
+            s2 = sig(i, j);
+            if s2 < 0 && isControlBig(i, j) > 0
+                s2 = 0;
+            elseif s2 > 0 && isControlBig(i, j) < 0
+                s2 = 0;
+            end
+            s(k) = abs(s2);
+%}
         end
         X = [X, s];
         sigCount = [sigCount, length(find(s>=sigTh))];
@@ -390,15 +402,20 @@ function [normalities, normalitiesP] = calculateAlzNormalityTest(weights, roiNam
         end
         save(outfName, 'normalities', 'normalitiesP', 'roiNames');
     end
+
+    load('test/colormap.mat')
     % show normality test result
     figure; 
+    colormap(hvalmap);
     clims = [0,1];
     imagesc(normalities,clims);
     daspect([1 1 1]);
     title([group '-' algorithm ' normality test result']);
     colorbar;
     % normality test p values
-    figure; 
+    normalitiesP(isnan(normalitiesP)) = 1;
+    figure;
+    colormap(pvalmap);
     clims = [0,0.5];
     imagesc(normalitiesP,clims);
     daspect([1 1 1]);
@@ -448,15 +465,19 @@ function [utestH, utestP, utestP2] = calculateAlzWilcoxonTest(control, target, r
     countTarget = nansum(utestH,2);
     save(outfName, 'utestH', 'utestP', 'utestP2', 'roiNames', 'countSource', 'countTarget');
 
+    load('test/colormap.mat')
     % U test result
     figure; 
+    colormap(hvalmap);
     clims = [0,1];
     imagesc(utestH,clims);
     daspect([1 1 1]);
     title([controlGroup '-' targetGroup ' : ' algorithm ' : u test result']);
     colorbar;
     % U test p values
-    figure; 
+    utestP(isnan(utestP)) = 1;
+    figure;
+    colormap(pvalmap);
     clims = [0,1];
     imagesc(utestP, clims);
     daspect([1 1 1]);
