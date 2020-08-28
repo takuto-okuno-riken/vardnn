@@ -72,7 +72,7 @@ function performanceCheckDCMy2DLCM
         else
             ticHdl = tic;
             % init DLCM network
-            netDLCM = initDlcmNetwork(si, inSignal, inControl);
+            netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
 
             % set training options
             maxEpochs = 1000;
@@ -91,9 +91,9 @@ function performanceCheckDCMy2DLCM
 %                'GradientThresholdMethod', 'global-l2norm' , ...
 
             % training DLCM network
-            netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+            netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
             % calc dlcm-gc
-            mat = calcDlcmGCI(si, inSignal, inControl, netDLCM);
+            mat = calcDlcmGCI(si, inSignal, [], inControl, netDLCM);
             time = toc(ticHdl);
             disp(['finish calculating DLCM-GC! t = ' num2str(time) 's']);
 
