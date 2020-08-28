@@ -44,7 +44,7 @@ function performanceCheckVariHidden
             netDLCM = createDlcmNetwork(nodeNum, inputNum, hdnNums);
 
             % training DLCM network
-            netDLCM = trainDlcmNetwork(si, [], [], netDLCM, options);
+            netDLCM = trainDlcmNetwork(si, [], [], [], netDLCM, options);
             save(dlcmFile, 'netDLCM');
         end
     end

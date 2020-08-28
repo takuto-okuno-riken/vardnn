@@ -90,7 +90,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 %            'Plots','training-progress');
 
     disp('initial state before training');
-    netDLCM = trainDlcmNetwork(si, [], [], netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, [], [], [], netDLCM, options);
     [t,mae,maeerr] = plotNodeSignals(nodeNum,si,inSignal,netDLCM);
     disp(['t=' num2str(t) ', mae=' num2str(mae)]);
     %}
@@ -107,12 +107,12 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 %            'Plots','training-progress');
 
     disp('start training');
-    netDLCM = trainDlcmNetwork(si, [], [], netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, [], [], [], netDLCM, options);
     dlcmFile = ['results/net-pat-' num2str(idx) '.mat'];
     save(dlcmFile, 'netDLCM');
 
     % show signals after training
-    figure; [S, t,mae,maeerr] = plotPredictSignals(si,[],[],netDLCM);
+    figure; [S, t,mae,maeerr] = plotPredictSignals(si,[],[],[],netDLCM);
     disp(['t=' num2str(t) ', mae=' num2str(mae)]);
 
     % show original signal FC
@@ -127,7 +127,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 %    figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
     figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
     % show DLCM-GC
-    figure; dlGC = plotDlcmGCI(si, [], [], netDLCM);
+    figure; dlGC = plotDlcmGCI(si, [], [], [], netDLCM);
 
     % DEM Structure: create random inputs
     % -------------------------------------------------------------------------

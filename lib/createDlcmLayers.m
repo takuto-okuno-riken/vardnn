@@ -4,21 +4,23 @@
 %  nodeNum        DLCM node number
 %  inputNum       DLCM exogenous input number
 %  hiddenNums     hidden layer (next of input) neuron numbers of single unit (vector)
+%  nNodeControl   node control matrix (1 x node) (optional)
 %  nodeInControl  exogenous input control (1 x exogenous input) (optional)
 %  initialWeight  weight initialize matrix of hidden1 layer (optional)
 %  initialBias    bias initialize matrix of hidden1 layer (optional)
 
-function layers = createDlcmLayers(nodeNum, inputNum, hiddenNums, nodeInControl, initWeightFunc, initWeightParam, initBias, currentNode)
-    if nargin < 6, initWeightFunc = []; initWeightParam = []; initBias = []; currentNode = 0; end
-    if nargin < 5, nodeInControl = []; end
+function layers = createDlcmLayers(nodeNum, inputNum, hiddenNums, nNodeControl, nodeInControl, initWeightFunc, initWeightParam, initBias, currentNode)
+    if nargin < 7, initWeightFunc = []; initWeightParam = []; initBias = []; currentNode = 0; end
+    if nargin < 6, nodeInControl = []; end
+    if nargin < 5, nNodeControl = []; end
 
     % init first fully connected layer
     if isempty(initWeightFunc) && isempty(nodeInControl) && isempty(initBias)
         firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
-            'WeightsInitializer', @(sz) weightInitializer(sz, nodeInControl, initWeightFunc, initWeightParam, currentNode));
+            'WeightsInitializer', @(sz) weightInitializer(sz, nNodeControl, nodeInControl, initWeightFunc, initWeightParam, currentNode));
     else
         firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
-            'WeightsInitializer', @(sz) weightInitializer(sz, nodeInControl, initWeightFunc, initWeightParam, currentNode), ...
+            'WeightsInitializer', @(sz) weightInitializer(sz, nNodeControl, nodeInControl, initWeightFunc, initWeightParam, currentNode), ...
             'Bias', initBias);
     end
     
@@ -60,7 +62,7 @@ end
 %%
 % weight initializer
 % Returns He distribution + user specified weight
-function weights = weightInitializer(sz, nodeInControl, initWeightFunc, initWeightParam, currentNode)
+function weights = weightInitializer(sz, nNodeControl, nodeInControl, initWeightFunc, initWeightParam, currentNode)
     global dlcmInitWeights;
 
     if ~isempty(initWeightFunc)
@@ -72,6 +74,11 @@ function weights = weightInitializer(sz, nodeInControl, initWeightFunc, initWeig
 
         varWeights = 2 / ((1 + scale^2) * numIn);
         weights = randn(sz) * sqrt(varWeights);
+    end
+    if ~isempty(nNodeControl)
+        nodeNum = length(nNodeControl);
+        filter = repmat(nNodeControl, size(weights,1), 1);
+        weights(:, 1:nodeNum) = weights(:, 1:nodeNum) .* filter;
     end
     if ~isempty(nodeInControl)
         nodeNum = sz(2) - length(nodeInControl);

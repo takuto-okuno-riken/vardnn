@@ -36,17 +36,17 @@ function testSimulationMarmo
         load(dlcmFile);
     else
         % init DLCM network
-        netDLCM = initDlcmNetwork(si, inSignal, inControl);
+        netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
         % training DLCM network
-        netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+        netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
         % recover training 
-        [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+        [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
         [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);        save(dlcmFile, 'netDLCM');
     end
     
     % simulate DLCM network with 1st frame & exogenous input signal
-    [S, time] = simulateDlcmNetwork(si, inSignal, inControl, netDLCM);
+    [S, time] = simulateDlcmNetwork(si, inSignal, [], inControl, netDLCM);
 
     figure; [mae, maeerr] = plotTwoSignals(si, S);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
@@ -58,6 +58,6 @@ function testSimulationMarmo
     figure; gcI = plotPairwiseGCI(si,3,0);
 %    figure; gcI = plotPairwiseGCI(S,3,0);
     % show DLCM-GC
-    figure; dlGC = plotDlcmGCI(si, inSignal, inControl, netDLCM, 0);
+    figure; dlGC = plotDlcmGCI(si, inSignal, [], inControl, netDLCM, 0);
 end
 

@@ -84,7 +84,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, inSignal, inControl, idx)
     sigLen = size(si,2);
 
     % layer parameters
-    netDLCM = initDlcmNetwork(si, inSignal, inControl);
+    netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
 
     % show signals before training
     %{
@@ -100,7 +100,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, inSignal, inControl, idx)
 %            'Plots','training-progress');
 
     disp('initial state before training');
-    netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
     [t,mae,maeerr] = plotNodeSignals(nodeNum,si,inSignal,netDLCM);
     disp(['t=' num2str(t) ', mae=' num2str(mae)]);
     %}
@@ -117,12 +117,12 @@ function [FC, dlEC, gcI] = checkingPattern(si, inSignal, inControl, idx)
 %            'Plots','training-progress');
 
     disp('start training');
-    netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
-    dlcmFile = ['results/net-pat-' num2str(idx) '.mat'];
+    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+    dlcmFile = ['results/net-pat-in' num2str(idx) '.mat'];
     save(dlcmFile, 'netDLCM');
 
     % show signals after training
-    [S, t,mae,maeerr] = plotPredictSignals(si,inSignal,inControl,netDLCM);
+    [S, t,mae,maeerr] = plotPredictSignals(si,inSignal,[],inControl,netDLCM);
     disp(['t=' num2str(t) ', mae=' num2str(mae)]);
 
     siWithInput = [si; inSignal];

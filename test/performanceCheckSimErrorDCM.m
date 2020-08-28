@@ -80,7 +80,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx)
             load(dlcmFile);
         else
             % init DLCM network
-            netDLCM = initDlcmNetwork(si, inSignal, inControl);
+            netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
 
             % set training options
             maxEpochs = 1000;
@@ -98,9 +98,9 @@ function checkingPattern(si, inSignal, inControl, winLen, idx)
         %            'Plots','training-progress');
 
             % training DLCM network
-            netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+            netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
             % recover training 
-            [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+            [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
             disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
             %plotDlcmWeight(netDLCM);
@@ -123,7 +123,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx)
             sInSignal = inSignal(:,st:en);
             % do simulation
             if isempty(allS{i})
-                [S, time] = simulateDlcmNetwork(wSi, sInSignal, inControl, netDLCM);
+                [S, time] = simulateDlcmNetwork(wSi, sInSignal, [], inControl, netDLCM);
                 allS{i,1} = S; simTime(i) = time;
             else
                 S = allS{i,1}; time = simTime(i);

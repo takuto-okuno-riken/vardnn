@@ -183,7 +183,7 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     sigLen = size(si,2);
     if isempty(netDLCM)
         % layer parameters
-        netDLCM = initDlcmNetwork(si, inSignal, inControl);
+        netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
         % training DLCM network
         maxEpochs = 1000;
         miniBatchSize = ceil(sigLen / 3);
@@ -198,14 +198,14 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     %            'Plots','training-progress');
 
         disp('start training');
-        netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+        netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
         % recoverty training
-        [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+        [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
         save(dlcmFile, 'netDLCM', 'pP', 'M', 'U', 'N','T','n','TR', 'y2', 'u2', 'si', 'A', 'Uus', 'RMS', 'CSD');
     end
 
     % show signals after training
-    figure; [S, t,mae,maeerr] = plotPredictSignals(si,inSignal,inControl,netDLCM);
+    figure; [S, t,mae,maeerr] = plotPredictSignals(si,inSignal,[],inControl,netDLCM);
     disp(['t=' num2str(t) ', mae=' num2str(mae)]);
 
     % show original signal FC
@@ -220,7 +220,7 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 %    figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
 %    figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
     % show DLCM-GC
-    figure; dlGC = plotDlcmGCI(si, inSignal, inControl, netDLCM, 0);
+    figure; dlGC = plotDlcmGCI(si, inSignal, [], inControl, netDLCM, 0);
 
 end
 

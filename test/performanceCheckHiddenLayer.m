@@ -42,7 +42,7 @@ function performanceCheckHiddenLayer
             netDLCM = createDlcmNetwork(nodeNum, inputNum, hiddenNums);
 
             % training DLCM network
-            netDLCM = trainDlcmNetwork(si, inSignal, [], netDLCM, options);
+            netDLCM = trainDlcmNetwork(si, inSignal, [], [], netDLCM, options);
             save(dlcmFile, 'netDLCM');
         end
     end

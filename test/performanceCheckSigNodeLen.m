@@ -43,7 +43,7 @@ function performanceCheckSignalLen
             netDLCM = createDlcmNetwork(nodeNum, inputNum, hiddenNums);
 
             % training DLCM network
-            netDLCM = trainDlcmNetwork(si, [], [], netDLCM, options);
+            netDLCM = trainDlcmNetwork(si, [], [], [], netDLCM, options);
             save(dlcmFile, 'netDLCM');
         end
     end

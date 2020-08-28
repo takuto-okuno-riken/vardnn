@@ -26,9 +26,9 @@ function testInputSignal
     %% test pattern 1 -- no input signal (default weight initializer)
 %%{
     % init DLCM network
-    netDLCM = initDlcmNetwork(si, []);
+    netDLCM = initDlcmNetwork(si);
     % training DLCM network
-    netDLCM = trainDlcmNetwork(si, [], [], netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, [], [], [], netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['1) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 %%}
@@ -37,7 +37,7 @@ function testInputSignal
     % init DLCM network
     netDLCM = initDlcmNetwork(si, inSignal, []);
     % training DLCM network
-    netDLCM = trainDlcmNetwork(si, inSignal, [], netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, inSignal, [], [], netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['2) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotDlcmWeight(netDLCM);
@@ -47,9 +47,9 @@ function testInputSignal
     % control is all zero
     inControl = logical(zeros(nodeNum,inputNum));
     % init DLCM network
-    netDLCM = initDlcmNetwork(si, inSignal, inControl);
+    netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
     % training DLCM network
-    netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotDlcmWeight(netDLCM);
@@ -62,9 +62,9 @@ function testInputSignal
         inControl(i, mod(i-1,4)+1) = 1;
     end
     % init DLCM network
-    netDLCM = initDlcmNetwork(si, inSignal, inControl);
+    netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
     % training DLCM network
-    netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotDlcmWeight(netDLCM);
@@ -78,9 +78,9 @@ function testInputSignal
         inControl(i, mod(i+1,4)+1) = 1;
     end
     % init DLCM network
-    netDLCM = initDlcmNetwork(si, inSignal, inControl);
+    netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
     % training DLCM network
-    netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotDlcmWeight(netDLCM);
@@ -90,9 +90,9 @@ function testInputSignal
     % control one by one
     inControl = logical(ones(nodeNum,inputNum));
     % init DLCM network
-    netDLCM = initDlcmNetwork(si, inSignal, inControl);
+    netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
     % training DLCM network
-    netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotDlcmWeight(netDLCM);
@@ -108,9 +108,9 @@ function testInputSignal
     % estimate neuron number of hidden layers
     hiddenNums = estimateHiddenNeurons(nodeNum, sigLen);
     % layer parameters
-    netDLCM = createDlcmNetwork(nodeNum, inputNum, hiddenNums, inControl, []);
+    netDLCM = createDlcmNetwork(nodeNum, inputNum, hiddenNums, [], inControl, []);
     % training DLCM network
-    netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotDlcmWeight(netDLCM);

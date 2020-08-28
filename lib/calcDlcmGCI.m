@@ -2,12 +2,13 @@
 % Caluclate DLCM Granger Causality
 % returns DLCM Granger causality index matrix (gcI) and AIC, BIC (of node) vector
 % input:
-%  X          multivariate time series matrix (node x time series)
-%  inSignal   multivariate time series matrix (exogenous input x time series) (optional)
-%  inControl  exogenous input control matrix for each node (node x exogenous input) (optional)
-%  netDLCM    trained DLCM network
+%  X            multivariate time series matrix (node x time series)
+%  inSignal     multivariate time series matrix (exogenous input x time series) (optional)
+%  nodeControl  node control matrix (node x node) (optional)
+%  inControl    exogenous input control matrix for each node (node x exogenous input) (optional)
+%  netDLCM      trained DLCM network
 
-function [gcI, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, inControl, netDLCM)
+function [gcI, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM)
     nodeNum = size(X,1);
     sigLen = size(X,2);
     
@@ -24,6 +25,10 @@ function [gcI, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, inControl, netDLCM)
     gcI = nan(nodeNum, nodeNum);
     for i=1:nodeNum
         nodeInput = nodeInputOrg;
+        if ~isempty(nodeControl)
+            filter = nodeControl(i,:).';
+            nodeInput(1:nodeNum,1) = nodeInput(1:nodeNum,1) .* filter;
+        end
         if ~isempty(inControl)
             filter = inControl(i,:).';
             nodeInput(nodeNum+1:end,1) = nodeInput(nodeNum+1:end,1) .* filter;

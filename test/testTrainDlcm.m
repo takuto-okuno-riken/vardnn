@@ -43,7 +43,7 @@ function testTrainDlcm
             'LearnRateDropFactor',0.5, ...
 %}
         % training DLCM network
-        netDLCM = trainDlcmNetwork(si, [], [], netDLCM, options);
+        netDLCM = trainDlcmNetwork(si, [], [], [], netDLCM, options);
         save(dlcmFile, 'netDLCM');
     end
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
@@ -81,7 +81,7 @@ function testTrainDlcm
     FC = plotFunctionalConnectivity(si);
 
     % test & show predicted
-    [S, time, mae, maeerr] = plotPredictSignals(si, [], [], netDLCM, 0);
+    [S, time, mae, maeerr] = plotPredictSignals(si, [], [], [], netDLCM, 0);
     
     % show functional conectivity of predicted node signals
     FC = plotFunctionalConnectivity(S);

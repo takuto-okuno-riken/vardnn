@@ -52,7 +52,7 @@ function performanceCheckDCMy2DLCM
             load(dlcmFile);
         else
             % init DLCM network
-            netDLCM = initDlcmNetwork(si, inSignal, inControl);
+            netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
 
             % set training options
             maxEpochs = 1000;
@@ -71,9 +71,9 @@ function performanceCheckDCMy2DLCM
 %                'GradientThresholdMethod', 'global-l2norm' , ...
 
             % training DLCM network
-            netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+            netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
             % recover training 
-            [netDLCM, time, mae] = recoveryTrainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+            [netDLCM, time, mae] = recoveryTrainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
             disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 
@@ -85,7 +85,7 @@ function performanceCheckDCMy2DLCM
         end
         
         % simulate DLCM network with 1st frame & exogenous input signal
-        [S, time] = simulateDlcmNetwork(si, inSignal, inControl, netDLCM);
+        [S, time] = simulateDlcmNetwork(si, inSignal, [], inControl, netDLCM);
 
         % show original & simulated signal correlation        
         figure; DLCorr(k,1) = plotTwoSignalsCorrelation(S, si);

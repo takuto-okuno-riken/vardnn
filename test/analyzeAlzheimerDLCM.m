@@ -314,7 +314,7 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
                     sigLen = size(si,2);
                     inSignal = rand(ROINUM, sigLen);
                     inControl = eye(ROINUM);
-                    netDLCM = initDlcmNetwork(si, inSignal, inControl); 
+                    netDLCM = initDlcmNetwork(si, inSignal, [], inControl); 
                     % training DLCM network
                     maxEpochs = 1000;
                     miniBatchSize = ceil(sigLen / 3);
@@ -329,11 +329,11 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
                 %            'Plots','training-progress');
 
                     disp('start training');
-                    netDLCM = trainDlcmNetwork(si, inSignal, inControl, netDLCM, options);
+                    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
                     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
                     disp(['end training : rsme=' num2str(rsme)]);
                     % calc dlcm-gc
-                    mat = calcDlcmGCI(si, inSignal, inControl, netDLCM);
+                    mat = calcDlcmGCI(si, inSignal, [], inControl, netDLCM);
                     
                     save(dlcmName, 'netDLCM', 'si', 'inSignal', 'inControl', 'mat', 'sig', 'm', 'maxsi', 'minsi');
                 end

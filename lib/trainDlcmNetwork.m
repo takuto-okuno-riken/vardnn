@@ -3,11 +3,12 @@
 % input :
 %  X             multivariate time series matrix (node x time series)
 %  inSignal      multivariate time series matrix (exogenous input x time series) (optional)
-%  inControl     exogenous input control matrix for each node (node x exogenous input)
+%  nodeControl   node control matrix (node x node) (optional)
+%  inControl     exogenous input control matrix for each node (node x exogenous input) (optional)
 %  net           DLCM network structure
 %  options       training options
 
-function trainedNet = trainDlcmNetwork(X, inSignal, inControl, net, options)
+function trainedNet = trainDlcmNetwork(X, inSignal, nodeControl, inControl, net, options)
     global dlcmInitWeights;
     nodeNum = length(net.nodeLayers);
     trainedNet = net;
@@ -24,6 +25,10 @@ function trainedNet = trainDlcmNetwork(X, inSignal, inControl, net, options)
         disp(['training node ' num2str(i)]);
         nodeTeach = X(i,2:end);
         nodeInput = nodeInputOrg;
+        if ~isempty(nodeControl)
+            filter = repmat(nodeControl(i,:).', 1, size(nodeControl,2));
+            nodeInput(1:nodeNum,:) = nodeInput(1:nodeNum,:) .* filter;
+        end
         if ~isempty(inControl)
             filter = repmat(inControl(i,:).', 1, size(nodeInput,2));
             nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
