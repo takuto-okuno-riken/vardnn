@@ -19,7 +19,7 @@ function [TE, nodeAIC, nodeBIC] = plotLinueTE(X, lag, range, rowcut)
         lag = 3;
     end
     clims = [0, range];
-    [TE, nodeAIC, nodeBIC] = calcLinueTE(X, lag);
+    [TE, ~, ~, ~, nodeAIC, nodeBIC] = calcLinueTE(X, lag);
     if range <= 0
         sigma = std(TE(:),'omitnan');
         avg = mean(TE(:),'omitnan');
