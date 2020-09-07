@@ -1,6 +1,6 @@
 function performanceCheckNodePatternTVB2
     node_nums = [11,22,33,44,55,66];
-    num_scan = 53;
+    num_scan = 52;
     if num_scan == 47 % deco's 66 node. weight add. DLCM-GC show highest AUC, others so so.
         Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
     elseif num_scan == 48 % deco's 66 node. original. FC so so. GC and DLCM-GC show low AUC
@@ -17,11 +17,11 @@ function performanceCheckNodePatternTVB2
         Gths = [0.02, 0.01, 0.01, 0.01, 0.01, 0.01];
     elseif num_scan == 51  % oh's mouse 98 node. original.
         node_nums = [16,32,48,64,80,98];
-        Gths = [0.04, 0.05, 0.05, 0.05, 0.05, 0.05];
-    elseif num_scan == 52  % oh's mouse 98 node. weight add. 
+        Gths = [0.05, 0.05, 0.05, 0.05, 0.05, 0.05];
+    elseif num_scan == 52  % oh's mouse 98 node. density around 0.15. weight add.
         node_nums = [16,32,48,64,80,98];
         Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
-    elseif num_scan == 53  % oh's mouse 98 node. weight add. 
+    elseif num_scan == 53  % oh's mouse 98 node. density around 0.23. weight add.
         node_nums = [16,32,48,64,80,98];
         Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
     end
