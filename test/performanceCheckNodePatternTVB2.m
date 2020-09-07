@@ -1,24 +1,32 @@
-function performanceCheckNodePatternTVB
-    %node_nums = [16, 16, 16, 32, 32, 32];
-%    node_nums = [16, 16, 16, 16, 16, 16];
-%    node_nums = [32, 32, 32, 32, 32, 32];
-%    Gths = [0, 0, 0, 0, 0, 0];
-    % test node number & density (42, 4020)
-    %node_nums = [16, 16, 32, 32, 76];
-    %Gths = [0.2, 0.2, 0.2, 0.2, 0.2];
-    %num_scan = 4020;
-    % test node scale effective (same density) (45, 4050)
-    node_nums = [16, 32, 48, 64, 80, 96];
-    Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
-    num_scan = 45;
+function performanceCheckNodePatternTVB2
+    node_nums = [11,22,33,44,55,66];
+    num_scan = 52;
+    if num_scan == 47 % deco's 66 node. weight add. DLCM-GC show highest AUC, others so so.
+        Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
+    elseif num_scan == 48 % deco's 66 node. original. FC so so. GC and DLCM-GC show low AUC
+        Gths = [0.001, 0.001, 0.001, 0.001, 0.001, 0.001];
+    elseif num_scan == 2048 % deco's 66 node. original TR=2 BOLD / FC ok. others bad.
+        Gths = [0.001, 0.001, 0.001, 0.001, 0.001, 0.001];
+    elseif num_scan == 3048 % deco's 66 node. original TR=0.1 BOLD / FC and DLCM-GC so so.
+        Gths = [0.001, 0.001, 0.001, 0.001, 0.001, 0.001];
+    elseif num_scan == 2948 % deco's 66 node. original TR=0.1 BOLD / all bad.
+        Gths = [0.001, 0.001, 0.001, 0.001, 0.001, 0.001];
+    elseif num_scan == 3148 % deco's 66 node. original TR=0.2 BOLD / all bad.
+        Gths = [0.001, 0.001, 0.001, 0.001, 0.001, 0.001];
+    elseif num_scan == 50  % TVB's 66 node. 
+        Gths = [0.02, 0.01, 0.01, 0.01, 0.01, 0.01];
+    elseif num_scan == 51  % oh's mouse 98 node. original.
+        node_nums = [16,32,48,64,80,98];
+        Gths = [0.04, 0.05, 0.05, 0.05, 0.05, 0.05];
+    elseif num_scan == 52  % oh's mouse 98 node. weight add. 
+        node_nums = [16,32,48,64,80,98];
+        Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
+    end
     % test sparse and full density
-    %node_nums = [8, 8, 8, 8, 8, 8, 8, 8];
-    %Gths = [0, 0, 0, 0, 0.2, 0.2, 0.2, 0.2];
-    %num_scan = ??;
     hz = 64;
     N = 8;
 
-    for i=5:length(node_nums)
+    for i=1:length(node_nums)
         checkingPattern(node_nums(i), num_scan, hz, Gths(i), N, i);
     end
 end
@@ -43,12 +51,12 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     origf = figure;
     origSigf = figure;
 
-    rnnTrial = 8;
     lag = 3;
 
     for k=1:N
         tvbFile = ['data/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-' num2str(k) '.mat'];
         load(tvbFile);
+        density = length(find(weights>Gth)) / (node_num * (node_num-1));
 
         [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(si);
         [uu, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
@@ -119,7 +127,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of DLCM-GC (pat=' num2str(i) ')']);
 %%}
-%%{
+%{
         % linue TE result
         linueFile = ['results/tvb-pat-linue/linue_MultivAnalysis_tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-' num2str(k) '-' num2str(lag) '.mat'];
         load(linueFile);
@@ -128,7 +136,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         % show ROC curve of TE(LIN UE)
         figure(linueRf); hold on; [linueROC{k,1}, linueROC{k,2}, linueAUC(k)] = plotROCcurve(A, weights, 100, 1, Gth); hold off;        
         title(['ROC curve of LINUE-TE (pat=' num2str(i) ')']);
-%%}
+%}
     end
     % show result AUC
     disp(['FC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(fcAUC))]);
