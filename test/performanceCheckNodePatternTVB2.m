@@ -1,6 +1,6 @@
 function performanceCheckNodePatternTVB2
     node_nums = [11,22,33,44,55,66];
-    num_scan = 52;
+    num_scan = 55;
     if num_scan == 47 % deco's 66 node. weight add. DLCM-GC show highest AUC, others so so.
         Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
     elseif num_scan == 48 % deco's 66 node. original. FC so so. GC and DLCM-GC show low AUC
@@ -24,6 +24,12 @@ function performanceCheckNodePatternTVB2
     elseif num_scan == 53  % oh's mouse 98 node. density around 0.23. weight add.
         node_nums = [16,32,48,64,80,98];
         Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
+    elseif num_scan == 54  % oh's mouse 98 node. density around 0.15. weight add.
+        node_nums = [16,32,48,64,80,98];
+        Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
+    elseif num_scan == 55  % oh's mouse 98 node. density 0.15. weight add.
+        node_nums = [16,32,48,64,80,98];
+        Gths = [1, 1, 1, 1, 1, 1];
     end
     % test sparse and full density
     hz = 64;
@@ -130,7 +136,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of DLCM-GC (pat=' num2str(i) ')']);
 %%}
-%{
+%%{
         % linue TE result
         linueFile = ['results/tvb-pat-linue/linue_MultivAnalysis_tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-' num2str(k) '-' num2str(lag) '.mat'];
         load(linueFile);
@@ -139,7 +145,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         % show ROC curve of TE(LIN UE)
         figure(linueRf); hold on; [linueROC{k,1}, linueROC{k,2}, linueAUC(k)] = plotROCcurve(A, weights, 100, 1, Gth); hold off;        
         title(['ROC curve of LINUE-TE (pat=' num2str(i) ')']);
-%}
+%%}
     end
     % show result AUC
     disp(['FC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(fcAUC))]);
