@@ -18,8 +18,8 @@ end
 
 function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     % init
-    dlAUC = zeros(10,N);
-    dlErr = zeros(10,N);
+    dlAUC = zeros(N,10);
+    dlErr = zeros(N,10);
     origf = figure;
     origSigf = figure;
 
@@ -70,13 +70,13 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             end
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
             disp(['end training : rsme=' num2str(rsme)]);
-            dlErr(j,k) = rsme;
+            dlErr(k,j) = rsme;
             
             % show DLCM-GC
             dlGC = calcDlcmGCI(Y, inSignal, [], inControl, netDLCM);
 
             % calc ROC curve
-            [~, ~, dlAUC(j,k)] = calcROCcurve(dlGC, weights, 100, 1, Gth);
+            [~, ~, dlAUC(k,j)] = calcROCcurve(dlGC, weights, 100, 1, Gth);
         end
     end
 
