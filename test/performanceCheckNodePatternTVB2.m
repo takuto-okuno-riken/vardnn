@@ -24,9 +24,9 @@ function performanceCheckNodePatternTVB2
     elseif num_scan == 53  % oh's mouse 98 node. density around 0.23. weight add.
         node_nums = [16,32,48,64,80,98];
         Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
-    elseif num_scan == 54  % oh's mouse 98 node. density around 0.15. weight add.
+    elseif num_scan == 54  % oh's mouse 98 node. density 0.15. weight add.
         node_nums = [16,32,48,64,80,98];
-        Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
+        Gths = [1, 1, 1, 1, 1, 1];
     elseif num_scan == 55  % oh's mouse 98 node. density 0.15. weight add.
         node_nums = [16,32,48,64,80,98];
         Gths = [1, 1, 1, 1, 1, 1];
