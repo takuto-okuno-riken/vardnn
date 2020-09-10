@@ -17,7 +17,8 @@ function performanceCheckNodePatternTVB2
 end
 
 function checkingPattern(node_num, num_scan, hz, Gth, N, i)
-    trial = 10;
+    l2rs = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1];
+    trial = length(l2rs);
 
     % init
     dlAUC = zeros(N,trial);
@@ -42,17 +43,19 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         sigLen = size(si,2);
         inControl = eye(nodeNum, nodeNum);
         for j=1:trial
-            dlcmFile = ['results/net-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) 'ovf' num2str(j) '.mat'];
+            dlcmFile = ['results/net-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) 'ovfl' num2str(j) '.mat'];
             if exist(dlcmFile, 'file')
                 load(dlcmFile);
             else
                 % train DLCM
+                %[Y, sig, m, maxsi, minsi] = convert2SigmoidSignal(si);
+                %[inSignal, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
                 Y = si;
                 inSignal = uu;
                 % layer parameters
                 netDLCM = initDlcmNetwork(Y, inSignal, [], inControl);
                 % training DLCM network
-                maxEpochs = j*200;
+                maxEpochs = 1000;
                 miniBatchSize = ceil(sigLen / 3);
                 options = trainingOptions('adam', ...
                     'ExecutionEnvironment','cpu', ...
@@ -60,7 +63,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
                     'MiniBatchSize',miniBatchSize, ...
                     'Shuffle','every-epoch', ...
                     'GradientThreshold',5,...
-                    'L2Regularization',0.05, ...
+                    'L2Regularization',l2rs(j), ...
                     'Verbose',false);
             %            'Plots','training-progress');
 
@@ -81,6 +84,6 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     end
 
     % save result
-    fname = ['results/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-ovf-result.mat'];
+    fname = ['results/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-ovfl-result.mat'];
     save(fname, 'dlAUC','dlErr');
 end
