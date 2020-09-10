@@ -1,14 +1,14 @@
 %%
 % Caluclate LINER-Uniform Embedding Transfer Entropy (LINUE-TE)
 % returns Transfer Entropy matrix (TE), significance (h=1 or 0)
-% F-statistic (F), the critical value from the F-distribution (cvFd)
+% p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
 % and AIC, BIC (of node) vector
 % input:
 %  X      multivariate time series matrix (node x time series)
 %  lags   number of lags for autoregression
 %  alpha  the significance level of F-statistic (default:0.05)
 
-function [TE, h, F, cvFd, nodeAIC, nodeBIC] = calcLinueTE(X, lags, alpha)
+function [TE, h, P, F, cvFd, nodeAIC, nodeBIC] = calcLinueTE(X, lags, alpha)
     if nargin < 3
         alpha = 0.05;
     end
@@ -33,6 +33,7 @@ function [TE, h, F, cvFd, nodeAIC, nodeBIC] = calcLinueTE(X, lags, alpha)
     nodeBIC = zeros(nodeNum,1);
     TE = nan(nodeNum,nodeNum);
     h = nan(nodeNum,nodeNum);
+    P = nan(nodeNum,nodeNum);
     F = nan(nodeNum,nodeNum);
     cvFd = nan(nodeNum,nodeNum);
     for i=1:nodeNum
@@ -74,6 +75,7 @@ function [TE, h, F, cvFd, nodeAIC, nodeBIC] = calcLinueTE(X, lags, alpha)
             RSS1 = r'*r;  % p1 = p*nn1;
             RSS2 = RSS;   % p2 = p*nodeNum;
             F(i,j) = ((RSS1 - RSS2)/p) / (RSS2 / (n - (p*nodeNum)));
+            P(i,j) = 1 - fcdf(F(i,j),p,(n-p*nodeNum));
             cvFd(i,j) = finv(1-alpha,p,(n-p*nodeNum));
             h(i,j) = F(i,j) > cvFd(i,j);
         end

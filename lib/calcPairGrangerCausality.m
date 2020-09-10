@@ -1,14 +1,14 @@
 %%
 % Caluclate pairwised Granger Causality
 % returns Granger causality index (gcI), significance (h=1 or 0)
-% F-statistic (F) and the critical value from the F-distribution (cvFd)
+% p-values (P), F-statistic (F) and the critical value from the F-distribution (cvFd)
 % input:
 %  X      time series vector (1 x time series)
 %  Y      time series vector (1 x time series)
 %  p      number of lags for autoregression
 %  alpha  the significance level of F-statistic (default:0.05)
 
-function [gcI, h, F, cvFd] = calcPairGrangerCausality(X, Y, p, alpha)
+function [gcI, h, P, F, cvFd] = calcPairGrangerCausality(X, Y, p, alpha)
     if nargin < 4
         alpha = 0.05;
     end
@@ -46,6 +46,7 @@ function [gcI, h, F, cvFd] = calcPairGrangerCausality(X, Y, p, alpha)
     RSS1 = Xr'*Xr;
     RSS2 = Yr'*Yr;
     F = ((RSS1 - RSS2)/p) / (RSS2 / (n - 2*p));
+    P = 1 - fcdf(F,p,(n-2*p));
     cvFd = finv(1-alpha,p,(n-2*p));
     h = F > cvFd;
 end
