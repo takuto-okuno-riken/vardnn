@@ -17,7 +17,7 @@ function performanceCheckNodePatternTVBovfnn
 end
 
 function checkingPattern(node_num, num_scan, hz, Gth, N, i)
-    trial = 6;
+    trial = 7;
 
     % init
     dlAUC = zeros(N,trial);
