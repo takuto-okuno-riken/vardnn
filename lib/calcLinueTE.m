@@ -74,9 +74,9 @@ function [TE, h, P, F, cvFd, nodeAIC, nodeBIC] = calcLinueTE(X, lags, alpha)
             % F = ((RSS1 - RSS2) / (p2 - p1)) / (RSS2 / n - p2)
             RSS1 = r'*r;  % p1 = p*nn1;
             RSS2 = RSS;   % p2 = p*nodeNum;
-            F(i,j) = ((RSS1 - RSS2)/p) / (RSS2 / (n - (p*nodeNum)));
-            P(i,j) = 1 - fcdf(F(i,j),p,(n-p*nodeNum));
-            cvFd(i,j) = finv(1-alpha,p,(n-p*nodeNum));
+            F(i,j) = ((RSS1 - RSS2)/p) / (RSS2 / (n - k));
+            P(i,j) = 1 - fcdf(F(i,j),p,(n-k));
+            cvFd(i,j) = finv(1-alpha,p,(n-k));
             h(i,j) = F(i,j) > cvFd(i,j);
         end
     end

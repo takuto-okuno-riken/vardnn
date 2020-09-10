@@ -51,10 +51,10 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairGrangerCausality(X, Y, p, alph
     % calc F-statistic
     % https://en.wikipedia.org/wiki/F-test
     % F = ((RSS1 - RSS2) / (p2 - p1)) / (RSS2 / n - p2)
-    RSS1 = Xr'*Xr;
-    RSS2 = RSS;
-    F = ((RSS1 - RSS2)/p) / (RSS2 / (n - 2*p));
-    P = 1 - fcdf(F,p,(n-2*p));
-    cvFd = finv(1-alpha,p,(n-2*p));
+    RSS1 = Xr'*Xr;  % p1 = p + 1
+    RSS2 = RSS;     % p2 = k
+    F = ((RSS1 - RSS2)/p) / (RSS2 / (n - k));
+    P = 1 - fcdf(F,p,(n-k));
+    cvFd = finv(1-alpha,p,(n-k));
     h = F > cvFd;
 end
