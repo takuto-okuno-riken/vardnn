@@ -54,7 +54,7 @@ function [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, lags, 
         % AIC and BIC of this node (assuming residuals are gausiann distribution)
         T = n-p;
         RSS = r'*r;
-        k = p * nodeNum + 1;
+        k = p * nodeNum;
         nodeAIC(i) = T*log(RSS/T) + 2 * k;
         nodeBIC(i) = T*log(RSS/T) + k*log(T);
 

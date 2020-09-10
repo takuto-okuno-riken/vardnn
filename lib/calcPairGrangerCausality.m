@@ -2,13 +2,14 @@
 % Caluclate pairwised Granger Causality
 % returns Granger causality index (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F) and the critical value from the F-distribution (cvFd)
+% and AIC, BIC
 % input:
 %  X      time series vector (1 x time series)
 %  Y      time series vector (1 x time series)
 %  p      number of lags for autoregression
 %  alpha  the significance level of F-statistic (default:0.05)
 
-function [gcI, h, P, F, cvFd] = calcPairGrangerCausality(X, Y, p, alpha)
+function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairGrangerCausality(X, Y, p, alpha)
     if nargin < 4
         alpha = 0.05;
     end
@@ -20,9 +21,9 @@ function [gcI, h, P, F, cvFd] = calcPairGrangerCausality(X, Y, p, alpha)
 
     % autoregression
     Xt = X(1:n-p);
-    Xti = zeros(n-p, p);
+    Xti = ones(n-p, p+1);
     for i=1:p
-        Xti(:,i) = X(i+1:n-p+i);
+        Xti(:,i+1) = X(i+1:n-p+i);
     end
     % apply the regress function
     [b,bint,Xr] = regress(Xt,Xti);
@@ -30,21 +31,28 @@ function [gcI, h, P, F, cvFd] = calcPairGrangerCausality(X, Y, p, alpha)
 
     % autoregression plus other regression
     Yt = X(1:n-p);
-    Yti = zeros(n-p, p*2);
+    Yti = ones(n-p, p*2+1);
     for i=1:p
-        Yti(:,i) = X(i+1:n-p+i);
-        Yti(:,p+i) = Y(i+1:n-p+i);
+        Yti(:,i+1) = X(i+1:n-p+i);
+        Yti(:,p+i+1) = Y(i+1:n-p+i);
     end
     [b,bint,Yr] = regress(Yt,Yti);
     Vyt = var(Yr);
     
     gcI = log(Vxt / Vyt);
 
+    % AIC and BIC (assuming residuals are gausiann distribution)
+    T = n-p;
+    RSS = Yr'*Yr;
+    k = p*2 + 1;
+    AIC = T*log(RSS/T) + 2 * k;
+    BIC = T*log(RSS/T) + k*log(T);
+
     % calc F-statistic
     % https://en.wikipedia.org/wiki/F-test
     % F = ((RSS1 - RSS2) / (p2 - p1)) / (RSS2 / n - p2)
     RSS1 = Xr'*Xr;
-    RSS2 = Yr'*Yr;
+    RSS2 = RSS;
     F = ((RSS1 - RSS2)/p) / (RSS2 / (n - 2*p));
     P = 1 - fcdf(F,p,(n-2*p));
     cvFd = finv(1-alpha,p,(n-2*p));
