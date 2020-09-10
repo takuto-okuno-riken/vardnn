@@ -60,7 +60,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
                 biasMat = ones(hiddenNums(1),1) * 0;
 
                 % layer parameters
-                netDLCM = createDlcmNetwork(nodeNum, inputNum, hiddenNums, nodeControl, inControl, [], [], biasMat);
+                netDLCM = createDlcmNetwork(nodeNum, inputNum, hiddenNums, [], inControl, [], [], biasMat);
 
                 % training DLCM network
                 maxEpochs = 1000;
