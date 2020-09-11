@@ -52,7 +52,7 @@ function [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeC
         % AIC and BIC of this node (assuming residuals are gausiann distribution)
         T = sigLen;
         RSS = err*err';
-        k = nodeNum + size(inSignal, 1);
+        k = nodeNum + size(inSignal, 1) + 1; % input + bias
         %for j=2:2:length(netDLCM.nodeNetwork{i, 1}.Layers)
         %    k = k + length(netDLCM.nodeNetwork{i, 1}.Layers(j, 1).Bias);   % added hidden neuron number
         %end
@@ -74,7 +74,7 @@ function [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeC
             % calc F-statistic
             % https://en.wikipedia.org/wiki/F-test
             % F = ((RSS1 - RSS2) / (p2 - p1)) / (RSS2 / n - p2)
-            RSS1 = err*err';  % p1 = nodeNum - 1 + size(inSignal, 1);
+            RSS1 = err*err';  % p1 = nodeNum - 1 + size(inSignal, 1) + 1;
             RSS2 = RSS;       % p2 = k
             F(i,j) = ((RSS1 - RSS2)/1) / (RSS2 / (sigLen - k));
             P(i,j) = 1 - fcdf(F(i,j),1,(sigLen - k));
