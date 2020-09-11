@@ -1,4 +1,4 @@
-function performanceCheckNodePatternTVB2
+function performanceCheckNodePatternTVBovf
     num_scan = 55;
     if num_scan == 54  % oh's mouse 98 node. density around 0.15. weight add.
         node_nums = [16,32,48,64,80,98];
