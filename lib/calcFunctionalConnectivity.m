@@ -1,9 +1,9 @@
 %%
 % Caluclate Functional Connectivity
-% returns Functional Connectivity (FC)
+% returns Functional Connectivity (FC) and p-values (P)
 % input:
 %  X     multivariate time series matrix (node x time series)
 
-function [FC] = calcFunctionalConnectivity(X)
-    FC = corr(X.',X.');
+function [FC, P] = calcFunctionalConnectivity(X)
+    [FC, P] = corr(X.', X.');
 end

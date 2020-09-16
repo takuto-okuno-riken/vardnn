@@ -1,16 +1,16 @@
 %%
 % Plot Functional Connectivity
-% returns Functional Connectivity (FC)
+% returns Functional Connectivity (FC) and p-values (P)
 % input:
 %  X       multivariate time series matrix (node x time series)
 %  rowcut  cut bottom rows of result gcI matris (default:0)
 
-function [FC] = plotFunctionalConnectivity(X, rowcut)
+function [FC, P] = plotFunctionalConnectivity(X, rowcut)
     if nargin < 2
         rowcut = 0;
     end
     % show functional conectivity
-    FC = calcFunctionalConnectivity(X);
+    [FC, P] = calcFunctionalConnectivity(X);
     if rowcut>0, FC(end-rowcut+1:end,:) = []; end
     clims = [-1,1];
     imagesc(FC,clims);

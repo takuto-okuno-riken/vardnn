@@ -26,7 +26,7 @@ function trainedNet = trainDlcmNetwork(X, inSignal, nodeControl, inControl, net,
         nodeTeach = X(i,2:end);
         nodeInput = nodeInputOrg;
         if ~isempty(nodeControl)
-            filter = repmat(nodeControl(i,:).', 1, size(nodeControl,2));
+            filter = repmat(nodeControl(i,:).', 1, size(nodeInput,2));
             nodeInput(1:nodeNum,:) = nodeInput(1:nodeNum,:) .* filter;
         end
         if ~isempty(inControl)

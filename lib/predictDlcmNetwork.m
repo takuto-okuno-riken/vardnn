@@ -20,7 +20,7 @@ function [S, time, mae, maeerr] = predictDlcmNetwork(X, inSignal, nodeControl, i
         nodeInput = nodeInputOrg;
         nodeTeach = single(X(i,2:end));
         if ~isempty(nodeControl)
-            filter = repmat(nodeControl(i,:).', 1, size(nodeControl,2));
+            filter = repmat(nodeControl(i,:).', 1, size(nodeInput,2));
             nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
         end
         if ~isempty(inControl)
