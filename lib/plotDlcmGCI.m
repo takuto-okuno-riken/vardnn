@@ -2,7 +2,7 @@
 % Plotting DLCM Granger causality Index matrix
 % returns DLCM Granger causality index matrix (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
-% and AIC, BIC (of node) vector
+% and AIC, BIC (of node vector)
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  inSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -12,7 +12,7 @@
 %  rowcut       cut bottom rows of result gcI matris (default:0)
 %  alpha        the significance level of F-statistic (optional)
 
-function [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, range, rowcut, alpha)
+function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, range, rowcut, alpha)
     if nargin < 8
         alpha = 0.05;
     end
@@ -22,7 +22,7 @@ function [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeC
     if nargin < 6
         range = 10;
     end
-    [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, alpha);
+    [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, alpha);
     if range <= 0
         sigma = std(gcI(:),'omitnan');
         avg = mean(gcI(:),'omitnan');

@@ -255,10 +255,10 @@ function processInputFiles(handles)
             
             % show original signal granger causality index 
             if handles.showMat > 0
-                figure; [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, 0, 0, handles.alpha)
+                figure; [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, 0, 0, handles.alpha)
                 title(['DLCM Granger Causality Index : ' name]);
             else
-                [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, handles.alpha);
+                [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, handles.alpha);
             end
             % output result matrix csv file
             outputCsvFile(gcI, [name '_dlgc.csv']);

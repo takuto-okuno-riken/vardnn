@@ -2,7 +2,7 @@
 % Caluclate DLCM Granger Causality
 % returns DLCM Granger causality index matrix (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
-% and AIC, BIC (of node) vector
+% and AIC, BIC (of node vector)
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  inSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -11,7 +11,7 @@
 %  netDLCM      trained DLCM network
 %  alpha        the significance level of F-statistic (optional)
 
-function [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, alpha)
+function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, alpha)
     if nargin < 6
         alpha = 0.05;
     end
@@ -33,6 +33,8 @@ function [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeC
     P = nan(nodeNum,nodeNum);
     F = nan(nodeNum,nodeNum);
     cvFd = nan(nodeNum,nodeNum);
+    AIC = nan(nodeNum,nodeNum);
+    BIC = nan(nodeNum,nodeNum);
     for i=1:nodeNum
         nodeInput = nodeInputOrg;
         if ~isempty(nodeControl)
@@ -50,7 +52,7 @@ function [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeC
         VarEi = var(err);
 
         % AIC and BIC of this node (assuming residuals are gausiann distribution)
-        T = sigLen;
+        T = sigLen-1;
         RSS = err*err';
         k = nodeNum + size(inSignal, 1) + 1; % input + bias
         %for j=2:2:length(netDLCM.nodeNetwork{i, 1}.Layers)
@@ -71,10 +73,17 @@ function [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeC
             VarEj = var(err);
             gcI(i,j) = log(VarEj / VarEi);
 
+            % AIC and BIC (assuming residuals are gausiann distribution)
+            % BIC = n*ln(RSS/n)+k*ln(n)
+            RSS1 = err*err';
+            k1 = nodeNum - 1 + size(inSignal, 1) + 1;
+            AIC(i,j) = T*log(RSS1/T) + 2 * k1;
+            BIC(i,j) = T*log(RSS1/T) + k1*log(T);
+
             % calc F-statistic
             % https://en.wikipedia.org/wiki/F-test
             % F = ((RSS1 - RSS2) / (p2 - p1)) / (RSS2 / n - p2)
-            RSS1 = err*err';  % p1 = nodeNum - 1 + size(inSignal, 1) + 1;
+            %RSS1 = err*err';  % p1 = nodeNum - 1 + size(inSignal, 1) + 1;
             RSS2 = RSS;       % p2 = k
             F(i,j) = ((RSS1 - RSS2)/1) / (RSS2 / (sigLen - k));
             P(i,j) = 1 - fcdf(F(i,j),1,(sigLen - k));
