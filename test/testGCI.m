@@ -39,7 +39,7 @@ gcI3 = zeros(nodeNum,nodeNum,maxLag);
 nodeAIC = zeros(nodeNum,maxLag);
 nodeBIC = zeros(nodeNum,maxLag);
 for k=1:maxLag
-    [gcI3(:,:,k), ~, ~, ~, ~, nodeAIC(:,k), nodeBIC(:,k)] = calcMultivariateGCI2(X, k); % calc granger causality index of lag |p|
+    [gcI3(:,:,k), ~, ~, ~, ~, ~, ~, nodeAIC(:,k), nodeBIC(:,k)] = calcMultivariateGCI2(X, k); % calc granger causality index of lag |p|
 end
 % plot AIC and BIC of each node by each lag
 figure; plot(nodeAIC.');

@@ -2,7 +2,7 @@
 % Plotting multivariate Granger causality Index matrix
 % returns Granger causality index matrix (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
-% and AIC, BIC (of node) vector
+% and AIC, BIC (of node vector)
 % input:
 %  X       multivariate time series matrix (node x time series)
 %  lags    number of lags for autoregression (default:3)
@@ -11,7 +11,7 @@
 %  rowcut  cut bottom rows of result gcI matris (default:0)
 %  alpha  the significance level of F-statistic (default:0.05)
 
-function [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, lag, range, rowcut, alpha)
+function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, lag, range, rowcut, alpha)
     if nargin < 5
         alpha = 0.05;
     end
@@ -24,7 +24,7 @@ function [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, lag, r
     if nargin < 2
         lag = 3;
     end
-    [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, lag, alpha);
+   [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, lag, alpha);
     if range <= 0
         sigma = std(gcI(:),'omitnan');
         avg = mean(gcI(:),'omitnan');

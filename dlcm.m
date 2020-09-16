@@ -273,10 +273,10 @@ function processInputFiles(handles)
         if handles.mvgc > 0
             % show original signal granger causality index 
             if handles.showMat > 0
-                figure; [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, handles.lag, 0, 0, handles.alpha);
+                figure; [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, handles.lag, 0, 0, handles.alpha);
                 title(['multivariate Granger Causality Index : ' name]);
             else
-                [gcI, h, P, F, cvFd, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, handles.lag, handles.alpha);
+                [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, handles.lag, handles.alpha);
             end
             % output result matrix csv file
             outputCsvFile(gcI, [name '_mvgc.csv']);
