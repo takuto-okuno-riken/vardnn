@@ -2,7 +2,7 @@
 % Plotting LINER-Uniform Embedding Transfer Entropy (LINUE-TE) matrix
 % returns Transfer Entropy matrix (TE), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
-% and AIC, BIC (of node) vector
+% and AIC, BIC (of node vector)
 % input:
 %  X       multivariate time series matrix (node x time series)
 %  lags    number of lags for autoregression (default:3)
@@ -11,7 +11,7 @@
 %  rowcut  cut bottom rows of result gcI matris (default:0)
 %  alpha   the significance level of F-statistic (default:0.05)
 
-function [TE, h, P, F, cvFd, nodeAIC, nodeBIC] = plotLinueTE(X, lag, range, rowcut, alpha)
+function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotLinueTE(X, lag, range, rowcut, alpha)
     if nargin < 5
         alpha = 0.05;
     end
@@ -25,7 +25,7 @@ function [TE, h, P, F, cvFd, nodeAIC, nodeBIC] = plotLinueTE(X, lag, range, rowc
         lag = 3;
     end
     clims = [0, range];
-    [TE, h, P, F, cvFd, nodeAIC, nodeBIC] = calcLinueTE(X, lag, alpha);
+    [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, lag, alpha);
     if range <= 0
         sigma = std(TE(:),'omitnan');
         avg = mean(TE(:),'omitnan');

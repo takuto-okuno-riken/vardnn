@@ -309,10 +309,10 @@ function processInputFiles(handles)
         if handles.te > 0
             % show original signal granger causality index 
             if handles.showMat > 0
-                figure; [TE, h, P, F, cvFd, nodeAIC, nodeBIC] = plotLinueTE(X, handles.lag, 0, 0, handles.alpha);
+                figure; [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotLinueTE(X, handles.lag, 0, 0, handles.alpha);
                 title(['Transfer Entropy (LINUE) : ' name]);
             else
-                [TE, h, P, F, cvFd, nodeAIC, nodeBIC] = calcLinueTE(X, handles.lag, handles.alpha);
+                [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, handles.lag, handles.alpha);
             end
             % output result matrix csv file
             outputCsvFile(TE, [name '_te.csv']);

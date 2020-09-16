@@ -2,13 +2,13 @@
 % Caluclate LINER-Uniform Embedding Transfer Entropy (LINUE-TE)
 % returns Transfer Entropy matrix (TE), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
-% and AIC, BIC (of node) vector
+% and AIC, BIC (of node vector)
 % input:
 %  X      multivariate time series matrix (node x time series)
 %  lags   number of lags for autoregression
 %  alpha  the significance level of F-statistic (default:0.05)
 
-function [TE, h, P, F, cvFd, nodeAIC, nodeBIC] = calcLinueTE(X, lags, alpha)
+function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, lags, alpha)
     if nargin < 3
         alpha = 0.05;
     end
@@ -36,6 +36,8 @@ function [TE, h, P, F, cvFd, nodeAIC, nodeBIC] = calcLinueTE(X, lags, alpha)
     P = nan(nodeNum,nodeNum);
     F = nan(nodeNum,nodeNum);
     cvFd = nan(nodeNum,nodeNum);
+    AIC = nan(nodeNum,nodeNum);
+    BIC = nan(nodeNum,nodeNum);
     for i=1:nodeNum
         % input signal is time [1 ... last]
         % need to flip signal
@@ -69,10 +71,17 @@ function [TE, h, P, F, cvFd, nodeAIC, nodeBIC] = calcLinueTE(X, lags, alpha)
 
             TE(i,j) = Hyt - Hxt;
 
+            % AIC and BIC (assuming residuals are gausiann distribution)
+            % BIC = n*ln(RSS/n)+k*ln(n)
+            RSS1 = r'*r;
+            k1 = p * nn1;
+            AIC(i,j) = T*log(RSS1/T) + 2 * k1;
+            BIC(i,j) = T*log(RSS1/T) + k1*log(T);
+
             % calc F-statistic
             % https://en.wikipedia.org/wiki/F-test
             % F = ((RSS1 - RSS2) / (p2 - p1)) / (RSS2 / n - p2)
-            RSS1 = r'*r;  % p1 = p*nn1;
+            %RSS1 = r'*r;  % p1 = p*nn1;
             RSS2 = RSS;   % p2 = p*nodeNum;
             F(i,j) = ((RSS1 - RSS2)/p) / (RSS2 / (n - k));
             P(i,j) = 1 - fcdf(F(i,j),p,(n-k));
