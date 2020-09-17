@@ -40,6 +40,7 @@ function dlcm(varargin)
     handles.aic = 0;
     handles.bic = 0;
     handles.transform = 0;
+    handles.format = 0;
     handles.alpha = 0.05;
     handles.showSig = 0;
     handles.showEx = 0;
@@ -78,6 +79,9 @@ function dlcm(varargin)
                 handles.bic = 1;
             case {'--transform'}
                 handles.transform = str2num(varargin{i+1});
+                i = i + 1;
+            case {'--format'}
+                handles.format = str2num(varargin{i+1});
                 i = i + 1;
             case {'--epoch'}
                 handles.maxEpochs = str2num(varargin{i+1});
@@ -143,11 +147,12 @@ function showUsage()
     disp('  -p, --pwgc          output pair-wised Granger Causality matrix result (<filename>_pwgc.csv)');
     disp('  -t, --te            output (LINUE) Transfer Entropy matrix result (<filename>_te.csv)');
     disp('  -f, --fc            output Functional Conectivity matrix result (<filename>_fc.csv)');
-    disp('  --pval              output P-value matrix of DLCM-GC, mvGC, pwGC, TE and FC (<filename>_*_pval.csv)');
-    disp('  --fval alpha        output F-value with <alpha> matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_fval.csv, <filename>_*_fcrit.csv)');
-    disp('  --aic               output AIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_aic.csv)');
-    disp('  --bic               output BIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_bic.csv)');
+    disp('  --pval              save P-value matrix of DLCM-GC, mvGC, pwGC, TE and FC (<filename>_*_pval.csv)');
+    disp('  --fval alpha        save F-value with <alpha> matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_fval.csv, <filename>_*_fcrit.csv)');
+    disp('  --aic               save AIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_aic.csv)');
+    disp('  --bic               save BIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_bic.csv)');
     disp('  --transform type    input signal transform <type> 0:raw, 1:sigmoid (default:0)');
+    disp('  --format type       save file format <type> 0:csv, 1:mat(each), 2:mat(all) (default:0)');
     disp('  --lag num           time lag <num> for mvGC, pwGC and TE (default:3)');
     disp('  --ex files          DLCM exogenouse input signal <files> (file1.csv[:file2.csv:...])');
     disp('  --nctrl files       DLCM node status control <files> (file1.csv[:file2.csv:...])');
@@ -179,6 +184,14 @@ function processInputFiles(handles)
         nodeNum = size(X,1);
         sigLen = size(X,2);
         [path,name,ext] = fileparts(fname);
+        
+        if handles.format==2
+            if i==1
+                savename = name;
+            end
+        else
+            savename = name;
+        end
 
         % load exogenous input signals csv file
         inNum = 0;
@@ -288,42 +301,42 @@ function processInputFiles(handles)
 
             % show original signal granger causality index 
             if handles.showMat > 0
-                figure; [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, 0, 0, handles.alpha);
+                figure; [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, 0, 0, handles.alpha);
                 title(['DLCM Granger Causality Index : ' name]);
             else
-                [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, handles.alpha);
+                [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, handles.alpha);
             end
             
             % output result matrix files
-            outputCsvFiles(handles, gcI, P, F, cvFd, AIC, BIC, [name '_dlgc']);
+            saveResultFiles(handles, dlGC, P, F, cvFd, AIC, BIC, [savename '_dlgc']);
         end
         
         % calc multivaliate Granger causality
         if handles.mvgc > 0
             % show original signal granger causality index 
             if handles.showMat > 0
-                figure; [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, handles.lag, 0, 0, handles.alpha);
+                figure; [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, handles.lag, 0, 0, handles.alpha);
                 title(['multivariate Granger Causality Index : ' name]);
             else
-                [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, handles.lag, handles.alpha);
+                [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, handles.lag, handles.alpha);
             end
             
             % output result matrix files
-            outputCsvFiles(handles, gcI, P, F, cvFd, AIC, BIC, [name '_mvgc']);
+            saveResultFiles(handles, mvGC, P, F, cvFd, AIC, BIC, [savename '_mvgc']);
         end
         
         % calc pair-wised Granger causality
         if handles.pwgc > 0
             % show original signal granger causality index 
             if handles.showMat > 0
-                figure; [gcI, h, P, F, cvFd, AIC, BIC] = plotPairwiseGCI(X, handles.lag, 0, 0, handles.alpha);
+                figure; [pwGC, h, P, F, cvFd, AIC, BIC] = plotPairwiseGCI(X, handles.lag, 0, 0, handles.alpha);
                 title(['pairwised Granger Causality Index : ' name]);
             else
-                [gcI, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, handles.lag, handles.alpha);
+                [pwGC, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, handles.lag, handles.alpha);
             end
 
             % output result matrix files
-            outputCsvFiles(handles, gcI, P, F, cvFd, AIC, BIC, [name '_pwgc']);
+            saveResultFiles(handles, pwGC, P, F, cvFd, AIC, BIC, [savename '_pwgc']);
         end
         
         % calc Transfer Entropy (LINUE)
@@ -337,7 +350,7 @@ function processInputFiles(handles)
             end
             
             % output result matrix files
-            outputCsvFiles(handles, TE, P, F, cvFd, AIC, BIC, [name '_te']);
+            saveResultFiles(handles, TE, P, F, cvFd, AIC, BIC, [savename '_te']);
         end
         
         % calc Function connectivity
@@ -351,7 +364,7 @@ function processInputFiles(handles)
             end
             
             % output result matrix files
-            outputCsvFiles(handles, FC, P, [], [], [], [], [name '_fc']);
+            saveResultFiles(handles, FC, P, [], [], [], [], [savename '_fc']);
         end
     end
 end
@@ -359,29 +372,45 @@ end
 %%
 % output result matrix files
 %
-function outputCsvFiles(handles, mat, P, F, cvFd, AIC, BIC, outname)
-    % output result matrix csv file
-    outputCsvFile(mat, [outname '.csv']);
+function saveResultFiles(handles, Index, P, F, cvFd, AIC, BIC, outname)
+    if handles.format == 1
+        save([outname '.mat'],'Index', 'P', 'F', 'cvFd', 'AIC', 'BIC');
+    elseif handles.format == 2
+        fname = [outname '_all.mat'];
+        if exist(fname,'file')
+            t = load(fname);
+            t.Index(:,:,end+1) = Index; Index = t.Index;
+            t.P(:,:,end+1) = P; P = t.P;
+            t.F(:,:,end+1) = F; F = t.F;
+            t.cvFd(:,:,end+1) = cvFd; cvFd = t.cvFd;
+            t.AIC(:,:,end+1) = AIC; AIC = t.AIC;
+            t.BIC(:,:,end+1) = BIC; BIC = t.BIC;
+        end
+        save(fname,'Index', 'P', 'F', 'cvFd', 'AIC', 'BIC');
+    else
+        % output result matrix csv file
+        outputCsvFile(Index, [outname '.csv']);
 
-    % output result P-value matrix csv file
-    if handles.pval > 0 && ~isempty(P)
-        outputCsvFile(P, [outname '_pval.csv']);
-    end
+        % output result P-value matrix csv file
+        if handles.pval > 0 && ~isempty(P)
+            outputCsvFile(P, [outname '_pval.csv']);
+        end
 
-    % output result F-value matrix csv file
-    if handles.fval > 0 && ~isempty(F)
-        outputCsvFile(F, [outname '_fval.csv']);
-        outputCsvFile(cvFd, [outname '_fcrit.csv']);
-    end
-    
-    % output AIC matrix csv file
-    if handles.aic > 0 && ~isempty(AIC)
-        outputCsvFile(AIC, [outname '_aic.csv']);
-    end
-    
-    % output BIC matrix csv file
-    if handles.bic > 0 && ~isempty(BIC)
-        outputCsvFile(BIC, [outname '_bic.csv']);
+        % output result F-value matrix csv file
+        if handles.fval > 0 && ~isempty(F)
+            outputCsvFile(F, [outname '_fval.csv']);
+            outputCsvFile(cvFd, [outname '_fcrit.csv']);
+        end
+
+        % output AIC matrix csv file
+        if handles.aic > 0 && ~isempty(AIC)
+            outputCsvFile(AIC, [outname '_aic.csv']);
+        end
+
+        % output BIC matrix csv file
+        if handles.bic > 0 && ~isempty(BIC)
+            outputCsvFile(BIC, [outname '_bic.csv']);
+        end
     end
 end
 
