@@ -28,6 +28,7 @@ function dlcm(varargin)
     handles.exoFiles = {};
     handles.nodeControls = {};
     handles.inControls = {};
+    handles.groundTruth = {};
     handles.commandError = 0;
     handles.dlgc = 0;
     handles.mvgc = 0;
@@ -42,9 +43,11 @@ function dlcm(varargin)
     handles.transform = 0;
     handles.format = 0;
     handles.alpha = 0.05;
+    handles.Gth = 0;
     handles.showSig = 0;
     handles.showEx = 0;
     handles.showMat = 0;
+    handles.showROC = 0;
     handles.maxEpochs = 1000;
     handles.L2Regularization = 0.05;
 
@@ -98,12 +101,17 @@ function dlcm(varargin)
             case {'--ectrl'}
                 handles.inControls = strsplit(varargin{i+1},':');
                 i = i + 1;
+            case {'--groundtruth'}
+                handles.groundTruth = strsplit(varargin{i+1},':');
+                i = i + 1;
             case {'--showsig'}
                 handles.showSig = 1;
             case {'--showex'}
                 handles.showEx = 1;
             case {'--showmat'}
                 handles.showMat = 1;
+            case {'--showroc'}
+                handles.showROC = 1;
             case {'-h','--help'}
                 showUsage();
                 return;
@@ -151,6 +159,7 @@ function showUsage()
     disp('  --fval alpha        save F-value with <alpha> matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_fval.csv, <filename>_*_fcrit.csv)');
     disp('  --aic               save AIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_aic.csv)');
     disp('  --bic               save BIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_bic.csv)');
+    disp('  --groundtruth files calculate ROC curve and save AUC of DLCM-GC, mvGC, pwGC, TE and FC (<filename>_*_auc.csv)');
     disp('  --transform type    input signal transform <type> 0:raw, 1:sigmoid (default:0)');
     disp('  --format type       save file format <type> 0:csv, 1:mat(each), 2:mat(all) (default:0)');
     disp('  --lag num           time lag <num> for mvGC, pwGC and TE (default:3)');
@@ -162,6 +171,7 @@ function showUsage()
     disp('  --showsig           show node status signals of <filename>.csv');
     disp('  --showex            show exogenous input signals of <file1>.csv');
     disp('  --showmat           show result matrix of DLCM-GC, mvGC, pwGC, TE and FC');
+    disp('  --showroc           show ROC curve (by GroundTruth) of DLCM-GC, mvGC, pwGC, TE and FC');
     disp('  -v, --version       show version number');
     disp('  -h, --help          show command line help');
 end
@@ -172,7 +182,24 @@ end
 function processInputFiles(handles)
     global exePath;
     global exeName;
-    for i = 1:length(handles.csvFiles)
+
+    % init
+    N = length(handles.csvFiles);
+    if ~isempty(handles.groundTruth) && handles.showROC > 0
+        fcROC = cell(N,2);
+        gcROC = cell(N,2);
+        pwROC = cell(N,2);
+        dlROC = cell(N,2);
+        teROC = cell(N,2);
+        if handles.dlgc > 0, dlRf = figure; end
+        if handles.mvgc > 0, gcRf = figure; end
+        if handles.pwgc > 0, pwRf = figure; end
+        if handles.te > 0, teRf = figure; end
+        if handles.fc > 0, fcRf = figure; end
+    end
+    
+    % process each file
+    for i = 1:N
         % load node status signals csv file
         fname = handles.csvFiles{i};
         if ~exist(fname,'file')
@@ -249,6 +276,22 @@ function processInputFiles(handles)
             inControl = table2array(T);
         end
 
+        % load ground truth csv file
+        groundTruth = [];
+        auc = NaN;
+        if ~isempty(handles.groundTruth)
+            if length(handles.groundTruth)==1
+                gtname = handles.groundTruth{1};
+            elseif length(handles.groundTruth) >= i
+                gtname = handles.groundTruth{i};
+            else
+                disp(['error : bad ground truth file list with ' fname]);
+                continue;
+            end
+            T = readtable(gtname);
+            groundTruth = table2array(T);
+        end
+
         % signal transform raw or not
         if handles.transform == 1
             [X, sig, m, maxsi, minsi] = convert2SigmoidSignal(X);
@@ -307,8 +350,18 @@ function processInputFiles(handles)
                 [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, handles.alpha);
             end
             
+            % show ROC curve 
+            if ~isempty(groundTruth)
+                if handles.showROC > 0
+                    figure(dlRf); hold on; [dlROC{i,1}, dlROC{i,2}, auc] = plotROCcurve(dlGC, groundTruth, 100, 1, handles.Gth); hold off;
+                    title('ROC curve of DLCM Granger Causality');
+                else
+                    [dlROC{i,1}, dlROC{i,2}, auc] = calcROCcurve(dlGC, groundTruth, 100, 1, handles.Gth);
+                end
+            end
+            
             % output result matrix files
-            saveResultFiles(handles, dlGC, P, F, cvFd, AIC, BIC, [savename '_dlgc']);
+            saveResultFiles(handles, dlGC, P, F, cvFd, AIC, BIC, auc, [savename '_dlgc']);
         end
         
         % calc multivaliate Granger causality
@@ -321,8 +374,18 @@ function processInputFiles(handles)
                 [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, handles.lag, handles.alpha);
             end
             
+            % show ROC curve 
+            if ~isempty(groundTruth)
+                if handles.showROC > 0
+                    figure(gcRf); hold on; [gcROC{i,1}, gcROC{i,2}, auc] = plotROCcurve(mvGC, groundTruth, 100, 1, handles.Gth); hold off;
+                    title('ROC curve of multivariate Granger Causality');
+                else
+                    [gcROC{i,1}, gcROC{i,2}, auc] = calcROCcurve(mvGC, groundTruth, 100, 1, handles.Gth);
+                end
+            end
+            
             % output result matrix files
-            saveResultFiles(handles, mvGC, P, F, cvFd, AIC, BIC, [savename '_mvgc']);
+            saveResultFiles(handles, mvGC, P, F, cvFd, AIC, BIC, auc, [savename '_mvgc']);
         end
         
         % calc pair-wised Granger causality
@@ -335,8 +398,18 @@ function processInputFiles(handles)
                 [pwGC, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, handles.lag, handles.alpha);
             end
 
+            % show ROC curve 
+            if ~isempty(groundTruth)
+                if handles.showROC > 0
+                    figure(pwRf); hold on; [pwROC{i,1}, pwROC{i,2}, auc] = plotROCcurve(pwGC, groundTruth, 100, 1, handles.Gth); hold off;
+                    title('ROC curve of pairwised Granger Causality');
+                else
+                    [pwROC{i,1}, pwROC{i,2}, auc] = calcROCcurve(pwGC, groundTruth, 100, 1, handles.Gth);
+                end
+            end
+            
             % output result matrix files
-            saveResultFiles(handles, pwGC, P, F, cvFd, AIC, BIC, [savename '_pwgc']);
+            saveResultFiles(handles, pwGC, P, F, cvFd, AIC, BIC, auc, [savename '_pwgc']);
         end
         
         % calc Transfer Entropy (LINUE)
@@ -348,9 +421,19 @@ function processInputFiles(handles)
             else
                 [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, handles.lag, handles.alpha);
             end
+
+            % show ROC curve 
+            if ~isempty(groundTruth)
+                if handles.showROC > 0
+                    figure(teRf); hold on; [teROC{i,1}, teROC{i,2}, auc] = plotROCcurve(TE, groundTruth, 100, 1, handles.Gth); hold off;
+                    title('ROC curve of Transfer Entropy (LINUE)');
+                else
+                    [teROC{i,1}, teROC{i,2}, auc] = calcROCcurve(TE, groundTruth, 100, 1, handles.Gth);
+                end
+            end
             
             % output result matrix files
-            saveResultFiles(handles, TE, P, F, cvFd, AIC, BIC, [savename '_te']);
+            saveResultFiles(handles, TE, P, F, cvFd, AIC, BIC, auc, [savename '_te']);
         end
         
         % calc Function connectivity
@@ -363,18 +446,52 @@ function processInputFiles(handles)
                 [FC,P] = calcFunctionalConnectivity(X);
             end
             
+            % show ROC curve 
+            if ~isempty(groundTruth)
+                if handles.showROC > 0
+                    figure(fcRf); hold on; [fcROC{i,1}, fcROC{i,2}, auc] = plotROCcurve(FC, groundTruth, 100, 1, handles.Gth); hold off;
+                    title('ROC curve of Functional Connectivity');
+                else
+                    [fcROC{i,1}, fcROC{i,2}, auc] = calcROCcurve(FC, groundTruth, 100, 1, handles.Gth);
+                end
+            end
+            
             % output result matrix files
-            saveResultFiles(handles, FC, P, [], [], [], [], [savename '_fc']);
+            saveResultFiles(handles, FC, P, [], [], [], [], auc, [savename '_fc']);
         end
+    end
+    
+    % show average ROC curve
+    if ~isempty(handles.groundTruth) && handles.showROC > 0
+        figure; 
+        hold on;
+        plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
+        plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
+        plotErrorROCcurve(pwROC, N, [0.0,0.5,0.0]);
+        plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
+        plotErrorROCcurve(teROC, N, [0.2,0.6,0.8]);
+        plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
+        plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
+        plotAverageROCcurve(pwROC, N, '--', [0.0,0.5,0.0],0.5);
+        plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);
+        plotAverageROCcurve(teROC, N, '--', [0.2,0.5,0.7],0.5);
+        plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
+        hold off;
+        ylim([0 1]);
+        xlim([0 1]);
+        daspect([1 1 1]);
+        title(['averaged ROC curve of ' num2str(N) ' data']);
+        xlabel('False Positive Rate')
+        ylabel('True Positive Rate')
     end
 end
 
 %%
 % output result matrix files
 %
-function saveResultFiles(handles, Index, P, F, cvFd, AIC, BIC, outname)
+function saveResultFiles(handles, Index, P, F, cvFd, AIC, BIC, auc, outname)
     if handles.format == 1
-        save([outname '.mat'],'Index', 'P', 'F', 'cvFd', 'AIC', 'BIC');
+        save([outname '.mat'],'Index', 'P', 'F', 'cvFd', 'AIC', 'BIC', 'auc');
     elseif handles.format == 2
         fname = [outname '_all.mat'];
         if exist(fname,'file')
@@ -385,8 +502,9 @@ function saveResultFiles(handles, Index, P, F, cvFd, AIC, BIC, outname)
             t.cvFd(:,:,end+1) = cvFd; cvFd = t.cvFd;
             t.AIC(:,:,end+1) = AIC; AIC = t.AIC;
             t.BIC(:,:,end+1) = BIC; BIC = t.BIC;
+            t.auc(end+1) = auc; auc = t.auc;
         end
-        save(fname,'Index', 'P', 'F', 'cvFd', 'AIC', 'BIC');
+        save(fname,'Index', 'P', 'F', 'cvFd', 'AIC', 'BIC', 'auc');
     else
         % output result matrix csv file
         outputCsvFile(Index, [outname '.csv']);
@@ -410,6 +528,11 @@ function saveResultFiles(handles, Index, P, F, cvFd, AIC, BIC, outname)
         % output BIC matrix csv file
         if handles.bic > 0 && ~isempty(BIC)
             outputCsvFile(BIC, [outname '_bic.csv']);
+        end
+
+        % output auc csv file
+        if ~isempty(handles.groundTruth)
+            outputCsvFile(auc, [outname '_auc.csv']);
         end
     end
 end
