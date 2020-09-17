@@ -185,12 +185,12 @@ function processInputFiles(handles)
 
     % init
     N = length(handles.csvFiles);
-    if ~isempty(handles.groundTruth) && handles.showROC > 0
-        fcROC = cell(N,2);
-        gcROC = cell(N,2);
-        pwROC = cell(N,2);
-        dlROC = cell(N,2);
-        teROC = cell(N,2);
+    fcROC = cell(N,2);
+    gcROC = cell(N,2);
+    pwROC = cell(N,2);
+    dlROC = cell(N,2);
+    teROC = cell(N,2);
+    if handles.showROC > 0
         if handles.dlgc > 0, dlRf = figure; end
         if handles.mvgc > 0, gcRf = figure; end
         if handles.pwgc > 0, pwRf = figure; end
@@ -200,19 +200,33 @@ function processInputFiles(handles)
     
     % process each file
     for i = 1:N
-        % load node status signals csv file
+        % init data
+        X = [];
+        inSignal = [];
+        nodeControl = [];
+        inControl = [];
+        inNum = 0;
+        groundTruth = [];
+        auc = NaN;
+
+        % load node status signals csv or mat file
         fname = handles.csvFiles{i};
         if ~exist(fname,'file')
             disp(['file is not found. ignoring : ' fname]);
             continue;
         end
-        T = readtable(fname);
-        X = table2array(T);
+        [path,name,ext] = fileparts(fname);
+        if strcmp(ext,'.mat')
+            load(fname);
+            inNum = size(inSignal, 1);
+        else
+            T = readtable(fname);
+            X = table2array(T);
+        end
         nodeNum = size(X,1);
         sigLen = size(X,2);
-        [path,name,ext] = fileparts(fname);
         
-        if handles.format==2
+        if handles.format==2 % if save format is mat(all)
             if i==1
                 savename = name;
             end
@@ -221,8 +235,6 @@ function processInputFiles(handles)
         end
 
         % load exogenous input signals csv file
-        inNum = 0;
-        inSignal = [];
         if ~isempty(handles.exoFiles)
             if length(handles.exoFiles)==1
                 exoname = handles.exoFiles{1};
@@ -243,7 +255,6 @@ function processInputFiles(handles)
         end
 
         % load node control csv file
-        nodeControl = [];
         if ~isempty(handles.nodeControls)
             if length(handles.nodeControls)==1
                 ndcntrolname = handles.nodeControls{1};
@@ -258,10 +269,8 @@ function processInputFiles(handles)
         end
 
         % load exogenous input control csv file
-        if inNum > 0
+        if inNum > 0 && isempty(inControl)
             inControl = eye(nodeNum, inNum);
-        else
-            inControl = [];
         end
         if ~isempty(handles.inControls)
             if length(handles.inControls)==1
@@ -277,8 +286,6 @@ function processInputFiles(handles)
         end
 
         % load ground truth csv file
-        groundTruth = [];
-        auc = NaN;
         if ~isempty(handles.groundTruth)
             if length(handles.groundTruth)==1
                 gtname = handles.groundTruth{1};
@@ -462,7 +469,7 @@ function processInputFiles(handles)
     end
     
     % show average ROC curve
-    if ~isempty(handles.groundTruth) && handles.showROC > 0
+    if handles.showROC > 0
         figure; 
         hold on;
         plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
@@ -531,7 +538,7 @@ function saveResultFiles(handles, Index, P, F, cvFd, AIC, BIC, auc, outname)
         end
 
         % output auc csv file
-        if ~isempty(handles.groundTruth)
+        if ~isnan(auc)
             outputCsvFile(auc, [outname '_auc.csv']);
         end
     end
