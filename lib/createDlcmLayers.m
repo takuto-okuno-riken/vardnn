@@ -15,13 +15,19 @@ function layers = createDlcmLayers(nodeNum, inputNum, hiddenNums, nNodeControl, 
     if nargin < 5, nNodeControl = []; end
 
     % init first fully connected layer
-    if isempty(initWeightFunc) && isempty(nodeInControl) && isempty(initBias)
-        firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
-            'WeightsInitializer', @(sz) weightInitializer(sz, nNodeControl, nodeInControl, initWeightFunc, initWeightParam, currentNode));
+    v = ver('nnet');
+    nnetver = str2num(v.Version);
+    if nnetver < 12.1
+        firstFCLayer = fullyConnectedLayer(hiddenNums(1));
     else
-        firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
-            'WeightsInitializer', @(sz) weightInitializer(sz, nNodeControl, nodeInControl, initWeightFunc, initWeightParam, currentNode), ...
-            'Bias', initBias);
+        if isempty(initWeightFunc) && isempty(nodeInControl) && isempty(initBias)
+            firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
+                'WeightsInitializer', @(sz) weightInitializer(sz, nNodeControl, nodeInControl, initWeightFunc, initWeightParam, currentNode));
+        else
+            firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
+                'WeightsInitializer', @(sz) weightInitializer(sz, nNodeControl, nodeInControl, initWeightFunc, initWeightParam, currentNode), ...
+                'Bias', initBias);
+        end
     end
     
     %
@@ -56,7 +62,7 @@ function layers = createDlcmLayers(nodeNum, inputNum, hiddenNums, nNodeControl, 
 
         % reggression for learning
         regressionLayer();
-    ]
+    ];
 end
 
 %%
