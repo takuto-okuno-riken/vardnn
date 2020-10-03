@@ -10,6 +10,8 @@ X(3,:) = 1 - X(7,:);
 
 PC = calcPartialCorrelation(X); % calc PC
 
+PC2 = calcPartialCorrelation2(X,0); % calc PC - this does not work well.
+
 % plot matrix
 figure;
 clims = [-1 1];

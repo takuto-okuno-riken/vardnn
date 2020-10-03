@@ -17,6 +17,10 @@ function analyzeAlzheimerDLCM
     [adFCs, meanADFC, stdADFC] = calculateConnectivity(adSignals, roiNames, 'ad', 'fc');
     [mciFCs, meanMCIFC, stdMCIFC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'fc');
 
+    [cnPCs, meanCNPC, stdCNPC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'pc');
+    [adPCs, meanADPC, stdADPC] = calculateConnectivity(adSignals, roiNames, 'ad', 'pc');
+    [mciPCs, meanMCIPC, stdMCIPC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'pc');
+
     [cnGCs, meanCNGC, stdCNGC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'gc');
     [adGCs, meanADGC, stdADGC] = calculateConnectivity(adSignals, roiNames, 'ad', 'gc');
     [mciGCs, meanMCIGC, stdMCIGC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'gc');
@@ -36,20 +40,25 @@ function analyzeAlzheimerDLCM
 %    figure; cnadGCr = plotTwoSignalsCorrelation(meanCNGC, meanADGC);
 %    figure; cnadTEr = plotTwoSignalsCorrelation(meanCNTE, meanADTE);
 %    figure; cnadDLr = plotTwoSignalsCorrelation(meanCNDL, meanADDL);
-    cosSim = zeros(4,1);
+    cosSim = zeros(5,1);
     cosSim(1) = getCosSimilarity(meanCNFC+nanx, meanADFC+nanx);
-    cosSim(2) = getCosSimilarity(meanCNGC, meanADGC);
-    cosSim(3) = getCosSimilarity(meanCNTE, meanADTE);
-    cosSim(4) = getCosSimilarity(meanCNDL, meanADDL);
-    X = categorical({'FC','GC','TE','DLCM-GC'});
+    cosSim(2) = getCosSimilarity(meanCNPC+nanx, meanADPC+nanx);
+    cosSim(3) = getCosSimilarity(meanCNGC, meanADGC);
+    cosSim(4) = getCosSimilarity(meanCNTE, meanADTE);
+    cosSim(5) = getCosSimilarity(meanCNDL, meanADDL);
+    X = categorical({'FC','PC','GC','TE','DLCM-GC'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and AD by each algorithm');
     
     % normality test
-%%{
+%{
     cnFCsNt = calculateAlzNormalityTest(cnFCs, roiNames, 'cn', 'fc');
     adFCsNt = calculateAlzNormalityTest(adFCs, roiNames, 'ad', 'fc');
     mciFCsNt = calculateAlzNormalityTest(mciFCs, roiNames, 'mci', 'fc');
+
+    cnPCsNt = calculateAlzNormalityTest(cnPCs, roiNames, 'cn', 'pc');
+    adPCsNt = calculateAlzNormalityTest(adPCs, roiNames, 'ad', 'pc');
+    mciPCsNt = calculateAlzNormalityTest(mciPCs, roiNames, 'mci', 'pc');
 
     cnGCsNt = calculateAlzNormalityTest(cnGCs, roiNames, 'cn', 'gc');
     adGCsNt = calculateAlzNormalityTest(adGCs, roiNames, 'ad', 'gc');
@@ -62,9 +71,10 @@ function analyzeAlzheimerDLCM
     cnDLsNt = calculateAlzNormalityTest(cnDLs, roiNames, 'cn', 'dlcm');
     adDLsNt = calculateAlzNormalityTest(adDLs, roiNames, 'ad', 'dlcm');
     mciDLsNt = calculateAlzNormalityTest(mciDLs, roiNames, 'mci', 'dlcm');
-%%}
+%}
     % compalizon test (Wilcoxon, Mann?Whitney U test)
     [cnadFCsUt, cnadFCsUtP, cnadFCsUtP2] = calculateAlzWilcoxonTest(cnFCs, adFCs, roiNames, 'cn', 'ad', 'fc');
+    [cnadPCsUt, cnadPCsUtP, cnadPCsUtP2] = calculateAlzWilcoxonTest(cnPCs, adPCs, roiNames, 'cn', 'ad', 'pc');
     [cnadGCsUt, cnadGCsUtP, cnadGCsUtP2] = calculateAlzWilcoxonTest(cnGCs, adGCs, roiNames, 'cn', 'ad', 'gc');
     [cnadTEsUt, cnadTEsUtP, cnadTEsUtP2] = calculateAlzWilcoxonTest(cnTEs, adTEs, roiNames, 'cn', 'ad', 'te');
     [cnadDLsUt, cnadDLsUtP, cnadDLsUtP2] = calculateAlzWilcoxonTest(cnDLs, adDLs, roiNames, 'cn', 'ad', 'dlcm');
@@ -75,10 +85,12 @@ function analyzeAlzheimerDLCM
     N = 5;
 
     fcAUC = zeros(1,N);
+    pcAUC = zeros(1,N);
     gcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
     teAUC = zeros(1,N);
     fcROC = cell(N,2);
+    pcROC = cell(N,2);
     gcROC = cell(N,2);
     dlROC = cell(N,2);
     teROC = cell(N,2);
@@ -93,6 +105,12 @@ function analyzeAlzheimerDLCM
         sigCntAD{k,1} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = calcAlzROCcurve(sigCntCN{k,1}, sigCntAD{k,1}, topNum);
 
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnPCs, adPCs, k, N);
+        [B, I, X] = sortAndPairPValues(control, target, cnadPCsUtP, topNum);
+        sigCntCN{k,1} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntAD{k,1} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = calcAlzROCcurve(sigCntCN{k,1}, sigCntAD{k,1}, topNum);
+        
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnGCs, adGCs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadGCsUtP, topNum);
         sigCntCN{k,2} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
@@ -115,18 +133,21 @@ function analyzeAlzheimerDLCM
 
     % save result
     fname = ['results/ad-cn-ad-roi' num2str(132) '-result.mat'];
-    save(fname, 'cosSim', 'fcAUC','gcAUC','dlAUC','teAUC', 'fcROC','gcROC','dlROC','teROC', 'sigCntCN', 'sigCntAD');
+    save(fname, 'cosSim', 'fcAUC','pcAUC','gcAUC','dlAUC','teAUC', 'fcROC','pcROC','gcROC','dlROC','teROC', 'sigCntCN', 'sigCntAD');
     mean(dlAUC) % show result AUC
     mean(fcAUC) % show result AUC
+    mean(pcAUC) % show result AUC
 
     % plot ROC curve
     figure;
     hold on;
     plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
+    plotErrorROCcurve(pcROC, N, [0.8,0.2,0.2]);
     plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
     plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
     plotErrorROCcurve(teROC, N, [0.2,0.6,0.8]);
     plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
+    plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
     plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);
     plotAverageROCcurve(teROC, N, '--', [0.2,0.5,0.7],0.5);
@@ -301,6 +322,8 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
             switch(algorithm)
             case 'fc'
                 mat = calcFunctionalConnectivity(signals{i});
+            case 'pc'
+                mat = calcPartialCorrelation(signals{i});
             case 'gc'
                 mat = calcMultivariateGCI(signals{i}, LAG);
             case 'te'
@@ -355,6 +378,10 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
     case 'fc'
         clims = [-1,1];
         titleStr = [group ' : Functional Connectivity'];
+        sigWeights = meanWeights;
+    case 'pc'
+        clims = [-1,1];
+        titleStr = [group ' : Partial Correlation'];
         sigWeights = meanWeights;
     case 'gc'
         sigma = std(meanWeights(:),'omitnan');
@@ -449,6 +476,7 @@ function [utestH, utestP, utestP2] = calculateAlzWilcoxonTest(control, target, r
                     x2(1:length(x),1) = x;
                     y2 = y;
                 end
+                if isempty(find(~isnan(x2))) || isempty(find(~isnan(y2))), continue; end
                 [p, h] = ranksum(x2,y2);
 %                [p, h] = signrank(x2,y2);
                 utestH(i,j) = h;
