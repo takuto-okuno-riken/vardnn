@@ -42,7 +42,7 @@ function performanceCheckNodePatternDCM4
 
     %% pattern 1 -------------------------------------------------
 %%{
-    disp('network density 0.191');
+    disp('network density 0.05');
     pP.A = rand(n,n)/5 - 0.1;
     pP.A(5,1) = 0.5 + rand() * 0.2;
     pP.A(8,3) = 0.5 + rand() * 0.2;
@@ -51,7 +51,7 @@ function performanceCheckNodePatternDCM4
 %%}
     %% pattern 2 -------------------------------------------------
 %%{
-    disp('network density 0.25');
+    disp('network density 0.11');
     pP.A = rand(n,n)/5 - 0.1;
     pP.A(5,1) = 0.5 + rand() * 0.2;
     pP.A(8,3) = 0.5 + rand() * 0.2;
@@ -63,14 +63,14 @@ function performanceCheckNodePatternDCM4
 %%}
     %% pattern 6 -------------------------------------------------
 %%{
-    disp('network density 0.304');
+    disp('network density 0.16');
     pP.A = rand(n,n)/5 - 0.1;
     pP.A = addPattern6(pP.A,0.3,0.2);
     checkingPattern(pP,M,U,N,T,n,TR,options,6);
 %%}
     %% pattern 7 -------------------------------------------------
 %%{
-    disp('network density 0.411');
+    disp('network density 0.27');
     pP.A = rand(n,n)/5 - 0.1;
     pP.A = addPattern6(pP.A,0.25,0.1);
     pP.A = addPattern7(pP.A,0.25,0.2);
@@ -78,7 +78,7 @@ function performanceCheckNodePatternDCM4
 %%}
     %% pattern 8 -------------------------------------------------
 %%{
-    disp('network density 0.5');
+    disp('network density 0.36');
     pP.A = rand(n,n)/5 - 0.1;
     pP.A = addPattern6(pP.A,0.25,0.1);
     pP.A = addPattern7(pP.A,0.25,0.2);
@@ -167,7 +167,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure(fcRf); hold on; [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = plotROCcurve(FC, pP.A, 100, 1, 0.2); hold off;
         % show original signal PC
         figure; PC = plotPartialCorrelation(y2.');
-        figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(FC, pP.A, 100, 1, 0.2); hold off;
+        figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(PC, pP.A, 100, 1, 0.2); hold off;
         % show original signal granger causality index (mvGC)
         figure; gcI = plotMultivariateGCI(y2.',3,0);
         figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, pP.A, 100, 1, 0.2); hold off;

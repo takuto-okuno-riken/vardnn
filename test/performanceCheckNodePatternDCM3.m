@@ -42,7 +42,7 @@ function performanceCheckNodePatternDCM3
 
     %% pattern 1 -------------------------------------------------
 %%{
-    disp('network density 0.191');
+    disp('network density 0.05');
     pP.A = eye(n,n) * 0.2;
     pP.A(5,1) = 0.2 + rand() * 0.3;
     pP.A(8,3) = 0.2 + rand() * 0.3;
@@ -51,7 +51,7 @@ function performanceCheckNodePatternDCM3
 %%}
     %% pattern 2 -------------------------------------------------
 %%{
-    disp('network density 0.25');
+    disp('network density 0.11');
     pP.A = eye(n,n) * 0.2;
     pP.A(5,1) = 0.3 + rand() * 0.3;
     pP.A(8,3) = 0.3 + rand() * 0.3;
@@ -63,14 +63,14 @@ function performanceCheckNodePatternDCM3
 %%}
     %% pattern 6 -------------------------------------------------
 %%{
-    disp('network density 0.304');
+    disp('network density 0.16');
     pP.A = eye(n,n) * 0.2;
     pP.A = addPattern6(pP.A,0.3,0.2);
     checkingPattern(pP,M,U,N,T,n,TR,options,6);
 %%}
     %% pattern 7 -------------------------------------------------
 %%{
-    disp('network density 0.411');
+    disp('network density 0.27');
     pP.A = eye(n,n) * 0.15;
     pP.A = addPattern6(pP.A,0.3,0.2);
     pP.A = addPattern7(pP.A);
@@ -78,7 +78,7 @@ function performanceCheckNodePatternDCM3
 %%}
     %% pattern 8 -------------------------------------------------
 %%{
-    disp('network density 0.5');
+    disp('network density 0.36');
     pP.A = eye(n,n) * 0.1;
     pP.A = addPattern6(pP.A,0.2,0.2);
     pP.A = addPattern7(pP.A);
@@ -133,12 +133,15 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     figure; plotDcmEC(pP.A);
 
     fcAUC = zeros(1,N);
+    pcAUC = zeros(1,N);
     gcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
     fcROC = cell(N,2);
+    pcROC = cell(N,2);
     gcROC = cell(N,2);
     dlROC = cell(N,2);
     fcRf = figure;
+    pcRf = figure;
     gcRf = figure;
     dlRf = figure;
 
@@ -162,6 +165,9 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         % show original signal FC
         figure; FC = plotFunctionalConnectivity(y2.');
         figure(fcRf); hold on; [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = plotROCcurve(FC, pP.A); hold off;
+        % show original signal PC
+        figure; PC = plotPartialCorrelation(y2.');
+        figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(PC, pP.A); hold off;
         % show original signal granger causality index (mvGC)
         figure; gcI = plotMultivariateGCI(y2.',3,0);
         figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, pP.A); hold off;
@@ -210,6 +216,6 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A); hold off;
     end
     fname = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];    
-    save(fname, 'fcAUC', 'gcAUC', 'dlAUC', 'fcROC','gcROC','dlROC');
+    save(fname, 'fcAUC', 'pcAUC', 'gcAUC', 'dlAUC', 'fcROC','pcROC','gcROC','dlROC');
 end
 

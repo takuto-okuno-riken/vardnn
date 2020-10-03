@@ -10,7 +10,9 @@ function performanceCheckNodePatternDCM3d
     t  = (1:T)*TR;                        % observation times
 
     prefix = 'net-pat3-';                 % original weight file prefix (result of *NodePatternDCM3.m or *DCM4.m)
-    Gth = 0;                            % 0 for pat3. 0.2 for pat4.
+    Gth = 0;                              % 0 for pat3. 0.2 for pat4.
+%    prefix = 'net-pat4-';                 % original weight file prefix (result of *NodePatternDCM3.m or *DCM4.m)
+%    Gth = 0.2;                            % 0 for pat3. 0.2 for pat4.
 
     % priors
     % -------------------------------------------------------------------------
@@ -40,27 +42,27 @@ function performanceCheckNodePatternDCM3d
 
     %% pattern 1 -------------------------------------------------
 %%{
-    disp('network density 0.191');
+    disp('network density 0.05');
     checkingPattern(pP,M,U,N,T,n,TR,options,prefix,Gth,1);
 %%}
     %% pattern 2 -------------------------------------------------
 %%{
-    disp('network density 0.25');
+    disp('network density 0.11');
     checkingPattern(pP,M,U,N,T,n,TR,options,prefix,Gth,2);
 %%}
     %% pattern 6 -------------------------------------------------
 %%{
-    disp('network density 0.304');
+    disp('network density 0.16');
     checkingPattern(pP,M,U,N,T,n,TR,options,prefix,Gth,6);
 %%}
     %% pattern 7 -------------------------------------------------
 %%{
-    disp('network density 0.411');
+    disp('network density 0.27');
     checkingPattern(pP,M,U,N,T,n,TR,options,prefix,Gth,7);
 %%}
     %% pattern 8 -------------------------------------------------
 %%{
-    disp('network density 0.5');
+    disp('network density 0.36');
     checkingPattern(pP,M,U,N,T,n,TR,options,prefix,Gth,8);
 %%}
 end
@@ -137,6 +139,6 @@ function checkingPattern(pP,M,U,N,T,n,TR,options,prefix,Gth,idx)
         figure; plotDcmEC(BPA.Ep.A,0);
         figure(dcmRf); hold on; [dcmROC{k,1}, dcmROC{k,2}, dcmAUC(k)] = plotROCcurve(BPA.Ep.A, pP.A, 100, 1, Gth); hold off;
     end
-    save(fname, 'fcAUC','gcAUC','dlAUC','dcmAUC', 'fcROC','gcROC','dlROC','dcmROC');
+    save(fname, 'fcAUC','pcAUC','gcAUC','dlAUC','dcmAUC', 'fcROC','pcROC','gcROC','dlROC','dcmROC');
 end
 

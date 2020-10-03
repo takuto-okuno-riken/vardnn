@@ -7,31 +7,33 @@ function performanceCheckNodePatternDCM3rnn
     n  = 8;                               % number of regions or nodes
 
     prefix = 'net-pat3-';                 % original weight file prefix (result of *NodePatternDCM3d.m)
-    Gth = 0;                            % 0 for pat3. 0.2 for pat4.
+    Gth = 0;                              % 0 for pat3. 0.2 for pat4.
+%    prefix = 'net-pat4-';                  % original weight file prefix (result of *NodePatternDCM3d.m)
+%    Gth = 0.2;                             % 0 for pat3. 0.2 for pat4.
 
     %% pattern 1 -------------------------------------------------
 %%{
-    disp('network density 0.191');
+    disp('network density 0.05');
     checkingPattern(N,T,n,prefix,Gth,1);
 %%}
     %% pattern 2 -------------------------------------------------
 %%{
-    disp('network density 0.25');
+    disp('network density 0.11');
     checkingPattern(N,T,n,prefix,Gth,2);
 %%}
     %% pattern 6 -------------------------------------------------
 %%{
-    disp('network density 0.304');
+    disp('network density 0.16');
     checkingPattern(N,T,n,prefix,Gth,6);
 %%}
     %% pattern 7 -------------------------------------------------
 %%{
-    disp('network density 0.411');
+    disp('network density 0.27');
     checkingPattern(N,T,n,prefix,Gth,7);
 %%}
     %% pattern 8 -------------------------------------------------
 %%{
-    disp('network density 0.5');
+    disp('network density 0.36');
     checkingPattern(N,T,n,prefix,Gth,8);
 %%}
 end
@@ -96,12 +98,13 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         figure(nnnueRf); hold on; [nnnueROC{k,1}, nnnueROC{k,2}, nnnueAUC(k)] = plotROCcurve(A, pP.A, 100, 1, Gth); hold off;        
     end
     % save result
-    save(fname, 'fcAUC','gcAUC','dlAUC','dcmAUC','rnnAUC','linueAUC','nnnueAUC', 'fcROC','gcROC','dlROC','dcmROC','rnnROC','linueROC','nnnueROC');
+    save(fname, 'fcAUC','pcAUC','gcAUC','dlAUC','dcmAUC','rnnAUC','linueAUC','nnnueAUC', 'fcROC','pcROC','gcROC','dlROC','dcmROC','rnnROC','linueROC','nnnueROC');
     
     % show average ROC curve of DCM
     figure; 
     hold on;
     plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
+    plotErrorROCcurve(pcROC, N, [0.8,0.2,0.2]);
     plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
     plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
     plotErrorROCcurve(dcmROC, N, [0.2,0.2,0.8]);
@@ -109,6 +112,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plotErrorROCcurve(linueROC, N, [0.2,0.6,0.8]);
     plotErrorROCcurve(nnnueROC, N, [0.8,0.2,0.8]);
     plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
+    plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
     plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);
     plotAverageROCcurve(dcmROC, N, '-', [0.2,0.2,0.8],0.5);
