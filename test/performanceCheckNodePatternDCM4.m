@@ -133,11 +133,14 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     figure; plotDcmEC(pP.A);
 
     fcAUC = zeros(1,N);
+    pcAUC = zeros(1,N);
     gcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
     fcROC = cell(N,2);
+    pcROC = cell(N,2);
     gcROC = cell(N,2);
     dlROC = cell(N,2);
+    pcRf = figure;
     fcRf = figure;
     gcRf = figure;
     dlRf = figure;
@@ -162,6 +165,9 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         % show original signal FC
         figure; FC = plotFunctionalConnectivity(y2.');
         figure(fcRf); hold on; [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = plotROCcurve(FC, pP.A, 100, 1, 0.2); hold off;
+        % show original signal PC
+        figure; PC = plotPartialCorrelation(y2.');
+        figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(FC, pP.A, 100, 1, 0.2); hold off;
         % show original signal granger causality index (mvGC)
         figure; gcI = plotMultivariateGCI(y2.',3,0);
         figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, pP.A, 100, 1, 0.2); hold off;
@@ -210,6 +216,6 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A, 100, 1, 0.2); hold off;
     end
     fname = ['results/net-pat4-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];    
-    save(fname, 'fcAUC', 'gcAUC', 'dlAUC', 'fcROC','gcROC','dlROC');
+    save(fname, 'fcAUC', 'pcAUC', 'gcAUC', 'dlAUC', 'fcROC','pcROC','gcROC','dlROC');
 end
 
