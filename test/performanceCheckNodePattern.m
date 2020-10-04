@@ -122,6 +122,8 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     figure; FC = plotFunctionalConnectivity(si);
     % show original signal PC
     figure; PC = plotPartialCorrelation(si);
+    % show original signal mWCS
+    figure; mWCS = plotWaveletCoherence(si);
     % show original signal granger causality index (gc-EC)
     figure; gcI = plotMultivariateGCI(si, 3, 0);
     % show original time shifted correlation (tsc-FC)
