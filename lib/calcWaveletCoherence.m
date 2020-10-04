@@ -1,7 +1,7 @@
 %%
 % Caluclate Wavelet Coherence
-% returns mean Wavelet Cross Spectol matrix (mWCS), full set of Wavelet
-% Coherence (WCOH) and Cross Spectols (WCS)
+% returns mean Wavelet Cross Spectrum matrix (mWCS), full set of Wavelet
+% Coherence (WCOH) and Cross Spectrums (WCS)
 % input:
 %  X     multivariate time series matrix (node x time series)
 

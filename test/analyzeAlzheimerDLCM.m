@@ -345,6 +345,14 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
                 mat = calcFunctionalConnectivity(signals{i});
             case 'pc'
                 mat = calcPartialCorrelation(signals{i});
+            case 'wcs'
+                wcsName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                if exist(wcsName, 'file')
+                    load(wcsName);
+                else
+                    mat = calcWaveletCoherence(signals{i});
+                    save(wcsName, 'mat');
+                end
             case 'gc'
                 mat = calcMultivariateGCI(signals{i}, LAG);
             case 'te'
@@ -403,6 +411,10 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
     case 'pc'
         clims = [-1,1];
         titleStr = [group ' : Partial Correlation'];
+        sigWeights = meanWeights;
+    case 'wcs'
+        clims = [-1,1];
+        titleStr = [group ' : Wavelet Coherence Cross Spectrum'];
         sigWeights = meanWeights;
     case 'gc'
         sigma = std(meanWeights(:),'omitnan');
