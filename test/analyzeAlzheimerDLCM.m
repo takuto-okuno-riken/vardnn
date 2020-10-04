@@ -21,6 +21,10 @@ function analyzeAlzheimerDLCM
     [adPCs, meanADPC, stdADPC] = calculateConnectivity(adSignals, roiNames, 'ad', 'pc');
     [mciPCs, meanMCIPC, stdMCIPC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'pc');
 
+    [cnWCSs, meanCNWCS, stdCNWCS] = calculateConnectivity(cnSignals, roiNames, 'cn', 'wcs');
+    [adWCSs, meanADWCS, stdADWCS] = calculateConnectivity(adSignals, roiNames, 'ad', 'wcs');
+    [mciWCSs, meanMCIWCS, stdMCIWCS] = calculateConnectivity(mciSignals, roiNames, 'mci', 'wcs');
+
     [cnGCs, meanCNGC, stdCNGC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'gc');
     [adGCs, meanADGC, stdADGC] = calculateConnectivity(adSignals, roiNames, 'ad', 'gc');
     [mciGCs, meanMCIGC, stdMCIGC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'gc');
@@ -40,13 +44,14 @@ function analyzeAlzheimerDLCM
 %    figure; cnadGCr = plotTwoSignalsCorrelation(meanCNGC, meanADGC);
 %    figure; cnadTEr = plotTwoSignalsCorrelation(meanCNTE, meanADTE);
 %    figure; cnadDLr = plotTwoSignalsCorrelation(meanCNDL, meanADDL);
-    cosSim = zeros(5,1);
+    cosSim = zeros(6,1);
     cosSim(1) = getCosSimilarity(meanCNFC+nanx, meanADFC+nanx);
     cosSim(2) = getCosSimilarity(meanCNPC+nanx, meanADPC+nanx);
-    cosSim(3) = getCosSimilarity(meanCNGC, meanADGC);
-    cosSim(4) = getCosSimilarity(meanCNTE, meanADTE);
-    cosSim(5) = getCosSimilarity(meanCNDL, meanADDL);
-    X = categorical({'FC','PC','GC','TE','DLCM-GC'});
+    cosSim(3) = getCosSimilarity(meanCNWCS+nanx, meanADWCS+nanx);
+    cosSim(4) = getCosSimilarity(meanCNGC, meanADGC);
+    cosSim(5) = getCosSimilarity(meanCNTE, meanADTE);
+    cosSim(6) = getCosSimilarity(meanCNDL, meanADDL);
+    X = categorical({'FC','PC','WCS','GC','TE','DLCM-GC'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and AD by each algorithm');
     
@@ -59,6 +64,10 @@ function analyzeAlzheimerDLCM
     cnPCsNt = calculateAlzNormalityTest(cnPCs, roiNames, 'cn', 'pc');
     adPCsNt = calculateAlzNormalityTest(adPCs, roiNames, 'ad', 'pc');
     mciPCsNt = calculateAlzNormalityTest(mciPCs, roiNames, 'mci', 'pc');
+
+    cnWCSsNt = calculateAlzNormalityTest(cnWCSs, roiNames, 'cn', 'wcs');
+    adWCSsNt = calculateAlzNormalityTest(adWCSs, roiNames, 'ad', 'wcs');
+    mciWCSsNt = calculateAlzNormalityTest(mciWCSs, roiNames, 'mci', 'wcs');
 
     cnGCsNt = calculateAlzNormalityTest(cnGCs, roiNames, 'cn', 'gc');
     adGCsNt = calculateAlzNormalityTest(adGCs, roiNames, 'ad', 'gc');
@@ -75,6 +84,7 @@ function analyzeAlzheimerDLCM
     % compalizon test (Wilcoxon, Mann?Whitney U test)
     [cnadFCsUt, cnadFCsUtP, cnadFCsUtP2] = calculateAlzWilcoxonTest(cnFCs, adFCs, roiNames, 'cn', 'ad', 'fc');
     [cnadPCsUt, cnadPCsUtP, cnadPCsUtP2] = calculateAlzWilcoxonTest(cnPCs, adPCs, roiNames, 'cn', 'ad', 'pc');
+    [cnadWCSsUt, cnadWCSsUtP, cnadWCSsUtP2] = calculateAlzWilcoxonTest(cnWCSs, adWCSs, roiNames, 'cn', 'ad', 'wcs');
     [cnadGCsUt, cnadGCsUtP, cnadGCsUtP2] = calculateAlzWilcoxonTest(cnGCs, adGCs, roiNames, 'cn', 'ad', 'gc');
     [cnadTEsUt, cnadTEsUtP, cnadTEsUtP2] = calculateAlzWilcoxonTest(cnTEs, adTEs, roiNames, 'cn', 'ad', 'te');
     [cnadDLsUt, cnadDLsUtP, cnadDLsUtP2] = calculateAlzWilcoxonTest(cnDLs, adDLs, roiNames, 'cn', 'ad', 'dlcm');
@@ -86,17 +96,19 @@ function analyzeAlzheimerDLCM
 
     fcAUC = zeros(1,N);
     pcAUC = zeros(1,N);
+    wcsAUC = zeros(1,N);
     gcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
     teAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
+    wcsROC = cell(N,2);
     gcROC = cell(N,2);
     dlROC = cell(N,2);
     teROC = cell(N,2);
 
-    sigCntCN = cell(N,4);
-    sigCntAD = cell(N,4);
+    sigCntCN = cell(N,6);
+    sigCntAD = cell(N,6);
     for k=1:N
         % check sigma of healthy subject
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnFCs, adFCs, k, N);
@@ -110,6 +122,12 @@ function analyzeAlzheimerDLCM
         sigCntCN{k,1} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,1} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = calcAlzROCcurve(sigCntCN{k,1}, sigCntAD{k,1}, topNum);
+        
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnWCSs, adWCSs, k, N);
+        [B, I, X] = sortAndPairPValues(control, target, cnadWCSsUtP, topNum);
+        sigCntCN{k,1} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntAD{k,1} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        [wcsROC{k,1}, wcsROC{k,2}, wcsAUC(k)] = calcAlzROCcurve(sigCntCN{k,1}, sigCntAD{k,1}, topNum);
         
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnGCs, adGCs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadGCsUtP, topNum);
@@ -133,21 +151,24 @@ function analyzeAlzheimerDLCM
 
     % save result
     fname = ['results/ad-cn-ad-roi' num2str(132) '-result.mat'];
-    save(fname, 'cosSim', 'fcAUC','pcAUC','gcAUC','dlAUC','teAUC', 'fcROC','pcROC','gcROC','dlROC','teROC', 'sigCntCN', 'sigCntAD');
+    save(fname, 'cosSim', 'fcAUC','pcAUC','wcsAUC','gcAUC','dlAUC','teAUC', 'fcROC','pcROC','wcsROC','gcROC','dlROC','teROC', 'sigCntCN', 'sigCntAD');
     mean(dlAUC) % show result AUC
     mean(fcAUC) % show result AUC
     mean(pcAUC) % show result AUC
+    mean(wcsAUC) % show result AUC
 
     % plot ROC curve
     figure;
     hold on;
     plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
     plotErrorROCcurve(pcROC, N, [0.8,0.2,0.2]);
+    plotErrorROCcurve(wcsROC, N, [0.9,0.5,0]);
     plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
     plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
     plotErrorROCcurve(teROC, N, [0.2,0.6,0.8]);
     plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
+    plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
     plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);
     plotAverageROCcurve(teROC, N, '--', [0.2,0.5,0.7],0.5);

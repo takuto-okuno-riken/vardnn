@@ -75,6 +75,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
         [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(si);
         [uu, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
+        nodeNum = size(si,1);
+        sigLen = size(si,2);
             
         % show original connection
         figure(origf); plotDcmEC(weights);
@@ -90,8 +92,14 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(PC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of PC (pat=' num2str(i) ')']);
 
-        % show original signal PC
-        WCS = plotWaveletCoherence(si);
+        % show original signal WCS
+        wcsFile = ['results/wcs-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) '.mat'];
+        if exist(wcsFile, 'file')
+            load(wcsFile);
+        else
+            WCS = calcWaveletCoherence(si);
+            save(wcsFile, 'WCS');
+        end
         figure(wcsRf); hold on; [wcsROC{k,1}, wcsROC{k,2}, wcsAUC(k)] = plotROCcurve(WCS, weights, 100, 1, Gth); hold off;
         title(['ROC curve of WCS (pat=' num2str(i) ')']);
 
@@ -106,8 +114,6 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of pwGC (pat=' num2str(i) ')']);
 %%{
         % calcurate and show DLCM-GC
-        nodeNum = size(si,1);
-        sigLen = size(si,2);
         inControl = eye(nodeNum, nodeNum);
         dlcmFile = ['results/net-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) '.mat'];
         if exist(dlcmFile, 'file')
