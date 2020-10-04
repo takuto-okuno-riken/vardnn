@@ -8,8 +8,8 @@ function performanceCheckNodePatternDCM3rnn
 
     prefix = 'net-pat3-';                 % original weight file prefix (result of *NodePatternDCM3d.m)
     Gth = 0;                              % 0 for pat3. 0.2 for pat4.
-%    prefix = 'net-pat4-';                  % original weight file prefix (result of *NodePatternDCM3d.m)
-%    Gth = 0.2;                             % 0 for pat3. 0.2 for pat4.
+    prefix = 'net-pat4-';                  % original weight file prefix (result of *NodePatternDCM3d.m)
+    Gth = 0.2;                             % 0 for pat3. 0.2 for pat4.
 
     %% pattern 1 -------------------------------------------------
 %%{
@@ -98,13 +98,14 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         figure(nnnueRf); hold on; [nnnueROC{k,1}, nnnueROC{k,2}, nnnueAUC(k)] = plotROCcurve(A, pP.A, 100, 1, Gth); hold off;        
     end
     % save result
-    save(fname, 'fcAUC','pcAUC','gcAUC','dlAUC','dcmAUC','rnnAUC','linueAUC','nnnueAUC', 'fcROC','pcROC','gcROC','dlROC','dcmROC','rnnROC','linueROC','nnnueROC');
+    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','dlAUC','dcmAUC','rnnAUC','linueAUC','nnnueAUC', 'fcROC','pcROC','wcsROC','gcROC','dlROC','dcmROC','rnnROC','linueROC','nnnueROC');
     
     % show average ROC curve of DCM
     figure; 
     hold on;
     plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
     plotErrorROCcurve(pcROC, N, [0.8,0.2,0.2]);
+    plotErrorROCcurve(wcsROC, N, [0.9,0.5,0]);
     plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
     plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
     plotErrorROCcurve(dcmROC, N, [0.2,0.2,0.8]);
@@ -113,6 +114,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plotErrorROCcurve(nnnueROC, N, [0.8,0.2,0.8]);
     plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
+    plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
     plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);
     plotAverageROCcurve(dcmROC, N, '-', [0.2,0.2,0.8],0.5);

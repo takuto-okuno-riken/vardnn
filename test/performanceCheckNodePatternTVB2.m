@@ -44,18 +44,21 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     % init
     fcAUC = zeros(1,N);
     pcAUC = zeros(1,N);
+    wcsAUC = zeros(1,N);
     gcAUC = zeros(1,N);
     pgcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
     linueAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
+    wcsROC = cell(N,2);
     gcROC = cell(N,2);
     pgcROC = cell(N,2);
     dlROC = cell(N,2);
     linueROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
+    wcsRf = figure;
     gcRf = figure;
     pgcRf = figure;
     dlRf = figure;
@@ -86,6 +89,11 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         PC = calcPartialCorrelation(si);
         figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(PC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of PC (pat=' num2str(i) ')']);
+
+        % show original signal PC
+        WCS = plotWaveletCoherence(si);
+        figure(wcsRf); hold on; [wcsROC{k,1}, wcsROC{k,2}, wcsAUC(k)] = plotROCcurve(WCS, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of WCS (pat=' num2str(i) ')']);
 
         % show original signal granger causality index (mvGC)
         gcI = calcMultivariateGCI(si,lag);
@@ -158,6 +166,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     % show result AUC
     disp(['FC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(fcAUC))]);
     disp(['PC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(pcAUC))]);
+    disp(['WCS AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(wcsAUC))]);
     disp(['mvGC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(gcAUC))]);
     disp(['pwGC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(pgcAUC))]);
     disp(['DLCM-GC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlAUC))]);
@@ -165,13 +174,14 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
     % save result
     fname = ['results/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-result.mat'];
-    save(fname, 'fcAUC','pcAUC','gcAUC','pgcAUC','dlAUC','linueAUC', 'fcROC','pcROC','gcROC','pgcROC','dlROC','linueROC');
+    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','linueAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','linueROC');
 
     % show average ROC curve of DCM
     figure; 
     hold on;
     plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
     plotErrorROCcurve(pcROC, N, [0.8,0.2,0.2]);
+    plotErrorROCcurve(pcROC, N, [0.9,0.5,0]);
     plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
     plotErrorROCcurve(pgcROC, N, [0.0,0.5,0.0]);
     plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
@@ -181,6 +191,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 %    plotErrorROCcurve(nnnueROC, N, [0.8,0.2,0.8]);
     plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
+    plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
     plotAverageROCcurve(pgcROC, N, '--', [0.0,0.5,0.0],0.5);
     plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);

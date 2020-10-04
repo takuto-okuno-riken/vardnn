@@ -139,6 +139,6 @@ function checkingPattern(pP,M,U,N,T,n,TR,options,prefix,Gth,idx)
         figure; plotDcmEC(BPA.Ep.A,0);
         figure(dcmRf); hold on; [dcmROC{k,1}, dcmROC{k,2}, dcmAUC(k)] = plotROCcurve(BPA.Ep.A, pP.A, 100, 1, Gth); hold off;
     end
-    save(fname, 'fcAUC','pcAUC','gcAUC','dlAUC','dcmAUC', 'fcROC','pcROC','gcROC','dlROC','dcmROC');
+    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','dlAUC','dcmAUC', 'fcROC','pcROC','wcsROC','gcROC','dlROC','dcmROC');
 end
 
