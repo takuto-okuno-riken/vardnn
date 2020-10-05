@@ -72,12 +72,9 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         tvbFile = ['data/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-' num2str(k) '.mat'];
         load(tvbFile);
         density = length(find(weights>Gth)) / (node_num * (node_num-1));
-
-        [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(si);
-        [uu, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
         nodeNum = size(si,1);
         sigLen = size(si,2);
-            
+
         % show original connection
         figure(origf); plotDcmEC(weights);
         figure(origSigf); plot(t, si);
@@ -113,6 +110,9 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(pgcRf); hold on; [pgcROC{k,1}, pgcROC{k,2}, pgcAUC(k)] = plotROCcurve(gcI, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pwGC (pat=' num2str(i) ')']);
 %%{
+        [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(si);
+        [uu, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
+            
         % calcurate and show DLCM-GC
         inControl = eye(nodeNum, nodeNum);
         dlcmFile = ['results/net-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) '.mat'];

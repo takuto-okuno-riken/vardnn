@@ -1,5 +1,8 @@
+% Before using this function, download SPM12 codes from
+% https://www.fil.ion.ucl.ac.uk/spm/software/download/
+% and add a path "spm12" and sub folders, then remove "spm12/external" folder and sub folders.
 
-% this script should run after performanceCheckNodePatternDCM3 and RNN-GC result
+% this script should run after performanceCheckNodePatternDCM3, performanceCheckNodePatternDCM3d and RNN-GC result
 function performanceCheckNodePatternDCM3rnn
     % -------------------------------------------------------------------------
     N  = 8;

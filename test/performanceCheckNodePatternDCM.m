@@ -1,4 +1,6 @@
-
+% Before using this function, download SPM12 codes from
+% https://www.fil.ion.ucl.ac.uk/spm/software/download/
+% and add a path "spm12" and sub folders, then remove "spm12/external" folder and sub folders.
 
 function performanceCheckNodePatternDCM
     % load signals
