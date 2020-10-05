@@ -48,6 +48,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     gcAUC = zeros(1,N);
     pgcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
+    dlgAUC = zeros(1,N);
     linueAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
@@ -55,6 +56,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     gcROC = cell(N,2);
     pgcROC = cell(N,2);
     dlROC = cell(N,2);
+    dlgROC = cell(N,2);
     linueROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
@@ -62,6 +64,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     gcRf = figure;
     pgcRf = figure;
     dlRf = figure;
+    dlgRf = figure;
     linueRf = figure;
     origf = figure;
     origSigf = figure;
@@ -109,6 +112,11 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         gcI = calcPairwiseGCI(si,lag);
         figure(pgcRf); hold on; [pgcROC{k,1}, pgcROC{k,2}, pgcAUC(k)] = plotROCcurve(gcI, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pwGC (pat=' num2str(i) ')']);
+
+        % show original signal DirectLiNGAM
+        Aest = calcDirectLiNGAM(si);
+        figure(dlgRf); hold on; [dlgROC{k,1}, dlgROC{k,2}, dlgAUC(k)] = plotROCcurve(Aest, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of DirectLiNGAM (pat=' num2str(i) ')']);
 %%{
         [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(si);
         [uu, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
@@ -120,8 +128,6 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             load(dlcmFile);
         else
             % train DLCM    
-            %[Y, sig, m, maxsi, minsi] = convert2SigmoidSignal(si);
-            %[inSignal, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
             Y = si;
             inSignal = uu;
             % layer parameters
@@ -149,7 +155,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
             % recoverty training
             %[netDLCM, time] = recoveryTrainDlcmNetwork(Y, inSignal, [], inControl, netDLCM, options);
-            save(dlcmFile, 'netDLCM', 'Y', 'inSignal', 'Y', 'sig', 'm', 'maxsi', 'minsi', 'sig2', 'm2', 'maxsi2', 'minsi2');
+            save(dlcmFile, 'netDLCM', 'Y', 'inSignal', 'si', 'sig', 'm', 'maxsi', 'minsi', 'sig2', 'm2', 'maxsi2', 'minsi2');
         end
         % show DLCM-GC
         dlGC = calcDlcmGCI(Y, inSignal, [], inControl, netDLCM);
@@ -177,10 +183,11 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     disp(['pwGC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(pgcAUC))]);
     disp(['DLCM-GC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlAUC))]);
     disp(['LINUE-TE AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(linueAUC))]);
+    disp(['DirectLiNGAM AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlgAUC))]);
 
     % save result
     fname = ['results/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-result.mat'];
-    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','linueAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','linueROC');
+    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlgAUC','linueAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlgROC','linueROC');
 
     % show average ROC curve of DCM
     figure; 
@@ -195,6 +202,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 %    plotErrorROCcurve(rnnROC, N, [0.8,0.8,0.2]);
     plotErrorROCcurve(linueROC, N, [0.2,0.6,0.8]);
 %    plotErrorROCcurve(nnnueROC, N, [0.8,0.2,0.8]);
+    plotErrorROCcurve(dlgROC, N, [0.6,0.6,0.6]);
     plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
@@ -205,6 +213,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 %    plotAverageROCcurve(rnnROC, N, '--', [0.7,0.7,0.2],0.5);
     plotAverageROCcurve(linueROC, N, '--', [0.2,0.5,0.7],0.5);
 %    plotAverageROCcurve(nnnueROC, N, '--', [0.7,0.2,0.7],0.5);
+    plotAverageROCcurve(dlgROC, N, '--', [0.6,0.6,0.6],0.5);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);
