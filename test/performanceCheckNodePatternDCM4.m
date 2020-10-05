@@ -214,14 +214,14 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
                 'MiniBatchSize',miniBatchSize, ...
                 'Shuffle','every-epoch', ...
                 'GradientThreshold',5,...
-                'L2Regularization',0.1, ...
+                'L2Regularization',0.05, ...
                 'Verbose',false);
         %            'Plots','training-progress');
 
             disp('start training');
             netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
             % recoverty training
-            [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+            %[netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
             save(dlcmFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'm', 'maxsi', 'minsi', 'sig2', 'm2', 'maxsi2', 'minsi2');
         end
 
