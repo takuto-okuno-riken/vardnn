@@ -193,8 +193,8 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure(dlgRf); hold on; [dlgROC{k,1}, dlgROC{k,2}, dlgAUC(k)] = plotROCcurve(Aest, pP.A, 100, 1, 0.2); hold off;
 
         % show DCM signals
-        [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(y2.');
-        [inSignal, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(u2.');
+        [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(y2.', 0);
+        [inSignal, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(u2.', 0);
         inControl = eye(n,n);
         figure; plot(si.');
         %figure; plot(inSignal.');
@@ -214,7 +214,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
                 'MiniBatchSize',miniBatchSize, ...
                 'Shuffle','every-epoch', ...
                 'GradientThreshold',5,...
-                'L2Regularization',0.05, ...
+                'L2Regularization',0.1, ...
                 'Verbose',false);
         %            'Plots','training-progress');
 

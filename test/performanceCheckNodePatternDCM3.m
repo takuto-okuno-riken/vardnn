@@ -177,24 +177,24 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         end
 
         % show original signal FC
-        figure; FC = plotFunctionalConnectivity(y2.');
+        fg = figure; FC = plotFunctionalConnectivity(y2.'); close(fg);
         figure(fcRf); hold on; [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = plotROCcurve(FC, pP.A); hold off;
         % show original signal PC
-        figure; PC = plotPartialCorrelation(y2.');
+        fg = figure; PC = plotPartialCorrelation(y2.'); close(fg);
         figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(PC, pP.A); hold off;
         % show original signal WCS
-        figure; WCS = plotWaveletCoherence(y2.');
+        fg = figure; WCS = plotWaveletCoherence(y2.'); close(fg);
         figure(wcsRf); hold on; [wcsROC{k,1}, wcsROC{k,2}, wcsAUC(k)] = plotROCcurve(WCS, pP.A); hold off;
         % show original signal granger causality index (mvGC)
-        figure; gcI = plotMultivariateGCI(y2.',3,0);
+        fg = figure; gcI = plotMultivariateGCI(y2.',3,0); close(fg);
         figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, pP.A); hold off;
         % show original signal DirectLiNGAM
-        figure; Aest = plotDirectLiNGAM(y2.');
+        fg = figure; Aest = plotDirectLiNGAM(y2.'); close(fg);
         figure(dlgRf); hold on; [dlgROC{k,1}, dlgROC{k,2}, dlgAUC(k)] = plotROCcurve(Aest, pP.A); hold off;
 
         % show DCM signals
-        [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(y2.');
-        [inSignal, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(u2.');
+        [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(y2.', 0);
+        [inSignal, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(u2.', 0);
         inControl = eye(n,n);
         figure; plot(si.');
         %figure; plot(inSignal.');
@@ -214,7 +214,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
                 'MiniBatchSize',miniBatchSize, ...
                 'Shuffle','every-epoch', ...
                 'GradientThreshold',5,...
-                'L2Regularization',0.05, ...
+                'L2Regularization',0.1, ...
                 'Verbose',false);
         %            'Plots','training-progress');
 
@@ -230,7 +230,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         disp(['t=' num2str(t) ', mae=' num2str(mae)]);
 
         % show DLCM-GC
-        figure; dlGC = plotDlcmGCI(si, inSignal, [], inControl, netDLCM, 0);
+        fg = figure; dlGC = plotDlcmGCI(si, inSignal, [], inControl, netDLCM, 0); close(fg);
         
         % calc ROC curve
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A); hold off;
