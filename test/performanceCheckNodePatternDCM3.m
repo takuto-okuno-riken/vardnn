@@ -235,7 +235,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         % calc ROC curve
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A); hold off;
     end
-    fname = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];    
+    fname = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
     save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'dlAUC', 'dlgAUC', 'fcROC','pcROC','wcsROC','gcROC','dlROC','dlgROC');
 end
 

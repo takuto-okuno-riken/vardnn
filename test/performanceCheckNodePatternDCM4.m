@@ -2,6 +2,12 @@
 % https://www.fil.ion.ucl.ac.uk/spm/software/download/
 % and add a path "spm12" and sub folders, then remove "spm12/external" folder and sub folders.
 
+% Before using this function, download Dlingam-1.2 codes from
+% https://sites.google.com/site/sshimizu06/Dlingamcode
+% and add a path "Dlingam-1.2" and sub folders. And also download kernel-ICA 1.2 code from
+% https://www.di.ens.fr/~fbach/kernel-ica/index.htm
+% and add a path "kernel-ica1_2" and sub folders.
+
 function performanceCheckNodePatternDCM4
     % set global random stream and shuffle it
     myStream=RandStream('mt19937ar');
@@ -139,16 +145,19 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     wcsAUC = zeros(1,N);
     gcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
+    dlgAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
     wcsROC = cell(N,2);
     gcROC = cell(N,2);
     dlROC = cell(N,2);
+    dlgROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
     wcsRf = figure;
     gcRf = figure;
     dlRf = figure;
+    dlgRf = figure;
 
     % calc input signal and node BOLD signals
     for k=1:N
@@ -179,10 +188,13 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         % show original signal granger causality index (mvGC)
         figure; gcI = plotMultivariateGCI(y2.',3,0);
         figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, pP.A, 100, 1, 0.2); hold off;
+        % show original signal DirectLiNGAM
+        figure; Aest = plotDirectLiNGAM(y2.');
+        figure(dlgRf); hold on; [dlgROC{k,1}, dlgROC{k,2}, dlgAUC(k)] = plotROCcurve(Aest, pP.A, 100, 1, 0.2); hold off;
 
         % show DCM signals
-        si = bold2dnnSignal(y2.');
-        inSignal = bold2dnnSignal(u2.');
+        [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(y2.');
+        [inSignal, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(u2.');
         inControl = eye(n,n);
         figure; plot(si.');
         %figure; plot(inSignal.');
@@ -210,7 +222,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
             netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
             % recoverty training
             [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
-            save(dlcmFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data');
+            save(dlcmFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'm', 'maxsi', 'minsi', 'sig2', 'm2', 'maxsi2', 'minsi2');
         end
 
         % show signals after training
@@ -223,7 +235,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         % calc ROC curve
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A, 100, 1, 0.2); hold off;
     end
-    fname = ['results/net-pat4-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];    
-    save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'dlAUC', 'fcROC','pcROC','wcsROC','gcROC','dlROC');
+    fname = ['results/net-pat4-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
+    save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'dlAUC', 'dlgAUC', 'fcROC','pcROC','wcsROC','gcROC','dlROC','dlgROC');
 end
 
