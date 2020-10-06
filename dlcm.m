@@ -41,6 +41,7 @@ function dlcm(varargin)
     handles.aic = 0;
     handles.bic = 0;
     handles.transform = 0;
+    handles.transopt = NaN;
     handles.format = 0;
     handles.alpha = 0.05;
     handles.Gth = 0;
@@ -82,6 +83,9 @@ function dlcm(varargin)
                 handles.bic = 1;
             case {'--transform'}
                 handles.transform = str2num(varargin{i+1});
+                i = i + 1;
+            case {'--transopt'}
+                handles.transopt = str2num(varargin{i+1});
                 i = i + 1;
             case {'--format'}
                 handles.format = str2num(varargin{i+1});
@@ -161,6 +165,7 @@ function showUsage()
     disp('  --bic               save BIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_bic.csv)');
     disp('  --groundtruth files calculate ROC curve and save AUC of DLCM-GC, mvGC, pwGC, TE and FC (<filename>_*_auc.csv)');
     disp('  --transform type    input signal transform <type> 0:raw, 1:sigmoid (default:0)');
+    disp('  --transopt num      signal transform option <num> (for type 1:centroid)');
     disp('  --format type       save file format <type> 0:csv, 1:mat(each), 2:mat(all) (default:0)');
     disp('  --lag num           time lag <num> for mvGC, pwGC and TE (default:3)');
     disp('  --ex files          DLCM exogenouse input signal <files> (file1.csv[:file2.csv:...])');
@@ -301,9 +306,9 @@ function processInputFiles(handles)
 
         % signal transform raw or not
         if handles.transform == 1
-            [X, sig, m, maxsi, minsi] = convert2SigmoidSignal(X);
+            [X, sig, c, maxsi, minsi] = convert2SigmoidSignal(X, handles.transopt);
             if ~isempty(inSignal)
-                [inSignal, sig, m, maxsi, minsi] = convert2SigmoidSignal(inSignal);
+                [inSignal, sig, c, maxsi, minsi] = convert2SigmoidSignal(inSignal, handles.transopt);
             end
         end
 

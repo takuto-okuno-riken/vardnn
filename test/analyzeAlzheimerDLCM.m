@@ -1,3 +1,9 @@
+% Before using this function, download Dlingam-1.2 codes from
+% https://sites.google.com/site/sshimizu06/Dlingamcode
+% and add a path "Dlingam-1.2" and sub folders. And also download kernel-ICA 1.2 code from
+% https://www.di.ens.fr/~fbach/kernel-ica/index.htm
+% and add a path "kernel-ica1_2" and sub folders.
+
 function analyzeAlzheimerDLCM
     % CONN fmri data base path :
     base = '../fmri/';
@@ -391,7 +397,7 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
                 if exist(dlcmName, 'file')
                     load(dlcmName);
                 else
-                    [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(signals{i});
+                    [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i}, 0);
                     sigLen = size(si,2);
                     inSignal = rand(ROINUM, sigLen);
                     inControl = eye(ROINUM);
@@ -416,7 +422,7 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
                     % calc dlcm-gc
                     mat = calcDlcmGCI(si, inSignal, [], inControl, netDLCM);
                     
-                    save(dlcmName, 'netDLCM', 'si', 'inSignal', 'inControl', 'mat', 'sig', 'm', 'maxsi', 'minsi');
+                    save(dlcmName, 'netDLCM', 'si', 'inSignal', 'inControl', 'mat', 'sig', 'c', 'maxsi', 'minsi');
                 end
             end
             weights(:,:,i) = mat;

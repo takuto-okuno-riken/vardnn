@@ -62,8 +62,8 @@ function performanceCheckDCMy2DLCM
         disp(['finish GC! t = ' num2str(time) 's']);
 
         % normalize signal to [0, 1] 
-        si = convert2SigmoidSignal(si);
-        inSignal = convert2SigmoidSignal(inSignal);
+        si = convert2SigmoidSignal(si,0);
+        inSignal = convert2SigmoidSignal(inSignal,0);
 
         % do training or load DLCM network
         dlcmFile = ['results/net-time-' num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];

@@ -50,8 +50,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         tvbFile = ['data/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-' num2str(k) '.mat'];
         load(tvbFile);
 
-        [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(si);
-        [uu, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
+        [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(si);
+        [uu, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
             
         % show original connection
         figure(origf); plotDcmEC(weights);
@@ -110,7 +110,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
             % recoverty training
             %[netDLCM, time] = recoveryTrainDlcmNetwork(Y, inSignal, [], inControl, netDLCM, options);
-            save(dlcmFile, 'netDLCM', 'Y', 'inSignal', 'Y', 'sig', 'm', 'maxsi', 'minsi', 'sig2', 'm2', 'maxsi2', 'minsi2');
+            save(dlcmFile, 'netDLCM', 'Y', 'inSignal', 'Y', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
         end
         % show DLCM-GC
         dlGC = calcDlcmGCI(Y, inSignal, [], inControl, netDLCM);

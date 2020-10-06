@@ -31,8 +31,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         load(tvbFile);
         density = length(find(weights>Gth)) / (node_num * (node_num-1));
 
-        [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(si);
-        [uu, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
+        [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(si);
+        [uu, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
             
         % show original connection
         figure(origf); plotDcmEC(weights);
@@ -67,7 +67,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
                 disp('start training');
                 netDLCM = trainDlcmNetwork(Y, inSignal, [], inControl, netDLCM, options);
-                save(dlcmFile, 'netDLCM', 'Y', 'inSignal', 'Y', 'sig', 'm', 'maxsi', 'minsi', 'sig2', 'm2', 'maxsi2', 'minsi2');
+                save(dlcmFile, 'netDLCM', 'Y', 'inSignal', 'Y', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
             end
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
             disp(['end training : rsme=' num2str(rsme)]);

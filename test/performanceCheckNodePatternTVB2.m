@@ -118,8 +118,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(dlgRf); hold on; [dlgROC{k,1}, dlgROC{k,2}, dlgAUC(k)] = plotROCcurve(Aest, weights, 100, 1, Gth); hold off;
         title(['ROC curve of DirectLiNGAM (pat=' num2str(i) ')']);
 %%{
-        [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(si);
-        [uu, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
+        [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(si);
+        [uu, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
             
         % calcurate and show DLCM-GC
         inControl = eye(nodeNum, nodeNum);
@@ -155,7 +155,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
             % recoverty training
             %[netDLCM, time] = recoveryTrainDlcmNetwork(Y, inSignal, [], inControl, netDLCM, options);
-            save(dlcmFile, 'netDLCM', 'Y', 'inSignal', 'si', 'sig', 'm', 'maxsi', 'minsi', 'sig2', 'm2', 'maxsi2', 'minsi2');
+            save(dlcmFile, 'netDLCM', 'Y', 'inSignal', 'si', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
         end
         % show DLCM-GC
         dlGC = calcDlcmGCI(Y, inSignal, [], inControl, netDLCM);

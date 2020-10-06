@@ -193,8 +193,8 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure(dlgRf); hold on; [dlgROC{k,1}, dlgROC{k,2}, dlgAUC(k)] = plotROCcurve(Aest, pP.A); hold off;
 
         % show DCM signals
-        [si, sig, m, maxsi, minsi] = convert2SigmoidSignal(y2.', 0);
-        [inSignal, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(u2.', 0);
+        [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(y2.', 0);
+        [inSignal, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(u2.', 0);
         inControl = eye(n,n);
         figure; plot(si.');
         %figure; plot(inSignal.');
@@ -222,7 +222,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
             netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
             % recoverty training
             %[netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
-            save(dlcmFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'm', 'maxsi', 'minsi', 'sig2', 'm2', 'maxsi2', 'minsi2');
+            save(dlcmFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
         end
 
         % show signals after training
