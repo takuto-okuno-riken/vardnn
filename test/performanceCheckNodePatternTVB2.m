@@ -50,6 +50,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     dlAUC = zeros(1,N);
     dlgAUC = zeros(1,N);
     linueAUC = zeros(1,N);
+    pcsAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
     wcsROC = cell(N,2);
@@ -58,6 +59,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     dlROC = cell(N,2);
     dlgROC = cell(N,2);
     linueROC = cell(N,2);
+    pcsROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
     wcsRf = figure;
@@ -66,6 +68,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     dlRf = figure;
     dlgRf = figure;
     linueRf = figure;
+    pcsRf = figure;
     origf = figure;
     origSigf = figure;
 
@@ -82,17 +85,17 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(origf); plotDcmEC(weights);
         figure(origSigf); plot(t, si);
 
-        % show original signal FC
+        % show result of FC
         FC = calcFunctionalConnectivity(si);
         figure(fcRf); hold on; [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = plotROCcurve(FC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of FC (pat=' num2str(i) ')']);
 
-        % show original signal PC
+        % show result of PC
         PC = calcPartialCorrelation(si);
         figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(PC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of PC (pat=' num2str(i) ')']);
 
-        % show original signal WCS
+        % show result of WCS
         wcsFile = ['results/wcs-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) '.mat'];
         if exist(wcsFile, 'file')
             load(wcsFile);
@@ -103,18 +106,24 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(wcsRf); hold on; [wcsROC{k,1}, wcsROC{k,2}, wcsAUC(k)] = plotROCcurve(WCS, weights, 100, 1, Gth); hold off;
         title(['ROC curve of WCS (pat=' num2str(i) ')']);
 
-        % show original signal granger causality index (mvGC)
+        % show result of granger causality index (mvGC)
         gcI = calcMultivariateGCI(si,lag);
         figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, weights, 100, 1, Gth); hold off;
         title(['ROC curve of mvGC (pat=' num2str(i) ')']);
 
-        % show original signal granger causality index (pwGC)
+        % show result of granger causality index (pwGC)
         gcI = calcPairwiseGCI(si,lag);
         figure(pgcRf); hold on; [pgcROC{k,1}, pgcROC{k,2}, pgcAUC(k)] = plotROCcurve(gcI, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pwGC (pat=' num2str(i) ')']);
 
-        % show original signal DirectLiNGAM
-        Aest = calcDirectLiNGAM(si);
+        % show result of DirectLiNGAM
+        dlgFile = ['results/dling-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) '.mat'];
+        if exist(dlgFile, 'file')
+            load(dlgFile);
+        else
+            Aest = calcDirectLiNGAM(si);
+            save(dlgFile, 'Aest');
+        end
         figure(dlgRf); hold on; [dlgROC{k,1}, dlgROC{k,2}, dlgAUC(k)] = plotROCcurve(Aest, weights, 100, 1, Gth); hold off;
         title(['ROC curve of DirectLiNGAM (pat=' num2str(i) ')']);
 %%{
@@ -174,6 +183,11 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(linueRf); hold on; [linueROC{k,1}, linueROC{k,2}, linueAUC(k)] = plotROCcurve(A, weights, 100, 1, Gth); hold off;        
         title(['ROC curve of LINUE-TE (pat=' num2str(i) ')']);
 %%}
+        % show result of TETRAD PC-stable-max
+        csvFile = ['results/tetrad/pcs-tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-' num2str(k) '.csv'];
+        A = readmatrix(csvFile);
+        figure(pcsRf); hold on; [pcsROC{k,1}, pcsROC{k,2}, pcsAUC(k)] = plotROCcurve(A, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of PC-stable-max (pat=' num2str(i) ')']);
     end
     % show result AUC
     disp(['FC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(fcAUC))]);
@@ -184,10 +198,11 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     disp(['DLCM-GC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlAUC))]);
     disp(['LINUE-TE AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(linueAUC))]);
     disp(['DirectLiNGAM AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlgAUC))]);
+    disp(['PC-sm AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(pcsAUC))]);
 
     % save result
     fname = ['results/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-result.mat'];
-    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlgAUC','linueAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlgROC','linueROC');
+    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlgAUC','linueAUC','pcsAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlgROC','linueROC','pcsROC');
 
     % show average ROC curve of DCM
     figure; 
@@ -203,6 +218,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     plotErrorROCcurve(linueROC, N, [0.2,0.6,0.8]);
 %    plotErrorROCcurve(nnnueROC, N, [0.8,0.2,0.8]);
     plotErrorROCcurve(dlgROC, N, [0.6,0.6,0.6]);
+    plotErrorROCcurve(pcsROC, N, [0.5,0.5,0.5]);
     plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
@@ -214,6 +230,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     plotAverageROCcurve(linueROC, N, '--', [0.2,0.5,0.7],0.5);
 %    plotAverageROCcurve(nnnueROC, N, '--', [0.7,0.2,0.7],0.5);
     plotAverageROCcurve(dlgROC, N, '--', [0.6,0.6,0.6],0.5);
+    plotAverageROCcurve(pcsROC, N, '-', [0.5,0.5,0.5],0.5);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);
