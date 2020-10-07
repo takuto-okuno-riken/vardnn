@@ -397,7 +397,7 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
                 if exist(dlcmName, 'file')
                     load(dlcmName);
                 else
-                    [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i}, 0);
+                    [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
                     sigLen = size(si,2);
                     inSignal = rand(ROINUM, sigLen);
                     inControl = eye(ROINUM);
