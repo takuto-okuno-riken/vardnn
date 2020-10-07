@@ -144,18 +144,21 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     pcAUC = zeros(1,N);
     wcsAUC = zeros(1,N);
     gcAUC = zeros(1,N);
+    pgcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
     dlgAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
     wcsROC = cell(N,2);
     gcROC = cell(N,2);
+    pgcROC = cell(N,2);
     dlROC = cell(N,2);
     dlgROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
     wcsRf = figure;
     gcRf = figure;
+    pgcRf = figure;
     dlRf = figure;
     dlgRf = figure;
 
@@ -176,19 +179,22 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
             save(dlcmFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data');
         end
 
-        % show original signal FC
+        % show result of FC
         fg = figure; FC = plotFunctionalConnectivity(y2.'); close(fg);
         figure(fcRf); hold on; [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = plotROCcurve(FC, pP.A); hold off;
-        % show original signal PC
+        % show result of PC
         fg = figure; PC = plotPartialCorrelation(y2.'); close(fg);
         figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(PC, pP.A); hold off;
-        % show original signal WCS
+        % show result of WCS
         fg = figure; WCS = plotWaveletCoherence(y2.'); close(fg);
         figure(wcsRf); hold on; [wcsROC{k,1}, wcsROC{k,2}, wcsAUC(k)] = plotROCcurve(WCS, pP.A); hold off;
-        % show original signal granger causality index (mvGC)
+        % show result of granger causality index (mvGC)
         fg = figure; gcI = plotMultivariateGCI(y2.',3,0); close(fg);
         figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, pP.A); hold off;
-        % show original signal DirectLiNGAM
+        % show result of granger causality index (pwGC)
+        fg = figure; gcI = plotPairwiseGCI(y2.',3,0); close(fg);
+        figure(pgcRf); hold on; [pgcROC{k,1}, pgcROC{k,2}, pgcAUC(k)] = plotROCcurve(gcI, pP.A); hold off;
+        % show result of DirectLiNGAM
         fg = figure; Aest = plotDirectLiNGAM(y2.'); close(fg);
         figure(dlgRf); hold on; [dlgROC{k,1}, dlgROC{k,2}, dlgAUC(k)] = plotROCcurve(Aest, pP.A); hold off;
 
@@ -236,6 +242,6 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A); hold off;
     end
     fname = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
-    save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'dlAUC', 'dlgAUC', 'fcROC','pcROC','wcsROC','gcROC','dlROC','dlgROC');
+    save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlgAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlgROC');
 end
 

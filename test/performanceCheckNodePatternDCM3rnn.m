@@ -113,7 +113,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         figure(pcsRf); hold on; [pcsROC{k,1}, pcsROC{k,2}, pcsAUC(k)] = plotROCcurve(A, pP.A, 100, 1, Gth); hold off;
     end
     % save result
-    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','dlAUC','dlgAUC','dcmAUC','rnnAUC','linueAUC','nnnueAUC','pcsAUC', 'fcROC','pcROC','wcsROC','gcROC','dlROC','dlgROC','dcmROC','rnnROC','linueROC','nnnueROC','pcsROC');
+    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcROC','dlAUC','dlgAUC','dcmAUC','rnnAUC','linueAUC','nnnueAUC','pcsAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlgROC','dcmROC','rnnROC','linueROC','nnnueROC','pcsROC');
     
     % show average ROC curve of DCM
     figure; 
@@ -122,6 +122,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plotErrorROCcurve(pcROC, N, [0.8,0.2,0.2]);
     plotErrorROCcurve(wcsROC, N, [0.9,0.5,0]);
     plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
+    plotErrorROCcurve(pgcROC, N, [0.0,0.5,0.0]);
     plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
     plotErrorROCcurve(dcmROC, N, [0.2,0.2,0.8]);
     plotErrorROCcurve(rnnROC, N, [0.8,0.8,0.2]);
@@ -133,6 +134,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
+    plotAverageROCcurve(pgcROC, N, '--', [0.0,0.5,0.0],0.5);
     plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);
     plotAverageROCcurve(dcmROC, N, '-', [0.2,0.2,0.8],0.5);
     plotAverageROCcurve(rnnROC, N, '--', [0.7,0.7,0.2],0.5);
