@@ -1,3 +1,4 @@
+%% for DCM generated signal
 %{
 prefix = 'results/net-pat4-8x300-idx';
 N = 8;
@@ -23,6 +24,8 @@ for i=1:length(idxs)
 end
 %}
 
+%% for reduced wongwang generated signal
+%{
 N = 8;
 idxs = [16,32,48,64,80,98];
 
@@ -44,4 +47,24 @@ for i=1:length(idxs)
         disp(['output csv file : ' outfname]);
     end
 end
+%}
 
+%% for ADNI2 fMRI data
+%%{
+roiNum = 132;
+group = {'cn', 'ad', 'mci'};
+
+for i=1:length(group)
+    fname = ['data/ad-signal-' group{i} '-roi' num2str(roiNum) '.mat'];
+    load(fname);
+
+    for j=1:length(signals)
+        % output csv file
+        outfname = ['data/ad-signal-' group{i} '-roi' num2str(roiNum) '-' num2str(j) '.csv'];
+        mat = signals{j};
+        T = array2table(mat.');
+        writetable(T,outfname,'WriteVariableNames',false);
+        disp(['output csv file : ' outfname]);
+    end
+end
+%%}

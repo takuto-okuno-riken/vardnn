@@ -209,7 +209,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     hold on;
     plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
     plotErrorROCcurve(pcROC, N, [0.8,0.2,0.2]);
-    plotErrorROCcurve(pcROC, N, [0.9,0.5,0]);
+    plotErrorROCcurve(wcsROC, N, [0.9,0.5,0]);
     plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
     plotErrorROCcurve(pgcROC, N, [0.0,0.5,0.0]);
     plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
