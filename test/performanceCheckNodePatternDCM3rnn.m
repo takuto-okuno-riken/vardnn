@@ -51,14 +51,21 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     linueAUC = zeros(1,N);
     nnnueAUC = zeros(1,N);
     pcsAUC = zeros(1,N);
+    cpcAUC = zeros(1,N);
+    fgesAUC = zeros(1,N);
     rnnROC = cell(N,2);
     linueROC = cell(N,2);
     nnnueROC = cell(N,2);
     pcsROC = cell(N,2);
+    fgesROC = cell(N,2);
+    cpcROC = cell(N,2);
     rnnRf = figure;
     linueRf = figure;
     nnnueRf = figure;
     pcsRf = figure;
+    cpcRf = figure;
+    fgesRf = figure;
+    
     origf = figure;
     rnnTrial = 8;
 
@@ -107,13 +114,28 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         % read TETRAD PC-stable-max result
         csvFile = ['results/tetrad/pcs-' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.csv'];
         A = readmatrix(csvFile);
-        %figure; plotDcmEC(A);
 
         % show ROC curve of PC-stable-max
         figure(pcsRf); hold on; [pcsROC{k,1}, pcsROC{k,2}, pcsAUC(k)] = plotROCcurve(A, pP.A, 100, 1, Gth); hold off;
+
+        % -----------------------------------------------------------------
+        % read TETRAD CPC result
+        csvFile = ['results/tetrad/cpc-' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.csv'];
+        A = readmatrix(csvFile);
+
+        % show ROC curve of CPC result
+        figure(cpcRf); hold on; [cpcROC{k,1}, cpcROC{k,2}, cpcAUC(k)] = plotROCcurve(A, pP.A, 100, 1, Gth); hold off;
+
+        % -----------------------------------------------------------------
+        % read TETRAD FGES result
+        csvFile = ['results/tetrad/fges-' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.csv'];
+        A = readmatrix(csvFile);
+
+        % show ROC curve of FGES result
+        figure(fgesRf); hold on; [fgesROC{k,1}, fgesROC{k,2}, fgesAUC(k)] = plotROCcurve(A, pP.A, 100, 1, Gth); hold off;
     end
     % save result
-    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcROC','dlAUC','dlgAUC','dcmAUC','rnnAUC','linueAUC','nnnueAUC','pcsAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlgROC','dcmROC','rnnROC','linueROC','nnnueROC','pcsROC');
+    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcROC','dlAUC','dlgAUC','dcmAUC','rnnAUC','linueAUC','nnnueAUC','pcsAUC','cpcAUC','fgesAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlgROC','dcmROC','rnnROC','linueROC','nnnueROC','pcsROC','cpcROC','fgesROC');
     
     % show average ROC curve of DCM
     figure; 
@@ -128,8 +150,10 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plotErrorROCcurve(rnnROC, N, [0.8,0.8,0.2]);
     plotErrorROCcurve(linueROC, N, [0.2,0.6,0.8]);
     plotErrorROCcurve(nnnueROC, N, [0.8,0.2,0.8]);
-    plotErrorROCcurve(dlgROC, N, [0.6,0.6,0.6]);
+    plotErrorROCcurve(dlgROC, N, [0.6,0.6,0.3]);
     plotErrorROCcurve(pcsROC, N, [0.5,0.5,0.5]);
+    plotErrorROCcurve(cpcROC, N, [0.5,0.5,0.5]);
+    plotErrorROCcurve(fgesROC, N, [0.5,0.5,0.5]);
     plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
@@ -140,8 +164,10 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plotAverageROCcurve(rnnROC, N, '--', [0.7,0.7,0.2],0.5);
     plotAverageROCcurve(linueROC, N, '--', [0.2,0.5,0.7],0.5);
     plotAverageROCcurve(nnnueROC, N, '--', [0.7,0.2,0.7],0.5);
-    plotAverageROCcurve(dlgROC, N, '--', [0.6,0.6,0.6],0.5);
+    plotAverageROCcurve(dlgROC, N, '-.', [0.6,0.6,0.3],0.5);
     plotAverageROCcurve(pcsROC, N, '-', [0.5,0.5,0.5],0.5);
+    plotAverageROCcurve(cpcROC, N, '--', [0.5,0.5,0.5],0.5);
+    plotAverageROCcurve(fgesROC, N, '-.', [0.5,0.5,0.5],0.5);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);

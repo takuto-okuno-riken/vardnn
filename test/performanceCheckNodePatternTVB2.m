@@ -51,6 +51,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     dlgAUC = zeros(1,N);
     linueAUC = zeros(1,N);
     pcsAUC = zeros(1,N);
+    cpcAUC = zeros(1,N);
+    fgesAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
     wcsROC = cell(N,2);
@@ -60,6 +62,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     dlgROC = cell(N,2);
     linueROC = cell(N,2);
     pcsROC = cell(N,2);
+    cpcROC = cell(N,2);
+    fgesROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
     wcsRf = figure;
@@ -69,6 +73,9 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     dlgRf = figure;
     linueRf = figure;
     pcsRf = figure;
+    cpcRf = figure;
+    fgesRf = figure;
+
     origf = figure;
     origSigf = figure;
 
@@ -188,6 +195,18 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         A = readmatrix(csvFile);
         figure(pcsRf); hold on; [pcsROC{k,1}, pcsROC{k,2}, pcsAUC(k)] = plotROCcurve(A, weights, 100, 1, Gth); hold off;
         title(['ROC curve of PC-stable-max (pat=' num2str(i) ')']);
+
+        % show result of TETRAD CPC
+        csvFile = ['results/tetrad/cpc-tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-' num2str(k) '.csv'];
+        A = readmatrix(csvFile);
+        figure(cpcRf); hold on; [cpcROC{k,1}, cpcROC{k,2}, cpcAUC(k)] = plotROCcurve(A, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of CPC (pat=' num2str(i) ')']);
+
+        % show result of TETRAD FGES
+        csvFile = ['results/tetrad/fges-tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-' num2str(k) '.csv'];
+        A = readmatrix(csvFile);
+        figure(fgesRf); hold on; [fgesROC{k,1}, fgesROC{k,2}, fgesAUC(k)] = plotROCcurve(A, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of CPC (pat=' num2str(i) ')']);
     end
     % show result AUC
     disp(['FC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(fcAUC))]);
@@ -202,7 +221,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
     % save result
     fname = ['results/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-result.mat'];
-    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlgAUC','linueAUC','pcsAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlgROC','linueROC','pcsROC');
+    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC');
 
     % show average ROC curve of DCM
     figure; 
@@ -217,8 +236,10 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 %    plotErrorROCcurve(rnnROC, N, [0.8,0.8,0.2]);
     plotErrorROCcurve(linueROC, N, [0.2,0.6,0.8]);
 %    plotErrorROCcurve(nnnueROC, N, [0.8,0.2,0.8]);
-    plotErrorROCcurve(dlgROC, N, [0.6,0.6,0.6]);
+    plotErrorROCcurve(dlgROC, N, [0.6,0.6,0.3]);
     plotErrorROCcurve(pcsROC, N, [0.5,0.5,0.5]);
+    plotErrorROCcurve(cpcROC, N, [0.5,0.5,0.5]);
+    plotErrorROCcurve(fgesROC, N, [0.5,0.5,0.5]);
     plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
@@ -229,8 +250,10 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 %    plotAverageROCcurve(rnnROC, N, '--', [0.7,0.7,0.2],0.5);
     plotAverageROCcurve(linueROC, N, '--', [0.2,0.5,0.7],0.5);
 %    plotAverageROCcurve(nnnueROC, N, '--', [0.7,0.2,0.7],0.5);
-    plotAverageROCcurve(dlgROC, N, '--', [0.6,0.6,0.6],0.5);
+    plotAverageROCcurve(dlgROC, N, '-.', [0.6,0.6,0.3],0.5);
     plotAverageROCcurve(pcsROC, N, '-', [0.5,0.5,0.5],0.5);
+    plotAverageROCcurve(cpcROC, N, '--', [0.5,0.5,0.5],0.5);
+    plotAverageROCcurve(fgesROC, N, '-.', [0.5,0.5,0.5],0.5);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);
