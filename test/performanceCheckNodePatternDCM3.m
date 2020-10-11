@@ -146,6 +146,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     gcAUC = zeros(1,N);
     pgcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
+    dlwAUC = zeros(1,N);
     dlgAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
@@ -153,6 +154,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     gcROC = cell(N,2);
     pgcROC = cell(N,2);
     dlROC = cell(N,2);
+    dlwROC = cell(N,2);
     dlgROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
@@ -160,6 +162,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     gcRf = figure;
     pgcRf = figure;
     dlRf = figure;
+    dlwRf = figure;
     dlgRf = figure;
 
     % calc input signal and node BOLD signals
@@ -235,13 +238,15 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure; [S, t,mae,maeerr] = plotPredictSignals(si,inSignal,[],inControl,netDLCM);
         disp(['t=' num2str(t) ', mae=' num2str(mae)]);
 
-        % show DLCM-GC
+        % show result of DLCM-GC
         fg = figure; dlGC = plotDlcmGCI(si, inSignal, [], inControl, netDLCM, 0); close(fg);
-        
-        % calc ROC curve
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A); hold off;
+
+        % show result of DLCM weight causality index (DLCM-wci)
+        fg = figure; dlwGC = plotDlcmWCI(netDLCM, [], inControl, 0); %close(fg);
+        figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A); hold off;
     end
     fname = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
-    save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlgAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlgROC');
+    save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlwAUC', 'dlgAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC');
 end
 

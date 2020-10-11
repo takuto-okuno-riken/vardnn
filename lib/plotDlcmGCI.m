@@ -8,6 +8,7 @@
 %  inSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  inControl    exogenous input control matrix for each node (node x exogenous input) (optional)
+%  netDLCM      trained DLCM network
 %  range        plotting minimum and maximum range of GCI (default:10)
 %  rowcut       cut bottom rows of result gcI matris (default:0)
 %  alpha        the significance level of F-statistic (optional)

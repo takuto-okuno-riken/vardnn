@@ -1,4 +1,8 @@
-
+% Before using this function, download Dlingam-1.2 codes from
+% https://sites.google.com/site/sshimizu06/Dlingamcode
+% and add a path "Dlingam-1.2" and sub folders. And also download kernel-ICA 1.2 code from
+% https://www.di.ens.fr/~fbach/kernel-ica/index.htm
+% and add a path "kernel-ica1_2" and sub folders.
 
 function performanceCheckNodePattern
     % load signals
@@ -135,9 +139,10 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 %    figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
     % show DLCM-GC
     figure; dlGC = plotDlcmGCI(si, [], [], [], netDLCM, 0);
+    % show DLCM-WCI
+    figure; dlWC = plotDlcmWeightCI(netDLCM, [], [], 0);
     % show DLCM-weight-GC
-%    figure; dlwGC = plotDlcmWeightGCI(netDLCM);
 %    figure; dlwGC = plotDlcmDeltaWeightGCI(netDLCM);
-    Aest = plotDirectLiNGAM(si);
+    figure; Aest = plotDirectLiNGAM(si);
 end
 

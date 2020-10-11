@@ -146,6 +146,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     gcAUC = zeros(1,N);
     pgcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
+    dlwAUC = zeros(1,N);
     dlgAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
@@ -153,6 +154,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     gcROC = cell(N,2);
     pgcROC = cell(N,2);
     dlROC = cell(N,2);
+    dlwROC = cell(N,2);
     dlgROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
@@ -160,6 +162,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     gcRf = figure;
     pgcRf = figure;
     dlRf = figure;
+    dlwRf = figure;
     dlgRf = figure;
 
     % calc input signal and node BOLD signals
@@ -180,22 +183,22 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         end
 
         % show result of FC
-        figure; FC = plotFunctionalConnectivity(y2.');
+        fg = figure; FC = plotFunctionalConnectivity(y2.'); close(fg);
         figure(fcRf); hold on; [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = plotROCcurve(FC, pP.A, 100, 1, 0.2); hold off;
         % show result of PC
-        figure; PC = plotPartialCorrelation(y2.');
+        fg = figure; PC = plotPartialCorrelation(y2.'); close(fg);
         figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(PC, pP.A, 100, 1, 0.2); hold off;
         % show result of WCS
-        figure; WCS = plotWaveletCoherence(y2.');
+        fg = figure; WCS = plotWaveletCoherence(y2.'); close(fg);
         figure(wcsRf); hold on; [wcsROC{k,1}, wcsROC{k,2}, wcsAUC(k)] = plotROCcurve(WCS, pP.A, 100, 1, 0.2); hold off;
         % show result of granger causality index (mvGC)
-        figure; gcI = plotMultivariateGCI(y2.',3,0);
+        fg = figure; gcI = plotMultivariateGCI(y2.',3,0); close(fg);
         figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, pP.A, 100, 1, 0.2); hold off;
         % show result of granger causality index (pwGC)
         fg = figure; gcI = plotPairwiseGCI(y2.',3,0); close(fg);
         figure(pgcRf); hold on; [pgcROC{k,1}, pgcROC{k,2}, pgcAUC(k)] = plotROCcurve(gcI, pP.A, 100, 1, 0.2); hold off;
         % show result of DirectLiNGAM
-        figure; Aest = plotDirectLiNGAM(y2.');
+        fg = figure; Aest = plotDirectLiNGAM(y2.'); close(fg);
         figure(dlgRf); hold on; [dlgROC{k,1}, dlgROC{k,2}, dlgAUC(k)] = plotROCcurve(Aest, pP.A, 100, 1, 0.2); hold off;
 
         % show DCM signals
@@ -235,13 +238,15 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure; [S, t,mae,maeerr] = plotPredictSignals(si,inSignal,[],inControl,netDLCM);
         disp(['t=' num2str(t) ', mae=' num2str(mae)]);
 
-        % show DLCM-GC
-        figure; dlGC = plotDlcmGCI(si, inSignal, [], inControl, netDLCM, 0);
-        
-        % calc ROC curve
+        % show result of DLCM-GC
+        fg = figure; dlGC = plotDlcmGCI(si, inSignal, [], inControl, netDLCM, 0); close(fg);
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A, 100, 1, 0.2); hold off;
+
+        % show result of DLCM weight causality index (DLCM-wci)
+        fg = figure; dlwGC = plotDlcmWCI(netDLCM, 0); close(fg);
+        figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A); hold off;
     end
     fname = ['results/net-pat4-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
-    save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlgAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlgROC');
+    save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlwAUC', 'dlgAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC');
 end
 

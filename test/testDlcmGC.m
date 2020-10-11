@@ -10,6 +10,8 @@ function testDlcmGC
     inSignal = [];
     % control is all positive input
     inControl = [];
+    si(2,2:end) = si(6,1:sigLen-1);
+    si(4,2:end) = si(6,1:sigLen-1);
 
     % set training options
     maxEpochs = 1000;
