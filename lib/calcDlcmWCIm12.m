@@ -5,7 +5,7 @@
 %  nodeControl  node control matrix (node x node) (optional)
 %  inControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 
-function wcI = calcDlcmWCIp123(netDLCM, nodeControl, inControl)
+function wcI = calcDlcmWCIm12(netDLCM, nodeControl, inControl)
     if nargin < 3
         inControl = [];
     end
@@ -17,6 +17,16 @@ function wcI = calcDlcmWCIp123(netDLCM, nodeControl, inControl)
     wcI = nan(nodeNum,nodeNum);
     for i=1:nodeNum
         % get input control
+        control = ones(1, nodeNum);
+        excontrol = ones(1, nodeInNum - nodeNum);
+        if ~isempty(nodeControl)
+            control = nodeControl(i,:);
+        end
+        if ~isempty(inControl)
+            excontrol = inControl(i,:);
+        end
+        ctrl = [control, excontrol];
+
         % calc liner weights relation
         w1 = netDLCM.nodeNetwork{i, 1}.Layers(2, 1).Weights;
         w2 = netDLCM.nodeNetwork{i, 1}.Layers(4, 1).Weights;
@@ -24,22 +34,26 @@ function wcI = calcDlcmWCIp123(netDLCM, nodeControl, inControl)
         b1 = netDLCM.nodeNetwork{i, 1}.Layers(2, 1).Bias;
         b2 = netDLCM.nodeNetwork{i, 1}.Layers(4, 1).Bias;
         b3 = netDLCM.nodeNetwork{i, 1}.Layers(6, 1).Bias;
+        w1 = w1 .* repmat(ctrl, size(w1,1), 1);
 
-        w = w2 * (w1 + b1);
-        w(w<0) = 0; % TODO: remove?
+        x = sum(w1,2) + b1;
+        x(x<0) = 0;
+
+        y = w2 * x + b2;
+        y(y<0) = 0;
+        VarEi = var(y(:));
         
-        v2 = sum(w,2) + b2;
-        %v2(v2<0) = 0; % TODO: remove?
-        VarEi = var(v2(:));
-
         % imparement node signals
         for j=1:nodeNum
             if i==j, continue; end
-            wt = w;
-            wt(:,j) = [];
-            v1 = sum(wt,2) + b2;
-            %v1(v1<0) = 0; % TODO: remove?
-            VarEj = var(v1(:));
+            w = w1;
+            w(:,j) = 0;
+            xj = sum(w,2) + b1;
+            xj(xj<0) = 0;
+            
+            yj = w2 * xj + b2;
+            yj(yj<0) = 0;
+            VarEj = var(yj(:));
             wcI(i,j) = log(VarEi / VarEj);
         end
     end

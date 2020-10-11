@@ -17,7 +17,6 @@ function wcI = calcDlcmWCIp123(netDLCM, nodeControl, inControl)
     wcI = nan(nodeNum,nodeNum);
     for i=1:nodeNum
         % get input control
-%{        
         control = ones(1, nodeNum);
         excontrol = ones(1, nodeInNum - nodeNum);
         if ~isempty(nodeControl)
@@ -27,7 +26,7 @@ function wcI = calcDlcmWCIp123(netDLCM, nodeControl, inControl)
             excontrol = inControl(i,:);
         end
         ctrl = [control, excontrol];
-%}
+
         % calc liner weights relation
         w1 = netDLCM.nodeNetwork{i, 1}.Layers(2, 1).Weights;
         w2 = netDLCM.nodeNetwork{i, 1}.Layers(4, 1).Weights;
@@ -35,27 +34,26 @@ function wcI = calcDlcmWCIp123(netDLCM, nodeControl, inControl)
         b1 = netDLCM.nodeNetwork{i, 1}.Layers(2, 1).Bias;
         b2 = netDLCM.nodeNetwork{i, 1}.Layers(4, 1).Bias;
         b3 = netDLCM.nodeNetwork{i, 1}.Layers(6, 1).Bias;
+        w1 = w1 .* repmat(ctrl, size(w1,1), 1);
 
-        w23 = w2.' * w3.';
-        b23 = b2.' * w3.' + b3;
-        
-%        w123 = w1.' * w23;
-%        b123 = b1.' * w23 + b23;
-%        w = w123.';
-%        b = b123;
+        x = w1(:,i) + b1;
+        x(x<0) = 0;
 
-        w23r = repmat(w23, 1, size(w1,2));
-        w = w1 .* w23r;
-        b = b1 .* w23  + b23;
-        
-        v2 = w(:,i) + b;
-        VarEi = var(v2(:));
+        y = w2 * x + b2;
+        y(y<0) = 0;
+        z = w3 .* y.';
+        VarEi = var(z(:));
 
         % imparement node signals
         for j=1:nodeNum
             if i==j, continue; end
-            v1 = w(:,i) + w(:,j) + b;
-            VarEj = var(v1(:));
+            xj = w1(:,i) + w1(:,j) + b1;
+            xj(xj<0) = 0;
+
+            yj = w2 * xj + b2;
+            yj(yj<0) = 0;
+            zj = w3 .* yj.';
+            VarEj = var(zj(:));
             wcI(i,j) = log(VarEj / VarEi);
         end
     end
