@@ -6,5 +6,5 @@
 %  inControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 
 function wcI = calcDlcmWCI(netDLCM, nodeControl, inControl)
-    wcI = calcDlcmWCIm123(netDLCM, nodeControl, inControl);
+    wcI = calcDlcmWCIdm123(netDLCM, nodeControl, inControl);
 end
