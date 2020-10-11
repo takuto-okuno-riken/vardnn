@@ -21,7 +21,7 @@ function [wcI] = plotDlcmWCI(netDLCM, nodeControl, inControl, range, rowcut)
         nodeControl = [];
     end
     nodeNum = length(netDLCM.nodeNetwork);
-    wcI = calcDlcmWCIm1(netDLCM, nodeControl, inControl);
+    wcI = calcDlcmWCI(netDLCM, nodeControl, inControl);
     % show DLCM weight causality of predicted node signals
     if range <= 0
         sigma = std(wcI(:),'omitnan');

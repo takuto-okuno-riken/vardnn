@@ -16,10 +16,21 @@ function wcI = calcDlcmWCIm1(netDLCM, nodeControl, inControl)
     nodeInNum = size(netDLCM.nodeNetwork{1, 1}.Layers(2, 1).Weights, 2);
     wcI = nan(nodeNum,nodeNum);
     for i=1:nodeNum
+        % get input control
+        control = ones(1, nodeNum);
+        excontrol = ones(1, nodeInNum - nodeNum);
+        if ~isempty(nodeControl)
+            control = nodeControl(i,:);
+        end
+        if ~isempty(inControl)
+            excontrol = inControl(i,:);
+        end
+        ctrl = [control, excontrol];
 
         % calc liner weights relation
         w1 = netDLCM.nodeNetwork{i, 1}.Layers(2, 1).Weights;
         b1 = netDLCM.nodeNetwork{i, 1}.Layers(2, 1).Bias;
+        w1 = w1 .* repmat(ctrl, size(w1,1), 1);
 
         v2 = sum(w1,2) + b1;
         v2(v2<0) = 0; % TODO: remove?

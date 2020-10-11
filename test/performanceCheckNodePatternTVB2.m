@@ -48,6 +48,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     gcAUC = zeros(1,N);
     pgcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
+    dlwAUC = zeros(1,N);
     dlgAUC = zeros(1,N);
     linueAUC = zeros(1,N);
     pcsAUC = zeros(1,N);
@@ -59,6 +60,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     gcROC = cell(N,2);
     pgcROC = cell(N,2);
     dlROC = cell(N,2);
+    dlwROC = cell(N,2);
     dlgROC = cell(N,2);
     linueROC = cell(N,2);
     pcsROC = cell(N,2);
@@ -70,6 +72,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     gcRf = figure;
     pgcRf = figure;
     dlRf = figure;
+    dlwRf = figure;
     dlgRf = figure;
     linueRf = figure;
     pcsRf = figure;
@@ -138,6 +141,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         [uu, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
             
         % calcurate and show DLCM-GC
+        dlGC = [];
         inControl = eye(nodeNum, nodeNum);
         dlcmFile = ['results/net-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) '.mat'];
         if exist(dlcmFile, 'file')
@@ -173,12 +177,20 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             %[netDLCM, time] = recoveryTrainDlcmNetwork(Y, inSignal, [], inControl, netDLCM, options);
             save(dlcmFile, 'netDLCM', 'Y', 'inSignal', 'si', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
         end
-        % show DLCM-GC
-        dlGC = calcDlcmGCI(Y, inSignal, [], inControl, netDLCM);
+        if isempty(dlGC)
+            % show DLCM-GC
+            dlGC = calcDlcmGCI(Y, inSignal, [], inControl, netDLCM);
+            save(dlcmFile, 'netDLCM', 'Y', 'inSignal', 'si', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2', 'dlGC');
+        end
         
         % calc ROC curve
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of DLCM-GC (pat=' num2str(i) ')']);
+
+        % show result of DLCM weight causality index (DLCM-wci)
+        fg = figure; dlwGC = calcDlcmWCI(netDLCM, [], inControl); close(fg);
+        figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of DLCM-WCI (pat=' num2str(i) ')']);
 %%}
 %%{
         % linue TE result
@@ -215,13 +227,14 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     disp(['mvGC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(gcAUC))]);
     disp(['pwGC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(pgcAUC))]);
     disp(['DLCM-GC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlAUC))]);
+    disp(['DLCM-WCI AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlwAUC))]);
     disp(['LINUE-TE AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(linueAUC))]);
     disp(['DirectLiNGAM AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlgAUC))]);
     disp(['PC-sm AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(pcsAUC))]);
 
     % save result
     fname = ['results/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-result.mat'];
-    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC');
+    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC');
 
     % show average ROC curve of DCM
     figure; 
@@ -232,6 +245,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
     plotErrorROCcurve(pgcROC, N, [0.0,0.5,0.0]);
     plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
+    plotErrorROCcurve(dlwROC, N, [0.2,0.2,0.2]); % TODO:
 %    plotErrorROCcurve(dcmROC, N, [0.2,0.2,0.8]);
 %    plotErrorROCcurve(rnnROC, N, [0.8,0.8,0.2]);
     plotErrorROCcurve(linueROC, N, [0.2,0.6,0.8]);
@@ -246,6 +260,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
     plotAverageROCcurve(pgcROC, N, '--', [0.0,0.5,0.0],0.5);
     plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);
+    plotAverageROCcurve(dlwROC, N, '--', [0.2,0.2,0.2],0.7); % TODO:
 %    plotAverageROCcurve(dcmROC, N, '-', [0.2,0.2,0.8],0.5);
 %    plotAverageROCcurve(rnnROC, N, '--', [0.7,0.7,0.2],0.5);
     plotAverageROCcurve(linueROC, N, '--', [0.2,0.5,0.7],0.5);

@@ -244,7 +244,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 
         % show result of DLCM weight causality index (DLCM-wci)
         fg = figure; dlwGC = plotDlcmWCI(netDLCM, 0); close(fg);
-        figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A); hold off;
+        figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A, 100, 1, 0.2); hold off;
     end
     fname = ['results/net-pat4-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
     save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlwAUC', 'dlgAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC');

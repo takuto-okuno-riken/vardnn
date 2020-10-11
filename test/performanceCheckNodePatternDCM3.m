@@ -208,7 +208,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure; plot(si.');
         %figure; plot(inSignal.');
 
-        % train DLCM    
+        % train DLCM
         nodeNum = size(si,1);
         sigLen = size(si,2);
         if isempty(netDLCM)
@@ -243,7 +243,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A); hold off;
 
         % show result of DLCM weight causality index (DLCM-wci)
-        fg = figure; dlwGC = plotDlcmWCI(netDLCM, [], inControl, 0); %close(fg);
+        fg = figure; dlwGC = plotDlcmWCI(netDLCM, [], inControl, 0); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A); hold off;
     end
     fname = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];

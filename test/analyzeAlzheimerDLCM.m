@@ -19,7 +19,7 @@ function analyzeAlzheimerDLCM
     [mciSignals] = connData2signalsFile(base, pathesMCI, 'mci');
 
     % calculate connectivity
-    algNum = 11;
+    algNum = 12;
     [cnFCs, meanCNFC, stdCNFC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'fc');
     [adFCs, meanADFC, stdADFC] = calculateConnectivity(adSignals, roiNames, 'ad', 'fc');
     [mciFCs, meanMCIFC, stdMCIFC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'fc');
@@ -47,6 +47,10 @@ function analyzeAlzheimerDLCM
     [cnDLs, meanCNDL, stdCNDL] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm');
     [adDLs, meanADDL, stdADDL] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm');
     [mciDLs, meanMCIDL, stdMCIDL] = calculateConnectivity(mciSignals, roiNames, 'mci', 'dlcm');
+
+    [cnDLWs, meanCNDLW, stdCNDLW] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlw');
+    [adDLWs, meanADDLW, stdADDLW] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlw');
+    [mciDLWs, meanMCIDLW, stdMCIDLW] = calculateConnectivity(mciSignals, roiNames, 'mci', 'dlw');
 
     [cnDLGs, meanCNDLG, stdCNDLG] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlg');
     [adDLGs, meanADDLG, stdADDLG] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlg');
@@ -79,11 +83,12 @@ function analyzeAlzheimerDLCM
     cosSim(5) = getCosSimilarity(meanCNPGC, meanADPGC);
     cosSim(6) = getCosSimilarity(meanCNTE, meanADTE);
     cosSim(7) = getCosSimilarity(meanCNDL, meanADDL);
-    cosSim(8) = getCosSimilarity(meanCNDLG, meanADDLG);
-    cosSim(9) = getCosSimilarity(meanCNPCS+nanx, meanADPCS+nanx);
-    cosSim(10) = getCosSimilarity(meanCNCPC+nanx, meanADCPC+nanx);
-    cosSim(11) = getCosSimilarity(meanCNFGES+nanx, meanADFGES+nanx);
-    X = categorical({'FC','PC','WCS','GC','PGC','TE','DLCM-GC','DLG','PCS','CPC','FGES'});
+    cosSim(8) = getCosSimilarity(meanCNDLW, meanADDLW);
+    cosSim(9) = getCosSimilarity(meanCNDLG, meanADDLG);
+    cosSim(10) = getCosSimilarity(meanCNPCS+nanx, meanADPCS+nanx);
+    cosSim(11) = getCosSimilarity(meanCNCPC+nanx, meanADCPC+nanx);
+    cosSim(12) = getCosSimilarity(meanCNFGES+nanx, meanADFGES+nanx);
+    X = categorical({'FC','PC','WCS','GC','PGC','TE','DLCM-GC','DLW','dLiNG','PCS','CPC','FGES'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and AD by each algorithm');
     
@@ -117,6 +122,10 @@ function analyzeAlzheimerDLCM
     adDLsNt = calculateAlzNormalityTest(adDLs, roiNames, 'ad', 'dlcm');
     mciDLsNt = calculateAlzNormalityTest(mciDLs, roiNames, 'mci', 'dlcm');
 
+    cnDLWsNt = calculateAlzNormalityTest(cnDLWs, roiNames, 'cn', 'dlw');
+    adDLWsNt = calculateAlzNormalityTest(adDLWs, roiNames, 'ad', 'dlw');
+    mciDLWsNt = calculateAlzNormalityTest(mciDLWs, roiNames, 'mci', 'dlw');
+
     cnDLGsNt = calculateAlzNormalityTest(cnDLGs, roiNames, 'cn', 'dlg');
     adDLGsNt = calculateAlzNormalityTest(adDLGs, roiNames, 'ad', 'dlg');
     mciDLGsNt = calculateAlzNormalityTest(mciDLGs, roiNames, 'mci', 'dlg');
@@ -141,6 +150,7 @@ function analyzeAlzheimerDLCM
     [cnadPGCsUt, cnadPGCsUtP, cnadPGCsUtP2] = calculateAlzWilcoxonTest(cnPGCs, adPGCs, roiNames, 'cn', 'ad', 'pgc');
     [cnadTEsUt, cnadTEsUtP, cnadTEsUtP2] = calculateAlzWilcoxonTest(cnTEs, adTEs, roiNames, 'cn', 'ad', 'te');
     [cnadDLsUt, cnadDLsUtP, cnadDLsUtP2] = calculateAlzWilcoxonTest(cnDLs, adDLs, roiNames, 'cn', 'ad', 'dlcm');
+    [cnadDLWsUt, cnadDLWsUtP, cnadDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, adDLWs, roiNames, 'cn', 'ad', 'dlw');
     [cnadDLGsUt, cnadDLGsUtP, cnadDLGsUtP2] = calculateAlzWilcoxonTest(cnDLGs, adDLGs, roiNames, 'cn', 'ad', 'dlg');
     [cnadPCSsUt, cnadPCSsUtP, cnadPCSsUtP2] = calculateAlzWilcoxonTest(cnPCSs, adPCSs, roiNames, 'cn', 'ad', 'pcs');
     [cnadCPCsUt, cnadCPCsUtP, cnadCPCsUtP2] = calculateAlzWilcoxonTest(cnCPCs, adCPCs, roiNames, 'cn', 'ad', 'cpc');
@@ -157,6 +167,7 @@ function analyzeAlzheimerDLCM
     gcAUC = zeros(1,N);
     pgcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
+    dlwAUC = zeros(1,N);
     dlgAUC = zeros(1,N);
     teAUC = zeros(1,N);
     pcsAUC = zeros(1,N);
@@ -168,6 +179,7 @@ function analyzeAlzheimerDLCM
     gcROC = cell(N,2);
     pgcROC = cell(N,2);
     dlROC = cell(N,2);
+    dlwROC = cell(N,2);
     dlgROC = cell(N,2);
     teROC = cell(N,2);
     pcsROC = cell(N,2);
@@ -228,6 +240,13 @@ function analyzeAlzheimerDLCM
         [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
         i = i + 1;
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDLWs, adDLWs, k, N);         % replece cn*s, ad*s
+        [B, I, X] = sortAndPairPValues(control, target, cnadDLWsUtP, topNum);                                  % replace cnad*sUtP
+        sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
+
+        i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDLGs, adDLGs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadDLGsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
@@ -260,8 +279,9 @@ function analyzeAlzheimerDLCM
 
     % save result
     fname = ['results/ad-cn-ad-roi' num2str(132) '-result.mat'];
-    save(fname, 'cosSim', 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlgAUC','teAUC','pcsAUC','cpcAUC','fgesAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlgROC','teROC','pcsROC','cpcROC','fgesROC', 'sigCntCN', 'sigCntAD');
+    save(fname, 'cosSim', 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','teAUC','pcsAUC','cpcAUC','fgesAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','teROC','pcsROC','cpcROC','fgesROC', 'sigCntCN', 'sigCntAD');
     mean(dlAUC) % show result AUC
+    mean(dlwAUC) % show result AUC
     mean(fcAUC) % show result AUC
     mean(pgcAUC) % show result AUC
     mean(pcAUC) % show result AUC
@@ -278,6 +298,7 @@ function analyzeAlzheimerDLCM
     plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
     plotErrorROCcurve(pgcROC, N, [0.0,0.5,0.0]);
     plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
+    plotErrorROCcurve(dlwROC, N, [0.2,0.2,0.2]); % TODO:
 %    plotErrorROCcurve(dcmROC, N, [0.2,0.2,0.8]);
 %    plotErrorROCcurve(rnnROC, N, [0.8,0.8,0.2]);
     plotErrorROCcurve(teROC, N, [0.2,0.6,0.8]);
@@ -292,6 +313,7 @@ function analyzeAlzheimerDLCM
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
     plotAverageROCcurve(pgcROC, N, '--', [0.0,0.5,0.0],0.5);
     plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);
+    plotAverageROCcurve(dlwROC, N, '--', [0.2,0.2,0.2],0.7); % TODO:
 %    plotAverageROCcurve(dcmROC, N, '-', [0.2,0.2,0.8],0.5);
 %    plotAverageROCcurve(rnnROC, N, '--', [0.7,0.7,0.2],0.5);
     plotAverageROCcurve(teROC, N, '--', [0.2,0.5,0.7],0.5);
@@ -542,6 +564,10 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
                     
                     save(dlcmName, 'netDLCM', 'si', 'inSignal', 'inControl', 'mat', 'sig', 'c', 'maxsi', 'minsi');
                 end
+            case 'dlw' % should be called after dlcm
+                dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                load(dlcmName);
+                mat = calcDlcmWCI(netDLCM, [], inControl);
             end
             weights(:,:,i) = mat;
         end
@@ -611,6 +637,12 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : DLCM Granger Causality Index'];
+    case 'dlw'
+        sigma = std(meanWeights(:),'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : DLCM Weight Causality Index'];
     end
     imagesc(sigWeights,clims);
     daspect([1 1 1]);
