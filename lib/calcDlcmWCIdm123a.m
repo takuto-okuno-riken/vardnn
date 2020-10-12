@@ -5,7 +5,7 @@
 %  nodeControl  node control matrix (node x node) (optional)
 %  inControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 
-function wcI = calcDlcmWCIdm123(netDLCM, nodeControl, inControl)
+function wcI = calcDlcmWCIdm123a(netDLCM, nodeControl, inControl)
     if nargin < 3
         inControl = [];
     end

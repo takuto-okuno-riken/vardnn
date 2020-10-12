@@ -242,8 +242,8 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         fg = figure; dlGC = plotDlcmGCI(si, inSignal, [], inControl, netDLCM, 0); close(fg);
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A, 100, 1, 0.2); hold off;
 
-        % show result of DLCM weight causality index (DLCM-wci)
-        fg = figure; dlwGC = plotDlcmWCI(netDLCM, [], inControl, 0); close(fg);
+        % show result of DLCM weight causality index (DLCM-wci) as DLCM-EC
+        fg = figure; dlwGC = plotDlcmEC(netDLCM, [], inControl, 0); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A, 100, 1, 0.2); hold off;
     end
     fname = ['results/net-pat4-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];

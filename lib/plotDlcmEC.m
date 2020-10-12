@@ -1,5 +1,5 @@
 %%
-% plot DLCM weight causality index matrix
+% plot DLCM effective connectivity matrix
 % input:
 %  netDLCM      trained DLCM network
 %  nodeControl  node control matrix (node x node) (optional)
@@ -7,7 +7,7 @@
 %  range        plotting minimum and maximum range of GCI (default:0.5)
 %  rowcut       cut bottom rows of result CI matrix (default:0)
 
-function [wcI] = plotDlcmWCI(netDLCM, nodeControl, inControl, range, rowcut)
+function [EC] = plotDlcmEC(netDLCM, nodeControl, inControl, range, rowcut)
     if nargin < 5
         rowcut = 0;
     end
@@ -21,18 +21,18 @@ function [wcI] = plotDlcmWCI(netDLCM, nodeControl, inControl, range, rowcut)
         nodeControl = [];
     end
     nodeNum = length(netDLCM.nodeNetwork);
-    wcI = calcDlcmWCI(netDLCM, nodeControl, inControl);
+    EC = calcDlcmEC(netDLCM, nodeControl, inControl);
     % show DLCM weight causality of predicted node signals
     if range <= 0
-        sigma = std(wcI(:),'omitnan');
-        avg = mean(wcI(:),'omitnan');
-        wcI = (wcI - avg) / sigma;
+        sigma = std(EC(:),'omitnan');
+        avg = mean(EC(:),'omitnan');
+        EC = (EC - avg) / sigma;
         range = 3;
     end
-    wcI = wcI(:, 1:nodeNum); % TODO: probably, calcDlcmWeightCI should be changed.
-    if rowcut>0, wcI(end-rowcut+1:end,:) = []; end
+    EC = EC(:, 1:nodeNum); % TODO: probably, calcDlcmWeightCI should be changed.
+    if rowcut>0, EC(end-rowcut+1:end,:) = []; end
     clims = [-range, range];
-    imagesc(wcI,clims);
+    imagesc(EC,clims);
     daspect([1 1 1]);
     title('DLCM Weight Causality Index');
     colorbar;

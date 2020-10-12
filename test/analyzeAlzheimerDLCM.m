@@ -98,9 +98,9 @@ function analyzeAlzheimerDLCM
     adFCsNt = calculateAlzNormalityTest(adFCs, roiNames, 'ad', 'fc');
     mciFCsNt = calculateAlzNormalityTest(mciFCs, roiNames, 'mci', 'fc');
 
-    cnPCsNt = calculateAlzNormalityTest(cnPCs, roiNames, 'cn', 'pc');
-    adPCsNt = calculateAlzNormalityTest(adPCs, roiNames, 'ad', 'pc');
-    mciPCsNt = calculateAlzNormalityTest(mciPCs, roiNames, 'mci', 'pc');
+%    cnPCsNt = calculateAlzNormalityTest(cnPCs, roiNames, 'cn', 'pc');
+%    adPCsNt = calculateAlzNormalityTest(adPCs, roiNames, 'ad', 'pc');
+%    mciPCsNt = calculateAlzNormalityTest(mciPCs, roiNames, 'mci', 'pc');
 
     cnWCSsNt = calculateAlzNormalityTest(cnWCSs, roiNames, 'cn', 'wcs');
     adWCSsNt = calculateAlzNormalityTest(adWCSs, roiNames, 'ad', 'wcs');
@@ -121,11 +121,11 @@ function analyzeAlzheimerDLCM
     cnDLsNt = calculateAlzNormalityTest(cnDLs, roiNames, 'cn', 'dlcm');
     adDLsNt = calculateAlzNormalityTest(adDLs, roiNames, 'ad', 'dlcm');
     mciDLsNt = calculateAlzNormalityTest(mciDLs, roiNames, 'mci', 'dlcm');
-
+%}
     cnDLWsNt = calculateAlzNormalityTest(cnDLWs, roiNames, 'cn', 'dlw');
     adDLWsNt = calculateAlzNormalityTest(adDLWs, roiNames, 'ad', 'dlw');
     mciDLWsNt = calculateAlzNormalityTest(mciDLWs, roiNames, 'mci', 'dlw');
-
+%{
     cnDLGsNt = calculateAlzNormalityTest(cnDLGs, roiNames, 'cn', 'dlg');
     adDLGsNt = calculateAlzNormalityTest(adDLGs, roiNames, 'ad', 'dlg');
     mciDLGsNt = calculateAlzNormalityTest(mciDLGs, roiNames, 'mci', 'dlg');
@@ -293,35 +293,35 @@ function analyzeAlzheimerDLCM
     figure;
     hold on;
     plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
-    plotErrorROCcurve(pcROC, N, [0.8,0.2,0.2]);
-    plotErrorROCcurve(wcsROC, N, [0.9,0.5,0]);
+%    plotErrorROCcurve(pcROC, N, [0.8,0.2,0.2]);
+%    plotErrorROCcurve(wcsROC, N, [0.9,0.5,0]);
     plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
-    plotErrorROCcurve(pgcROC, N, [0.0,0.5,0.0]);
+%    plotErrorROCcurve(pgcROC, N, [0.0,0.5,0.0]);
     plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
     plotErrorROCcurve(dlwROC, N, [0.2,0.2,0.2]); % TODO:
 %    plotErrorROCcurve(dcmROC, N, [0.2,0.2,0.8]);
 %    plotErrorROCcurve(rnnROC, N, [0.8,0.8,0.2]);
     plotErrorROCcurve(teROC, N, [0.2,0.6,0.8]);
 %    plotErrorROCcurve(nnnueROC, N, [0.8,0.2,0.8]);
-    plotErrorROCcurve(dlgROC, N, [0.6,0.6,0.3]);
-    plotErrorROCcurve(pcsROC, N, [0.5,0.5,0.5]);
-    plotErrorROCcurve(cpcROC, N, [0.5,0.5,0.5]);
-    plotErrorROCcurve(fgesROC, N, [0.5,0.5,0.5]);
+%    plotErrorROCcurve(dlgROC, N, [0.6,0.6,0.3]);
+%    plotErrorROCcurve(pcsROC, N, [0.5,0.5,0.5]);
+%    plotErrorROCcurve(cpcROC, N, [0.5,0.5,0.5]);
+%    plotErrorROCcurve(fgesROC, N, [0.5,0.5,0.5]);
     plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
-    plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
-    plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
+%    plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
+%    plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
-    plotAverageROCcurve(pgcROC, N, '--', [0.0,0.5,0.0],0.5);
+%    plotAverageROCcurve(pgcROC, N, '--', [0.0,0.5,0.0],0.5);
     plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);
     plotAverageROCcurve(dlwROC, N, '--', [0.2,0.2,0.2],0.7); % TODO:
 %    plotAverageROCcurve(dcmROC, N, '-', [0.2,0.2,0.8],0.5);
 %    plotAverageROCcurve(rnnROC, N, '--', [0.7,0.7,0.2],0.5);
     plotAverageROCcurve(teROC, N, '--', [0.2,0.5,0.7],0.5);
 %    plotAverageROCcurve(nnnueROC, N, '--', [0.7,0.2,0.7],0.5);
-    plotAverageROCcurve(dlgROC, N, '-.', [0.6,0.6,0.3],0.5);
-    plotAverageROCcurve(pcsROC, N, '-', [0.5,0.5,0.5],0.5);
-    plotAverageROCcurve(cpcROC, N, '--', [0.5,0.5,0.5],0.5);
-    plotAverageROCcurve(fgesROC, N, '-.', [0.5,0.5,0.5],0.5);
+%    plotAverageROCcurve(dlgROC, N, '-.', [0.6,0.6,0.3],0.5);
+%    plotAverageROCcurve(pcsROC, N, '-', [0.5,0.5,0.5],0.5);
+%    plotAverageROCcurve(cpcROC, N, '--', [0.5,0.5,0.5],0.5);
+%    plotAverageROCcurve(fgesROC, N, '-.', [0.5,0.5,0.5],0.5);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);
@@ -567,7 +567,7 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
             case 'dlw' % should be called after dlcm
                 dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 load(dlcmName);
-                mat = calcDlcmWCI(netDLCM, [], inControl);
+                mat = calcDlcmEC(netDLCM, [], inControl);
             end
             weights(:,:,i) = mat;
         end

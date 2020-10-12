@@ -187,8 +187,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of DLCM-GC (pat=' num2str(i) ')']);
 
-        % show result of DLCM weight causality index (DLCM-wci)
-        fg = figure; dlwGC = plotDlcmWCI(netDLCM, [], inControl); close(fg);
+        % show result of DLCM weight causality index (DLCM-wci) as DLCM-EC
+        fg = figure; dlwGC = plotDlcmEC(netDLCM, [], inControl); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of DLCM-WCI (pat=' num2str(i) ')']);
 %%}

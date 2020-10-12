@@ -78,7 +78,7 @@ function testDlcmWeights
     r4 = (r2 + repW3) / 2;
     figure; imagesc(r4); daspect([1 1 1]); colorbar;
     
-    % DLCM weight causal index
-    wci = plotDlcmWCI(netDLCM, [], [], 0);
+    % DLCM weight causal index as DLCM-EC
+    wci = plotDlcmEC(netDLCM, [], [], 0);
 end
 

@@ -1,10 +1,10 @@
 %%
-% get DLCM weight causality index matrix
+% calc DLCM effective connectivity matrix
 % input:
 %  netDLCM      trained DLCM network
 %  nodeControl  node control matrix (node x node) (optional)
 %  inControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 
-function wcI = calcDlcmWCI(netDLCM, nodeControl, inControl)
-    wcI = calcDlcmWCIdm123(netDLCM, nodeControl, inControl);
+function EC = calcDlcmEC(netDLCM, nodeControl, inControl)
+    EC = calcDlcmWCIdm123a(netDLCM, nodeControl, inControl);
 end

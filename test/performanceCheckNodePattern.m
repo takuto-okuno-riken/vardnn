@@ -139,8 +139,8 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 %    figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
     % show DLCM-GC
     figure; dlGC = plotDlcmGCI(si, [], [], [], netDLCM, 0);
-    % show DLCM-WCI
-    figure; dlWC = plotDlcmWeightCI(netDLCM, [], [], 0);
+    % show DLCM-WCI as DLCM-EC
+    figure; dlWC = plotDlcmEC(netDLCM, [], [], 0);
     % show DLCM-weight-GC
 %    figure; dlwGC = plotDlcmDeltaWeightGCI(netDLCM);
     figure; Aest = plotDirectLiNGAM(si);
