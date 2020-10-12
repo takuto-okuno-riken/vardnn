@@ -312,8 +312,10 @@ function analyzeAlzheimerDLCM
 %    plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
 %    plotAverageROCcurve(pgcROC, N, '--', [0.0,0.5,0.0],0.5);
-    plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);
-    plotAverageROCcurve(dlwROC, N, '--', [0.2,0.2,0.2],0.7); % TODO:
+%    plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);
+%    plotAverageROCcurve(dlwROC, N, '--', [0.2,0.2,0.2],0.7); % TODO:
+    plotAverageROCcurve(dlwROC, N, '-', [0.2,0.2,0.2],1.2);
+    plotAverageROCcurve(dlROC, N, '--', [0.2,0.2,0.2],0.7); % TODO:
 %    plotAverageROCcurve(dcmROC, N, '-', [0.2,0.2,0.8],0.5);
 %    plotAverageROCcurve(rnnROC, N, '--', [0.7,0.7,0.2],0.5);
     plotAverageROCcurve(teROC, N, '--', [0.2,0.5,0.7],0.5);
