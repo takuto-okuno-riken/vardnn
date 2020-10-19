@@ -9,7 +9,7 @@ function performanceCheckDCMy2DLCM
     N  = 12;                              % number of runs
     T  = 200;                             % number of observations (scans)
     TR = 2;                               % repetition time or timing
-    n  = 16;                               % number of regions or nodes
+    n  = 8;                               % number of regions or nodes
     t  = (1:T)*TR;                        % observation times
     
     % integrate states
@@ -22,13 +22,18 @@ function performanceCheckDCMy2DLCM
     ySt = 30; % BOLD signal starting point (for DCM inversion)
     T = 199 + ySt;
 
-    maxK = 10; % number of trial
+    maxK = 20; % number of trial
     LAG = 3;   % lag time for GC
 
     % initialize parameters to save file or load previous one
     FCtime = zeros(maxK,N);
-    GCtime = zeros(maxK,N);
+    PCtime = zeros(maxK,N);
+    WCtime = zeros(maxK,N);
+    mGCtime = zeros(maxK,N);
+    pGCtime = zeros(maxK,N);
     DLtime = zeros(maxK,N);
+    DLEtime = zeros(maxK,N);
+    dLiNtime = zeros(maxK,N);
 
     % load spectrum DCM performance check result
     fname = ['results/DCM_demo-rand' num2str(n) '-' num2str(N) 'x' num2str(maxK) '.mat'];
@@ -54,13 +59,41 @@ function performanceCheckDCMy2DLCM
         FCtime(k,1) = time;
         disp(['finish FC! t = ' num2str(time) 's']);
 
-        % calculate GC and get computational time
+        % calculate PC and get computational time
+        ticHdl = tic;
+        mat = calcPartialCorrelation(si);
+        time = toc(ticHdl);
+        PCtime(k,1) = time;
+        disp(['finish PC! t = ' num2str(time) 's']);
+
+        % calculate WC and get computational time
+        ticHdl = tic;
+        mat = calcWaveletCoherence(si);
+        time = toc(ticHdl);
+        WCtime(k,1) = time;
+        disp(['finish WC! t = ' num2str(time) 's']);
+
+        % calculate mvGC and get computational time
         ticHdl = tic;
         mat = calcMultivariateGCI(si, LAG);
         time = toc(ticHdl);
-        GCtime(k,1) = time;
-        disp(['finish GC! t = ' num2str(time) 's']);
+        mGCtime(k,1) = time;
+        disp(['finish mvGC! t = ' num2str(time) 's']);
 
+        % calculate pwGC and get computational time
+        ticHdl = tic;
+        mat = calcPairwiseGCI(si, LAG);
+        time = toc(ticHdl);
+        pGCtime(k,1) = time;
+        disp(['finish pwGC! t = ' num2str(time) 's']);
+
+        % calculate dLiN and get computational time
+        ticHdl = tic;
+        mat = calcDirectLiNGAM(si);
+        time = toc(ticHdl);
+        dLiNtime(k,1) = time;
+        disp(['finish dLiNGAM! t = ' num2str(time) 's']);
+        
         % normalize signal to [0, 1] 
         si = convert2SigmoidSignal(si,0);
         inSignal = convert2SigmoidSignal(inSignal,0);
@@ -102,10 +135,18 @@ function performanceCheckDCMy2DLCM
             %plotDlcmWeight(netDLCM);
             save(dlcmFile, 'netDLCM','mat','DLtime');
         end
+        
+        % calculate DLCM-EC and get computational time
+        ticHdl = tic;
+        mat = calcDlcmEC(netDLCM, [], inControl);
+        time = toc(ticHdl) + netDLCM.trainTime;
+        DLEtime(k,1) = time;
+        disp(['finish DLCM-EC! t = ' num2str(time) 's']);        
     end
+
     % save result
-%    dlcmFile = ['results/net-time-' num2str(n) '-' num2str(N) 'x' num2str(k) '-result.mat'];
-%    save(dlcmFile, 'DLtime', 'FCtime', 'GCtime');
+    timeFile = ['results/net-time-' num2str(n) '-' num2str(N) 'x' num2str(k) '-result.mat'];
+    save(timeFile, 'FCtime', 'PCtime', 'WCtime', 'mGCtime', 'pGCtime', 'DLtime', 'DLEtime', 'dLiNtime');
 end
 
 

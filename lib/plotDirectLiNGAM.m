@@ -15,7 +15,7 @@ function [Aest, Best, stdeest, ciest, kest] = plotDirectLiNGAM(X, rowcut)
     if nargin < 2
         rowcut = 0;
     end
-    % show Wavelet Coherence
+    % show Direct LiNGAM
     [Aest, Best, stdeest, ciest, kest] = calcDirectLiNGAM(X);
     if rowcut>0, mWCS(end-rowcut+1:end,:) = []; end
     clims = [-1,1];
