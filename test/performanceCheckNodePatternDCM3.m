@@ -50,7 +50,7 @@ function performanceCheckNodePatternDCM3
 
     %% pattern 1 -------------------------------------------------
 %%{
-    disp('network density 0.05');
+    disp('network density 0.2'); % self connection
     pP.A = eye(n,n) * 0.2;
     pP.A(5,1) = 0.2 + rand() * 0.3;
     pP.A(8,3) = 0.2 + rand() * 0.3;
@@ -59,7 +59,7 @@ function performanceCheckNodePatternDCM3
 %%}
     %% pattern 2 -------------------------------------------------
 %%{
-    disp('network density 0.11');
+    disp('network density 0.25');
     pP.A = eye(n,n) * 0.2;
     pP.A(5,1) = 0.3 + rand() * 0.3;
     pP.A(8,3) = 0.3 + rand() * 0.3;
@@ -71,14 +71,14 @@ function performanceCheckNodePatternDCM3
 %%}
     %% pattern 6 -------------------------------------------------
 %%{
-    disp('network density 0.16');
+    disp('network density 0.3');
     pP.A = eye(n,n) * 0.2;
     pP.A = addPattern6(pP.A,0.3,0.2);
     checkingPattern(pP,M,U,N,T,n,TR,options,6);
 %%}
     %% pattern 7 -------------------------------------------------
 %%{
-    disp('network density 0.27');
+    disp('network density 0.41');
     pP.A = eye(n,n) * 0.15;
     pP.A = addPattern6(pP.A,0.3,0.2);
     pP.A = addPattern7(pP.A);
@@ -86,7 +86,7 @@ function performanceCheckNodePatternDCM3
 %%}
     %% pattern 8 -------------------------------------------------
 %%{
-    disp('network density 0.36');
+    disp('network density 0.5');
     pP.A = eye(n,n) * 0.1;
     pP.A = addPattern6(pP.A,0.2,0.2);
     pP.A = addPattern7(pP.A);

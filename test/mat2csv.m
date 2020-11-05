@@ -23,6 +23,33 @@ for i=1:length(idxs)
     end
 end
 %}
+%% for time comparison with DCM generated signal
+prefix = 'results/net-timeD-';
+N = 12;
+idxs = [8,12,16];
+reps = [20,10,10];
+
+for i=1:length(idxs)
+    n = idxs(i);
+    m = reps(i);
+    for k=1:m
+        fname = [prefix num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];
+
+        if ~exist(fname, 'file')
+            continue;
+        end
+        % load
+        load(fname);
+        
+        mat = data.';
+
+        % output csv file
+        outfname = [prefix num2str(n) '-' num2str(N) 'x' num2str(k) '.csv'];
+        T = array2table(mat);
+        writetable(T,outfname,'WriteVariableNames',false);
+        disp(['output csv file : ' outfname]);
+    end
+end
 
 %% for reduced wongwang generated signal
 %{
@@ -50,7 +77,7 @@ end
 %}
 
 %% for ADNI2 fMRI data
-%%{
+%{
 roiNum = 132;
 group = {'cn', 'ad', 'mci'};
 
@@ -67,4 +94,4 @@ for i=1:length(group)
         disp(['output csv file : ' outfname]);
     end
 end
-%%}
+%}
