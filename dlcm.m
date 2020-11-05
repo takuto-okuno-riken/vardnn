@@ -29,6 +29,7 @@ function dlcm(varargin)
     handles.nodeControls = {};
     handles.inControls = {};
     handles.groundTruth = {};
+    handles.roiNames = {};
     handles.commandError = 0;
     handles.dlec = 0;
     handles.dlgc = 0;
@@ -51,6 +52,7 @@ function dlcm(varargin)
     handles.showSig = 0;
     handles.showEx = 0;
     handles.showMat = 0;
+    handles.showCG = 0;
     handles.showROC = 0;
     handles.maxEpochs = 1000;
     handles.L2Regularization = 0.05;
@@ -117,12 +119,17 @@ function dlcm(varargin)
             case {'--groundtruth'}
                 handles.groundTruth = strsplit(varargin{i+1},':');
                 i = i + 1;
+            case {'--roiname'}
+                handles.roiNames = strsplit(varargin{i+1},':');
+                i = i + 1;
             case {'--showsig'}
                 handles.showSig = 1;
             case {'--showex'}
                 handles.showEx = 1;
             case {'--showmat'}
                 handles.showMat = 1;
+            case {'--showcg'}
+                handles.showCG = 1;
             case {'--showroc'}
                 handles.showROC = 1;
             case {'-h','--help'}
@@ -185,9 +192,11 @@ function showUsage()
     disp('  --ectrl files       DLCM exogenous input control <files> (file1.csv[:file2.csv:...])');
     disp('  --epoch num         DLCM training epoch number <num> (default:1000)');
     disp('  --l2 num            DLCM training L2Regularization <num> (default:0.05)');
+    disp('  --roiname files     ROI names <files> (file1.csv[:file2.csv:...])');
     disp('  --showsig           show node status signals of <filename>.csv');
     disp('  --showex            show exogenous input signals of <file1>.csv');
     disp('  --showmat           show result matrix of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC');
+    disp('  --showcg            show circle graph of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC');
     disp('  --showroc           show ROC curve (by GroundTruth) of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC');
     disp('  -v, --version       show version number');
     disp('  -h, --help          show command line help');
@@ -230,6 +239,7 @@ function processInputFiles(handles)
         inControl = [];
         inNum = 0;
         groundTruth = [];
+        roiNames = [];
         auc = NaN;
 
         % load node status signals csv or mat file
@@ -322,6 +332,22 @@ function processInputFiles(handles)
             groundTruth = table2array(T);
         end
 
+        % load ROI names csv file
+        if ~isempty(handles.roiNames)
+            if length(handles.roiNames)==1
+                roiname = handles.roiNames{1};
+            elseif length(handles.roiNames) >= i
+                roiname = handles.roiNames{i};
+            else
+                disp(['error : bad ROI name file list with ' fname]);
+                continue;
+            end
+            T = readtable(roiname, 'ReadVariableNames', 0);
+            roiNames = table2array(T);
+        elseif isempty(roiNames)
+            roiNames = generateNumberROINames(nodeNum);
+        end
+
         % signal transform raw or not
         if handles.transform == 1
             [X, sig, c, maxsi, minsi] = convert2SigmoidSignal(X, handles.transopt);
@@ -375,12 +401,16 @@ function processInputFiles(handles)
         
         % calc DLCM-EC
         if handles.dlec > 0
-            % show original signal granger causality index 
+            % show DLCM-EC matrix
             if handles.showMat > 0
                 figure; dlEC = plotDlcmEC(netDLCM, nodeControl, inControl, 0, 0);
                 title(['DLCM Effective Connectivity : ' name]);
             else
                 dlEC = calcDlcmEC(netDLCM, nodeControl, inControl);
+            end
+            
+            if handles.showCG > 0
+                figure; plotCircleGraph(dlEC, ['DLCM Effective Connectivity : ' name], roiNames, 1, 5, 1);
             end
             
             % show ROC curve 
@@ -399,12 +429,16 @@ function processInputFiles(handles)
 
         % calc DLCM-GC
         if handles.dlgc > 0
-            % show original signal granger causality index 
+            % show DLCM-GC matrix
             if handles.showMat > 0
                 figure; [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, 0, 0, handles.alpha);
                 title(['DLCM Granger Causality Index : ' name]);
             else
                 [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, handles.alpha);
+            end
+            
+            if handles.showCG > 0
+                figure; plotCircleGraph(dlGC, ['DLCM Granger Causality Index : ' name], roiNames, 1, 5, 1);
             end
             
             % show ROC curve 
@@ -423,12 +457,16 @@ function processInputFiles(handles)
         
         % calc multivaliate Granger causality
         if handles.mvgc > 0
-            % show original signal granger causality index 
+            % show mvGC matrix
             if handles.showMat > 0
                 figure; [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, handles.lag, 0, 0, handles.alpha);
                 title(['multivariate Granger Causality Index : ' name]);
             else
                 [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, handles.lag, handles.alpha);
+            end
+            
+            if handles.showCG > 0
+                figure; plotCircleGraph(mvGC, ['multivariate Granger Causality Index : ' name], roiNames, 1, 5, 1);
             end
             
             % show ROC curve 
@@ -447,12 +485,16 @@ function processInputFiles(handles)
         
         % calc pair-wised Granger causality
         if handles.pwgc > 0
-            % show original signal granger causality index 
+            % show pwGC matrix
             if handles.showMat > 0
                 figure; [pwGC, h, P, F, cvFd, AIC, BIC] = plotPairwiseGCI(X, handles.lag, 0, 0, handles.alpha);
                 title(['pairwised Granger Causality Index : ' name]);
             else
                 [pwGC, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, handles.lag, handles.alpha);
+            end
+            
+            if handles.showCG > 0
+                figure; plotCircleGraph(pwGC, ['pairwised Granger Causality Index : ' name], roiNames, 1, 5, 1);
             end
 
             % show ROC curve 
@@ -471,12 +513,16 @@ function processInputFiles(handles)
         
         % calc Transfer Entropy (LINUE)
         if handles.te > 0
-            % show original signal granger causality index 
+            % show TE matrix
             if handles.showMat > 0
                 figure; [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotLinueTE(X, handles.lag, 0, 0, handles.alpha);
                 title(['Transfer Entropy (LINUE) : ' name]);
             else
                 [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, handles.lag, handles.alpha);
+            end
+            
+            if handles.showCG > 0
+                figure; plotCircleGraph(TE, ['Transfer Entropy (LINUE) : ' name], roiNames, 1, 5, 1);
             end
 
             % show ROC curve 
@@ -495,7 +541,7 @@ function processInputFiles(handles)
         
         % calc Function connectivity
         if handles.fc > 0
-            % show original signal FC
+            % show FC matrix
             if handles.showMat > 0
                 figure; [FC,P] = plotFunctionalConnectivity(X);
                 title(['Functional Connectivity : ' name]);
@@ -503,6 +549,10 @@ function processInputFiles(handles)
                 [FC,P] = calcFunctionalConnectivity(X);
             end
             
+            if handles.showCG > 0
+                figure; plotCircleGraph(FC, ['Functional Connectivity : ' name], roiNames, 0.4, 0.8, 0.2, true);
+            end
+
             % show ROC curve 
             if ~isempty(groundTruth)
                 if handles.showROC > 0
@@ -519,12 +569,16 @@ function processInputFiles(handles)
 
         % calc Partial Correlation
         if handles.pc > 0
-            % show original signal PC
+            % show PC matrix
             if handles.showMat > 0
                 figure; [PC,P] = plotPartialCorrelation(X);
                 title(['Partial Correlation : ' name]);
             else
                 [PC,P] = calcPartialCorrelation(X);
+            end
+            
+            if handles.showCG > 0
+                figure; plotCircleGraph(PC, ['Partial Correlation : ' name], roiNames, 0.4, 0.8, 0.2, true);
             end
             
             % show ROC curve 
@@ -543,7 +597,7 @@ function processInputFiles(handles)
 
         % calc Wavelet Coherence
         if handles.wc > 0
-            % show original signal WC
+            % show WC matrix
             if handles.showMat > 0
                 figure; [mWCS, WCOH, WCS] = plotWaveletCoherence(X);
                 title(['Wavelet Coherence : ' name]);
@@ -551,6 +605,10 @@ function processInputFiles(handles)
                 [mWCS, WCOH, WCS] = calcWaveletCoherence(X);
             end
             
+            if handles.showCG > 0
+                figure; plotCircleGraph(mWCS, ['Wavelet Coherence : ' name], roiNames, 0.4, 0.8, 0.2, true);
+            end
+
             % show ROC curve 
             if ~isempty(groundTruth)
                 if handles.showROC > 0
@@ -595,6 +653,73 @@ function processInputFiles(handles)
         xlabel('False Positive Rate')
         ylabel('True Positive Rate')
     end
+end
+
+%%
+function roiNames = generateNumberROINames(nodeNum)
+    roiNames = cell(1, nodeNum);
+    for i=1:nodeNum
+        roiNames{i} = num2str(i);
+    end
+end
+
+%%
+% show cercle graph
+function plotCircleGraph(mat, matname, roiNames, rmin, rmax, rstep, isRaw)
+    if nargin < 7
+        isRaw = 0;
+    end
+    if isRaw
+        mOrg = mat;
+    else
+        sigma = std(mat(:),'omitnan');
+        avg = mean(mat(:),'omitnan');
+        mOrg = (mat - avg) / sigma;
+    end
+    rangeW = -rmin:-rstep:-rmax;
+    rangeS = rmin:rstep:rmax;
+
+    % plot weaker weights
+    cstep = 0.8 / length(rangeW);
+    for i=1:length(rangeW)
+        m = mOrg;
+        m(m>rangeW(i)) = 0;
+        if i<length(rangeW)
+            m(m<=rangeW(i+1)) = 0;
+        end
+        hold on; 
+        G = digraph(m, 'omitselfloops');
+        gp=plot(G);
+        layout(gp,'circle');
+        gp.LineStyle = '-';
+        gp.NodeLabel = [];
+        gp.EdgeColor = [1-i*cstep, 1-i*cstep, 0.9];
+        hold off;
+    end
+    % plot stronger weights
+    cstep = 0.8 / length(rangeS);
+    for i=1:length(rangeS)
+        m = mOrg;
+        m(m<rangeS(i)) = 0;
+        if i<length(rangeS)
+            m(m>=rangeS(i+1)) = 0;
+        end
+        hold on; 
+        G = digraph(m, 'omitselfloops');
+        gp=plot(G);
+        layout(gp,'circle');
+        gp.LineStyle = '-';
+        gp.NodeLabel = [];
+        gp.EdgeColor = [0.9, 1-i*cstep, 1-i*cstep];
+        hold off;
+    end
+    gp.NodeColor = [0.7, 0.7, 0.7];
+    gp.NodeLabel = roiNames;
+    ax = gca;
+    ax.XAxis.Visible = 'off';
+    ax.YAxis.Visible = 'off';
+    daspect([1 1 1]);
+    title(['Cricle Graph of ' matname]);
 end
 
 %%
