@@ -29,7 +29,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = plotPairwiseGCI(X, lag, range, rowcut,
         sigma = std(gcI(:),'omitnan');
         avg = mean(gcI(:),'omitnan');
         gcI = (gcI - avg) / sigma;
-        range = 5;
+        range = 3;
     end
     if rowcut>0, gcI(end-rowcut+1:end,:) = []; end
     clims = [-range, range];

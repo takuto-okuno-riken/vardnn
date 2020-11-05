@@ -30,7 +30,7 @@ function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotLinueTE(X, lag, r
         sigma = std(TE(:),'omitnan');
         avg = mean(TE(:),'omitnan');
         TE = (TE - avg) / sigma;
-        clims = [-5, 5];
+        clims = [-3, 3];
     end
     if rowcut>0, TE(end-rowcut+1:end,:) = []; end
     imagesc(TE,clims);

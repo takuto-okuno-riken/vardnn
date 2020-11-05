@@ -30,11 +30,14 @@ function dlcm(varargin)
     handles.inControls = {};
     handles.groundTruth = {};
     handles.commandError = 0;
+    handles.dlec = 0;
     handles.dlgc = 0;
     handles.mvgc = 0;
     handles.pwgc = 0;
-    handles.fc = 0;
     handles.te = 0;
+    handles.fc = 0;
+    handles.pc = 0;
+    handles.wc = 0;
     handles.lag = 3;
     handles.pval = 0;
     handles.fval = 0;
@@ -59,16 +62,22 @@ function dlcm(varargin)
             break;
         end
         switch varargin{i}
+            case {'-e','--dlec'}
+                handles.dlec = 1;
             case {'-d','--dlgc'}
                 handles.dlgc = 1;
             case {'-m','--mvgc'}
                 handles.mvgc = 1;
-            case {'-p','--pwgc'}
+            case {'-g','--pwgc'}
                 handles.pwgc = 1;
-            case {'-f','--fc'}
-                handles.fc = 1;
             case {'-t','--te'}
                 handles.te = 1;
+            case {'-f','--fc'}
+                handles.fc = 1;
+            case {'-p','--pc'}
+                handles.pc = 1;
+            case {'-w','--wc'}
+                handles.wc = 1;
             case {'--lag'}
                 handles.lag = str2num(varargin{i+1});
                 i = i + 1;
@@ -154,16 +163,19 @@ function showUsage()
     global exePath;
     global exeName;
     disp(['usage: ' exeName ' [options] filename.csv ...']);
+    disp('  -e, --dlec          output DLCM Effective Connectivity matrix result (<filename>_dlec.csv)');
     disp('  -d, --dlgc          output DLCM Granger Causality matrix result (<filename>_dlgc.csv)');
     disp('  -m, --mvgc          output multivaliate Granger Causality matrix result (<filename>_mvgc.csv)');
-    disp('  -p, --pwgc          output pair-wised Granger Causality matrix result (<filename>_pwgc.csv)');
+    disp('  -g, --pwgc          output pair-wised Granger Causality matrix result (<filename>_pwgc.csv)');
     disp('  -t, --te            output (LINUE) Transfer Entropy matrix result (<filename>_te.csv)');
     disp('  -f, --fc            output Functional Conectivity matrix result (<filename>_fc.csv)');
-    disp('  --pval              save P-value matrix of DLCM-GC, mvGC, pwGC, TE and FC (<filename>_*_pval.csv)');
+    disp('  -p, --pc            output Partial Correlation matrix result (<filename>_pc.csv)');
+    disp('  -w, --wc            output Wavelet Coherence matrix result (<filename>_wc.csv)');
+    disp('  --pval              save P-value matrix of DLCM-GC, mvGC, pwGC, TE, FC and PC (<filename>_*_pval.csv)');
     disp('  --fval alpha        save F-value with <alpha> matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_fval.csv, <filename>_*_fcrit.csv)');
     disp('  --aic               save AIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_aic.csv)');
     disp('  --bic               save BIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_bic.csv)');
-    disp('  --groundtruth files calculate ROC curve and save AUC of DLCM-GC, mvGC, pwGC, TE and FC (<filename>_*_auc.csv)');
+    disp('  --groundtruth files calculate ROC curve and save AUC of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC (<filename>_*_auc.csv)');
     disp('  --transform type    input signal transform <type> 0:raw, 1:sigmoid (default:0)');
     disp('  --transopt num      signal transform option <num> (for type 1:centroid value)');
     disp('  --format type       save file format <type> 0:csv, 1:mat(each), 2:mat(all) (default:0)');
@@ -175,8 +187,8 @@ function showUsage()
     disp('  --l2 num            DLCM training L2Regularization <num> (default:0.05)');
     disp('  --showsig           show node status signals of <filename>.csv');
     disp('  --showex            show exogenous input signals of <file1>.csv');
-    disp('  --showmat           show result matrix of DLCM-GC, mvGC, pwGC, TE and FC');
-    disp('  --showroc           show ROC curve (by GroundTruth) of DLCM-GC, mvGC, pwGC, TE and FC');
+    disp('  --showmat           show result matrix of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC');
+    disp('  --showroc           show ROC curve (by GroundTruth) of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC');
     disp('  -v, --version       show version number');
     disp('  -h, --help          show command line help');
 end
@@ -191,16 +203,22 @@ function processInputFiles(handles)
     % init
     N = length(handles.csvFiles);
     fcROC = cell(N,2);
+    pcROC = cell(N,2);
+    wcROC = cell(N,2);
     gcROC = cell(N,2);
     pwROC = cell(N,2);
     dlROC = cell(N,2);
+    dleROC = cell(N,2);
     teROC = cell(N,2);
     if handles.showROC > 0
+        if handles.dlec > 0, dleRf = figure; end
         if handles.dlgc > 0, dlRf = figure; end
         if handles.mvgc > 0, gcRf = figure; end
         if handles.pwgc > 0, pwRf = figure; end
         if handles.te > 0, teRf = figure; end
         if handles.fc > 0, fcRf = figure; end
+        if handles.pc > 0, pcRf = figure; end
+        if handles.wc > 0, wcRf = figure; end
     end
     
     % process each file
@@ -327,8 +345,8 @@ function processInputFiles(handles)
             ylabel('Signal Value');
         end
         
-        % calc DLCM Granger causality
-        if handles.dlgc > 0
+        % train DLCM network
+        if handles.dlec > 0 || handles.dlgc > 0
             dlcmFile = [exePath '/results/cache-dlcm-' name '.mat'];
             if exist(dlcmFile, 'file')
                 disp(['read cache file : ' dlcmFile]);
@@ -353,7 +371,34 @@ function processInputFiles(handles)
                 disp(['DLCM training result : rsme=' num2str(rsme)]);
                 save(dlcmFile, 'netDLCM');
             end
+        end
+        
+        % calc DLCM-EC
+        if handles.dlec > 0
+            % show original signal granger causality index 
+            if handles.showMat > 0
+                figure; dlEC = plotDlcmEC(netDLCM, nodeControl, inControl, 0, 0);
+                title(['DLCM Effective Connectivity : ' name]);
+            else
+                dlEC = calcDlcmEC(netDLCM, nodeControl, inControl);
+            end
+            
+            % show ROC curve 
+            if ~isempty(groundTruth)
+                if handles.showROC > 0
+                    figure(dleRf); hold on; [dleROC{i,1}, dleROC{i,2}, auc] = plotROCcurve(dlEC, groundTruth, 100, 1, handles.Gth); hold off;
+                    title('ROC curve of DLCM Effective Connectivity');
+                else
+                    [dleROC{i,1}, dleROC{i,2}, auc] = calcROCcurve(dlEC, groundTruth, 100, 1, handles.Gth);
+                end
+            end
+            
+            % output result matrix files
+            saveResultFiles(handles, dlEC, [], [], [], [], [], auc, [savename '_dlec']);
+        end
 
+        % calc DLCM-GC
+        if handles.dlgc > 0
             % show original signal granger causality index 
             if handles.showMat > 0
                 figure; [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, 0, 0, handles.alpha);
@@ -471,6 +516,54 @@ function processInputFiles(handles)
             % output result matrix files
             saveResultFiles(handles, FC, P, [], [], [], [], auc, [savename '_fc']);
         end
+
+        % calc Partial Correlation
+        if handles.pc > 0
+            % show original signal PC
+            if handles.showMat > 0
+                figure; [PC,P] = plotPartialCorrelation(X);
+                title(['Partial Correlation : ' name]);
+            else
+                [PC,P] = calcPartialCorrelation(X);
+            end
+            
+            % show ROC curve 
+            if ~isempty(groundTruth)
+                if handles.showROC > 0
+                    figure(pcRf); hold on; [pcROC{i,1}, pcROC{i,2}, auc] = plotROCcurve(PC, groundTruth, 100, 1, handles.Gth); hold off;
+                    title('ROC curve of Partial Correlation');
+                else
+                    [pcROC{i,1}, pcROC{i,2}, auc] = calcROCcurve(PC, groundTruth, 100, 1, handles.Gth);
+                end
+            end
+            
+            % output result matrix files
+            saveResultFiles(handles, PC, P, [], [], [], [], auc, [savename '_pc']);
+        end
+
+        % calc Wavelet Coherence
+        if handles.wc > 0
+            % show original signal WC
+            if handles.showMat > 0
+                figure; [mWCS, WCOH, WCS] = plotWaveletCoherence(X);
+                title(['Wavelet Coherence : ' name]);
+            else
+                [mWCS, WCOH, WCS] = calcWaveletCoherence(X);
+            end
+            
+            % show ROC curve 
+            if ~isempty(groundTruth)
+                if handles.showROC > 0
+                    figure(wcRf); hold on; [wcROC{i,1}, wcROC{i,2}, auc] = plotROCcurve(mWCS, groundTruth, 100, 1, handles.Gth); hold off;
+                    title('ROC curve of Wavelet Coherence');
+                else
+                    [wcROC{i,1}, wcROC{i,2}, auc] = calcROCcurve(mWCS, groundTruth, 100, 1, handles.Gth);
+                end
+            end
+            
+            % output result matrix files
+            saveResultFiles(handles, mWCS, [], [], [], [], [], auc, [savename '_wc']);
+        end
     end
     
     % show average ROC curve
@@ -478,14 +571,20 @@ function processInputFiles(handles)
         figure; 
         hold on;
         plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
+        plotErrorROCcurve(pcROC, N, [0.8,0.2,0.2]);
+        plotErrorROCcurve(wcROC, N, [0.8,0.5,0.2]);
         plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
         plotErrorROCcurve(pwROC, N, [0.0,0.5,0.0]);
         plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
+        plotErrorROCcurve(dleROC, N, [0.2,0.2,0.2]);
         plotErrorROCcurve(teROC, N, [0.2,0.6,0.8]);
         plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
+        plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
+        plotAverageROCcurve(wcROC, N, '--', [0.8,0.5,0.2],0.5);
         plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
         plotAverageROCcurve(pwROC, N, '--', [0.0,0.5,0.0],0.5);
-        plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);
+        plotAverageROCcurve(dlROC, N, '--', [0.2,0.2,0.2],0.8);
+        plotAverageROCcurve(dleROC, N, '-', [0.2,0.2,0.2],1.2);
         plotAverageROCcurve(teROC, N, '--', [0.2,0.5,0.7],0.5);
         plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
         hold off;
