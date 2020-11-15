@@ -194,16 +194,25 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         % show result of granger causality index (mvGC)
         fg = figure; gcI = plotMultivariateGCI(y2.',3,0); close(fg);
         figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, pP.A); hold off;
+        title('mvGC');
         % show result of granger causality index (pwGC)
         fg = figure; gcI = plotPairwiseGCI(y2.',3,0); close(fg);
         figure(pgcRf); hold on; [pgcROC{k,1}, pgcROC{k,2}, pgcAUC(k)] = plotROCcurve(gcI, pP.A); hold off;
+        title('pwGC');
         % show result of DirectLiNGAM
         fg = figure; Aest = plotDirectLiNGAM(y2.'); close(fg);
         figure(dlgRf); hold on; [dlgROC{k,1}, dlgROC{k,2}, dlgAUC(k)] = plotROCcurve(Aest, pP.A); hold off;
+        title('dLiNGAM');
 
         % show DCM signals
         [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(y2.', 0);
         [inSignal, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(u2.', 0);
+        % si = si - 0.5; (bad DLCM-EC)
+        % inSignal = inSignal - 0.5; (bad DLCM-EC)
+        % si = y2.'; % test raw data (bad DLCM-EC)
+        % inSignal = u2.'; % test raw data (bad DLCM-EC)
+        % si = y2.' - min(y2,[],'all'); % test raw data (nice DLCM-EC)
+        % inSignal = u2.' - min(u2,[],'all');; % test raw data (nice DLCM-EC)
         inControl = eye(n,n);
         figure; plot(si.');
         %figure; plot(inSignal.');
@@ -241,10 +250,12 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         % show result of DLCM-GC
         fg = figure; dlGC = plotDlcmGCI(si, inSignal, [], inControl, netDLCM, 0); close(fg);
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A); hold off;
+        title('DLCM-GC');
 
         % show result of DLCM weight causality index (DLCM-wci) as DLCM-EC
         fg = figure; dlwGC = plotDlcmEC(netDLCM, [], inControl, 0); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A); hold off;
+        title('DLCM-EC');
     end
     fname = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
     save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlwAUC', 'dlgAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC');
