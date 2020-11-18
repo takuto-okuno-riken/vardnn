@@ -598,19 +598,19 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
         titleStr = [group ' : Wavelet Coherence Cross Spectrum'];
         sigWeights = meanWeights;
     case 'gc'
-        sigma = std(meanWeights(:),'omitnan');
+        sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : multivariate Granger Causality Index'];
     case 'pgc'
-        sigma = std(meanWeights(:),'omitnan');
+        sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : pairwise Granger Causality Index'];
     case 'te'
-        sigma = std(meanWeights(:),'omitnan');
+        sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
@@ -624,7 +624,7 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
         titleStr = [group ' : Conservative PC'];
         sigWeights = meanWeights;
     case 'fges'
-        sigma = std(meanWeights(:),'omitnan');
+        sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
@@ -634,13 +634,13 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
         titleStr = [group ' : Direct LiNGAM'];
         sigWeights = meanWeights;
     case 'dlcm'
-        sigma = std(meanWeights(:),'omitnan');
+        sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : DLCM Granger Causality Index'];
     case 'dlw'
-        sigma = std(meanWeights(:),'omitnan');
+        sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];

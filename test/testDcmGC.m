@@ -201,7 +201,7 @@ function [gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 
     % show DCM GC
     figure;
-    sigma = std(gcI(:),'omitnan');
+    sigma = std(gcI(:),1,'omitnan');
     avg = mean(gcI(:),'omitnan');
     gcI = (gcI - avg) / sigma;
     range = 5;

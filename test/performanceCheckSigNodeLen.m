@@ -96,7 +96,7 @@ function performanceCheckSignalLen
             resultRSME(j,i) = c / nodeNum;
             resultRSMEAll(j,i) = d / nodeNum;
             resultMAEAll(j,i) = e / nodeNum;
-            resultMAEErr(j,i) = std(errs) / sqrt(length(errs));
+            resultMAEErr(j,i) = std(errs,1) / sqrt(length(errs)); % uncorrected std error
         end
     end
     

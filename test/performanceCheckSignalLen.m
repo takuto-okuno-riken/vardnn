@@ -94,7 +94,7 @@ function performanceCheckSignalLen
         resultMAEAll(i,1) = e / nodeNum;
         A = resultErrs(i,:,1:i*step-1);
         errs = A(:);
-        resultMAEErr(i,1) = std(errs) / sqrt(length(errs));
+        resultMAEErr(i,1) = std(errs,1) / sqrt(length(errs)); % uncorrected std error
     end
     
     % show error bar graph

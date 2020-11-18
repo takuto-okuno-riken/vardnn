@@ -1,11 +1,11 @@
 %%
-% get DLCM weight causality index matrix
+% get DLCM weight causality index matrix (wcI) and impaired node signals (wcNS)
 % input:
 %  netDLCM      trained DLCM network
 %  nodeControl  node control matrix (node x node) (optional)
 %  inControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 
-function wcI = calcDlcmWCIdm123a(netDLCM, nodeControl, inControl)
+function [wcI, wcNS] = calcDlcmWCIdm123a(netDLCM, nodeControl, inControl)
     if nargin < 3
         inControl = [];
     end
@@ -15,6 +15,7 @@ function wcI = calcDlcmWCIdm123a(netDLCM, nodeControl, inControl)
     nodeNum = length(netDLCM.nodeNetwork);
     nodeInNum = size(netDLCM.nodeNetwork{1, 1}.Layers(2, 1).Weights, 2);
     wcI = nan(nodeNum,nodeNum);
+    wcNS = nan(nodeNum,nodeNum+1);
     for i=1:nodeNum
         % get input control
         control = ones(1, nodeNum);
@@ -42,6 +43,7 @@ function wcI = calcDlcmWCIdm123a(netDLCM, nodeControl, inControl)
         y = w2 * x + b2;
         y(y<0) = 0;
         z = w3 * y + b3;
+        wcNS(i,1) = z;
         
         % imparement node signals
         for j=1:nodeNum
@@ -55,6 +57,7 @@ function wcI = calcDlcmWCIdm123a(netDLCM, nodeControl, inControl)
             yj(yj<0) = 0;
             zj = w3 * yj + b3;
             wcI(i,j) = abs(z - zj);
+            wcNS(i,j+1) = zj;
         end
     end
 end

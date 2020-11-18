@@ -205,8 +205,8 @@ function [x, y] = plotErrorROCcurve(roc, N, col)
     mx = mean(x,1);
     my = mean(y,1);
     % error area
-    errx = std(x,0,1) / sqrt(size(x,1));
-    erry = std(y,0,1) / sqrt(size(y,1));
+    errx = std(x,1,1) / sqrt(size(x,1));
+    erry = std(y,1,1) / sqrt(size(y,1));
     xt = mx -errx;
     yt = my +erry;
     xb = mx +errx;

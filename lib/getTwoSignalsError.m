@@ -17,5 +17,5 @@ function [mae, maeerr, errs] = getTwoSignalsError(X, Y)
         errs = [errs; A];
     end
     mae = e / nodeNum;
-    maeerr = std(errs(:)) / sqrt(length(errs(:)));
+    maeerr = std(errs(:),1) / sqrt(length(errs(:))); % uncorrected
 end

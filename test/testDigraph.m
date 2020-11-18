@@ -17,7 +17,7 @@ gp.EdgeColor = [0.9 0.9 0.9];
 
 %%
 % plot function hub graph 2
-sigma = std(meanWeights(:),'omitnan');
+sigma = std(meanWeights(:),1,'omitnan');
 avg = mean(meanWeights(:),'omitnan');
 mOrg = (meanWeights - avg) / sigma;
 rangeW = [-2,-3,-4,-5];

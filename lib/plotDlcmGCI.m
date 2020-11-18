@@ -25,7 +25,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSig
     end
     [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, alpha);
     if range <= 0
-        sigma = std(gcI(:),'omitnan');
+        sigma = std(gcI(:),1,'omitnan');
         avg = mean(gcI(:),'omitnan');
         gcI = (gcI - avg) / sigma;
         range = 3;

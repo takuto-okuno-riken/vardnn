@@ -26,7 +26,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2
     end
    [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, lag, alpha);
     if range <= 0
-        sigma = std(gcI(:),'omitnan');
+        sigma = std(gcI(:),1,'omitnan');
         avg = mean(gcI(:),'omitnan');
         gcI = (gcI - avg) / sigma;
         range = 3;

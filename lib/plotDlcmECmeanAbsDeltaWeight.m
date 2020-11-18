@@ -12,7 +12,7 @@ function [dlEC, dlECerr] = plotDlcmECmeanAbsDeltaWeight(netDLCM, range)
     [dlEC, dlECerr] = getDlcmECmeanAbsDeltaWeight(netDLCM);
     % show effective conectivity of predicted node signals
     if range <= 0
-        sigma = std(dlEC(:),'omitnan');
+        sigma = std(dlEC(:),1,'omitnan');
         avg = mean(dlEC(:),'omitnan');
         dlEC = (dlEC - avg) / sigma;
         range = 5;

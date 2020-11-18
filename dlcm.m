@@ -672,7 +672,7 @@ function plotCircleGraph(mat, matname, roiNames, rmin, rmax, rstep, isRaw)
     if isRaw
         mOrg = mat;
     else
-        sigma = std(mat(:),'omitnan');
+        sigma = std(mat(:),1,'omitnan');
         avg = mean(mat(:),'omitnan');
         mOrg = (mat - avg) / sigma;
     end

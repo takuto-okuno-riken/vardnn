@@ -20,7 +20,7 @@ function [gcI] = plotMultivariateGCI(X, lag, range, rowcut)
     end
     gcI = calcMultivariateGCI(X, lag);
     if range <= 0
-        sigma = std(gcI(:),'omitnan');
+        sigma = std(gcI(:),1,'omitnan');
         avg = mean(gcI(:),'omitnan');
         gcI = (gcI - avg) / sigma;
         range = 3;
