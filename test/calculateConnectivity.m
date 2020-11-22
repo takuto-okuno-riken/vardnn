@@ -53,6 +53,7 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
                     load(dlcmName);
                 else
                     [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
+                    % si = signals{i} - nanmin(signals{i}, [], 'all'); % simple linear transform
                     sigLen = size(si,2);
                     inSignal = rand(ROINUM, sigLen);
                     inControl = eye(ROINUM);
