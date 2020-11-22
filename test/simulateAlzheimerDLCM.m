@@ -16,11 +16,12 @@ function simulateAlzheimerDLCM
     [cnDLWs, cnDLWnss, meanCnDLWns, stdCnDLWns] = calculateDistributions(cnSignals, roiNames,'cn', 'dlw');
     [adDLWs, adDLWnss, meanAdDLWns, stdAdDLWns] = calculateDistributions(adSignals, roiNames, 'ad', 'dlw');
 
-    % generate virtual ad signals
+    % generate virtual ad signals (type 3)
     vadSignals = calculateVirtualADSignals(cnSignals, roiNames, cnDLWs, adDLWs, 'dlw');
-    [vadDLWs3, meanAdDLW, stdAdDLW] = calculateConnectivity(vadSignals, roiNames, 'vad3', 'dlcm');
-    [vadDLWs3, meanAdDLW, stdAdDLW] = calculateConnectivity(vadSignals, roiNames, 'vad3', 'dlw');
-    
+    [vad3DLs, meanAdDL, stdAdDL] = calculateConnectivity(vadSignals, roiNames, 'vad3', 'dlcm');
+    [vad3DLWs, meanAdDLW, stdAdDLW] = calculateConnectivity(vadSignals, roiNames, 'vad3', 'dlw');
+    [~, vad3DLWnss, meanVad3DLWns, stdVadDLWns] = calculateDistributions(vadSignals, roiNames, 'vad3', 'dlw');
+
     % transform healthy zi,zi\{j} to ad's
     meanCnDLWns3 = repmat(meanCnDLWns,[1 1 size(cnDLWnss,3)]);
     stdCnDLWns3 = repmat(stdCnDLWns,[1 1 size(cnDLWnss,3)]);
@@ -28,33 +29,37 @@ function simulateAlzheimerDLCM
     meanAdDLWns3 = repmat(meanAdDLWns,[1 1 size(cnDLWnss,3)]);
     stdAdDLWns3 = repmat(stdAdDLWns,[1 1 size(cnDLWnss,3)]);
     vadDLWnss = meanAdDLWns3 + cnDLWsig .* stdAdDLWns3;
-    
+
     % calculate virtual AD ECcnDLWnss
     vadDLWs = vadDLWnss(:,2:end,:);
     vadZi = repmat(vadDLWnss(:,1,:),[1 size(vadDLWs,2) 1]);
     vadDLWs = abs(vadZi - vadDLWs);
 
     % retraining DLCM network
-    [vadDLWs2, meanVadDLWns2, stdVadDLWns2] = retrainDLCMAndEC(vadDLWnss, roiNames, 'vadns');
+    [vad2DLWs, meanVad2DLWns, stdVad2DLWns] = retrainDLCMAndEC(vadDLWnss, roiNames, 'vadns');
 
     % plot correlation and cos similarity
-    algNum = 4;
+    algNum = 6;
     meanCnDLW = nanmean(cnDLWs,3);
     meanAdDLW = nanmean(adDLWs,3);
     meanVadDLW = nanmean(vadDLWs,3);
-    meanVadDLW2 = nanmean(vadDLWs2,3);
+    meanVad2DLW = nanmean(vad2DLWs,3);
+    meanVad3DLW = nanmean(vad3DLWs,3);
 %    nanx = eye(size(meanCnDLW,1),size(meanCnDLW,2));
 %    nanx(nanx==1) = NaN;
     figure; cnadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanAdDLW);
     figure; cnvadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanVadDLW);
     figure; advadDLWr = plotTwoSignalsCorrelation(meanAdDLW, meanVadDLW);
-    figure; advadDLWr2 = plotTwoSignalsCorrelation(meanAdDLW, meanVadDLW2);
+    figure; advadDLWr2 = plotTwoSignalsCorrelation(meanAdDLW, meanVad2DLW);
+    figure; advadDLWr3 = plotTwoSignalsCorrelation(meanAdDLW, meanVad3DLW);
     cosSim = zeros(algNum,1);
     cosSim(1) = getCosSimilarity(meanCnDLW, meanAdDLW);
     cosSim(2) = getCosSimilarity(meanCnDLW, meanVadDLW);
     cosSim(3) = getCosSimilarity(meanAdDLW, meanVadDLW);
-    cosSim(4) = getCosSimilarity(meanAdDLW, meanVadDLW2);
-    X = categorical({'cn-ad','cn-vad','ad-vad','ad-vad2'});
+    cosSim(4) = getCosSimilarity(meanAdDLW, meanVad2DLW);
+    cosSim(5) = getCosSimilarity(meanCnDLW, meanVad3DLW);
+    cosSim(6) = getCosSimilarity(meanAdDLW, meanVad3DLW);
+    X = categorical({'cn-ad','cn-vad','ad-vad','ad-vad2','cn-vad3','ad-vad3'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and AD by each algorithm');
 
@@ -65,15 +70,18 @@ function simulateAlzheimerDLCM
     cnnsDLWsNt = calculateAlzNormalityTest(cnDLWnss, roiNames, 'cnns', 'dlw');
     adnsDLWsNt = calculateAlzNormalityTest(adDLWnss, roiNames, 'adns', 'dlw');
     vadnsDLWsNt = calculateAlzNormalityTest(vadDLWnss, roiNames, 'vadns', 'dlw');
+    vad3nsDLWsNt = calculateAlzNormalityTest(vad3DLWnss, roiNames, 'vad3ns', 'dlw');
 
     % compalizon test (Wilcoxon, Mann?Whitney U test)
     [cnadDLWsUt, cnadDLWsUtP, cnadDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, adDLWs, roiNames, 'cnec', 'adec', 'dlw');
     [cnvadDLWsUt, cnvadDLWsUtP, cnvadDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, vadDLWs, roiNames, 'cnec', 'vadec', 'dlw');
     [advadDLWsUt, advadDLWsUtP, advadDLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vadDLWs, roiNames, 'adec', 'vadec', 'dlw');
-    [advadDLWsUt2, advadDLWsUtP2, advadDLWsUtP22] = calculateAlzWilcoxonTest(adDLWs, vadDLWs2, roiNames, 'adec', 'vad2ec', 'dlw');
+    [advad2DLWsUt, advad2DLWsUtP, advad2DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad2DLWs, roiNames, 'adec', 'vad2ec', 'dlw');
+    [advad3DLWsUt, advad3DLWsUtP, advad3DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad3DLWs, roiNames, 'adec', 'vad3ec', 'dlw');
     [cnadDLWnssUt, cnadDLWnssUtP, cnadDLWnssUtP2] = calculateAlzWilcoxonTest(cnDLWnss, adDLWnss, roiNames, 'cnns', 'adns', 'dlw');
     [cnvadDLWnssUt, cnvadDLWnssUtP, cnvadDLWnssUtP2] = calculateAlzWilcoxonTest(cnDLWnss, vadDLWnss, roiNames, 'cnns', 'vadns', 'dlw');
     [advadDLWnssUt, advadDLWnssUtP, advadDLWnssUtP2] = calculateAlzWilcoxonTest(adDLWnss, vadDLWnss, roiNames, 'adns', 'vadns', 'dlw');
+    [advad3DLWnssUt, advad3DLWnssUtP, advad3DLWnssUtP2] = calculateAlzWilcoxonTest(adDLWnss, vad3DLWnss, roiNames, 'adns', 'vad3ns', 'dlw');
     
 %{
     % using minimum 100 p-value relations. perform 5-fold cross validation.
