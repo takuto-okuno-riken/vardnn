@@ -16,6 +16,11 @@ function simulateAlzheimerDLCM
     [cnDLWs, cnDLWnss, meanCnDLWns, stdCnDLWns] = calculateDistributions(cnSignals, roiNames,'cn', 'dlw');
     [adDLWs, adDLWnss, meanAdDLWns, stdAdDLWns] = calculateDistributions(adSignals, roiNames, 'ad', 'dlw');
 
+    % generate virtual ad signals
+    vadSignals = calculateVirtualADSignals(cnSignals, roiNames, cnDLWs, adDLWs, 'dlw');
+    [vadDLWs3, meanAdDLW, stdAdDLW] = calculateConnectivity(vadSignals, roiNames, 'vad3', 'dlcm');
+    [vadDLWs3, meanAdDLW, stdAdDLW] = calculateConnectivity(vadSignals, roiNames, 'vad3', 'dlw');
+    
     % transform healthy zi,zi\{j} to ad's
     meanCnDLWns3 = repmat(meanCnDLWns,[1 1 size(cnDLWnss,3)]);
     stdCnDLWns3 = repmat(stdCnDLWns,[1 1 size(cnDLWnss,3)]);
@@ -24,31 +29,39 @@ function simulateAlzheimerDLCM
     stdAdDLWns3 = repmat(stdAdDLWns,[1 1 size(cnDLWnss,3)]);
     vadDLWnss = meanAdDLWns3 + cnDLWsig .* stdAdDLWns3;
     
-    % calculate virtual AD EC
+    % calculate virtual AD ECcnDLWnss
     vadDLWs = vadDLWnss(:,2:end,:);
     vadZi = repmat(vadDLWnss(:,1,:),[1 size(vadDLWs,2) 1]);
     vadDLWs = abs(vadZi - vadDLWs);
-    
+
+    % retraining DLCM network
+    [vadDLWs2, meanVadDLWns2, stdVadDLWns2] = retrainDLCMAndEC(vadDLWnss, roiNames, 'vadns');
+
     % plot correlation and cos similarity
-    algNum = 3;
+    algNum = 4;
     meanCnDLW = nanmean(cnDLWs,3);
     meanAdDLW = nanmean(adDLWs,3);
     meanVadDLW = nanmean(vadDLWs,3);
+    meanVadDLW2 = nanmean(vadDLWs2,3);
 %    nanx = eye(size(meanCnDLW,1),size(meanCnDLW,2));
 %    nanx(nanx==1) = NaN;
     figure; cnadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanAdDLW);
     figure; cnvadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanVadDLW);
+    figure; advadDLWr = plotTwoSignalsCorrelation(meanAdDLW, meanVadDLW);
+    figure; advadDLWr2 = plotTwoSignalsCorrelation(meanAdDLW, meanVadDLW2);
     cosSim = zeros(algNum,1);
     cosSim(1) = getCosSimilarity(meanCnDLW, meanAdDLW);
     cosSim(2) = getCosSimilarity(meanCnDLW, meanVadDLW);
-    cosSim(3) = getCosSimilarity(meanCnDLW, meanVadDLW);
-    X = categorical({'cn-ad','cn-vad','ad-vad'});
+    cosSim(3) = getCosSimilarity(meanAdDLW, meanVadDLW);
+    cosSim(4) = getCosSimilarity(meanAdDLW, meanVadDLW2);
+    X = categorical({'cn-ad','cn-vad','ad-vad','ad-vad2'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and AD by each algorithm');
 
     % normality test
     cnDLWsNt = calculateAlzNormalityTest(cnDLWs, roiNames, 'cnec', 'dlw');
     adDLWsNt = calculateAlzNormalityTest(adDLWs, roiNames, 'adec', 'dlw');
+    vadDLWsNt = calculateAlzNormalityTest(vadDLWs, roiNames, 'vadec', 'dlw');
     cnnsDLWsNt = calculateAlzNormalityTest(cnDLWnss, roiNames, 'cnns', 'dlw');
     adnsDLWsNt = calculateAlzNormalityTest(adDLWnss, roiNames, 'adns', 'dlw');
     vadnsDLWsNt = calculateAlzNormalityTest(vadDLWnss, roiNames, 'vadns', 'dlw');
@@ -57,10 +70,12 @@ function simulateAlzheimerDLCM
     [cnadDLWsUt, cnadDLWsUtP, cnadDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, adDLWs, roiNames, 'cnec', 'adec', 'dlw');
     [cnvadDLWsUt, cnvadDLWsUtP, cnvadDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, vadDLWs, roiNames, 'cnec', 'vadec', 'dlw');
     [advadDLWsUt, advadDLWsUtP, advadDLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vadDLWs, roiNames, 'adec', 'vadec', 'dlw');
+    [advadDLWsUt2, advadDLWsUtP2, advadDLWsUtP22] = calculateAlzWilcoxonTest(adDLWs, vadDLWs2, roiNames, 'adec', 'vad2ec', 'dlw');
     [cnadDLWnssUt, cnadDLWnssUtP, cnadDLWnssUtP2] = calculateAlzWilcoxonTest(cnDLWnss, adDLWnss, roiNames, 'cnns', 'adns', 'dlw');
     [cnvadDLWnssUt, cnvadDLWnssUtP, cnvadDLWnssUtP2] = calculateAlzWilcoxonTest(cnDLWnss, vadDLWnss, roiNames, 'cnns', 'vadns', 'dlw');
     [advadDLWnssUt, advadDLWnssUtP, advadDLWnssUtP2] = calculateAlzWilcoxonTest(adDLWnss, vadDLWnss, roiNames, 'adns', 'vadns', 'dlw');
-
+    
+%{
     % using minimum 100 p-value relations. perform 5-fold cross validation.
     topNum = 100;
     sigTh = 2;
@@ -113,6 +128,94 @@ function simulateAlzheimerDLCM
     title(['averaged ROC curve']);
     xlabel('False Positive Rate')
     ylabel('True Positive Rate')
+%}
+end
+
+function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(signals, roiNames, group)
+    ROWNUM = size(signals,1);
+    COLNUM = size(signals,2);
+    sbjNum = size(signals,3);
+    weights = zeros(ROWNUM, ROWNUM, sbjNum);
+
+    outfName = ['results/adsim-retrain-' group '-roi' num2str(ROWNUM) '.mat'];
+    if exist(outfName, 'file')
+        load(outfName);
+    else
+        for i=1:sbjNum
+            dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROWNUM) '-net' num2str(i) '.mat'];
+            if exist(dlcmName, 'file')
+                load(dlcmName);
+            else
+                nodeInputOrg = ones(ROWNUM*2, COLNUM);
+                nodeInputOrg(1:ROWNUM,2:end) = nodeInputOrg(1:ROWNUM, 2:end) - eye(ROWNUM);
+
+                origName = ['results/ad-dlcm-cn-roi' num2str(ROWNUM) '-net' num2str(i) '.mat'];
+                load(origName);
+                if exist('m','var')
+                    c = m;
+                end
+
+                % training DLCM network
+                maxEpochs = 30;
+                options = trainingOptions('adam', ...
+                    'ExecutionEnvironment','cpu', ...
+                    'MaxEpochs',maxEpochs, ...
+                    'MiniBatchSize',ROWNUM, ...
+                    'Shuffle','every-epoch', ...
+                    'GradientThreshold',5,...
+                    'L2Regularization',0.05, ...
+                    'Verbose',false);
+    %                'Plots','training-progress');
+
+                disp('start training');
+                for j=1:ROWNUM
+                    disp(['virtual alzheimer training node ' num2str(i) '-' num2str(j)]);
+                    nodeTeach = signals(j,1:end,i);
+                    nodeInput = nodeInputOrg;
+                    if ~isempty(inControl)
+                        filter = repmat(inControl(i,:).', 1, size(nodeInput,2));
+                        nodeInput(ROWNUM+1:end,:) = nodeInput(ROWNUM+1:end,:) .* filter;
+                    end
+                    nodeTeach(:,j+1) = [];
+                    nodeInput(:,j+1) = [];
+                    [netDLCM.nodeNetwork{j}, netDLCM.trainInfo{j}] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{j}, options);
+                end
+
+                save(dlcmName, 'netDLCM', 'si', 'inSignal', 'inControl', 'mat', 'sig', 'c', 'maxsi', 'minsi');
+            end
+
+            % recalculate EC
+            weights(:,:,i) = calcDlcmEC(netDLCM, [], inControl);
+        end
+        save(outfName, 'weights', 'roiNames');
+    end
+    meanWeights = nanmean(weights, 3);
+    stdWeights = nanstd(weights, 1, 3);
+end
+
+function vadSignals = calculateVirtualADSignals(signals, roiNames, cnECs, adECs, algorithm)
+    % constant value
+    ROINUM = size(signals{1},1);
+    vadSignals = {};
+    
+    outfName = ['results/adsim-signal-vad-roi' num2str(ROINUM) '-' algorithm '.mat'];
+    if exist(outfName, 'file')
+        load(outfName);
+        return;
+    end
+    
+    cnOutECs = nansum(nanmean(cnECs, 3), 1);
+    adOutECs = nansum(nanmean(adECs, 3), 1);
+    transRate = adOutECs ./ cnOutECs;
+
+    for i=1:length(signals)
+        sbjSignals = signals{i};
+        for j=1:ROINUM
+            sbjSignals(j,:) = sbjSignals(j,:) * transRate(1,j);
+        end
+        vadSignals{end+1} = sbjSignals;
+    end
+    save(outfName, 'vadSignals', 'roiNames');
 end
 
 function [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(orgControl, orgTarget, k, N)
