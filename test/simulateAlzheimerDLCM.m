@@ -33,63 +33,32 @@ function simulateAlzheimerDLCM
     [vad2DLWs, meanVad2DLWns, stdVad2DLWns] = retrainDLCMAndEC(vadDLWnss, roiNames, 'vadns');
 
     % generate virtual ad signals (type 3)
-    vadSignals = calculateVirtualADSignals(cnSignals, roiNames, cnDLWs, adDLWs, 'dlw');
+    vadSignals = calculateVirtualADSignals3(cnSignals, roiNames, cnDLWs, adDLWs, 'dlw');
     [vad3DLs, ~, ~] = calculateConnectivity(vadSignals, roiNames, 'vad3', 'dlcm');
     [vad3DLWs, ~, ~] = calculateConnectivity(vadSignals, roiNames, 'vad3', 'dlw');
     [~, vad3DLWnss, meanVad3DLWns, stdVad3DLWns, ~, ~] = calculateDistributions(vadSignals, roiNames, 'vad3', 'dlw');
 
     % generate virtual ad signals (type 4)
-    ROWNUM = size(cnSignals{1},1);
-    sigLen = size(cnSignals{1},2);
-    cnNum = length(cnSignals);
-    adNum = length(adSignals);
-    outfName = ['results/adsim-all-vad-roi' num2str(ROWNUM) '.mat'];
-    if exist(outfName, 'file')
-        load(outfName);
-    else
-        allCnSignals = nan(ROWNUM, sigLen, cnNum);
-        allVadSignals = nan(ROWNUM, sigLen, cnNum, adNum);
-        sig = nan(cnNum);
-        c = nan(cnNum);
-        maxsi = nan(cnNum);
-        minsi = nan(cnNum);
-        for k=1:adNum
-            disp(['generate virtual ad signals (type 4) : ' num2str(k)]);
-            origName = ['results/ad-dlcm-ad-roi' num2str(ROWNUM) '-net' num2str(k) '.mat'];
-            load(origName);
-            for i=1:cnNum
-                [allCnSignals(:,:,i), sig(i), c(i), maxsi(i), minsi(i)] = convert2SigmoidSignal(cnSignals{i});
-                [S, time, mae, maeerr] = predictDlcmNetwork(allCnSignals(:,:,i), cnInSignals(:,:,i), [], cnInControls(:,:,1), netDLCM);
-                allVadSignals(:,:,i,k) = S;
-            end
-        end
-        save(outfName, 'allCnSignals', 'cnInSignals', 'sig', 'c', 'maxsi', 'minsi', 'allVadSignals');
-    end
-    % get mean of AD DLCM generated signals (type 4)
-    meanVadSignals = nanmean(allVadSignals, 4);
-    vad4Signals = {};
-    for i=1:cnNum
-        vad4Signals{end+1} = convert2InvSigmoidSignal(meanVadSignals(:,:,i), sig(i), c(i), maxsi(i), minsi(i));
-%        plot(vad4Signals{end});
-    end
-    [vad4DLs, ~, ~] = calculateConnectivity(vad4Signals, roiNames, 'vad4', 'dlcm');
-    [vad4DLWs, ~, ~] = calculateConnectivity(vad4Signals, roiNames, 'vad4', 'dlw');
-    [~, vad4DLWnss, meanVad4DLWns, stdVad4DLWns, ~, ~] = calculateDistributions(vad4Signals, roiNames, 'vad4', 'dlw');
+    [vad4Signals, vad4DLWs, vad4DLWnss] = calculateVirtualADSignals4(cnSignals, adSignals, roiNames, cnInSignals, cnInControls, 'vad4');
+    [vad5Signals, vad5DLWs, vad5DLWnss] = calculateVirtualADSignals4(vad4Signals, adSignals, roiNames, cnInSignals, cnInControls, 'vad5');
+    [vad6Signals, vad6DLWs, vad6DLWnss] = calculateVirtualADSignals4(vad5Signals, adSignals, roiNames, cnInSignals, cnInControls, 'vad6');
 
     % plot correlation and cos similarity
-    algNum = 6;
+    algNum = 8;
     meanCnDLW = nanmean(cnDLWs,3);
     meanAdDLW = nanmean(adDLWs,3);
     meanVadDLW = nanmean(vadDLWs,3);
     meanVad2DLW = nanmean(vad2DLWs,3);
     meanVad3DLW = nanmean(vad3DLWs,3);
+    meanVad4DLW = nanmean(vad4DLWs,3);
 %    nanx = eye(size(meanCnDLW,1),size(meanCnDLW,2));
 %    nanx(nanx==1) = NaN;
-    figure; cnadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanAdDLW);
-    figure; cnvadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanVadDLW);
-    figure; advadDLWr = plotTwoSignalsCorrelation(meanAdDLW, meanVadDLW);
-    figure; advadDLWr2 = plotTwoSignalsCorrelation(meanAdDLW, meanVad2DLW);
-    figure; advadDLWr3 = plotTwoSignalsCorrelation(meanAdDLW, meanVad3DLW);
+%    figure; cnadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanAdDLW);
+%    figure; cnvadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanVadDLW);
+%    figure; advadDLWr = plotTwoSignalsCorrelation(meanAdDLW, meanVadDLW);
+%    figure; advadDLWr2 = plotTwoSignalsCorrelation(meanAdDLW, meanVad2DLW);
+%    figure; advadDLWr3 = plotTwoSignalsCorrelation(meanAdDLW, meanVad3DLW);
+    figure; advadDLWr4 = plotTwoSignalsCorrelation(meanAdDLW, meanVad4DLW);
     cosSim = zeros(algNum,1);
     cosSim(1) = getCosSimilarity(meanCnDLW, meanAdDLW);
     cosSim(2) = getCosSimilarity(meanCnDLW, meanVadDLW);
@@ -97,11 +66,14 @@ function simulateAlzheimerDLCM
     cosSim(4) = getCosSimilarity(meanAdDLW, meanVad2DLW);
     cosSim(5) = getCosSimilarity(meanCnDLW, meanVad3DLW);
     cosSim(6) = getCosSimilarity(meanAdDLW, meanVad3DLW);
-    X = categorical({'cn-ad','cn-vad','ad-vad','ad-vad2','cn-vad3','ad-vad3'});
+    cosSim(7) = getCosSimilarity(meanCnDLW, meanVad4DLW);
+    cosSim(8) = getCosSimilarity(meanAdDLW, meanVad4DLW);
+    X = categorical({'cn-ad','cn-vad','ad-vad','ad-vad2','cn-vad3','ad-vad3','cn-vad4','ad-vad4'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and AD by each algorithm');
 
     % normality test
+%{
     cnDLWsNt = calculateAlzNormalityTest(cnDLWs, roiNames, 'cnec', 'dlw');
     adDLWsNt = calculateAlzNormalityTest(adDLWs, roiNames, 'adec', 'dlw');
     vadDLWsNt = calculateAlzNormalityTest(vadDLWs, roiNames, 'vadec', 'dlw');
@@ -109,7 +81,8 @@ function simulateAlzheimerDLCM
     adnsDLWsNt = calculateAlzNormalityTest(adDLWnss, roiNames, 'adns', 'dlw');
     vadnsDLWsNt = calculateAlzNormalityTest(vadDLWnss, roiNames, 'vadns', 'dlw');
     vad3nsDLWsNt = calculateAlzNormalityTest(vad3DLWnss, roiNames, 'vad3ns', 'dlw');
-
+    vad4nsDLWsNt = calculateAlzNormalityTest(vad4DLWnss, roiNames, 'vad4ns', 'dlw');
+%}
     % compalizon test (Wilcoxon, Mann?Whitney U test)
     [cnadDLWsUt, cnadDLWsUtP, cnadDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, adDLWs, roiNames, 'cnec', 'adec', 'dlw');
     [cnvadDLWsUt, cnvadDLWsUtP, cnvadDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, vadDLWs, roiNames, 'cnec', 'vadec', 'dlw');
@@ -120,6 +93,7 @@ function simulateAlzheimerDLCM
     [cnvadDLWnssUt, cnvadDLWnssUtP, cnvadDLWnssUtP2] = calculateAlzWilcoxonTest(cnDLWnss, vadDLWnss, roiNames, 'cnns', 'vadns', 'dlw');
     [advadDLWnssUt, advadDLWnssUtP, advadDLWnssUtP2] = calculateAlzWilcoxonTest(adDLWnss, vadDLWnss, roiNames, 'adns', 'vadns', 'dlw');
     [advad3DLWnssUt, advad3DLWnssUtP, advad3DLWnssUtP2] = calculateAlzWilcoxonTest(adDLWnss, vad3DLWnss, roiNames, 'adns', 'vad3ns', 'dlw');
+    [advad4DLWnssUt, advad4DLWnssUtP, advad4DLWnssUtP2] = calculateAlzWilcoxonTest(adDLWnss, vad4DLWnss, roiNames, 'adns', 'vad4ns', 'dlw');
     
 %{
     % using minimum 100 p-value relations. perform 5-fold cross validation.
@@ -239,7 +213,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(signals, roiNames
     stdWeights = nanstd(weights, 1, 3);
 end
 
-function vadSignals = calculateVirtualADSignals(signals, roiNames, cnECs, adECs, algorithm)
+function vadSignals = calculateVirtualADSignals3(signals, roiNames, cnECs, adECs, algorithm)
     % constant value
     ROINUM = size(signals{1},1);
     vadSignals = {};
@@ -263,6 +237,46 @@ function vadSignals = calculateVirtualADSignals(signals, roiNames, cnECs, adECs,
     end
     save(outfName, 'vadSignals', 'roiNames');
 end
+
+function [vadSignals, vadDLWs, vadDLWnss] = calculateVirtualADSignals4(cnSignals, adSignals, roiNames, cnInSignals, cnInControls, group)
+    ROWNUM = size(cnSignals{1},1);
+    sigLen = size(cnSignals{1},2);
+    cnNum = length(cnSignals);
+    adNum = length(adSignals);
+    outfName = ['results/adsim-all-vad-roi' num2str(ROWNUM) '.mat'];
+    if exist(outfName, 'file')
+        load(outfName);
+    else
+        allCnSignals = nan(ROWNUM, sigLen, cnNum);
+        allVadSignals = nan(ROWNUM, sigLen, cnNum, adNum);
+        sig = nan(cnNum);
+        c = nan(cnNum);
+        maxsi = nan(cnNum);
+        minsi = nan(cnNum);
+        for k=1:adNum
+            disp(['generate virtual ad signals (type 4) : ' num2str(k)]);
+            origName = ['results/ad-dlcm-ad-roi' num2str(ROWNUM) '-net' num2str(k) '.mat'];
+            load(origName);
+            for i=1:cnNum
+                [allCnSignals(:,:,i), sig(i), c(i), maxsi(i), minsi(i)] = convert2SigmoidSignal(cnSignals{i});
+                [S, time, mae, maeerr] = predictDlcmNetwork(allCnSignals(:,:,i), cnInSignals(:,:,i), [], cnInControls(:,:,1), netDLCM);
+                allVadSignals(:,:,i,k) = S;
+            end
+        end
+        save(outfName, 'allCnSignals', 'cnInSignals', 'sig', 'c', 'maxsi', 'minsi', 'allVadSignals');
+    end
+    % get mean of AD DLCM generated signals (type 4)
+    meanVadSignals = nanmean(allVadSignals, 4);
+    vadSignals = {};
+    for i=1:cnNum
+        vadSignals{end+1} = convert2InvSigmoidSignal(meanVadSignals(:,:,i), sig(i), c(i), maxsi(i), minsi(i));
+%        plot(vad4Signals{end});
+    end
+    [vad4DLs, ~, ~] = calculateConnectivity(vadSignals, roiNames, group, 'dlcm');
+    [vadDLWs, ~, ~] = calculateConnectivity(vadSignals, roiNames, group, 'dlw');
+    [~, vadDLWnss, meanVad4DLWns, stdVad4DLWns, ~, ~] = calculateDistributions(vadSignals, roiNames, group, 'dlw');
+end
+
 
 function [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(orgControl, orgTarget, k, N)
     un = floor(size(orgControl,3) / N);
