@@ -272,9 +272,9 @@ function [vadSignals, vadDLWs, vadDLWnss] = calculateVirtualADSignals4(cnSignals
         vadSignals{end+1} = convert2InvSigmoidSignal(meanVadSignals(:,:,i), sig(i), c(i), maxsi(i), minsi(i));
 %        plot(vad4Signals{end});
     end
-    [vad4DLs, ~, ~] = calculateConnectivity(vadSignals, roiNames, group, 'dlcm');
+    [vadDLs, ~, ~] = calculateConnectivity(vadSignals, roiNames, group, 'dlcm');
     [vadDLWs, ~, ~] = calculateConnectivity(vadSignals, roiNames, group, 'dlw');
-    [~, vadDLWnss, meanVad4DLWns, stdVad4DLWns, ~, ~] = calculateDistributions(vadSignals, roiNames, group, 'dlw');
+    [~, vadDLWnss, meanVadDLWns, stdVadDLWns, ~, ~] = calculateDistributions(vadSignals, roiNames, group, 'dlw');
 end
 
 
