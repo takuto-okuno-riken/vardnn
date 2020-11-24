@@ -44,13 +44,15 @@ function simulateAlzheimerDLCM
     [vad6Signals, vad6DLWs, vad6DLWnss] = calculateVirtualADSignals4(vad5Signals, adSignals, roiNames, cnInSignals, cnInControls, 'vad6');
 
     % plot correlation and cos similarity
-    algNum = 8;
+    algNum = 12;
     meanCnDLW = nanmean(cnDLWs,3);
     meanAdDLW = nanmean(adDLWs,3);
     meanVadDLW = nanmean(vadDLWs,3);
     meanVad2DLW = nanmean(vad2DLWs,3);
     meanVad3DLW = nanmean(vad3DLWs,3);
     meanVad4DLW = nanmean(vad4DLWs,3);
+    meanVad5DLW = nanmean(vad5DLWs,3);
+    meanVad6DLW = nanmean(vad6DLWs,3);
 %    nanx = eye(size(meanCnDLW,1),size(meanCnDLW,2));
 %    nanx(nanx==1) = NaN;
 %    figure; cnadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanAdDLW);
@@ -59,6 +61,8 @@ function simulateAlzheimerDLCM
 %    figure; advadDLWr2 = plotTwoSignalsCorrelation(meanAdDLW, meanVad2DLW);
 %    figure; advadDLWr3 = plotTwoSignalsCorrelation(meanAdDLW, meanVad3DLW);
     figure; advadDLWr4 = plotTwoSignalsCorrelation(meanAdDLW, meanVad4DLW);
+    figure; advadDLWr5 = plotTwoSignalsCorrelation(meanAdDLW, meanVad5DLW);
+    figure; advadDLWr6 = plotTwoSignalsCorrelation(meanAdDLW, meanVad6DLW);
     cosSim = zeros(algNum,1);
     cosSim(1) = getCosSimilarity(meanCnDLW, meanAdDLW);
     cosSim(2) = getCosSimilarity(meanCnDLW, meanVadDLW);
@@ -68,7 +72,11 @@ function simulateAlzheimerDLCM
     cosSim(6) = getCosSimilarity(meanAdDLW, meanVad3DLW);
     cosSim(7) = getCosSimilarity(meanCnDLW, meanVad4DLW);
     cosSim(8) = getCosSimilarity(meanAdDLW, meanVad4DLW);
-    X = categorical({'cn-ad','cn-vad','ad-vad','ad-vad2','cn-vad3','ad-vad3','cn-vad4','ad-vad4'});
+    cosSim(9) = getCosSimilarity(meanCnDLW, meanVad5DLW);
+    cosSim(10) = getCosSimilarity(meanAdDLW, meanVad5DLW);
+    cosSim(11) = getCosSimilarity(meanCnDLW, meanVad6DLW);
+    cosSim(12) = getCosSimilarity(meanAdDLW, meanVad6DLW);
+    X = categorical({'cn-ad','cn-vad','ad-vad','ad-vad2','cn-vad3','ad-vad3','cn-vad4','ad-vad4','cn-vad5','ad-vad5','cn-vad6','ad-vad6'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and AD by each algorithm');
 
@@ -94,6 +102,8 @@ function simulateAlzheimerDLCM
     [advadDLWnssUt, advadDLWnssUtP, advadDLWnssUtP2] = calculateAlzWilcoxonTest(adDLWnss, vadDLWnss, roiNames, 'adns', 'vadns', 'dlw');
     [advad3DLWnssUt, advad3DLWnssUtP, advad3DLWnssUtP2] = calculateAlzWilcoxonTest(adDLWnss, vad3DLWnss, roiNames, 'adns', 'vad3ns', 'dlw');
     [advad4DLWnssUt, advad4DLWnssUtP, advad4DLWnssUtP2] = calculateAlzWilcoxonTest(adDLWnss, vad4DLWnss, roiNames, 'adns', 'vad4ns', 'dlw');
+    [advad5DLWnssUt, advad5DLWnssUtP, advad5DLWnssUtP2] = calculateAlzWilcoxonTest(adDLWnss, vad5DLWnss, roiNames, 'adns', 'vad5ns', 'dlw');
+    [advad6DLWnssUt, advad6DLWnssUtP, advad6DLWnssUtP2] = calculateAlzWilcoxonTest(adDLWnss, vad6DLWnss, roiNames, 'adns', 'vad6ns', 'dlw');
     
 %{
     % using minimum 100 p-value relations. perform 5-fold cross validation.
@@ -269,11 +279,12 @@ function [vadSignals, vadDLWs, vadDLWnss] = calculateVirtualADSignals4(cnSignals
     meanVadSignals = nanmean(allVadSignals, 4);
     vadSignals = {};
     for i=1:cnNum
-        vadSignals{end+1} = convert2InvSigmoidSignal(meanVadSignals(:,:,i), sig(i), c(i), maxsi(i), minsi(i));
-%        plot(vad4Signals{end});
+        %vadSignals{end+1} = convert2InvSigmoidSignal(meanVadSignals(:,:,i), sig(i), c(i), maxsi(i), minsi(i));
+        vadSignals{end+1} = meanVadSignals(:,:,i);
+        %plot(vadSignals{end});
     end
-    [vadDLs, ~, ~] = calculateConnectivity(vadSignals, roiNames, group, 'dlcm');
-    [vadDLWs, ~, ~] = calculateConnectivity(vadSignals, roiNames, group, 'dlw');
+    [vadDLs, ~, ~] = calculateConnectivity(vadSignals, roiNames, group, 'dlcm', 1);
+    [vadDLWs, ~, ~] = calculateConnectivity(vadSignals, roiNames, group, 'dlw', 1);
     [~, vadDLWnss, meanVadDLWns, stdVadDLWns, ~, ~] = calculateDistributions(vadSignals, roiNames, group, 'dlw');
 end
 

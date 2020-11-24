@@ -1,6 +1,9 @@
 % this function is only for ADNI2 alzheimer analysis
 
-function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roiNames, group, algorithm)
+function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roiNames, group, algorithm, rawFlag)
+    if nargin < 5
+        rawFlag = 0;
+    end
     % constant value
     ROINUM = size(signals{1},1);
     LAG = 3;
@@ -52,7 +55,12 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
                 if exist(dlcmName, 'file')
                     load(dlcmName);
                 else
-                    [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
+                    if rawFlag
+                        si = signals{i};
+                        sig=0; c=0; maxsi=0; minsi=0;
+                    else
+                        [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
+                    end
                     % si = signals{i} - nanmin(signals{i}, [], 'all'); % simple linear transform
                     sigLen = size(si,2);
                     inSignal = rand(ROINUM, sigLen);
