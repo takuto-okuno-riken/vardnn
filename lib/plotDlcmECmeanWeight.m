@@ -8,7 +8,7 @@ function [dlEC, dlECerr] = plotDlcmECmeanWeight(netDLCM, range)
     if nargin < 2
         range = 0.25;
     end
-    [dlEC, dlECerr] = getDlcmEffectiveConnectivity(netDLCM);
+    [dlEC, dlECerr] = getDlcmECmeanWeight(netDLCM);
     % show effective conectivity of predicted node signals
     if range <= 0
         amax = abs(max(max(dlEC)));

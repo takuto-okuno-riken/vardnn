@@ -10,6 +10,11 @@
 
 function [S, time, mae, maeerr] = plotPredictSignals(X, inSignal, nodeControl, inControl, netDLCM, showEach)
     if nargin < 6, showEach = 0; end
-    [S, time, mae, maeerr] = predictDlcmNetwork(X, inSignal, nodeControl, inControl, netDLCM);
+    [Y, time] = predictDlcmNetwork(X, inSignal, nodeControl, inControl, netDLCM);
+    S = X;
+    S(:,2:end) = Y(:,1:end-1);
+    A = Y(:,1:end-1) - X(:,2:end);
+    mae = nanmean(abs(A(:)));
+    maeerr = std(A(:),1) / sqrt(length(A(:)));
     plotTwoSignals(X, S, showEach);
 end

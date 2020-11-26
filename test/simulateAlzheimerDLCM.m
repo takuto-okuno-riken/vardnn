@@ -13,8 +13,10 @@ function simulateAlzheimerDLCM
     [adSignals] = connData2signalsFile(base, pathesAD, 'ad');
 
     % calculate zi & zi\{j}
-    [cnDLWs, cnDLWnss, meanCnDLWns, stdCnDLWns, cnInSignals, cnInControls] = calculateDistributions(cnSignals, roiNames, 'cn', 'dlw');
-    [adDLWs, adDLWnss, meanAdDLWns, stdAdDLWns, ~, ~] = calculateDistributions(adSignals, roiNames, 'ad', 'dlw');
+%    [cnDLWs, cnDLWnss, meanCnDLWns, stdCnDLWns, cnInSignals, cnInControls] = calculateDistributions(cnSignals, roiNames, 'cn', 'dlw');
+%    [adDLWs, adDLWnss, meanAdDLWns, stdAdDLWns, ~, ~] = calculateDistributions(adSignals, roiNames, 'ad', 'dlw');
+    [cnDLWs, cnDLWnss, meanCnDLWns, stdCnDLWns, cnInSignals, cnInControls] = calculateDistributions2(cnSignals, roiNames, 'cn', 'dlw');
+    [adDLWs, adDLWnss, meanAdDLWns, stdAdDLWns, ~, ~] = calculateDistributions2(adSignals, roiNames, 'ad', 'dlw');
 
     % transform healthy zi,zi\{j} to ad's (type 2)
     meanCnDLWns3 = repmat(meanCnDLWns,[1 1 size(cnDLWnss,3)]);
@@ -43,6 +45,20 @@ function simulateAlzheimerDLCM
     [vad5Signals, vad5DLWs, vad5DLWnss] = calculateVirtualADSignals4(vad4Signals, adSignals, roiNames, cnInSignals, cnInControls, 'vad5');
     [vad6Signals, vad6DLWs, vad6DLWnss] = calculateVirtualADSignals4(vad5Signals, adSignals, roiNames, cnInSignals, cnInControls, 'vad6');
 
+    % change Z score
+%{
+    cnDLWs = calcZScores(cnDLWs);
+    adDLWs = calcZScores(adDLWs);
+    vadDLWs = calcZScores(vadDLWs);
+    vad2DLWs = calcZScores(vad2DLWs);
+    vad3DLWs = calcZScores(vad3DLWs);
+    vad4DLWs = calcZScores(vad4DLWs);
+    vad5DLWs = calcZScores(vad5DLWs);
+    vad6DLWs = calcZScores(vad6DLWs);
+    cnDLWnss = calcZScores(cnDLWnss);
+    adDLWnss = calcZScores(adDLWnss);
+    vad6DLWnss = calcZScores(vad6DLWnss);
+%}
     % plot correlation and cos similarity
     algNum = 12;
     meanCnDLW = nanmean(cnDLWs,3);
@@ -97,6 +113,7 @@ function simulateAlzheimerDLCM
     [advadDLWsUt, advadDLWsUtP, advadDLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vadDLWs, roiNames, 'adec', 'vadec', 'dlw');
     [advad2DLWsUt, advad2DLWsUtP, advad2DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad2DLWs, roiNames, 'adec', 'vad2ec', 'dlw');
     [advad3DLWsUt, advad3DLWsUtP, advad3DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad3DLWs, roiNames, 'adec', 'vad3ec', 'dlw');
+    [advad5DLWsUt, advad5DLWsUtP, advad5DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad5DLWs, roiNames, 'adec', 'vad5ec', 'dlw');
     [cnadDLWnssUt, cnadDLWnssUtP, cnadDLWnssUtP2] = calculateAlzWilcoxonTest(cnDLWnss, adDLWnss, roiNames, 'cnns', 'adns', 'dlw');
     [cnvadDLWnssUt, cnvadDLWnssUtP, cnvadDLWnssUtP2] = calculateAlzWilcoxonTest(cnDLWnss, vadDLWnss, roiNames, 'cnns', 'vadns', 'dlw');
     [advadDLWnssUt, advadDLWnssUtP, advadDLWnssUtP2] = calculateAlzWilcoxonTest(adDLWnss, vadDLWnss, roiNames, 'adns', 'vadns', 'dlw');
@@ -288,6 +305,72 @@ function [vadSignals, vadDLWs, vadDLWnss] = calculateVirtualADSignals4(cnSignals
     [~, vadDLWnss, meanVadDLWns, stdVadDLWns, ~, ~] = calculateDistributions(vadSignals, roiNames, group, 'dlw');
 end
 
+function [ECs, nodeSignals, meanSignals, stdSignals, inSignals, inControls] = calculateDistributions(signals, roiNames, group, algorithm)
+    % constant value
+    ROINUM = size(signals{1},1);
+
+    outfName = ['results/adsim-' algorithm '-' group '-roi' num2str(ROINUM) '.mat'];
+    if exist(outfName, 'file')
+        load(outfName);
+    else
+        ECs = zeros(ROINUM, ROINUM, length(signals));
+        nodeSignals = zeros(ROINUM, ROINUM+1, length(signals));
+        inSignals = zeros(ROINUM, size(signals{1},2), length(signals));
+        inControls = zeros(ROINUM, ROINUM, length(signals));
+        for i=1:length(signals)
+            switch(algorithm)
+            case 'dlw'
+                dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                load(dlcmName);
+                [ec, ecNS] = calcDlcmEC(netDLCM, [], inControl);
+            end
+            ECs(:,:,i) = ec;
+            nodeSignals(:,:,i) = ecNS;
+            inSignals(:,:,i) = inSignal;
+            inControls(:,:,i) = inControl;
+        end
+        save(outfName, 'ECs', 'nodeSignals', 'roiNames', 'inSignals', 'inControls');
+    end
+    meanSignals = nanmean(nodeSignals, 3);
+    stdSignals = nanstd(nodeSignals, 1, 3);
+    save(outfName, 'ECs', 'nodeSignals', 'meanSignals', 'stdSignals', 'roiNames', 'inSignals', 'inControls');
+end
+
+function [ECs, nodeSignals, meanSignals, stdSignals, inSignals, inControls] = calculateDistributions2(signals, roiNames, group, algorithm)
+    % constant value
+    ROINUM = size(signals{1},1);
+
+    outfName = ['results/adsim-' algorithm '-' group '-roi' num2str(ROINUM) '_2.mat'];
+    if exist(outfName, 'file')
+        load(outfName);
+    else
+        ECs = zeros(ROINUM, ROINUM, length(signals));
+        nodeSignals = zeros(ROINUM, ROINUM+1, length(signals));
+        inSignals = zeros(ROINUM, size(signals{1},2), length(signals));
+        inControls = zeros(ROINUM, ROINUM, length(signals));
+        for i=1:length(signals)
+            switch(algorithm)
+            case 'dlw'
+                dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                load(dlcmName);
+                nodeInput = ones(ROINUM, ROINUM+1);
+                nodeInput(:,2:end) = nodeInput(:, 2:end) - eye(ROINUM);
+                inSignal2 = ones(ROINUM, ROINUM+1);
+                [Y, time] = predictDlcmNetwork(nodeInput, inSignal2, [], inControl, netDLCM);
+                ec = calcDlcmEC(netDLCM, [], inControl);
+            end
+            ECs(:,:,i) = ec;
+            nodeSignals(:,:,i) = Y;
+            inSignals(:,:,i) = inSignal;
+            inControls(:,:,i) = inControl;
+        end
+        save(outfName, 'ECs', 'nodeSignals', 'roiNames', 'inSignals', 'inControls');
+    end
+    meanSignals = nanmean(nodeSignals, 3);
+    stdSignals = nanstd(nodeSignals, 1, 3);
+    save(outfName, 'ECs', 'nodeSignals', 'meanSignals', 'stdSignals', 'roiNames', 'inSignals', 'inControls');
+end
+
 
 function [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(orgControl, orgTarget, k, N)
     un = floor(size(orgControl,3) / N);
@@ -381,37 +464,6 @@ function sigCount = calcAlzSigmaSubjects(weights, meanWeights, stdWeights, meanC
     end
 %    figure; boxplot(X);
 %    figure; bar(sigCount);
-end
-
-function [ECs, nodeSignals, meanSignals, stdSignals, inSignals, inControls] = calculateDistributions(signals, roiNames, group, algorithm)
-    % constant value
-    ROINUM = size(signals{1},1);
-
-    outfName = ['results/adsim-' algorithm '-' group '-roi' num2str(ROINUM) '.mat'];
-    if exist(outfName, 'file')
-        load(outfName);
-    else
-        ECs = zeros(ROINUM, ROINUM, length(signals));
-        nodeSignals = zeros(ROINUM, ROINUM+1, length(signals));
-        inSignals = zeros(ROINUM, size(signals{1},2), length(signals));
-        inControls = zeros(ROINUM, ROINUM, length(signals));
-        for i=1:length(signals)
-            switch(algorithm)
-            case 'dlw'
-                dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
-                load(dlcmName);
-                [ec, ecNS] = calcDlcmEC(netDLCM, [], inControl);
-            end
-            ECs(:,:,i) = ec;
-            nodeSignals(:,:,i) = ecNS;
-            inSignals(:,:,i) = inSignal;
-            inControls(:,:,i) = inControl;
-        end
-        save(outfName, 'ECs', 'nodeSignals', 'roiNames', 'inSignals', 'inControls');
-    end
-    meanSignals = nanmean(nodeSignals, 3);
-    stdSignals = nanstd(nodeSignals, 1, 3);
-    save(outfName, 'ECs', 'nodeSignals', 'meanSignals', 'stdSignals', 'roiNames', 'inSignals', 'inControls');
 end
 
 function [normalities, normalitiesP] = calculateAlzNormalityTest(ECs, roiNames, group, algorithm)

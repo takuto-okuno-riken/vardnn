@@ -78,14 +78,14 @@ function testTrainDlcm
     colorbar;
 
     % show functional conectivity of original node signals
-    FC = plotFunctionalConnectivity(si);
+    figure; FC = plotFunctionalConnectivity(si);
 
     % test & show predicted
-    [S, time, mae, maeerr] = plotPredictSignals(si, [], [], [], netDLCM, 0);
+    figure; [S, time, mae, maeerr] = plotPredictSignals(si, [], [], [], netDLCM, 0);
     
     % show functional conectivity of predicted node signals
-    FC = plotFunctionalConnectivity(S);
+    figure; FC = plotFunctionalConnectivity(S);
 
     % plot correlation graph between original predicted node signals
-    R = plotTwoSignalsCorrelation(si, S) % show R result
+    figure; R = plotTwoSignalsCorrelation(si, S) % show R result
 end
