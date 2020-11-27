@@ -193,32 +193,35 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(signals, S2, IS2,
     if exist(outfName, 'file')
         load(outfName);
     else
+        % init params
+        sigLen = size(S2,2);
+        si = S2;
+        inSignal = IS2;
+        inControl = eye(ROWNUM);
+
         for i=1:sbjNum
             dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROWNUM) '-net' num2str(i) '.mat'];
             if exist(dlcmName, 'file')
                 load(dlcmName);
             else
-                origName = ['results/ad-dlcm-cn-roi' num2str(ROWNUM) '-net' num2str(i) '.mat'];
-                load(origName);
-                if exist('m','var')
-                    c = m;
-                end
+                % init DLCM network
+                netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
 
                 % training DLCM network
-                maxEpochs = 800;
+                maxEpochs = 1000;
+                miniBatchSize = ceil(sigLen / 2);
                 options = trainingOptions('adam', ...
                     'ExecutionEnvironment','cpu', ...
                     'MaxEpochs',maxEpochs, ...
-                    'MiniBatchSize',ROWNUM, ...
+                    'MiniBatchSize',miniBatchSize, ...
                     'Shuffle','every-epoch', ...
                     'GradientThreshold',5,...
                     'L2Regularization',0.05, ...
                     'Verbose',false);
-    %                'Plots','training-progress');
+            %            'Plots','training-progress');
 
                 disp('start training');
                 for j=1:ROWNUM
-                    disp(['virtual alzheimer training node ' num2str(i) '-' num2str(j)]);
                     nodeTeach = signals(j,1:end,i);
                     nodeInput = [S2; IS2];
                     if ~isempty(inControl)
@@ -228,9 +231,10 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(signals, S2, IS2,
                     nodeTeach(:,j+1) = [];
                     nodeInput(:,j+1) = [];
                     [netDLCM.nodeNetwork{j}, netDLCM.trainInfo{j}] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{j}, options);
+                    disp(['virtual alzheimer (' group ') training node ' num2str(i) '-' num2str(j) ' rmse=' num2str(netDLCM.trainInfo{j}.TrainingRMSE(maxEpochs))]);
                 end
 
-                save(dlcmName, 'netDLCM', 'si', 'inSignal', 'inControl', 'mat', 'sig', 'c', 'maxsi', 'minsi');
+                save(dlcmName, 'netDLCM', 'si', 'inSignal', 'inControl', 'options');
             end
 
             % recalculate EC
@@ -338,22 +342,34 @@ function [ECs, nodeSignals, meanSignals, stdSignals, inSignals, inControls] = ca
     save(outfName, 'ECs', 'nodeSignals', 'meanSignals', 'stdSignals', 'roiNames', 'inSignals', 'inControls');
 end
 
+function pat = repmatPat(repNum, ROINUM)
+    patIn = [repmat(1,[repNum 1]); repmat(0,[repNum 1])];
+    pat = repmat(patIn, [ceil(ROINUM/length(patIn)) 1]);
+    pat = pat(1:ROINUM,:);
+    pat = [pat, 1-pat, pat*0.5, (1-pat)*0.5];
+end
+
 function [ECs, nodeSignals, meanSignals, stdSignals, inSignals, inControls, S2, IS2] = calculateDistributions2(signals, roiNames, group, algorithm)
     % constant value
     ROINUM = size(signals{1},1);
 
-    % node status signals
+    % generate node input signals pattern
     S2 = ones(ROINUM, ROINUM+1);
     S2(:,2:end) = S2(:, 2:end) - eye(ROINUM);
     S2 = [S2, zeros(ROINUM, 1), eye(ROINUM), eye(ROINUM)*0.5];
-    IS2 = [ones(ROINUM, ROINUM+1), zeros(ROINUM, ROINUM*2+1)];
+    IS2 = [ones(ROINUM, ROINUM+1), zeros(ROINUM, 1), zeros(ROINUM, ROINUM*2)];
+    for i=1:7
+        pat = repmatPat(2^(i-1), ROINUM);
+        S2 = [S2, pat];
+        IS2 = [IS2, pat];
+    end
 
     outfName = ['results/adsim-' algorithm '-' group '-roi' num2str(ROINUM) '_2.mat'];
     if exist(outfName, 'file')
         load(outfName);
     else
         ECs = zeros(ROINUM, ROINUM, length(signals));
-        nodeSignals = zeros(ROINUM, ROINUM*3+2, length(signals));
+        nodeSignals = zeros(ROINUM, size(S2, 2), length(signals));
         inSignals = zeros(ROINUM, size(signals{1},2), length(signals));
         inControls = zeros(ROINUM, ROINUM, length(signals));
         for i=1:length(signals)
