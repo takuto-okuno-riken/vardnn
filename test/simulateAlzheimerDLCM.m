@@ -51,12 +51,27 @@ function simulateAlzheimerDLCM
     % calculate virtual AD ECcnDLWnss (type 1 : EC, node-signals)
 %    vadDLWs = adPMask .* repmat((meanAdZi-meanAdZij),[1 1 adSbjNum]) + adMMask .* repmat((meanAdZij-meanAdZi),[1 1 adSbjNum]);
 %    
-    vadZij = vadDLWnss(:,2:ROINUM+1,:); % .* repmat(sigWeight,[1 1 cnSbjNum]);
-    vadZi = repmat(vadDLWnss(:,1,:),[1 ROINUM 1]); % .* repmat(sigWeight,[1 1 cnSbjNum]);
-    vadDLWsR = (vadZi - vadZij);   % non-abs EC of virtual AD
+    vadZij = vadDLWnss(:,2:ROINUM+1,:);
+    vadZi = repmat(vadDLWnss(:,1,:),[1 ROINUM 1]);
 
-    vadDLWsRstd = nanstd(vadDLWsR,1,3);
-    sigWeight = adDLWsRstd ./ vadDLWsRstd;
+%    this needs to calc vadDLWsRstd, but it is redundant.
+%    vadDLWsR = (vadZi - vadZij);   % non-abs EC of virtual AD
+%    vadDLWsRstd = nanstd(vadDLWsR,1,3);
+%    sigWeight = adDLWsRstd ./ vadDLWsRstd; %
+
+    vadCov = nan(ROINUM,ROINUM);
+    for i=1:ROINUM
+        for j=1:ROINUM
+            X = squeeze(vadZi(i,j,:));
+            Y = squeeze(vadZij(i,j,:));
+            C = cov(X,Y,1);
+            vadCov(i,j) = C(1,2);
+        end
+    end
+    b4ac = 4 .* vadCov .* vadCov - 4 .* nanvar(vadZij,1,3) .* (nanvar(vadZi,1,3) - nanvar(adDLWsR,1,3));
+    b4ac(b4ac<0) = 0;
+    b4ac = sqrt(b4ac);
+    sigWeight = (2 .* vadCov + b4ac) ./ (2 .* nanvar(vadZij,1,3));
 
     vadDLWnss(:,2:ROINUM+1,:) = meanAdDLWns3(:,2:ROINUM+1,:) +  vadDLWstd(:,2:ROINUM+1,:) .* repmat(sigWeight,[1 1 cnSbjNum]);
     % this expression is better, but Zi from input (1...1) can take only one value
