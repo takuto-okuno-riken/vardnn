@@ -114,15 +114,22 @@ b(:,3) = squeeze(adZij(i,j,:));
     
     meanAdDLWs = mean(adDLWs,3);
     stdAdDLWs = nanstd(adDLWs,1,3);
-    vad7DLWnss = vadDLWnss;
-    vad7Zi = repmat(vadDLWnss(:,1,:),[1 ROINUM 1]);
-%    vad7Zij = vad7Zi - repmat(meanAdDLWs, [1 1 cnSbjNum]) + repmat(stdAdDLWs, [1 1 cnSbjNum]) .* randn([ROINUM ROINUM cnSbjNum]) .* 0.7;
-    vad7Zij = vad7Zi - repmat(meanAdDLWs, [1 1 cnSbjNum]) + repmat(stdAdDLWs, [1 1 cnSbjNum]) .* (rand([ROINUM ROINUM cnSbjNum])-0.5) .* 2;
-%    vad7Zij = vad7Zi - repmat(meanAdDLWs, [1 1 cnSbjNum]) + repmat(stdAdDLWs, [1 1 cnSbjNum]) .* sigCnDLW;
-    
-    vad7DLWnss(:,2:ROINUM+1,:) = vad7Zij;
-    vad7DLWsR = (vad7Zi - vad7Zij);
-    vad7DLWs = abs(vad7DLWsR);
+
+    outfName = ['results/adsim-dlw-vad7ns-roi' num2str(ROINUM) '.mat'];
+    if exist(outfName, 'file')
+        load(outfName);
+    else
+        vad7DLWnss = vadDLWnss;
+        vad7Zi = repmat(vadDLWnss(:,1,:),[1 ROINUM 1]);
+    %    vad7Zij = vad7Zi - repmat(meanAdDLWs, [1 1 cnSbjNum]) + repmat(stdAdDLWs, [1 1 cnSbjNum]) .* randn([ROINUM ROINUM cnSbjNum]) .* 0.7;
+        vad7Zij = vad7Zi - repmat(meanAdDLWs, [1 1 cnSbjNum]) + repmat(stdAdDLWs, [1 1 cnSbjNum]) .* (rand([ROINUM ROINUM cnSbjNum])-0.5) .* 2;
+    %    vad7Zij = vad7Zi - repmat(meanAdDLWs, [1 1 cnSbjNum]) + repmat(stdAdDLWs, [1 1 cnSbjNum]) .* sigCnDLW;
+
+        vad7DLWnss(:,2:ROINUM+1,:) = vad7Zij;
+        vad7DLWsR = (vad7Zi - vad7Zij);
+        vad7DLWs = abs(vad7DLWsR);
+        save(outfName, 'vad7DLWnss', 'vad7Zi', 'vad7Zij', 'vad7DLWsR', 'vad7DLWs');
+    end
     
     % re-training DLCM network (type 6 : EC, net)
     [vad8DLWs, meanVad8DLWns, stdVad8DLWns] = retrainDLCMAndEC(vad7DLWnss, cnS2, cnIS2, roiNames, 'vad8ns');
@@ -156,7 +163,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     vad6DLWnss = calcZScores(vad6DLWnss);
 %}
     % plot correlation and cos similarity
-    algNum = 15;
+    algNum = 17;
     meanCnDLW = nanmean(cnDLWs,3);
     meanAdDLW = nanmean(adDLWs,3);
     meanVadDLW = nanmean(vadDLWs,3);
@@ -166,17 +173,19 @@ b(:,3) = squeeze(adZij(i,j,:));
     meanVad5DLW = nanmean(vad5DLWs,3);
 %    meanVad6DLW = nanmean(vad6DLWs,3);
     meanVad7DLW = nanmean(vad7DLWs,3);
+    meanVad8DLW = nanmean(vad8DLWs,3);
     nanx = eye(size(meanCnDLW,1),size(meanCnDLW,2));
     nanx(nanx==1) = NaN;
 %    figure; cnadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanAdDLW);
 %    figure; cnvadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanVadDLW);
     figure; advadDLWr = plotTwoSignalsCorrelation(meanAdDLW, meanVadDLW + nanx);
-%    figure; advadDLWr2 = plotTwoSignalsCorrelation(meanAdDLW, meanVad2DLW);
+    figure; advadDLWr2 = plotTwoSignalsCorrelation(meanAdDLW, meanVad2DLW);
 %    figure; advadDLWr3 = plotTwoSignalsCorrelation(meanAdDLW, meanVad3DLW);
 %    figure; advadDLWr4 = plotTwoSignalsCorrelation(meanAdDLW, meanVad4DLW);
 %    figure; advadDLWr5 = plotTwoSignalsCorrelation(meanAdDLW, meanVad5DLW);
 %    figure; advadDLWr6 = plotTwoSignalsCorrelation(meanAdDLW, meanVad6DLW);
     figure; advadDLWr7 = plotTwoSignalsCorrelation(meanAdDLW, meanVad7DLW + nanx);
+    figure; advadDLWr8 = plotTwoSignalsCorrelation(meanAdDLW, meanVad8DLW + nanx);
     cosSim = zeros(algNum,1);
     cosSim(1) = getCosSimilarity(meanCnDLW, meanAdDLW);
     cosSim(2) = getCosSimilarity(meanCnDLW, meanVadDLW);
@@ -193,7 +202,9 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    cosSim(13) = getCosSimilarity(meanAdDLW, meanVad6DLW);
     cosSim(14) = getCosSimilarity(meanCnDLW, meanVad7DLW);
     cosSim(15) = getCosSimilarity(meanAdDLW, meanVad7DLW);
-    X = categorical({'cn-ad','cn-vad','ad-vad','cn-vad2','ad-vad2','cn-vad3','ad-vad3','cn-vad4','ad-vad4','cn-vad5','ad-vad5','cn-vad6','ad-vad6','cn-vad7','ad-vad7'});
+    cosSim(16) = getCosSimilarity(meanCnDLW, meanVad8DLW);
+    cosSim(17) = getCosSimilarity(meanAdDLW, meanVad8DLW);
+    X = categorical({'cn-ad','cn-vad','ad-vad','cn-vad2','ad-vad2','cn-vad3','ad-vad3','cn-vad4','ad-vad4','cn-vad5','ad-vad5','cn-vad6','ad-vad6','cn-vad7','ad-vad7','cn-vad8','ad-vad8'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and AD by each algorithm');
 
@@ -215,11 +226,13 @@ b(:,3) = squeeze(adZij(i,j,:));
     [advadDLWsUt, advadDLWsUtP, advadDLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vadDLWs, roiNames, 'adec', 'vadec', 'dlw');
     [~, ~, ~] = calculateAlzWilcoxonTest(adDLWsR, vadDLWsR, roiNames, 'adecR', 'vadecR', 'dlw');
 %    [cnvad2DLWsUt, cnvad2DLWsUtP, cnvad2DLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, vad2DLWs, roiNames, 'cnec', 'vad2ec', 'dlw');
-    [advad2DLWsUt, advad2DLWsUtP, advad2DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad2DLWs, roiNames, 'adec', 'vad2ec', 'dlw');
+%    [advad2DLWsUt, advad2DLWsUtP, advad2DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad2DLWs, roiNames, 'adec', 'vad2ec', 'dlw');
 %    [~, ~, ~] = calculateAlzWilcoxonTest(adDLWsR, vad2DLWsR, roiNames, 'adecR', 'vad2ecR', 'dlw');
     [cnvad7DLWsUt, cnvad7DLWsUtP, cnvad7DLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, vad7DLWs, roiNames, 'cnec', 'vad7ec', 'dlw');
     [advad7DLWsUt, advad7DLWsUtP, advad7DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad7DLWs, roiNames, 'adec', 'vad7ec', 'dlw');
     [~, ~, ~] = calculateAlzWilcoxonTest(adDLWsR, vad7DLWsR, roiNames, 'adecR', 'vad7ecR', 'dlw');
+    [cnvad8DLWsUt, cnvad8DLWsUtP, cnvad8DLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, vad8DLWs, roiNames, 'cnec', 'vad8ec', 'dlw');
+    [advad8DLWsUt, advad8DLWsUtP, advad8DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad8DLWs, roiNames, 'adec', 'vad8ec', 'dlw');
 %    [advad2bDLWsUt, advad2bDLWsUtP, advad2bDLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad2bDLWs, roiNames, 'adec', 'vad2bec', 'dlw');
 %    [advad3DLWsUt, advad3DLWsUtP, advad3DLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, vad3DLWs, roiNames, 'cnec', 'vad3ec', 'dlw');
 %    [advad3DLWsUt, advad3DLWsUtP, advad3DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad3DLWs, roiNames, 'adec', 'vad3ec', 'dlw');
