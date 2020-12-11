@@ -194,12 +194,15 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         % show result of granger causality index (mvGC)
         fg = figure; gcI = plotMultivariateGCI(y2.',3,0); close(fg);
         figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, pP.A, 100, 1, 0.2); hold off;
+        title('mvGC');
         % show result of granger causality index (pwGC)
         fg = figure; gcI = plotPairwiseGCI(y2.',3,0); close(fg);
         figure(pgcRf); hold on; [pgcROC{k,1}, pgcROC{k,2}, pgcAUC(k)] = plotROCcurve(gcI, pP.A, 100, 1, 0.2); hold off;
+        title('pwGC');
         % show result of DirectLiNGAM
         fg = figure; Aest = plotDirectLiNGAM(y2.'); close(fg);
         figure(dlgRf); hold on; [dlgROC{k,1}, dlgROC{k,2}, dlgAUC(k)] = plotROCcurve(Aest, pP.A, 100, 1, 0.2); hold off;
+        title('DirectLiNGAM');
 
         % show DCM signals
         [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(y2.', 0);
@@ -241,10 +244,12 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         % show result of DLCM-GC
         fg = figure; dlGC = plotDlcmGCI(si, inSignal, [], inControl, netDLCM, 0); close(fg);
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A, 100, 1, 0.2); hold off;
+        title('DLCM-GC');
 
         % show result of DLCM weight causality index (DLCM-wci) as DLCM-EC
         fg = figure; dlwGC = plotDlcmEC(netDLCM, [], inControl, 0); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A, 100, 1, 0.2); hold off;
+        title('DLCM-EC');
     end
     fname = ['results/net-pat4-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
     save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlwAUC', 'dlgAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC');
