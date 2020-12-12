@@ -136,16 +136,39 @@ b(:,3) = squeeze(adZij(i,j,:));
     
     vad9DLWnss = vadDLWnss;
     vad9Zi = repmat(vadDLWnss(:,1,:),[1 ROINUM 1]);
-    vad9Zij = vad9Zi - repmat(meanAdDLWs, [1 1 cnSbjNum]) - repmat(stdAdDLWs, [1 1 cnSbjNum]) .* sigCnDLW .* 0.8;
+    vad9Zij = vad9Zi - (repmat(meanAdDLWs, [1 1 cnSbjNum]) + repmat(stdAdDLWs, [1 1 cnSbjNum]) .* sigCnDLW .* 0.8);
 
     vad9DLWnss(:,2:ROINUM+1,:) = vad9Zij;
-    vad9DLWsR = (vad9Zi - vad9Zij);
-    vad9DLWs = abs(vad9DLWsR);
+    vad9DLWs = abs(vad9Zi - vad9Zij);
 %    [advad9DLWsUt, advad9DLWsUtP, advad9DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad9DLWs, roiNames, 'adec', 'vad9ec', 'dlw', 1, 'ttest2');
 %    [advad9DLWsUt, advad9DLWsUtP, advad9DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad9DLWs, roiNames, 'adec', 'vad9ec', 'dlw', 1, 'ranksum');
 
     % re-training DLCM network (type 8 : EC, net)
     [vad10DLWs, meanVad10DLWns, stdVad10DLWns] = retrainDLCMAndEC(vad9DLWnss, cnS2, cnIS2, roiNames, 'vad10ns');
+%    figure; plotEC(mean(adDLWs,3),'ad DLW',0);
+%    figure; plotEC(mean(vad10DLWs,3),'vad10 DLW',0);
+%    [advad10DLWsUt, advad10DLWsUtP, advad10DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad10DLWs, roiNames, 'adec', 'vad10ec', 'dlw', 1, 'ranksum');
+%    sigAdDLWs = sigmaEC(mean(adDLWs,3));
+%    sigVad10DLWs = sigmaEC(mean(vad10DLWs,3));
+%    figure; advadDLWr2 = plotTwoSignalsCorrelation(sigAdDLWs, sigVad10DLWs);
+%    sigAdDLWs = sigmaEC(adDLWs);
+%    sigCnDLWs = sigmaEC(cnDLWs);
+%    sigVad10DLWs = sigmaEC(vad10DLWs);
+%    [cnvad10DLWsUt, cnvad10DLWsUtP, cnvad10DLWsUtP2] = calculateAlzWilcoxonTest(sigCnDLWs, sigVad10DLWs, roiNames, 'cnec', 'vad10ec', 'dlw', 1, 'ranksum');
+%    [advad10DLWsUt, advad10DLWsUtP, advad10DLWsUtP2] = calculateAlzWilcoxonTest(sigAdDLWs, sigVad10DLWs, roiNames, 'adec', 'vad10ec', 'dlw', 1, 'ranksum');
+
+    % transform healthy node signals to ad's distribution (type 9 : EC, teach-signals)
+    % first generate vad Zi, then calculate Zij from ad EC (optimise for DLCM training)
+    vad11DLWnss = vadDLWnss;
+    vad11Zi = repmat(vadDLWnss(:,1,:),[1 ROINUM 1]);
+    vad11Zij = vad11Zi - (repmat(meanAdDLWs, [1 1 cnSbjNum]) + repmat(stdAdDLWs, [1 1 cnSbjNum]) .* sigCnDLW) * 1.5;
+
+    vad11DLWnss(:,2:ROINUM+1,:) = vad11Zij;
+    vad11DLWs = abs(vad11Zi - vad11Zij);
+    [advad11DLWsUt, advad11DLWsUtP, advad11DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad11DLWs, roiNames, 'adec', 'vad11ec', 'dlw', 1, 'ranksum');
+
+    % re-training DLCM network (type 10 : EC, net)
+    [vad12DLWs, meanVad12DLWns, stdVad12DLWns] = retrainDLCMAndEC(vad11DLWnss, cnS2, cnIS2, roiNames, 'vad12ns');
 
     % generate virtual ad signals (type 3 : EC, BOLD-signals, net)
     % transform cn signals to vad signals linearly (based on EC rate)
@@ -175,7 +198,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     vad6DLWnss = calcZScores(vad6DLWnss);
 %}
     % plot correlation and cos similarity
-    algNum = 21;
+    algNum = 23;
     meanCnDLW = nanmean(cnDLWs,3);
     meanAdDLW = nanmean(adDLWs,3);
     meanVadDLW = nanmean(vadDLWs,3);
@@ -188,6 +211,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     meanVad8DLW = nanmean(vad8DLWs,3);
     meanVad9DLW = nanmean(vad9DLWs,3);
     meanVad10DLW = nanmean(vad10DLWs,3);
+    meanVad11DLW = nanmean(vad11DLWs,3);
     nanx = eye(size(meanCnDLW,1),size(meanCnDLW,2));
     nanx(nanx==1) = NaN;
 %    figure; cnadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanAdDLW);
@@ -202,6 +226,7 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    figure; advadDLWr8 = plotTwoSignalsCorrelation(meanAdDLW, meanVad8DLW + nanx);
     figure; advadDLWr9 = plotTwoSignalsCorrelation(meanAdDLW, meanVad9DLW + nanx);
     figure; advadDLWr10 = plotTwoSignalsCorrelation(meanAdDLW, meanVad10DLW + nanx);
+    figure; advadDLWr11 = plotTwoSignalsCorrelation(meanAdDLW, meanVad11DLW + nanx);
     cosSim = zeros(algNum,1);
     cosSim(1) = getCosSimilarity(meanCnDLW, meanAdDLW);
     cosSim(2) = getCosSimilarity(meanCnDLW, meanVadDLW);
@@ -224,8 +249,10 @@ b(:,3) = squeeze(adZij(i,j,:));
     cosSim(19) = getCosSimilarity(meanAdDLW, meanVad9DLW);
     cosSim(20) = getCosSimilarity(meanCnDLW, meanVad10DLW);
     cosSim(21) = getCosSimilarity(meanAdDLW, meanVad10DLW);
+    cosSim(22) = getCosSimilarity(meanCnDLW, meanVad11DLW);
+    cosSim(23) = getCosSimilarity(meanAdDLW, meanVad11DLW);
     X = categorical({'cn-ad','cn-vad','ad-vad','cn-vad2','ad-vad2','cn-vad3','ad-vad3','cn-vad4','ad-vad4','cn-vad5','ad-vad5',...
-        'cn-vad6','ad-vad6','cn-vad7','ad-vad7','cn-vad8','ad-vad8','cn-vad9','ad-vad9','cn-vad10','ad-vad10'});
+        'cn-vad6','ad-vad6','cn-vad7','ad-vad7','cn-vad8','ad-vad8','cn-vad9','ad-vad9','cn-vad10','ad-vad10','cn-vad11','ad-vad11'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and AD by each algorithm');
 
@@ -325,6 +352,11 @@ b(:,3) = squeeze(adZij(i,j,:));
     xlabel('False Positive Rate')
     ylabel('True Positive Rate')
 %}
+end
+function sigEC = sigmaEC(EC)
+    m = nanmean(EC(:));
+    s = nanstd(EC(:),1);
+    sigEC = (EC - m) / s;
 end
 
 function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nodeSignals, exSignals, roiNames, group)
