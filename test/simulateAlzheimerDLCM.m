@@ -165,7 +165,7 @@ b(:,3) = squeeze(adZij(i,j,:));
 
     vad11DLWnss(:,2:ROINUM+1,:) = vad11Zij;
     vad11DLWs = abs(vad11Zi - vad11Zij);
-    [advad11DLWsUt, advad11DLWsUtP, advad11DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad11DLWs, roiNames, 'adec', 'vad11ec', 'dlw', 1, 'ranksum');
+%    [advad11DLWsUt, advad11DLWsUtP, advad11DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad11DLWs, roiNames, 'adec', 'vad11ec', 'dlw', 1, 'ranksum');
 
     % re-training DLCM network (type 10 : EC, net)
     [vad12DLWs, meanVad12DLWns, stdVad12DLWns] = retrainDLCMAndEC(vad11DLWnss, cnS2, cnIS2, roiNames, 'vad12ns');
