@@ -145,6 +145,7 @@ b(:,3) = squeeze(adZij(i,j,:));
 
     % re-training DLCM network (type 8 : EC, net)
     [vad10DLWs, meanVad10DLWns, stdVad10DLWns] = retrainDLCMAndEC(vad9DLWnss, cnS2, cnIS2, roiNames, 'vad10ns');
+    [vad10bDLWs, vad10DLWnss, ~, ~] = calculateNodeSignals(cnSignals, cnS2, cnIS2, roiNames, 'vad10ns', 'dlw', 'adsim');
 %    figure; plotEC(mean(adDLWs,3),'ad DLW',0);
 %    figure; plotEC(mean(vad10DLWs,3),'vad10 DLW',0);
 %    [advad10DLWsUt, advad10DLWsUtP, advad10DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad10DLWs, roiNames, 'adec', 'vad10ec', 'dlw', 1, 'ranksum');
@@ -156,19 +157,20 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    sigVad10DLWs = sigmaEC(vad10DLWs);
 %    [cnvad10DLWsUt, cnvad10DLWsUtP, cnvad10DLWsUtP2] = calculateAlzWilcoxonTest(sigCnDLWs, sigVad10DLWs, roiNames, 'cnec', 'vad10ec', 'dlw', 1, 'ranksum');
 %    [advad10DLWsUt, advad10DLWsUtP, advad10DLWsUtP2] = calculateAlzWilcoxonTest(sigAdDLWs, sigVad10DLWs, roiNames, 'adec', 'vad10ec', 'dlw', 1, 'ranksum');
+%    [~,~,~] = calculateAlzWilcoxonTest(vad9DLWs, vad10DLWs, roiNames, 'vad9ec', 'vad10ec', 'dlw', 1, 'ranksum');
+%    [~,~,~] = calculateAlzWilcoxonTest(vad9DLWnss, vad10DLWnss, roiNames, 'vad9ns', 'vad10ns', 'dlw', 1, 'ranksum');
 
     % transform healthy node signals to ad's distribution (type 9 : EC, teach-signals)
     % first generate vad Zi, then calculate Zij from ad EC (optimise for DLCM training)
-    vad11DLWnss = vadDLWnss;
-    vad11Zi = repmat(vadDLWnss(:,1,:),[1 ROINUM 1]);
-    vad11Zij = vad11Zi - (repmat(meanAdDLWs, [1 1 cnSbjNum]) + repmat(stdAdDLWs, [1 1 cnSbjNum]) .* sigCnDLW) * 1.5;
+    vad11DLWnss = [repmat(vad9DLWnss(:,1,:),[1 20 1]) vad9DLWnss(:,2:end,:)];
+    cnS11 = [repmat(cnS2(:,1,:),[1 20 1]) cnS2(:,2:end,:)];
+    cnIS11 = [repmat(cnIS2(:,1,:),[1 20 1]) cnS2(:,2:end,:)];
 
-    vad11DLWnss(:,2:ROINUM+1,:) = vad11Zij;
-    vad11DLWs = abs(vad11Zi - vad11Zij);
-%    [advad11DLWsUt, advad11DLWsUtP, advad11DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad11DLWs, roiNames, 'adec', 'vad11ec', 'dlw', 1, 'ranksum');
+    %    [advad11DLWsUt, advad11DLWsUtP, advad11DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad11DLWs, roiNames, 'adec', 'vad11ec', 'dlw', 1, 'ranksum');
 
     % re-training DLCM network (type 10 : EC, net)
-    [vad12DLWs, meanVad12DLWns, stdVad12DLWns] = retrainDLCMAndEC(vad11DLWnss, cnS2, cnIS2, roiNames, 'vad12ns');
+    [vad12DLWs, meanVad12DLWns, stdVad12DLWns] = retrainDLCMAndEC(vad11DLWnss, cnS11, cnIS11, roiNames, 'vad12ns');
+    [vad12bDLWs, vad12DLWnss, ~, ~] = calculateNodeSignals(cnSignals, cnS2, cnIS2, roiNames, 'vad12ns', 'dlw', 'adsim');
 
     % generate virtual ad signals (type 3 : EC, BOLD-signals, net)
     % transform cn signals to vad signals linearly (based on EC rate)
@@ -404,8 +406,9 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
                         filter = repmat(inControl(i,:).', 1, size(nodeInput,2));
                         nodeInput(ROWNUM+1:end,:) = nodeInput(ROWNUM+1:end,:) .* filter;
                     end
-                    nodeTeach(:,j+1) = [];
-                    nodeInput(:,j+1) = [];
+                    idx = find(isnan(nodeTeach));
+                    nodeTeach(:,idx) = [];
+                    nodeInput(:,idx) = [];
                     [netDLCM.nodeNetwork{j}, netDLCM.trainInfo{j}] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{j}, options);
                     disp(['virtual alzheimer (' group ') training node ' num2str(i) '-' num2str(j) ' rmse=' num2str(netDLCM.trainInfo{j}.TrainingRMSE(maxEpochs))]);
                 end
@@ -521,20 +524,21 @@ end
 function [ECs, nodeSignals, inSignals, inControls] = calculateNodeSignals(signals, S2, IS2, roiNames, group, algorithm, prefix)
     % constant value
     ROINUM = size(signals{1},1);
+    sbjNum = length(signals);
 
     outfName = ['results/adsim-' algorithm '-' group '_ns-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
     else
-        ECs = zeros(ROINUM, ROINUM, length(signals));
-        nodeSignals = zeros(ROINUM, size(S2, 2), length(signals));
+        ECs = zeros(ROINUM, ROINUM, sbjNum);
+        nodeSignals = zeros(ROINUM, size(S2, 2), sbjNum);
         if strcmp(prefix, 'adsim')
-            inSignals = zeros(ROINUM, size(S2, 2), length(signals));
+            inSignals = zeros(ROINUM, size(S2, 2), sbjNum);
         else
-            inSignals = zeros(ROINUM, size(signals{1},2), length(signals));
+            inSignals = zeros(ROINUM, size(signals{1},2), sbjNum);
         end
-        inControls = zeros(ROINUM, ROINUM, length(signals));
-        for i=1:length(signals)
+        inControls = zeros(ROINUM, ROINUM, sbjNum);
+        for i=1:sbjNum
             switch(algorithm)
             case 'dlw'
                 dlcmName = ['results/' prefix '-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
