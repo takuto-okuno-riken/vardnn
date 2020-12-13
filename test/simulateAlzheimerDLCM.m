@@ -161,9 +161,9 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    [~,~,~] = calculateAlzWilcoxonTest(vad9DLWnss, vad10DLWnss, roiNames, 'vad9ns', 'vad10ns', 'dlw', 1, 'ranksum');
 
     % re-training DLCM network (type 9 : EC, net) (optimise for DLCM training)
-    vad11DLWnss = [repmat(vad9DLWnss(:,1,:),[1 20 1]) vad9DLWnss(:,2:end,:) repmat(vad9DLWnss(:,1,:),[1 20 1])];
-    cnS11 = [repmat(cnS2(:,1,:),[1 20 1]) cnS2(:,2:end,:) repmat(cnS2(:,1,:),[1 20 1])];
-    cnIS11 = [repmat(cnIS2(:,1,:),[1 20 1]) cnS2(:,2:end,:) repmat(cnIS2(:,1,:),[1 20 1])];
+    vad11DLWnss = [repmat(vad9DLWnss(:,1,:),[1 160 1]) vad9DLWnss(:,2:133,:)];
+    cnS11 = [repmat(cnS2(:,1,:),[1 160 1]) cnS2(:,2:133,:)];
+    cnIS11 = [repmat(cnIS2(:,1,:),[1 160 1]) cnS2(:,2:133,:)];
 
     [vad12DLWs, meanVad12DLWns, stdVad12DLWns] = retrainDLCMAndEC(vad11DLWnss, cnS11, cnIS11, roiNames, 'vad12ns');
     [vad12bDLWs, vad12DLWnss, ~, ~] = calculateNodeSignals(cnSignals, cnS11, cnIS11, roiNames, 'vad12ns', 'dlw', 'adsim');
