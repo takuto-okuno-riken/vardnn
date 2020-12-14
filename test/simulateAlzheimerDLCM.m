@@ -187,7 +187,7 @@ b(:,3) = squeeze(adZij(i,j,:));
 
     vad13DLWnss(:,2:ROINUM+1,:) = vad13Zij;
     vad13DLWs = abs(vad13Zi - vad13Zij);
-    vad13DLWnss(:,1,:) = vadDLWnss(:,1,:) + nanmean(vad13DLWs,2) * 0.5;
+    vad13DLWnss(:,1,:) = vadDLWnss(:,1,:) + 0.02;
 
     [vad14DLWs, meanVad14DLWns, stdVad14DLWns] = retrainDLCMAndEC(vad13DLWnss, cnS2, cnIS2, roiNames, 'vad14ns');
     [vad14bDLWs, vad14DLWnss, ~, ~] = calculateNodeSignals(cnSignals, cnS2, cnIS2, roiNames, 'vad14ns', 'dlw', 'adsim');
