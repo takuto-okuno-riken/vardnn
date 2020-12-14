@@ -189,8 +189,8 @@ b(:,3) = squeeze(adZij(i,j,:));
     vad13DLWs = abs(vad13Zi - vad13Zij);
     vad13DLWnss(:,1,:) = vadDLWnss(:,1,:) + nanmean(vad13DLWs,2) * 0.5;
 
-    [vad14DLWs, meanVad14DLWns, stdVad14DLWns] = retrainDLCMAndEC(vad13DLWnss, cnS2, cnIS2, roiNames, 'vad12ns');
-    [vad14bDLWs, vad14DLWnss, ~, ~] = calculateNodeSignals(cnSignals, cnS2, cnIS2, roiNames, 'vad12ns', 'dlw', 'adsim');
+    [vad14DLWs, meanVad14DLWns, stdVad14DLWns] = retrainDLCMAndEC(vad13DLWnss, cnS2, cnIS2, roiNames, 'vad14ns');
+    [vad14bDLWs, vad14DLWnss, ~, ~] = calculateNodeSignals(cnSignals, cnS2, cnIS2, roiNames, 'vad14ns', 'dlw', 'adsim');
 
     [~,~,~] = calculateAlzWilcoxonTest(vad13DLWnss, vad14DLWnss, roiNames, 'vad13ns', 'vad14ns', 'dlw', 1, 'ranksum');
     [~,~,~] = calculateAlzWilcoxonTest(vad9DLWs, vad14bDLWs, roiNames, 'vad9ec', 'vad14ec', 'dlw', 1, 'ranksum');
