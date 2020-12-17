@@ -23,16 +23,16 @@ function simulateAlzheimerDLCM
     ROINUM = size(cnDLWs, 1);
     cnSbjNum = size(cnDLWs,3);
     adSbjNum = size(adDLWs,3);
-    cnZij = cnDLWnss(:,2:ROINUM+1,:);
     cnZi = repmat(cnDLWnss(:,1,:),[1 ROINUM 1]);
+    cnZij = cnDLWnss(:,2:ROINUM+1,:);
     cnDLWsR = (cnZi - cnZij);   % non-abs EC of AD
 
-    adZij = adDLWnss(:,2:ROINUM+1,:);
     adZi = repmat(adDLWnss(:,1,:),[1 ROINUM 1]);
+    adZij = adDLWnss(:,2:ROINUM+1,:);
     adDLWsR = (adZi - adZij);   % non-abs EC of AD
 
 %    cnDLWsRstd = nanstd(cnDLWsR,1,3);
-    adDLWsRstd = nanstd(adDLWsR,1,3);
+%    adDLWsRstd = nanstd(adDLWsR,1,3);
 %    sigWeight = adDLWsRstd ./ cnDLWsRstd;
 
 %    adPMask = (adDLWsR >= 0);
@@ -55,11 +55,11 @@ function simulateAlzheimerDLCM
     % calculate virtual AD ECcnDLWnss (type 1 : EC, teach-signals)
 %    vadDLWs = adPMask .* repmat((meanAdZi-meanAdZij),[1 1 adSbjNum]) + adMMask .* repmat((meanAdZij-meanAdZi),[1 1 adSbjNum]);
 %    
-    vadZij = vadDLWnss(:,2:ROINUM+1,:);
     vadZi = repmat(vadDLWnss(:,1,:),[1 ROINUM 1]);
+    vadZij = vadDLWnss(:,2:ROINUM+1,:);
 
 %    this needs to calc vadDLWsRstd, but it is redundant.
-%    vadDLWsR = (vadZi - vadZij);   % non-abs EC of virtual AD
+    vadDLWsR = (vadZi - vadZij);   % non-abs EC of virtual AD
 %    vadDLWsRstd = nanstd(vadDLWsR,1,3);
 %    sigWeight = adDLWsRstd ./ vadDLWsRstd; %
 
@@ -106,8 +106,8 @@ b(:,3) = squeeze(adZij(i,j,:));
     % re-training DLCM network (type 2 : EC, net)
     [vad2DLWs, meanVad2DLWns, stdVad2DLWns] = retrainDLCMAndEC(vadDLWnss, cnS2, cnIS2, roiNames, 'vadns');
     [vad2bDLWs, vad2DLWnss] = calculateNodeSignals(cnSignals, cnS2, cnIS2, roiNames, 'vadns', 'dlw');
-    vad2Zij = vad2DLWnss(:,2:ROINUM+1,:);
     vad2Zi = repmat(vad2DLWnss(:,1,:),[1 ROINUM 1]);
+    vad2Zij = vad2DLWnss(:,2:ROINUM+1,:);
     vad2DLWsR = (vad2Zi - vad2Zij);
 %%{
     p = 0;
@@ -125,7 +125,6 @@ b(:,3) = squeeze(adZij(i,j,:));
 %%}
     % --------------------------------------------------------------------------------------------------------------
     % re-training DLCM network (type 12 : EC, net) (optimise for DLCM training)
-%%{
     R = 8; %ROINUM;
     JMAX = 7;
     k1 = floor(101/20)+1;
@@ -135,12 +134,12 @@ b(:,3) = squeeze(adZij(i,j,:));
     h1 = zeros(JMAX+1,k1,ROINUM,ROINUM);
     p1 = zeros(JMAX+1,k1,ROINUM,ROINUM);
     h1c = zeros(JMAX+1,k1);
+%{
     for i=0:0
         for j=0:JMAX
             for k=1:20:141
                 vad17DLWnss = vadDLWnss;
                 vad17DLWnss(:,2:ROINUM+1,:) = vadZij - vadDLWsR * j * 0.2;
-                vad17DLWnss(:,1,:) = vadDLWnss(:,1,:);
 %                vad17DLWnss = [repmat(vad17DLWnss(:,1,:),[1 k 1]) vad17DLWnss(:,2:ROINUM+1,:)];
 %                cnS17 = [repmat(cnS2(:,1,:),[1 k 1]) cnS2(:,2:ROINUM+1,:)];
 %                cnIS17 = [repmat(cnIS2(:,1,:),[1 k 1]) cnS2(:,2:ROINUM+1,:)];
@@ -154,7 +153,7 @@ b(:,3) = squeeze(adZij(i,j,:));
                 [vad18bDLWs, vad18DLWnss] = calculateNodeSignals(cnSignals, cnS17, cnIS17, roiNames, vad18name, 'dlw');
 
                 k1 = floor(k/20)+1;
-                vadbDLWnss = [repmat(vadDLWnss(:,1,:),[1 k 1]) vadDLWnss(:,2:ROINUM+1,:)];
+                vadbDLWnss = [repmat(vadDLWnss(:,1,:),[1 k 1]) vadDLWnss(:,2:end,:)];
                 for b=1:R
                     r1(j+1,k1,b) = corr2(squeeze(vadbDLWnss(b,1,:)), squeeze(vad18DLWnss(b,1,:)));
 %                    figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' vad18name ' row=' num2str(b)]);
@@ -171,8 +170,8 @@ b(:,3) = squeeze(adZij(i,j,:));
 %                    plotTwoSignalsCorrelation(X, Y, [0.1*mod(a,10) 0.2*ceil(a/10) 0.5]);
                     r3(j+1,k1,a) = corr2(X(~isnan(X(:))), Y(~isnan(Y(:))));
                 end; hold off;
-%                [~,~,~] = calculateAlzWilcoxonTest(vadbDLWnss, vad18DLWnss, roiNames, 'vadns', vad18name, 'dlw', 1, 'ranksum');
-%                [~,~,~] = calculateAlzWilcoxonTest(vad17DLWnss, vad18DLWnss, roiNames, 'vad17ns', vad18name, 'dlw', 1, 'ranksum');
+%                calculateAlzWilcoxonTest(vadbDLWnss, vad18DLWnss, roiNames, 'vadns', vad18name, 'dlw', 1, 'ranksum');
+%                calculateAlzWilcoxonTest(vad17DLWnss, vad18DLWnss, roiNames, 'vad17ns', vad18name, 'dlw', 1, 'ranksum');
                 [h1(j+1,k1,:,:), p1(j+1,k1,:,:), ~] = calculateAlzWilcoxonTest(adDLWs, vad18bDLWs, roiNames, 'adec', vad18ecname, 'dlw', 1, 'ranksum', 0);
                 h1c(j+1,k1) = length(find(h1(j+1,k1,1:R,:)>0));
             end
@@ -182,7 +181,78 @@ b(:,3) = squeeze(adZij(i,j,:));
     r2m = nanmean(nanmean(r2,4),3);
     r3m = nanmean(r3,3);
     p1m = nanmean(nanmean(p1(:,:,1:R,:),4),3);
-%%}
+%}
+    % --------------------------------------------------------------------------------------------------------------
+    % transform healthy node signals to ad's distribution (type 13 : EC, teach-signals)
+    % first generate vad Zi, then calculate Zij from ad EC
+    meanAdDLWsR = mean(adDLWsR,3);
+    stdAdDLWsR = nanstd(adDLWsR,1,3);
+    meanCnDLWsR = mean(cnDLWsR,3);
+    stdCnDLWsR = nanstd(cnDLWsR,1,3);
+    sigCnDLWsR = (cnDLWsR - repmat(meanCnDLWsR, [1 1 cnSbjNum])) ./ repmat(stdCnDLWsR, [1 1 cnSbjNum]);
+
+%    vad19DLWnss = meanAdDLWns3 + sigCnDLWns .* stdAdDLWns3;
+%    vad19Zi = repmat(vad19DLWnss(:,1,:),[1 ROINUM 1]);
+%    vad19Zij = vad19DLWnss(:,2:ROINUM+1,:);
+%    vad19DLWs = abs(vad19Zi - vad19Zij);
+
+    vad19DLWnss = meanAdDLWns3 + sigCnDLWns .* stdAdDLWns3;
+    vad19Zi = repmat(vad19DLWnss(:,1,:),[1 ROINUM 1]);
+    vad19Zij = vad19Zi - (repmat(meanAdDLWsR, [1 1 cnSbjNum]) + repmat(stdAdDLWsR, [1 1 cnSbjNum]) .* sigCnDLWsR .* 1.0);
+    
+    vad19DLWnss(:,2:ROINUM+1,:) = vad19Zij;
+    vad19DLWsR = vad19Zi - vad19Zij;
+    vad19DLWs = abs(vad19DLWsR);
+
+%    [vad19H, vad19P, ~] = calculateAlzWilcoxonTest(adDLWs, vad19DLWs, roiNames, 'adec', 'vad19ec', 'dlw', 1, 'ranksum');
+%    [vadH, vadP, ~] = calculateAlzWilcoxonTest(adDLWs, vadDLWs, roiNames, 'adec', 'vadec', 'dlw', 1, 'ranksum');
+
+    % --------------------------------------------------------------------------------------------------------------
+    % re-training DLCM network (type 14 : EC, net) (optimise for DLCM training)
+    R = 4; %ROINUM;
+    for i=0:0
+        for j=0:6
+            for k=1:20:121
+                vad20DLWnss = vad19DLWnss;
+                vad20DLWnss(:,2:ROINUM+1,:) = vad19Zij - vad19DLWsR * j * 0.2;
+                vad20DLWnss = [repmat(vad20DLWnss(:,1,:),[1 k 1]) vad20DLWnss(:,2:end,:)];
+                cnS20 = [repmat(cnS2(:,1,:),[1 k 1]) cnS2(:,2:end,:)];
+                cnIS20 = [repmat(cnIS2(:,1,:),[1 k 1]) cnS2(:,2:end,:)];
+
+                vad21name = ['vad21-' num2str(i) '-' num2str(j) '-' num2str(k) 'ns'];
+                vad21ecname = ['vad21-' num2str(i) '-' num2str(j) '-' num2str(k) 'ec'];
+                [vad21DLWs, meanVad21DLWns, stdVad21DLWns] = retrainDLCMAndEC(vad20DLWnss, cnS20, cnIS20, roiNames, vad21name);
+                [vad21bDLWs, vad21DLWnss] = calculateNodeSignals(cnSignals, cnS20, cnIS20, roiNames, vad21name, 'dlw');
+
+                k1 = floor(k/20)+1;
+                vad19bDLWnss = [repmat(vad19DLWnss(:,1,:),[1 k 1]) vad19DLWnss(:,2:end,:)];
+                for b=1:R
+                    r1(j+1,k1,b) = corr2(squeeze(vad19bDLWnss(b,1,:)), squeeze(vad21DLWnss(b,1,:)));
+                    figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' vad21name ' row=' num2str(b)]);
+                    for a=1:cnSbjNum
+                        plotTwoSignalsCorrelation(vad19bDLWnss(b,1,a), vad21DLWnss(b,1,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.5], 'd', 8);
+                        plotTwoSignalsCorrelation(vad19bDLWnss(b,k+1:k+66,a), vad21DLWnss(b,k+1:k+66,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.8]);
+                        r2(j+1,k1,b,a) = corr2(vad19bDLWnss(b,k+1:k+ROINUM,a), vad21DLWnss(b,k+1:k+ROINUM,a));
+                    end; hold off;
+                end
+                figure; hold on; plot([0 0.2], [0 0.2],':','Color',[0.5 0.5 0.5]); title(['ec corr: ' vad21ecname ' row=' num2str(b)]);
+                for a=1:cnSbjNum
+                    X = vad19DLWs(1:R,1:R,a)+nanx(1:R,1:R);
+                    Y = vad21bDLWs(1:R,1:R,a);
+                    plotTwoSignalsCorrelation(X, Y, [0.1*mod(a,10) 0.2*ceil(a/10) 0.5]);
+                    r3(j+1,k1,a) = corr2(X(~isnan(X(:))), Y(~isnan(Y(:))));
+                end; hold off;
+                calculateAlzWilcoxonTest(vad19bDLWnss, vad21DLWnss, roiNames, 'vad21ns', vad21name, 'dlw', 1, 'ranksum');
+                [h1(j+1,k1,:,:), p1(j+1,k1,:,:), ~] = calculateAlzWilcoxonTest(adDLWs, vad21bDLWs, roiNames, 'adec', vad21ecname, 'dlw', 1, 'ranksum', 0);
+                h1c(j+1,k1) = length(find(h1(j+1,k1,1:R,:)>0));
+            end
+        end
+    end
+    r1m = nanmean(r1,3);
+    r2m = nanmean(nanmean(r2,4),3);
+    r3m = nanmean(r3,3);
+    p1m = nanmean(nanmean(p1(:,:,1:R,:),4),3);
+
     % --------------------------------------------------------------------------------------------------------------
     % transform healthy node signals to ad's distribution (type 5 : EC, teach-signals)
     % first generate vad Zi, then calculate Zij from ad EC (random sigma)
@@ -221,8 +291,8 @@ b(:,3) = squeeze(adZij(i,j,:));
 
     vad9DLWnss(:,2:ROINUM+1,:) = vad9Zij;
     vad9DLWs = abs(vad9Zi - vad9Zij);
-%    [advad9DLWsUt, advad9DLWsUtP, advad9DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad9DLWs, roiNames, 'adec', 'vad9ec', 'dlw', 1, 'ttest2');
-%    [advad9DLWsUt, advad9DLWsUtP, advad9DLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, vad9DLWs, roiNames, 'adec', 'vad9ec', 'dlw', 1, 'ranksum');
+%    calculateAlzWilcoxonTest(adDLWs, vad9DLWs, roiNames, 'adec', 'vad9ec', 'dlw', 1, 'ttest2');
+%    calculateAlzWilcoxonTest(adDLWs, vad9DLWs, roiNames, 'adec', 'vad9ec', 'dlw', 1, 'ranksum');
 
     % --------------------------------------------------------------------------------------------------------------
     % re-training DLCM network (type 8 : EC, net)
@@ -239,8 +309,8 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    sigVad10DLWs = sigmaEC(vad10DLWs);
 %    [cnvad10DLWsUt, cnvad10DLWsUtP, cnvad10DLWsUtP2] = calculateAlzWilcoxonTest(sigCnDLWs, sigVad10DLWs, roiNames, 'cnec', 'vad10ec', 'dlw', 1, 'ranksum');
 %    [advad10DLWsUt, advad10DLWsUtP, advad10DLWsUtP2] = calculateAlzWilcoxonTest(sigAdDLWs, sigVad10DLWs, roiNames, 'adec', 'vad10ec', 'dlw', 1, 'ranksum');
-%    [~,~,~] = calculateAlzWilcoxonTest(vad9DLWs, vad10DLWs, roiNames, 'vad9ec', 'vad10ec', 'dlw', 1, 'ranksum');
-%    [~,~,~] = calculateAlzWilcoxonTest(vad9DLWnss, vad10DLWnss, roiNames, 'vad9ns', 'vad10ns', 'dlw', 1, 'ranksum');
+%    calculateAlzWilcoxonTest(vad9DLWs, vad10DLWs, roiNames, 'vad9ec', 'vad10ec', 'dlw', 1, 'ranksum');
+%    calculateAlzWilcoxonTest(vad9DLWnss, vad10DLWnss, roiNames, 'vad9ns', 'vad10ns', 'dlw', 1, 'ranksum');
 
     % --------------------------------------------------------------------------------------------------------------
     % re-training DLCM network (type 9 : EC, net) (optimise for DLCM training)
@@ -251,15 +321,15 @@ b(:,3) = squeeze(adZij(i,j,:));
     [vad12DLWs, meanVad12DLWns, stdVad12DLWns] = retrainDLCMAndEC(vad11DLWnss, cnS11, cnIS11, roiNames, 'vad12ns');
     [vad12bDLWs, vad12DLWnss] = calculateNodeSignals(cnSignals, cnS11, cnIS11, roiNames, 'vad12ns', 'dlw');
 
-%    [~,~,~] = calculateAlzWilcoxonTest(vad11DLWnss, vad12DLWnss, roiNames, 'vad11ns', 'vad12ns', 'dlw', 1, 'ranksum');
-%    [~,~,~] = calculateAlzWilcoxonTest(vad9DLWs, vad12bDLWs, roiNames, 'vad9ec', 'vad12ec', 'dlw', 1, 'ranksum');
-%    [~,~,~] = calculateAlzWilcoxonTest(vad9DLWs, vad12bDLWs, roiNames, 'vad9ec', 'vad12ec', 'dlw', 1, 'ttest2');
+%    calculateAlzWilcoxonTest(vad11DLWnss, vad12DLWnss, roiNames, 'vad11ns', 'vad12ns', 'dlw', 1, 'ranksum');
+%    calculateAlzWilcoxonTest(vad9DLWs, vad12bDLWs, roiNames, 'vad9ec', 'vad12ec', 'dlw', 1, 'ranksum');
+%    calculateAlzWilcoxonTest(vad9DLWs, vad12bDLWs, roiNames, 'vad9ec', 'vad12ec', 'dlw', 1, 'ttest2');
 
     % --------------------------------------------------------------------------------------------------------------
     % re-training DLCM network (type 10 : EC, net) (optimise for DLCM training)
     vad13DLWnss = vadDLWnss;
     vad13Zi = repmat(vadDLWnss(:,1,:),[1 ROINUM 1]);
-    vad13Zij = vad13Zi - (repmat(meanAdDLWs, [1 1 cnSbjNum]) + repmat(stdAdDLWs, [1 1 cnSbjNum]) .* sigCnDLW .* 0.8);
+    vad19Zij = vad13Zi - (repmat(meanAdDLWs, [1 1 cnSbjNum]) + repmat(stdAdDLWs, [1 1 cnSbjNum]) .* sigCnDLW .* 0.8);
 %{
     for i=0:5
         for j=0:5
@@ -279,9 +349,9 @@ b(:,3) = squeeze(adZij(i,j,:));
                 [vad14bDLWs, vad14DLWnss] = calculateNodeSignals(cnSignals, cnS13, cnIS13, roiNames, vad14name, 'dlw');
                 
                 vad11bDLWnss = [repmat(vad9DLWnss(:,1,:),[1 p 1]) vad9DLWnss(:,2:ROINUM+1,:)];
-%                [~,~,~] = calculateAlzWilcoxonTest(vad11bDLWnss, vad14DLWnss, roiNames, 'vad11ns', vad14name, 'dlw', 1, 'ranksum');
-%                [~,~,~] = calculateAlzWilcoxonTest(vad13DLWnss, vad14DLWnss, roiNames, vad13name, vad14name, 'dlw', 1, 'ranksum');
-%                [~,~,~] = calculateAlzWilcoxonTest(adDLWs, vad14bDLWs, roiNames, 'adec', vad14ecname, 'dlw', 1, 'ranksum');
+%                calculateAlzWilcoxonTest(vad11bDLWnss, vad14DLWnss, roiNames, 'vad11ns', vad14name, 'dlw', 1, 'ranksum');
+%                calculateAlzWilcoxonTest(vad13DLWnss, vad14DLWnss, roiNames, vad13name, vad14name, 'dlw', 1, 'ranksum');
+%                calculateAlzWilcoxonTest(adDLWs, vad14bDLWs, roiNames, 'adec', vad14ecname, 'dlw', 1, 'ranksum');
                 for b=1:2
                     figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' vad14name ' row=' num2str(b)]);
                     for a=1:cnSbjNum
@@ -318,9 +388,9 @@ b(:,3) = squeeze(adZij(i,j,:));
                 [vad16bDLWs, vad16DLWnss] = calculateNodeSignals(cnSignals, cnS15, cnIS15, roiNames, vad16name, 'dlw');
 
                 vad11bDLWnss = [repmat(vad9DLWnss(:,1,:),[1 p 1]) vad9DLWnss(:,2:ROINUM+1,:)];
-    %                [~,~,~] = calculateAlzWilcoxonTest(vad11bDLWnss, vad14DLWnss, roiNames, 'vad11ns', vad14name, 'dlw', 1, 'ranksum');
-    %                [~,~,~] = calculateAlzWilcoxonTest(vad13DLWnss, vad14DLWnss, roiNames, vad13name, vad14name, 'dlw', 1, 'ranksum');
-    %                [~,~,~] = calculateAlzWilcoxonTest(adDLWs, vad14bDLWs, roiNames, 'adec', vad14ecname, 'dlw', 1, 'ranksum');
+    %                calculateAlzWilcoxonTest(vad11bDLWnss, vad14DLWnss, roiNames, 'vad11ns', vad14name, 'dlw', 1, 'ranksum');
+    %                calculateAlzWilcoxonTest(vad13DLWnss, vad14DLWnss, roiNames, vad13name, vad14name, 'dlw', 1, 'ranksum');
+    %                calculateAlzWilcoxonTest(adDLWs, vad14bDLWs, roiNames, 'adec', vad14ecname, 'dlw', 1, 'ranksum');
                 for b=1:2
                     figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' vad16name ' row=' num2str(b)]);
                     for a=1:cnSbjNum
@@ -355,6 +425,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     % --------------------------------------------------------------------------------------------------------------
     % calculate node-signals other pattern (1,...,1),(0.75,...,0.75),..,(0,...,0)
     % , (1,0,1..0),(0,1,0..1),..,(0.25,0,0.25..0),(0,0.25,0..0.25)
+%{
     [cn3DLWs, cn3DLWnss, meanCn3DLWns, stdCn3DLWns, cn3InSignals, cn3InControls, cnS3, cnIS3] = calculateDistributions3(cnSignals, roiNames, 'cn3', 'dlw', 'cn');
     [ad3DLWs, ad3DLWnss, meanAd3DLWns, stdAd3DLWns, ~, ~, ~, ~] = calculateDistributions3(adSignals, roiNames, 'ad3', 'dlw', 'ad');
     meanCn3DLWns3 = repmat(meanCn3DLWns,[1 1 cnSbjNum]);
@@ -368,8 +439,8 @@ b(:,3) = squeeze(adZij(i,j,:));
     [vad16DLWs, meanVad16DLWns, stdVad16DLWns] = retrainDLCMAndEC(vad15DLWnss(:,ROINUM+1:end,:), cnS3(:,ROINUM+1:end,:), cnIS3(:,ROINUM+1:end,:), roiNames, 'vad15ns');
     [vad16bDLWs, vad16DLWnss] = calculateNodeSignals(cnSignals, cnS3, cnIS3, roiNames, 'vad15ns', 'dlw');
     
-%    [~,~,~] = calculateAlzWilcoxonTest(vad15DLWnss, vad16DLWnss, roiNames, 'vad15ns', 'vad16ns', 'dlw', 1, 'ranksum');
-%    [~,~,~] = calculateAlzWilcoxonTest(adDLWs, vad16bDLWs, roiNames, 'adec', 'vad16ec', 'dlw', 1, 'ranksum');
+%    calculateAlzWilcoxonTest(vad15DLWnss, vad16DLWnss, roiNames, 'vad15ns', 'vad16ns', 'dlw', 1, 'ranksum');
+%    calculateAlzWilcoxonTest(adDLWs, vad16bDLWs, roiNames, 'adec', 'vad16ec', 'dlw', 1, 'ranksum');
 
 %    ad3Zij = ad3DLWnss(:,1:ROINUM,:);
 %    ad3Zi = repmat(ad3DLWnss(:,ROINUM+1,:),[1 ROINUM 1]);
@@ -377,7 +448,8 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    vad16Zij = vad16DLWnss(:,1:ROINUM,:);
 %    vad16Zi = repmat(vad16DLWnss(:,ROINUM+1,:),[1 ROINUM 1]);
 %    vad16DLWsR = (vad16Zi - vad16Zij);   % non-abs EC of AD
-%    [~,~,~] = calculateAlzWilcoxonTest(ad3DLWsR, vad16DLWsR, roiNames, 'ad3ecR', 'vad16ecR', 'dlw', 1, 'ranksum');
+%    calculateAlzWilcoxonTest(ad3DLWsR, vad16DLWsR, roiNames, 'ad3ecR', 'vad16ecR', 'dlw', 1, 'ranksum');
+%}
 
     % change Z score
 %{
@@ -394,7 +466,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     vad6DLWnss = calcZScores(vad6DLWnss);
 %}
     % plot correlation and cos similarity
-    algNum = 23;
+    algNum = 25;
     meanCnDLW = nanmean(cnDLWs,3);
     meanAdDLW = nanmean(adDLWs,3);
     meanVadDLW = nanmean(vadDLWs,3);
@@ -408,6 +480,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     meanVad9DLW = nanmean(vad9DLWs,3);
     meanVad10DLW = nanmean(vad10DLWs,3);
     meanVad12DLW = nanmean(vad12DLWs,3);
+    meanVad19DLW = nanmean(vad19DLWs,3);
 %    figure; cnadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanAdDLW);
 %    figure; cnvadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanVadDLW);
     figure; advadDLWr = plotTwoSignalsCorrelation(meanAdDLW, meanVadDLW + nanx);
@@ -418,9 +491,10 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    figure; advadDLWr6 = plotTwoSignalsCorrelation(meanAdDLW, meanVad6DLW);
 %    figure; advadDLWr7 = plotTwoSignalsCorrelation(meanAdDLW, meanVad7DLW + nanx);
 %    figure; advadDLWr8 = plotTwoSignalsCorrelation(meanAdDLW, meanVad8DLW + nanx);
-    figure; advadDLWr9 = plotTwoSignalsCorrelation(meanAdDLW, meanVad9DLW + nanx);
+%    figure; advadDLWr9 = plotTwoSignalsCorrelation(meanAdDLW, meanVad9DLW + nanx);
 %    figure; advadDLWr10 = plotTwoSignalsCorrelation(meanAdDLW, meanVad10DLW + nanx);
-    figure; advadDLWr12 = plotTwoSignalsCorrelation(meanAdDLW, meanVad12DLW + nanx);
+%    figure; advadDLWr12 = plotTwoSignalsCorrelation(meanAdDLW, meanVad12DLW + nanx);
+    figure; advadDLWr19 = plotTwoSignalsCorrelation(meanAdDLW, meanVad19DLW + nanx);
     cosSim = zeros(algNum,1);
     cosSim(1) = getCosSimilarity(meanCnDLW, meanAdDLW);
     cosSim(2) = getCosSimilarity(meanCnDLW, meanVadDLW);
@@ -445,8 +519,11 @@ b(:,3) = squeeze(adZij(i,j,:));
     cosSim(21) = getCosSimilarity(meanAdDLW, meanVad10DLW);
     cosSim(22) = getCosSimilarity(meanCnDLW, meanVad12DLW);
     cosSim(23) = getCosSimilarity(meanAdDLW, meanVad12DLW);
+    cosSim(24) = getCosSimilarity(meanCnDLW, meanVad19DLW);
+    cosSim(25) = getCosSimilarity(meanAdDLW, meanVad19DLW);
     X = categorical({'cn-ad','cn-vad','ad-vad','cn-vad2','ad-vad2','cn-vad3','ad-vad3','cn-vad4','ad-vad4','cn-vad5','ad-vad5',...
-        'cn-vad6','ad-vad6','cn-vad7','ad-vad7','cn-vad8','ad-vad8','cn-vad9','ad-vad9','cn-vad10','ad-vad10','cn-vad11','ad-vad11'});
+        'cn-vad6','ad-vad6','cn-vad7','ad-vad7','cn-vad8','ad-vad8','cn-vad9','ad-vad9','cn-vad10','ad-vad10','cn-vad11','ad-vad11',...
+        'cn-vad19','ad-vad19'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and AD by each algorithm');
 
@@ -591,7 +668,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
             %            'Plots','training-progress');
 
                 disp('start training');
-                for j=1:8 %ROWNUM
+                for j=1:4 %ROWNUM
                     nodeTeach = teachSignals(j,1:end,i);
                     nodeInput = [nodeSignals; exSignals];
                     if ~isempty(inControl)
