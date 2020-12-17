@@ -141,12 +141,12 @@ b(:,3) = squeeze(adZij(i,j,:));
                 vad17DLWnss = vadDLWnss;
                 vad17DLWnss(:,2:ROINUM+1,:) = vadZij - vadDLWsR * j * 0.2;
                 vad17DLWnss(:,1,:) = vadDLWnss(:,1,:);
-                vad17DLWnss = [repmat(vad17DLWnss(:,1,:),[1 k 1]) vad17DLWnss(:,2:ROINUM+1,:)];
-                cnS17 = [repmat(cnS2(:,1,:),[1 k 1]) cnS2(:,2:ROINUM+1,:)];
-                cnIS17 = [repmat(cnIS2(:,1,:),[1 k 1]) cnS2(:,2:ROINUM+1,:)];
-%                vad17DLWnss = [repmat(vad17DLWnss(:,1,:),[1 k 1]) vad17DLWnss(:,2:end,:)];
-%                cnS17 = [repmat(cnS2(:,1,:),[1 k 1]) cnS2(:,2:end,:)];
-%                cnIS17 = [repmat(cnIS2(:,1,:),[1 k 1]) cnS2(:,2:end,:)];
+%                vad17DLWnss = [repmat(vad17DLWnss(:,1,:),[1 k 1]) vad17DLWnss(:,2:ROINUM+1,:)];
+%                cnS17 = [repmat(cnS2(:,1,:),[1 k 1]) cnS2(:,2:ROINUM+1,:)];
+%                cnIS17 = [repmat(cnIS2(:,1,:),[1 k 1]) cnS2(:,2:ROINUM+1,:)];
+                vad17DLWnss = [repmat(vad17DLWnss(:,1,:),[1 k 1]) vad17DLWnss(:,2:end,:)];
+                cnS17 = [repmat(cnS2(:,1,:),[1 k 1]) cnS2(:,2:end,:)];
+                cnIS17 = [repmat(cnIS2(:,1,:),[1 k 1]) cnS2(:,2:end,:)];
 
                 vad18name = ['vad18-' num2str(i) '-' num2str(j) '-' num2str(k) 'ns'];
                 vad18ecname = ['vad18-' num2str(i) '-' num2str(j) '-' num2str(k) 'ec'];
@@ -591,7 +591,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
             %            'Plots','training-progress');
 
                 disp('start training');
-                for j=1:ROWNUM
+                for j=1:8 %ROWNUM
                     nodeTeach = teachSignals(j,1:end,i);
                     nodeInput = [nodeSignals; exSignals];
                     if ~isempty(inControl)
