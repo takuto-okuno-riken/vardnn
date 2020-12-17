@@ -158,8 +158,8 @@ b(:,3) = squeeze(adZij(i,j,:));
                     r1(j+1,k1,b) = corr2(squeeze(vadbDLWnss(b,1,:)), squeeze(vad18DLWnss(b,1,:)));
 %                    figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' vad18name ' row=' num2str(b)]);
                     for a=1:cnSbjNum
-                        %plotTwoSignalsCorrelation(vadbDLWnss(b,1,a), vad18DLWnss(b,1,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.5], 'd', 8);
-                        %plotTwoSignalsCorrelation(vadbDLWnss(b,k+1:k+66,a), vad18DLWnss(b,k+1:k+66,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.8]);
+%                        plotTwoSignalsCorrelation(vadbDLWnss(b,1,a), vad18DLWnss(b,1,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.5], 'd', 8);
+%                        plotTwoSignalsCorrelation(vadbDLWnss(b,k+1:k+66,a), vad18DLWnss(b,k+1:k+66,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.8]);
                         r2(j+1,k1,b,a) = corr2(vadbDLWnss(b,k+1:k+ROINUM,a), vad18DLWnss(b,k+1:k+ROINUM,a));
                     end; hold off;
                 end
@@ -212,7 +212,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     R = 4; %ROINUM;
     for i=0:0
         for j=0:6
-            for k=1:20:121
+            for k=1:20:101
                 vad20DLWnss = vad19DLWnss;
                 vad20DLWnss(:,2:ROINUM+1,:) = vad19Zij - vad19DLWsR * j * 0.2;
                 vad20DLWnss = [repmat(vad20DLWnss(:,1,:),[1 k 1]) vad20DLWnss(:,2:end,:)];
@@ -228,21 +228,21 @@ b(:,3) = squeeze(adZij(i,j,:));
                 vad19bDLWnss = [repmat(vad19DLWnss(:,1,:),[1 k 1]) vad19DLWnss(:,2:end,:)];
                 for b=1:R
                     r1(j+1,k1,b) = corr2(squeeze(vad19bDLWnss(b,1,:)), squeeze(vad21DLWnss(b,1,:)));
-                    figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' vad21name ' row=' num2str(b)]);
+%                    figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' vad21name ' row=' num2str(b)]);
                     for a=1:cnSbjNum
-                        plotTwoSignalsCorrelation(vad19bDLWnss(b,1,a), vad21DLWnss(b,1,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.5], 'd', 8);
-                        plotTwoSignalsCorrelation(vad19bDLWnss(b,k+1:k+66,a), vad21DLWnss(b,k+1:k+66,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.8]);
+%                        plotTwoSignalsCorrelation(vad19bDLWnss(b,1,a), vad21DLWnss(b,1,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.5], 'd', 8);
+%                        plotTwoSignalsCorrelation(vad19bDLWnss(b,k+1:k+66,a), vad21DLWnss(b,k+1:k+66,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.8]);
                         r2(j+1,k1,b,a) = corr2(vad19bDLWnss(b,k+1:k+ROINUM,a), vad21DLWnss(b,k+1:k+ROINUM,a));
                     end; hold off;
                 end
-                figure; hold on; plot([0 0.2], [0 0.2],':','Color',[0.5 0.5 0.5]); title(['ec corr: ' vad21ecname ' row=' num2str(b)]);
+%                figure; hold on; plot([0 0.2], [0 0.2],':','Color',[0.5 0.5 0.5]); title(['ec corr: ' vad21ecname ' row=' num2str(b)]);
                 for a=1:cnSbjNum
                     X = vad19DLWs(1:R,1:R,a)+nanx(1:R,1:R);
                     Y = vad21bDLWs(1:R,1:R,a);
-                    plotTwoSignalsCorrelation(X, Y, [0.1*mod(a,10) 0.2*ceil(a/10) 0.5]);
+%                    plotTwoSignalsCorrelation(X, Y, [0.1*mod(a,10) 0.2*ceil(a/10) 0.5]);
                     r3(j+1,k1,a) = corr2(X(~isnan(X(:))), Y(~isnan(Y(:))));
                 end; hold off;
-                calculateAlzWilcoxonTest(vad19bDLWnss, vad21DLWnss, roiNames, 'vad21ns', vad21name, 'dlw', 1, 'ranksum');
+%                calculateAlzWilcoxonTest(vad19bDLWnss, vad21DLWnss, roiNames, 'vad21ns', vad21name, 'dlw', 1, 'ranksum');
                 [h1(j+1,k1,:,:), p1(j+1,k1,:,:), ~] = calculateAlzWilcoxonTest(adDLWs, vad21bDLWs, roiNames, 'adec', vad21ecname, 'dlw', 1, 'ranksum', 0);
                 h1c(j+1,k1) = length(find(h1(j+1,k1,1:R,:)>0));
             end
