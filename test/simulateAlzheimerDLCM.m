@@ -209,10 +209,10 @@ b(:,3) = squeeze(adZij(i,j,:));
 
     % --------------------------------------------------------------------------------------------------------------
     % re-training DLCM network (type 14 : EC, net) (optimise for DLCM training)
-    R = 4; %ROINUM;
+    R = ROINUM;
     for i=0:0
-        for j=0:6
-            for k=1:20:101
+        for j=3:3 %0:6
+            for k=41:41 %1:20:101
                 vad20DLWnss = vad19DLWnss;
                 vad20DLWnss(:,2:ROINUM+1,:) = vad19Zij - vad19DLWsR * j * 0.2;
                 vad20DLWnss = [repmat(vad20DLWnss(:,1,:),[1 k 1]) vad20DLWnss(:,2:end,:)];
@@ -668,7 +668,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
             %            'Plots','training-progress');
 
                 disp('start training');
-                for j=1:4 %ROWNUM
+                for j=1:ROWNUM
                     nodeTeach = teachSignals(j,1:end,i);
                     nodeInput = [nodeSignals; exSignals];
                     if ~isempty(inControl)
