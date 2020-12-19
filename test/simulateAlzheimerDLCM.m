@@ -574,11 +574,11 @@ end
 
 function [r1m, r2m, r3m, h1c, p1m] = retrainDLCMAndECmultiPattern(cnSignals, adDLWs, vad19DLWs, vad19DLWnss, vad19Zij, vad19DLWsR, cnS2, cnIS2, roiNames, group)
     ROINUM = size(cnS2,1);
-    cnSbjNum = size(cnS2,3);
+    cnSbjNum = length(cnSignals);
     nanx = eye(ROINUM);
     nanx(nanx==1) = NaN;
 
-    R = 4; %ROINUM;
+    R = ROINUM;
     JMAX = 7;
     k1 = floor(101/20)+1;
     r1 = zeros(JMAX+1,k1,R);
@@ -588,14 +588,14 @@ function [r1m, r2m, r3m, h1c, p1m] = retrainDLCMAndECmultiPattern(cnSignals, adD
     p1 = zeros(JMAX+1,k1,ROINUM,ROINUM);
     h1c = zeros(JMAX+1,k1);
     for i=0:0
-        for j=0:6
-            for k=1:20:101
+        for j=4:4 %0:6
+            for k=41:41 %1:20:101
                 vad20DLWnss = vad19DLWnss;
                 if strcmp(group, 'vad24')
                     vad20DLWnss(:,1:ROINUM,:) = vad19Zij - vad19DLWsR * j * 0.2;
-                    vad20DLWnss = [vad20DLWnss(:,1:ROINUM,:) repmat(vad20DLWnss(:,ROINUM+1,:),[1 k 1]) vad20DLWnss(:,ROINUM+2:end,:)];
-                    cnS20 = [cnS2(:,1:ROINUM,:) repmat(cnS2(:,ROINUM+1,:),[1 k 1]) cnS2(:,ROINUM+2:end,:)];
-                    cnIS20 = [cnIS2(:,1:ROINUM,:) repmat(cnIS2(:,ROINUM+1,:),[1 k 1]) cnIS2(:,ROINUM+2:end,:)];
+                    vad20DLWnss = [vad20DLWnss(:,1:ROINUM,:) repmat(vad20DLWnss(:,ROINUM+1:ROINUM+4,:),[1 k 1]) vad20DLWnss(:,ROINUM+5:end,:)];
+                    cnS20 = [cnS2(:,1:ROINUM,:) repmat(cnS2(:,ROINUM+1:ROINUM+4,:),[1 k 1]) cnS2(:,ROINUM+5:end,:)];
+                    cnIS20 = [cnIS2(:,1:ROINUM,:) repmat(cnIS2(:,ROINUM+1:ROINUM+4,:),[1 k 1]) cnIS2(:,ROINUM+5:end,:)];
                 else
                     vad20DLWnss(:,2:ROINUM+1,:) = vad19Zij - vad19DLWsR * j * 0.2;
                     vad20DLWnss = [repmat(vad20DLWnss(:,1,:),[1 k 1]) vad20DLWnss(:,2:end,:)];
@@ -610,7 +610,7 @@ function [r1m, r2m, r3m, h1c, p1m] = retrainDLCMAndECmultiPattern(cnSignals, adD
 
                 k1 = floor(k/20)+1;
                 if strcmp(group, 'vad24')
-                    vad19bDLWnss = [vad19DLWnss(:,1:ROINUM,:) repmat(vad19DLWnss(:,ROINUM+1,:),[1 k 1]) vad19DLWnss(:,ROINUM+2:end,:)];
+                    vad19bDLWnss = [vad19DLWnss(:,1:ROINUM,:) repmat(vad19DLWnss(:,ROINUM+1:ROINUM+4,:),[1 k 1]) vad19DLWnss(:,ROINUM+5:end,:)];
                 else
                     vad19bDLWnss = [repmat(vad19DLWnss(:,1,:),[1 k 1]) vad19DLWnss(:,2:end,:)];
                 end
@@ -623,7 +623,7 @@ function [r1m, r2m, r3m, h1c, p1m] = retrainDLCMAndECmultiPattern(cnSignals, adD
                         r2(j+1,k1,b,a) = corr2(vad19bDLWnss(b,k+1:k+ROINUM,a), vad21DLWnss(b,k+1:k+ROINUM,a));
                     end; hold off;
                 end
-%                figure; hold on; plot([0 0.2], [0 0.2],':','Color',[0.5 0.5 0.5]); title(['ec corr: ' vad21ecname ' row=' num2str(b)]);
+%                figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]); title(['ec corr: ' vad21ecname ' row=' num2str(b)]);
                 for a=1:cnSbjNum
                     X = vad19DLWs(1:R,1:R,a)+nanx(1:R,1:R);
                     Y = vad21bDLWs(1:R,1:R,a);
@@ -631,7 +631,7 @@ function [r1m, r2m, r3m, h1c, p1m] = retrainDLCMAndECmultiPattern(cnSignals, adD
                     r3(j+1,k1,a) = corr2(X(~isnan(X(:))), Y(~isnan(Y(:))));
                 end; hold off;
 %                calculateAlzWilcoxonTest(vad19bDLWnss, vad21DLWnss, roiNames, 'vad19ns', vad21name, 'dlw', 1, 'ranksum');
-                [h1(j+1,k1,:,:), p1(j+1,k1,:,:), ~] = calculateAlzWilcoxonTest(adDLWs, vad21bDLWs, roiNames, 'adec', vad21ecname, 'dlw', 1, 'ranksum', 1);
+                [h1(j+1,k1,:,:), p1(j+1,k1,:,:), ~] = calculateAlzWilcoxonTest(adDLWs, vad21bDLWs, roiNames, 'adec', vad21ecname, 'dlw', 1, 'ranksum', 0);
                 h1c(j+1,k1) = length(find(h1(j+1,k1,1:R,:)>0));
             end
         end
@@ -686,7 +686,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
             %            'Plots','training-progress');
 
                 disp('start training');
-                for j=1:4 %ROWNUM
+                for j=1:ROWNUM
                     nodeTeach = teachSignals(j,1:end,i);
                     nodeInput = [nodeSignals; exSignals];
                     if ~isempty(inControl)
