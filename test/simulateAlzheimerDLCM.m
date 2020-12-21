@@ -14,8 +14,6 @@ function simulateAlzheimerDLCM
 
     % calculate node-signals from (1,...,1), (0,1...1)->(1...1,0),
     % (0,...,0), (1,0...0)->(0...0,1), (0.5,0...0)->(0...0,0.5)
-%    [cnDLWs, cnDLWnss, meanCnDLWns, stdCnDLWns, cnInSignals, cnInControls] = calculateDistributions(cnSignals, roiNames, 'cn', 'dlw');
-%    [adDLWs, adDLWnss, meanAdDLWns, stdAdDLWns, ~, ~] = calculateDistributions(adSignals, roiNames, 'ad', 'dlw');
     [cnDLWs, cnDLWnss, meanCnDLWns, stdCnDLWns, cnInSignals, cnInControls, cnS2, cnIS2] = calculateDistributions2(cnSignals, roiNames, 'cn', 'dlw', 'cn');
     [adDLWs, adDLWnss, meanAdDLWns, stdAdDLWns, ~, ~, ~, ~] = calculateDistributions2(adSignals, roiNames, 'ad', 'dlw', 'ad');
 
@@ -781,38 +779,6 @@ function [vadSignals, vadDLWs, vadDLWnss] = calculateVirtualADSignals4(cnSignals
     [vadDLs, ~, ~] = calculateConnectivity(vadSignals, roiNames, group, 'dlcm', 1);
     [vadDLWs, ~, ~] = calculateConnectivity(vadSignals, roiNames, group, 'dlw', 1);
     [~, vadDLWnss, meanVadDLWns, stdVadDLWns, ~, ~] = calculateDistributions2(vadSignals, roiNames, group, 'dlw', group);
-end
-
-function [ECs, nodeSignals, meanSignals, stdSignals, inSignals, inControls] = calculateDistributions(signals, roiNames, group, algorithm)
-    % constant value
-    ROINUM = size(signals{1},1);
-    sbjNum = length(signals);
-
-    outfName = ['results/adsim-' algorithm '-' group '-roi' num2str(ROINUM) '.mat'];
-    if exist(outfName, 'file')
-        load(outfName);
-    else
-        ECs = zeros(ROINUM, ROINUM, sbjNum);
-        nodeSignals = zeros(ROINUM, ROINUM+1, sbjNum);
-        inSignals = zeros(ROINUM, size(signals{1},2), sbjNum);
-        inControls = zeros(ROINUM, ROINUM, sbjNum);
-        for i=1:sbjNum
-            switch(algorithm)
-            case 'dlw'
-                dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
-                load(dlcmName);
-                [ec, ecNS] = calcDlcmEC(netDLCM, [], inControl);
-            end
-            ECs(:,:,i) = ec;
-            nodeSignals(:,:,i) = ecNS;
-            inSignals(:,:,i) = inSignal;
-            inControls(:,:,i) = inControl;
-        end
-        save(outfName, 'ECs', 'nodeSignals', 'roiNames', 'inSignals', 'inControls');
-    end
-    meanSignals = nanmean(nodeSignals, 3);
-    stdSignals = nanstd(nodeSignals, 1, 3);
-    save(outfName, 'ECs', 'nodeSignals', 'meanSignals', 'stdSignals', 'roiNames', 'inSignals', 'inControls');
 end
 
 function [ECs, nodeSignals] = calculateNodeSignals(signals, S2, IS2, roiNames, group, algorithm)
