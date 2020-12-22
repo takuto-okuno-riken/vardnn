@@ -212,6 +212,18 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    calculateAlzWilcoxonTest(ad3DLWnss, vad24DLWnss, roiNames, 'ad3ns', 'vad24ns', 'dlw');
 
     % --------------------------------------------------------------------------------------------------------------
+    % generate virtual ad signals (type 17 : EC, BOLD-signals, net)
+    % transform cn signals to vad signals linearly (based on EC rate),
+    % then convined with re-training DLCM network (type 16)
+    vad3Signals = calculateVirtualADSignals3(cnSignals, roiNames, cnDLWs, adDLWs, 'dlw');
+    [vad25Signals] = calculateNodeSignals3(vad3Signals, cnInSignals, cnInControls, roiNames, vad24name, 'dlw');
+
+    [vad25DLs, meanADDL, stdADDL] = calculateConnectivity(vad25Signals, roiNames, 'vad25', 'dlcm');
+    [vad25DLWs, meanVad25DLW, stdVad25DLW] = calculateConnectivity(vad25Signals, roiNames, 'vad25', 'dlw');
+%    [vad25H, vad25P, ~] = calculateAlzWilcoxonTest(adDLWs, vad25DLWs, roiNames, 'adec', 'vad25ec', 'dlw');
+%    calculateAlzWilcoxonTest(vad24DLWs, vad25DLWs, roiNames, 'vad24ec', 'vad25ec', 'dlw');
+
+    % --------------------------------------------------------------------------------------------------------------
     % transform healthy node signals to ad's distribution (type 5 : EC, teach-signals)
     % first generate vad Zi, then calculate Zij from ad EC (random sigma)
     meanAdDLWs = mean(adDLWs,3);
@@ -377,9 +389,9 @@ b(:,3) = squeeze(adZij(i,j,:));
     % generate virtual ad signals (type 3 : EC, BOLD-signals, net)
     % transform cn signals to vad signals linearly (based on EC rate)
 %{
-    vadSignals = calculateVirtualADSignals3(cnSignals, roiNames, cnDLWs, adDLWs, 'dlw');
-    [vad3DLs, ~, ~] = calculateConnectivity(vadSignals, roiNames, 'vad3', 'dlcm');
-    [vad3DLWs, ~, ~] = calculateConnectivity(vadSignals, roiNames, 'vad3', 'dlw');
+    vad3Signals = calculateVirtualADSignals3(cnSignals, roiNames, cnDLWs, adDLWs, 'dlw');
+    [vad3DLs, ~, ~] = calculateConnectivity(vad3Signals, roiNames, 'vad3', 'dlcm');
+    [vad3DLWs, ~, ~] = calculateConnectivity(vad3Signals, roiNames, 'vad3', 'dlw');
     [~, vad3DLWnss, meanVad3DLWns, stdVad3DLWns, ~, ~, ~, ~] = calculateDistributions2(vadSignals, roiNames, 'vad3', 'dlw', 'vad3');
 
     % generate virtual ad signals (type 4 : EC, BOLD-signals, net)
@@ -440,7 +452,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     vad6DLWnss = calcZScores(vad6DLWnss);
 %}
     % plot correlation and cos similarity
-    algNum = 27;
+    algNum = 29;
     meanCnDLW = nanmean(cnDLWs,3);
     meanAdDLW = nanmean(adDLWs,3);
     meanVadDLW = nanmean(vadDLWs,3);
@@ -456,6 +468,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     meanVad12DLW = nanmean(vad12DLWs,3);
     meanVad19DLW = nanmean(vad19DLWs,3);
     meanVad24DLW = nanmean(vad24DLWs,3);
+    meanVad25DLW = nanmean(vad25DLWs,3);
 %    figure; cnadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanAdDLW);
 %    figure; cnvadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanVadDLW);
     figure; advadDLWr = plotTwoSignalsCorrelation(meanAdDLW, meanVadDLW + nanx);
@@ -471,6 +484,7 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    figure; advadDLWr12 = plotTwoSignalsCorrelation(meanAdDLW, meanVad12DLW + nanx);
     figure; advadDLWr19 = plotTwoSignalsCorrelation(meanAdDLW, meanVad19DLW + nanx);
     figure; advadDLWr24 = plotTwoSignalsCorrelation(meanAdDLW, meanVad24DLW + nanx);
+    figure; advadDLWr25 = plotTwoSignalsCorrelation(meanAdDLW, meanVad25DLW + nanx);
     cosSim = zeros(algNum,1);
     cosSim(1) = getCosSimilarity(meanCnDLW, meanAdDLW);
     cosSim(2) = getCosSimilarity(meanCnDLW, meanVadDLW);
@@ -499,9 +513,11 @@ b(:,3) = squeeze(adZij(i,j,:));
     cosSim(25) = getCosSimilarity(meanAdDLW, meanVad19DLW);
     cosSim(26) = getCosSimilarity(meanCnDLW, meanVad24DLW);
     cosSim(27) = getCosSimilarity(meanAdDLW, meanVad24DLW);
+    cosSim(28) = getCosSimilarity(meanCnDLW, meanVad25DLW);
+    cosSim(29) = getCosSimilarity(meanAdDLW, meanVad25DLW);
     X = categorical({'cn-ad','cn-vad','ad-vad','cn-vad2','ad-vad2','cn-vad3','ad-vad3','cn-vad4','ad-vad4','cn-vad5','ad-vad5',...
         'cn-vad6','ad-vad6','cn-vad7','ad-vad7','cn-vad8','ad-vad8','cn-vad9','ad-vad9','cn-vad10','ad-vad10','cn-vad11','ad-vad11',...
-        'cn-vad19','ad-vad19','cn-vad24','ad-vad24'});
+        'cn-vad19','ad-vad19','cn-vad24','ad-vad24','cn-vad25','ad-vad25'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and AD by each algorithm');
 
@@ -838,6 +854,29 @@ function [ECs, nodeSignals, inSignals, inControls] = calculateNodeSignals2(signa
             inControls(:,:,i) = inControl;
         end
         save(outfName, 'ECs', 'nodeSignals', 'roiNames', 'inSignals', 'inControls', 'S2', 'IS2');
+    end
+end
+
+function [nodeSignals] = calculateNodeSignals3(S2, inSignals, inControls, roiNames, group, algorithm)
+    % constant value
+    ROINUM = size(S2{1},1);
+    sbjNum = length(S2);
+
+    outfName = ['results/adsim-' algorithm '-' group '_ns3-roi' num2str(ROINUM) '.mat'];
+    if exist(outfName, 'file')
+        load(outfName);
+    else
+        nodeSignals = cell(1,sbjNum);
+        for i=1:sbjNum
+            switch(algorithm)
+            case 'dlw'
+                dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                load(dlcmName);
+                [Y, time] = predictDlcmNetwork(S2{i}, inSignals(:,:,i), [], inControls(:,:,i), netDLCM);
+            end
+            nodeSignals{i} = Y;
+        end
+        save(outfName, 'nodeSignals', 'roiNames', 'inSignals', 'inControls', 'S2');
     end
 end
 
