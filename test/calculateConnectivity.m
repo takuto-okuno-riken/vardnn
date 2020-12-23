@@ -4,6 +4,10 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
     if nargin < 5
         rawFlag = 0;
     end
+    % if you want to use parallel processing, set NumProcessors more than 2
+    % and change for loop to parfor loop
+    NumProcessors = 1;
+
     % constant value
     ROINUM = size(signals{1},1);
     LAG = 3;
@@ -12,7 +16,18 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
     if exist(outfName, 'file')
         load(outfName);
     else
+        if NumProcessors > 1
+            try
+                disp('Destroing any existance matlab pool session');
+                parpool('close');
+            catch
+                disp('No matlab pool session found');
+            end
+            parpool(NumProcessors);
+        end
+
         weights = zeros(ROINUM, ROINUM, length(signals));
+%        parfor i=1:length(signals)    % for parallel processing
         for i=1:length(signals)
             switch(algorithm)
             case 'fc'
@@ -22,10 +37,11 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
             case 'wcs'
                 fName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(fName, 'file')
-                    load(fName);
+                    f = load(fName);
+                    mat = f.mat;
                 else
                     mat = calcWaveletCoherence(signals{i});
-                    save(fName, 'mat');
+                    parsavemat(fName, mat);
                 end
             case 'gc'
                 mat = calcMultivariateGCI(signals{i}, LAG);
@@ -45,15 +61,17 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
             case 'dlg'
                 fName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(fName, 'file')
-                    load(fName);
+                    f = load(fName);
+                    mat = f.mat;
                 else
                     mat = calcDirectLiNGAM(signals{i});
-                    save(fName, 'mat');
+                    parsavemat(fName, mat);
                 end
             case 'dlcm'
                 dlcmName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(dlcmName, 'file')
-                    load(dlcmName);
+                    f = load(dlcmName);
+                    mat = f.mat;
                 else
                     if rawFlag
                         si = signals{i};
@@ -70,7 +88,7 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
                     maxEpochs = 1000;
                     miniBatchSize = ceil(sigLen / 3);
                     options = trainingOptions('adam', ...
-                        'ExecutionEnvironment','cpu', ...
+                        'ExecutionEnvironment','gpu', ...
                         'MaxEpochs',maxEpochs, ...
                         'MiniBatchSize',miniBatchSize, ...
                         'Shuffle','every-epoch', ...
@@ -86,12 +104,12 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
                     % calc dlcm-gc
                     mat = calcDlcmGCI(si, inSignal, [], inControl, netDLCM);
                     
-                    save(dlcmName, 'netDLCM', 'si', 'inSignal', 'inControl', 'mat', 'sig', 'c', 'maxsi', 'minsi');
+                    parsavedlsm(dlcmName, netDLCM, si, inSignal, inControl, mat, sig, c, maxsi, minsi);
                 end
             case 'dlw' % should be called after dlcm
                 dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
-                load(dlcmName);
-                mat = calcDlcmEC(netDLCM, [], inControl);
+                f = load(dlcmName);
+                mat = calcDlcmEC(f.netDLCM, [], f.inControl);
             end
             weights(:,:,i) = mat;
         end
@@ -174,3 +192,10 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
     colorbar;
 end
 
+function parsavemat(fName, mat)
+    save(fName, 'mat');
+end
+
+function parsavedlsm(dlcmName, netDLCM, si, inSignal, inControl, mat, sig, c, maxsi, minsi)
+    save(dlcmName, 'netDLCM', 'si', 'inSignal', 'inControl', 'mat', 'sig', 'c', 'maxsi', 'minsi');
+end

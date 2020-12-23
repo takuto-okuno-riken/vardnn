@@ -224,6 +224,16 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    calculateAlzWilcoxonTest(vad24DLWs, vad25DLWs, roiNames, 'vad24ec', 'vad25ec', 'dlw');
 
     % --------------------------------------------------------------------------------------------------------------
+    % generate virtual ad signals (type 18 : BOLD-signals)
+    % simulate signals from cn first frame
+    vad26Signals = calculateNodeSignals4(cnSignals, cnInSignals, cnInControls, roiNames, vad24name, 'dlw');
+
+    [vad26DLs, meanADDL, stdADDL] = calculateConnectivity(vad26Signals, roiNames, 'vad26', 'dlcm');
+    [vad26DLWs, meanVad26DLW, stdVad26DLW] = calculateConnectivity(vad26Signals, roiNames, 'vad26', 'dlw');
+    [vad26H, vad26P, ~] = calculateAlzWilcoxonTest(adDLWs, vad26DLWs, roiNames, 'adec', 'vad26ec', 'dlw');
+    calculateAlzWilcoxonTest(vad24DLWs, vad26DLWs, roiNames, 'vad24ec', 'vad26ec', 'dlw');
+
+    % --------------------------------------------------------------------------------------------------------------
     % transform healthy node signals to ad's distribution (type 5 : EC, teach-signals)
     % first generate vad Zi, then calculate Zij from ad EC (random sigma)
     meanAdDLWs = mean(adDLWs,3);
@@ -857,10 +867,10 @@ function [ECs, nodeSignals, inSignals, inControls] = calculateNodeSignals2(signa
     end
 end
 
-function [nodeSignals] = calculateNodeSignals3(S2, inSignals, inControls, roiNames, group, algorithm)
+function [nodeSignals] = calculateNodeSignals3(signals, inSignals, inControls, roiNames, group, algorithm)
     % constant value
-    ROINUM = size(S2{1},1);
-    sbjNum = length(S2);
+    ROINUM = size(signals{1},1);
+    sbjNum = length(signals);
 
     outfName = ['results/adsim-' algorithm '-' group '_ns3-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
@@ -872,11 +882,38 @@ function [nodeSignals] = calculateNodeSignals3(S2, inSignals, inControls, roiNam
             case 'dlw'
                 dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 load(dlcmName);
-                [Y, time] = predictDlcmNetwork(S2{i}, inSignals(:,:,i), [], inControls(:,:,i), netDLCM);
+                [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
+                [Y, time] = predictDlcmNetwork(si, inSignals(:,:,i), [], inControls(:,:,i), netDLCM);
+%                Y = convert2InvSigmoidSignal(Y, sig, c, maxsi, minsi);
             end
             nodeSignals{i} = Y;
         end
-        save(outfName, 'nodeSignals', 'roiNames', 'inSignals', 'inControls', 'S2');
+        save(outfName, 'nodeSignals', 'roiNames', 'inSignals', 'inControls', 'signals');
+    end
+end
+
+function [nodeSignals] = calculateNodeSignals4(signals, inSignals, inControls, roiNames, group, algorithm)
+    % constant value
+    ROINUM = size(signals{1},1);
+    sbjNum = length(signals);
+
+    outfName = ['results/adsim-' algorithm '-' group '_ns4-roi' num2str(ROINUM) '.mat'];
+    if exist(outfName, 'file')
+        load(outfName);
+    else
+        nodeSignals = cell(1,sbjNum);
+        for i=1:sbjNum
+            switch(algorithm)
+            case 'dlw'
+                dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                load(dlcmName);
+                [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
+                [Y, time] = simulateDlcmNetwork(si, inSignals(:,:,i), [], inControls(:,:,i), netDLCM);
+%                Y = convert2InvSigmoidSignal(Y, sig, c, maxsi, minsi);
+            end
+            nodeSignals{i} = Y;
+        end
+        save(outfName, 'nodeSignals', 'roiNames', 'inSignals', 'inControls', 'signals');
     end
 end
 

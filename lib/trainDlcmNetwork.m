@@ -21,7 +21,12 @@ function trainedNet = trainDlcmNetwork(X, inSignal, nodeControl, inControl, net,
     else
         nodeInputOrg = [X(:,1:end-1); inSignal(:,1:end-1)];
     end
+    nodeLayers = trainedNet.nodeLayers;
+    nodeNetwork = cell(nodeNum,1);
+    trainInfo = cell(nodeNum,1);
+    initWeights = cell(nodeNum,1);
     for i=1:nodeNum
+%    parfor i=1:nodeNum    % for parallel processing
         disp(['training node ' num2str(i)]);
         nodeTeach = X(i,2:end);
         nodeInput = nodeInputOrg;
@@ -33,10 +38,13 @@ function trainedNet = trainDlcmNetwork(X, inSignal, nodeControl, inControl, net,
             filter = repmat(inControl(i,:).', 1, size(nodeInput,2));
             nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
         end
-        [trainedNet.nodeNetwork{i}, trainedNet.trainInfo{i}] = trainNetwork(nodeInput, nodeTeach, trainedNet.nodeLayers{i}, options);
-        trainedNet.initWeights{i} = dlcmInitWeights;
+        [nodeNetwork{i}, trainInfo{i}] = trainNetwork(nodeInput, nodeTeach, nodeLayers{i}, options);
+        initWeights{i} = dlcmInitWeights;
     end
     time = toc(ticH);
+    trainedNet.nodeNetwork = nodeNetwork;
+    trainedNet.trainInfo = trainInfo;
+    trainedNet.initWeights = initWeights;
     trainedNet.trainTime = time;
     trainedNet.trainOptions = options;
     disp(['finish training whole DLCM network! t = ' num2str(time) 's']);
