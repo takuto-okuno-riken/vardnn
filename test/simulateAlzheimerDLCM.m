@@ -226,13 +226,14 @@ b(:,3) = squeeze(adZij(i,j,:));
     % --------------------------------------------------------------------------------------------------------------
     % generate virtual ad signals (type 18 : BOLD-signals)
     % simulate signals from cn first frame
+%{
     vad26Signals = calculateNodeSignals4(cnSignals, cnInSignals, cnInControls, roiNames, vad24name, 'dlw');
 
     [vad26DLs, meanADDL, stdADDL] = calculateConnectivity(vad26Signals, roiNames, 'vad26', 'dlcm');
     [vad26DLWs, meanVad26DLW, stdVad26DLW] = calculateConnectivity(vad26Signals, roiNames, 'vad26', 'dlw');
     [vad26H, vad26P, ~] = calculateAlzWilcoxonTest(adDLWs, vad26DLWs, roiNames, 'adec', 'vad26ec', 'dlw');
     calculateAlzWilcoxonTest(vad24DLWs, vad26DLWs, roiNames, 'vad24ec', 'vad26ec', 'dlw');
-
+%}
     % --------------------------------------------------------------------------------------------------------------
     % transform healthy node signals to ad's distribution (type 5 : EC, teach-signals)
     % first generate vad Zi, then calculate Zij from ad EC (random sigma)
