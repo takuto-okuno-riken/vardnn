@@ -215,6 +215,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     % generate virtual ad signals (type 17 : EC, BOLD-signals, net)
     % transform cn signals to vad signals linearly (based on EC rate),
     % then convined with re-training DLCM network (type 16)
+%{
     vad3Signals = calculateVirtualADSignals3(cnSignals, roiNames, cnDLWs, adDLWs, 'dlw');
     [vad25Signals] = calculateNodeSignals3(vad3Signals, cnInSignals, cnInControls, roiNames, vad24name, 'dlw');
 
@@ -222,7 +223,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     [vad25DLWs, meanVad25DLW, stdVad25DLW] = calculateConnectivity(vad25Signals, roiNames, 'vad25', 'dlw');
 %    [vad25H, vad25P, ~] = calculateAlzWilcoxonTest(adDLWs, vad25DLWs, roiNames, 'adec', 'vad25ec', 'dlw');
 %    calculateAlzWilcoxonTest(vad24DLWs, vad25DLWs, roiNames, 'vad24ec', 'vad25ec', 'dlw');
-
+%}
     % --------------------------------------------------------------------------------------------------------------
     % generate virtual ad signals (type 18 : BOLD-signals)
     % simulate signals from cn first frame
@@ -233,6 +234,20 @@ b(:,3) = squeeze(adZij(i,j,:));
     [vad26DLWs, meanVad26DLW, stdVad26DLW] = calculateConnectivity(vad26Signals, roiNames, 'vad26', 'dlw');
     [vad26H, vad26P, ~] = calculateAlzWilcoxonTest(adDLWs, vad26DLWs, roiNames, 'adec', 'vad26ec', 'dlw');
     calculateAlzWilcoxonTest(vad24DLWs, vad26DLWs, roiNames, 'vad24ec', 'vad26ec', 'dlw');
+%}
+    % --------------------------------------------------------------------------------------------------------------
+    % generate virtual cn signals (type 19 : BOLD-signals)
+    % statistical frame work of multiple DLCM simulation
+    vcnSignals = calculateNodeSignals5(cnSignals, cnInSignals, [], cnInControls, roiNames, 'vcn', 'dlw', 'ad', 'cn');
+%{
+    S10 = vcnSignals{1}(:,10:end);
+    mS10 = nanmean(S10,2);
+    S10b = S10-mS10;
+    vcn2Signals{1} = convert2SigmoidSignal(S10b);
+    [vcn2DLs, meanADDL, stdADDL] = calculateConnectivity(vcn2Signals, roiNames, 'vcn2', 'dlcm');
+    [vcn2DLWs, meanCn2DLW, stdVcn2DLW] = calculateConnectivity(vcn2Signals, roiNames, 'vcn2', 'dlw');
+    meanCnDLW = nanmean(cnDLWs,3);
+    figure; cnadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanCn2DLW);
 %}
     % --------------------------------------------------------------------------------------------------------------
     % transform healthy node signals to ad's distribution (type 5 : EC, teach-signals)
@@ -494,8 +509,8 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    figure; advadDLWr10 = plotTwoSignalsCorrelation(meanAdDLW, meanVad10DLW + nanx);
 %    figure; advadDLWr12 = plotTwoSignalsCorrelation(meanAdDLW, meanVad12DLW + nanx);
     figure; advadDLWr19 = plotTwoSignalsCorrelation(meanAdDLW, meanVad19DLW + nanx);
-    figure; advadDLWr24 = plotTwoSignalsCorrelation(meanAdDLW, meanVad24DLW + nanx);
-    figure; advadDLWr25 = plotTwoSignalsCorrelation(meanAdDLW, meanVad25DLW + nanx);
+%    figure; advadDLWr24 = plotTwoSignalsCorrelation(meanAdDLW, meanVad24DLW + nanx);
+%    figure; advadDLWr25 = plotTwoSignalsCorrelation(meanAdDLW, meanVad25DLW + nanx);
     cosSim = zeros(algNum,1);
     cosSim(1) = getCosSimilarity(meanCnDLW, meanAdDLW);
     cosSim(2) = getCosSimilarity(meanCnDLW, meanVadDLW);
@@ -524,8 +539,8 @@ b(:,3) = squeeze(adZij(i,j,:));
     cosSim(25) = getCosSimilarity(meanAdDLW, meanVad19DLW);
     cosSim(26) = getCosSimilarity(meanCnDLW, meanVad24DLW);
     cosSim(27) = getCosSimilarity(meanAdDLW, meanVad24DLW);
-    cosSim(28) = getCosSimilarity(meanCnDLW, meanVad25DLW);
-    cosSim(29) = getCosSimilarity(meanAdDLW, meanVad25DLW);
+%    cosSim(28) = getCosSimilarity(meanCnDLW, meanVad25DLW);
+%    cosSim(29) = getCosSimilarity(meanAdDLW, meanVad25DLW);
     X = categorical({'cn-ad','cn-vad','ad-vad','cn-vad2','ad-vad2','cn-vad3','ad-vad3','cn-vad4','ad-vad4','cn-vad5','ad-vad5',...
         'cn-vad6','ad-vad6','cn-vad7','ad-vad7','cn-vad8','ad-vad8','cn-vad9','ad-vad9','cn-vad10','ad-vad10','cn-vad11','ad-vad11',...
         'cn-vad19','ad-vad19','cn-vad24','ad-vad24','cn-vad25','ad-vad25'});
@@ -816,22 +831,23 @@ function [ECs, nodeSignals] = calculateNodeSignals(signals, S2, IS2, roiNames, g
     outfName = ['results/adsim-' algorithm '-' group '_ns-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
-    else
-        ECs = zeros(ROINUM, ROINUM, sbjNum);
-        nodeSignals = zeros(ROINUM, size(S2, 2), sbjNum);
-        for i=1:sbjNum
-            switch(algorithm)
-            case 'dlw'
-                dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
-                load(dlcmName);
-                [Y, time] = predictDlcmNetwork(S2, IS2, [], inControl, netDLCM);
-                ec = calcDlcmEC(netDLCM, [], inControl);
-            end
-            ECs(:,:,i) = ec;
-            nodeSignals(:,:,i) = Y;
-        end
-        save(outfName, 'ECs', 'nodeSignals', 'roiNames', 'S2', 'IS2');
+        return;
     end
+
+    ECs = zeros(ROINUM, ROINUM, sbjNum);
+    nodeSignals = zeros(ROINUM, size(S2, 2), sbjNum);
+    for i=1:sbjNum
+        switch(algorithm)
+        case 'dlw'
+            dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            load(dlcmName);
+            [Y, time] = predictDlcmNetwork(S2, IS2, [], inControl, netDLCM);
+            ec = calcDlcmEC(netDLCM, [], inControl);
+        end
+        ECs(:,:,i) = ec;
+        nodeSignals(:,:,i) = Y;
+    end
+    save(outfName, 'ECs', 'nodeSignals', 'roiNames', 'S2', 'IS2');
 end
 
 function [ECs, nodeSignals, inSignals, inControls] = calculateNodeSignals2(signals, S2, IS2, roiNames, group, algorithm, prefix, orgGroup)
@@ -842,30 +858,31 @@ function [ECs, nodeSignals, inSignals, inControls] = calculateNodeSignals2(signa
     outfName = ['results/adsim-' algorithm '-' group '_ns-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
-    else
-        ECs = zeros(ROINUM, ROINUM, sbjNum);
-        nodeSignals = zeros(ROINUM, size(S2, 2), sbjNum);
-        if strcmp(prefix, 'adsim')
-            inSignals = zeros(ROINUM, size(S2, 2), sbjNum);
-        else
-            inSignals = zeros(ROINUM, size(signals{1},2), sbjNum);
-        end
-        inControls = zeros(ROINUM, ROINUM, sbjNum);
-        for i=1:sbjNum
-            switch(algorithm)
-            case 'dlw'
-                dlcmName = ['results/' prefix '-dlcm-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
-                load(dlcmName);
-                [Y, time] = predictDlcmNetwork(S2, IS2, [], inControl, netDLCM);
-                ec = calcDlcmEC(netDLCM, [], inControl);
-            end
-            ECs(:,:,i) = ec;
-            nodeSignals(:,:,i) = Y;
-            inSignals(:,:,i) = inSignal;
-            inControls(:,:,i) = inControl;
-        end
-        save(outfName, 'ECs', 'nodeSignals', 'roiNames', 'inSignals', 'inControls', 'S2', 'IS2');
+        return;
     end
+
+    ECs = zeros(ROINUM, ROINUM, sbjNum);
+    nodeSignals = zeros(ROINUM, size(S2, 2), sbjNum);
+    if strcmp(prefix, 'adsim')
+        inSignals = zeros(ROINUM, size(S2, 2), sbjNum);
+    else
+        inSignals = zeros(ROINUM, size(signals{1},2), sbjNum);
+    end
+    inControls = zeros(ROINUM, ROINUM, sbjNum);
+    for i=1:sbjNum
+        switch(algorithm)
+        case 'dlw'
+            dlcmName = ['results/' prefix '-dlcm-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            load(dlcmName);
+            [Y, time] = predictDlcmNetwork(S2, IS2, [], inControl, netDLCM);
+            ec = calcDlcmEC(netDLCM, [], inControl);
+        end
+        ECs(:,:,i) = ec;
+        nodeSignals(:,:,i) = Y;
+        inSignals(:,:,i) = inSignal;
+        inControls(:,:,i) = inControl;
+    end
+    save(outfName, 'ECs', 'nodeSignals', 'roiNames', 'inSignals', 'inControls', 'S2', 'IS2');
 end
 
 function [nodeSignals] = calculateNodeSignals3(signals, inSignals, inControls, roiNames, group, algorithm)
@@ -876,21 +893,22 @@ function [nodeSignals] = calculateNodeSignals3(signals, inSignals, inControls, r
     outfName = ['results/adsim-' algorithm '-' group '_ns3-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
-    else
-        nodeSignals = cell(1,sbjNum);
-        for i=1:sbjNum
-            switch(algorithm)
-            case 'dlw'
-                dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
-                load(dlcmName);
-                [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
-                [Y, time] = predictDlcmNetwork(si, inSignals(:,:,i), [], inControls(:,:,i), netDLCM);
-%                Y = convert2InvSigmoidSignal(Y, sig, c, maxsi, minsi);
-            end
-            nodeSignals{i} = Y;
-        end
-        save(outfName, 'nodeSignals', 'roiNames', 'inSignals', 'inControls', 'signals');
+        return;
     end
+
+    nodeSignals = cell(1,sbjNum);
+    for i=1:sbjNum
+        switch(algorithm)
+        case 'dlw'
+            dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            load(dlcmName);
+            [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
+            [Y, time] = predictDlcmNetwork(si, inSignals(:,:,i), [], inControls(:,:,i), netDLCM);
+%                Y = convert2InvSigmoidSignal(Y, sig, c, maxsi, minsi);
+        end
+        nodeSignals{i} = Y;
+    end
+    save(outfName, 'nodeSignals', 'roiNames', 'inSignals', 'inControls', 'signals');
 end
 
 function [nodeSignals] = calculateNodeSignals4(signals, inSignals, inControls, roiNames, group, algorithm)
@@ -901,21 +919,100 @@ function [nodeSignals] = calculateNodeSignals4(signals, inSignals, inControls, r
     outfName = ['results/adsim-' algorithm '-' group '_ns4-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
-    else
-        nodeSignals = cell(1,sbjNum);
-        for i=1:sbjNum
-            switch(algorithm)
-            case 'dlw'
-                dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
-                load(dlcmName);
-                [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
-                [Y, time] = simulateDlcmNetwork(si, inSignals(:,:,i), [], inControls(:,:,i), netDLCM);
-%                Y = convert2InvSigmoidSignal(Y, sig, c, maxsi, minsi);
-            end
-            nodeSignals{i} = Y;
-        end
-        save(outfName, 'nodeSignals', 'roiNames', 'inSignals', 'inControls', 'signals');
+        return;
     end
+
+    nodeSignals = cell(1,sbjNum);
+    for i=1:sbjNum
+        switch(algorithm)
+        case 'dlw'
+            dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            load(dlcmName);
+            [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
+            [Y, time] = simulateDlcmNetwork(si, inSignals(:,:,i), [], inControls(:,:,i), netDLCM);
+%                Y = convert2InvSigmoidSignal(Y, sig, c, maxsi, minsi);
+        end
+        nodeSignals{i} = Y;
+    end
+    save(outfName, 'nodeSignals', 'roiNames', 'inSignals', 'inControls', 'signals');
+end
+
+function [nodeSignals] = calculateNodeSignals5(signals, inSignals, nodeControls, inControls, roiNames, group, algorithm, prefix, orgGroup)
+    % constant value
+    nodeNum = size(signals{1},1);
+    sigLen = size(signals{1},2);
+    sbjNum = length(signals);
+    
+    outfName = ['results/adsim-' algorithm '-' group '_ns5-roi' num2str(nodeNum) '.mat'];
+    if exist(outfName, 'file')
+        load(outfName);
+        return;
+    end
+
+    % calculate statistical status of each node signal
+    allSignal = zeros(nodeNum, sigLen*sbjNum);    
+    for i=1:sbjNum
+        allSignal(:,1+(sigLen*(i-1)):sigLen*i) = signals{i};
+    end
+    meanSignal = nanmean(allSignal,2);
+    stdSignal = nanstd(allSignal,1,2);
+    % generate first frame signal (random)
+    S = zeros(nodeNum, sigLen);
+    allS = zeros(nodeNum, sigLen, sbjNum);
+%    rng('shuffle');
+    pm = rand(nodeNum,1) - 0.5;
+    pm(pm>0) = 1;
+    pm(pm<=0) = -1;
+    X = pm .* stdSignal * 1.5  + meanSignal;
+    [S(:,1), sig, c, maxsi, minsi] = convert2SigmoidSignal(X);
+    allS(:,1,:) = repmat(S(:,1), [1 1 sbjNum]);
+
+    netDLCMs = cell(sbjNum,1);
+    % load dlcm files
+    for i=1:sbjNum
+        dlcmName = ['results/' prefix '-dlcm-' orgGroup '-roi' num2str(nodeNum) '-net' num2str(i) '.mat'];
+        f = load(dlcmName);
+        netDLCMs{i} = f.netDLCM;
+    end
+
+    % simulate signals with multiple DLCM network
+    disp('start simulation by multiple DLCM network');
+    ticH = tic;
+    for t=1:sigLen-1
+        disp(['step : ' num2str(t)]);
+        for k=1:sbjNum
+            
+            if isempty(inSignals)
+                nodeInputOrg = S(:,t);
+            else
+                nodeInputOrg = [S(:,t); inSignals(:,t,k)];
+            end
+            for i=1:nodeNum
+                nodeInput = nodeInputOrg;
+                if ~isempty(nodeControls)
+                    filter = nodeControls(i,:,k).';
+                    nodeInput(1:nodeNum,1) = nodeInput(1:nodeNum,1) .* filter;
+                end
+                if ~isempty(inControls)
+                    filter = inControls(i,:,k).';
+                    nodeInput(nodeNum+1:end,1) = nodeInput(nodeNum+1:end,1) .* filter;
+                end
+                % predict next time step
+                allS(i,t+1,k) = predict(netDLCMs{k}.nodeNetwork{i}, nodeInput);
+            end
+        end
+        S(:,t+1) = nanmean(allS(:,t+1,:),3);
+        % fixed over shoot values
+        idx = find(S(:,t+1) > 1.2);
+        S(idx,t+1) = 1.2;
+        idx = find(S(:,t+1) < -0.2);
+        S(idx,t+1) = -0.2;
+    end
+    time = toc(ticH);
+    disp(['finish simulation by multiple DLCM network! t = ' num2str(time) 's']);
+
+    nodeSignals{1} = S;
+    save(outfName, 'netDLCMs', 'nodeSignals', 'S', 'allS', 'X', 'allSignal', 'inSignals', 'roiNames');
 end
 
 function pat = repmatPat(repNum, ROINUM)
