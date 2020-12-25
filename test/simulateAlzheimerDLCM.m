@@ -240,15 +240,21 @@ b(:,3) = squeeze(adZij(i,j,:));
     % statistical frame work of multiple DLCM simulation
     vcnSignals = calculateNodeSignals5(cnSignals, cnInSignals, [], cnInControls, roiNames, 'vcn', 'dlw', 'ad', 'cn');
 %{
-    S10 = vcnSignals{1}(:,10:end);
-    mS10 = nanmean(S10,2);
-    S10b = S10-mS10;
-    vcn2Signals{1} = convert2SigmoidSignal(S10b);
-    [vcn2DLs, meanADDL, stdADDL] = calculateConnectivity(vcn2Signals, roiNames, 'vcn2', 'dlcm');
-    [vcn2DLWs, meanCn2DLW, stdVcn2DLW] = calculateConnectivity(vcn2Signals, roiNames, 'vcn2', 'dlw');
+    [vcnDLs, meanADDL, stdADDL] = calculateConnectivity(vcnSignals, roiNames, 'vcn', 'dlcm');
+    [vcnDLWs, meanVcnDLW, stdVcnDLW] = calculateConnectivity(vcnSignals, roiNames, 'vcn', 'dlw');
     meanCnDLW = nanmean(cnDLWs,3);
-    figure; cnadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanCn2DLW);
+    figure; cnvcnDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanVcnDLW);
 %}
+    % --------------------------------------------------------------------------------------------------------------
+    % generate virtual cn signals (type 20 : BOLD-signals)
+    % statistical frame work of multiple DLCM simulation
+    vcn2Signals = calculateNodeSignals5(cnSignals, cnInSignals, [], cnInControls, roiNames, 'vcn2', 'dlw', 'ad', 'cn');
+%{
+    [vcn2DLs, meanADDL, stdADDL] = calculateConnectivity(vcn2Signals, roiNames, 'vcn2', 'dlcm');
+    [vcn2DLWs, meanVcn2DLW, stdVcn2DLW] = calculateConnectivity(vcn2Signals, roiNames, 'vcn2', 'dlw');
+    meanCnDLW = nanmean(cnDLWs,3);
+    figure; cnvcn2DLWr = plotTwoSignalsCorrelation(meanCnDLW, meanVcn2DLW);
+%}    
     % --------------------------------------------------------------------------------------------------------------
     % transform healthy node signals to ad's distribution (type 5 : EC, teach-signals)
     % first generate vad Zi, then calculate Zij from ad EC (random sigma)
@@ -494,7 +500,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     meanVad12DLW = nanmean(vad12DLWs,3);
     meanVad19DLW = nanmean(vad19DLWs,3);
     meanVad24DLW = nanmean(vad24DLWs,3);
-    meanVad25DLW = nanmean(vad25DLWs,3);
+%    meanVad25DLW = nanmean(vad25DLWs,3);
 %    figure; cnadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanAdDLW);
 %    figure; cnvadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanVadDLW);
     figure; advadDLWr = plotTwoSignalsCorrelation(meanAdDLW, meanVadDLW + nanx);
@@ -954,18 +960,25 @@ function [nodeSignals] = calculateNodeSignals5(signals, inSignals, nodeControls,
     for i=1:sbjNum
         allSignal(:,1+(sigLen*(i-1)):sigLen*i) = signals{i};
     end
-    meanSignal = nanmean(allSignal,2);
-    stdSignal = nanstd(allSignal,1,2);
+    [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(allSignal);
+    meanSignals = nanmean(si,2);
+    stdSignals = nanstd(si,1,2);
     % generate first frame signal (random)
-    S = zeros(nodeNum, sigLen);
-    allS = zeros(nodeNum, sigLen, sbjNum);
-%    rng('shuffle');
-    pm = rand(nodeNum,1) - 0.5;
-    pm(pm>0) = 1;
-    pm(pm<=0) = -1;
-    X = pm .* stdSignal * 1.5  + meanSignal;
-    [S(:,1), sig, c, maxsi, minsi] = convert2SigmoidSignal(X);
+    outLen = sigLen;
+    S = zeros(nodeNum, outLen);
+    allS = zeros(nodeNum, outLen, sbjNum);
+    if strcmp(group,'vcn')
+    %    rng('shuffle');
+        pm = rand(nodeNum,1) - 0.5;
+        pm(pm>0) = 1;
+        pm(pm<=0) = -1;
+        S(:,1) = pm .* stdSignals * 1.0  + meanSignals;
+    else
+        S(:,1) = stdSignals * 1.0  + meanSignals;
+    end
     allS(:,1,:) = repmat(S(:,1), [1 1 sbjNum]);
+    initADev = abs(S(:,1) - mean(S(:,1)));
+    initSDev = std(S(:,1),1);
 
     netDLCMs = cell(sbjNum,1);
     % load dlcm files
@@ -978,7 +991,7 @@ function [nodeSignals] = calculateNodeSignals5(signals, inSignals, nodeControls,
     % simulate signals with multiple DLCM network
     disp('start simulation by multiple DLCM network');
     ticH = tic;
-    for t=1:sigLen-1
+    for t=1:outLen-1
         disp(['step : ' num2str(t)]);
         for k=1:sbjNum
             
@@ -1001,7 +1014,17 @@ function [nodeSignals] = calculateNodeSignals5(signals, inSignals, nodeControls,
                 allS(i,t+1,k) = predict(netDLCMs{k}.nodeNetwork{i}, nodeInput);
             end
         end
-        S(:,t+1) = nanmean(allS(:,t+1,:),3);
+        St = nanmean(allS(:,t+1,:),3);
+        mSt = mean(St);
+        devSt = St - mSt;
+%        adSt = abs(devSt);
+        sdSt = std(St,1);
+        St2 = devSt * (initSDev / sdSt) + mSt;
+        if strcmp(group,'vcn')
+            S(:,t+1) = St2 + randn(nodeNum,1) .* stdSignals * 0.4;
+        else
+            S(:,t+1) = St2 + randn(nodeNum,1) .* stdSignals * 0.4;
+        end
         % fixed over shoot values
         idx = find(S(:,t+1) > 1.2);
         S(idx,t+1) = 1.2;
@@ -1012,7 +1035,7 @@ function [nodeSignals] = calculateNodeSignals5(signals, inSignals, nodeControls,
     disp(['finish simulation by multiple DLCM network! t = ' num2str(time) 's']);
 
     nodeSignals{1} = S;
-    save(outfName, 'netDLCMs', 'nodeSignals', 'S', 'allS', 'X', 'allSignal', 'inSignals', 'roiNames');
+    save(outfName, 'nodeSignals', 'S', 'allS', 'allSignal', 'inSignals', 'roiNames');
 end
 
 function pat = repmatPat(repNum, ROINUM)
