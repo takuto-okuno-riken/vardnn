@@ -640,8 +640,8 @@ function [r1m, r2m, r3m, h1c, p1m, cnS20, cnIS20, vad21name] = retrainDLCMAndECm
     p1 = zeros(JMAX+1,k1,ROINUM,ROINUM);
     h1c = zeros(JMAX+1,k1);
     for i=0:0
-        for j=4:4 %0:6
-            for k=41:41 %1:20:101
+        for j=0:6
+            for k=1:20:101
                 vad20DLWnss = vad19DLWnss;
                 if strcmp(group, 'vad24')
                     vad20DLWnss(:,1:ROINUM,:) = vad19Zij - vad19DLWsR * j * 0.2;
