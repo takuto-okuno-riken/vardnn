@@ -12,33 +12,73 @@ function simulateAlzheimerDLCM
     [cnSignals, roiNames] = connData2signalsFile(base, pathesCN, 'cn');
     [adSignals] = connData2signalsFile(base, pathesAD, 'ad');
 
-    % simulate CN signals from first frame
+    cnSbjNum = length(cnSignals);
+    adSbjNum = length(adSignals);
+    nodeNum = size(cnSignals{1},1);
+    
+    % simulate CN & AD signals from first frame
     [cnDLWs, smcnSignals] = simulateNodeSignals(cnSignals, roiNames, 'cn', 'dlw');
-    [smcnDLs, ~, ~] = calculateConnectivity(smcnSignals, roiNames, 'smcn', 'dlcm', 1);
-    [smcnDLWs, meanSmcnDLW, stdSmcnDLW] = calculateConnectivity(smcnSignals, roiNames, 'smcn', 'dlw', 1);
-    meanCnDLW = nanmean(cnDLWs,3);
-    figure; cnsmcnDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcnDLW);
-
-    % simulate AD signals from first frame
     [adDLWs, smadSignals] = simulateNodeSignals(adSignals, roiNames, 'ad', 'dlw');
-    [smadDLs, ~, ~] = calculateConnectivity(smadSignals, roiNames, 'smad', 'dlcm', 1);
-    [smadDLWs, meanSmadDLW, stdSmcnDLW] = calculateConnectivity(smadSignals, roiNames, 'smad', 'dlw', 1);
+
+    % get DLCM-GC from original CN and AD
+    [cnDLs, meanCnDL, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 1);
+    [adDLs, meanAdDL, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 1);
+
+    % check DLCM-EC and DLCM-GC of simulated CN and AD
+    [smcnDLs, meanSmcnDL, ~] = calculateConnectivity(smcnSignals, roiNames, 'smcn', 'dlcm', 1);
+    [smcnDLWs, meanSmcnDLW, ~] = calculateConnectivity(smcnSignals, roiNames, 'smcn', 'dlw', 1);
+    [smadDLs, meanSmadDL, ~] = calculateConnectivity(smadSignals, roiNames, 'smad', 'dlcm', 1);
+    [smadDLWs, meanSmadDLW, ~] = calculateConnectivity(smadSignals, roiNames, 'smad', 'dlw', 1);
+    
+    meanCnDLW = nanmean(cnDLWs,3);
     meanAdDLW = nanmean(adDLWs,3);
+    figure; cnsmcnDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcnDLW);
     figure; adsmadDLWr = plotTwoSignalsCorrelation(meanAdDLW, meanSmadDLW);
 
+    % check FC of simulated CN and AD
+    [cnFCs, meanCnFC, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'fc', 1);
+    [adFCs, meanAdFC, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'fc', 1);
+    [smcnFCs, meanSmcnFC, ~] = calculateConnectivity(smcnSignals, roiNames, 'smcn', 'fc', 1);
+    [smadFCs, meanSmadFC, ~] = calculateConnectivity(smadSignals, roiNames, 'smad', 'fc', 1);
+    figure; cnsmcnFCr = plotTwoSignalsCorrelation(meanCnFC, meanSmcnFC);
+    figure; adsmadFCr = plotTwoSignalsCorrelation(meanAdFC, meanSmadFC);
+
+    % plot box-and-whisker plot
+    cosSims = nan(cnSbjNum,10);
+    for i=1:cnSbjNum
+        cosSims(i,1) = getCosSimilarity(cnDLWs(:,:,i), smcnDLWs(:,:,i));
+        cosSims(i,3) = getCosSimilarity(cnDLs(:,:,i), smcnDLs(:,:,i));
+        cosSims(i,5) = getCosSimilarity(cnFCs(:,:,i), smcnFCs(:,:,i));
+    end
+    for i=1:adSbjNum
+        cosSims(i,2) = getCosSimilarity(adDLWs(:,:,i), smadDLWs(:,:,i));
+        cosSims(i,4) = getCosSimilarity(adDLs(:,:,i), smadDLs(:,:,i));
+        cosSims(i,6) = getCosSimilarity(adFCs(:,:,i), smadFCs(:,:,i));
+    end
+    figure; boxplot(cosSims);
+    
     % change Z score
 %{
     cnDLWs = calcZScores(cnDLWs);
     adDLWs = calcZScores(adDLWs);
 %}
     % plot correlation and cos similarity
-    algNum = 4;
+    algNum = 12;
     cosSim = zeros(algNum,1);
     cosSim(1) = getCosSimilarity(meanCnDLW, meanSmcnDLW);
     cosSim(2) = getCosSimilarity(meanAdDLW, meanSmadDLW);
     cosSim(3) = getCosSimilarity(meanAdDLW, meanSmcnDLW);
     cosSim(4) = getCosSimilarity(meanCnDLW, meanSmadDLW);
-    X = categorical({'cn-smcn','ad-smad','ad-smcn','cn-smad'});
+    cosSim(5) = getCosSimilarity(meanCnDL, meanSmcnDL);
+    cosSim(6) = getCosSimilarity(meanAdDL, meanSmadDL);
+    cosSim(7) = getCosSimilarity(meanAdDL, meanSmcnDL);
+    cosSim(8) = getCosSimilarity(meanCnDL, meanSmadDL);
+    cosSim(9) = getCosSimilarity(meanCnFC, meanSmcnFC);
+    cosSim(10) = getCosSimilarity(meanAdFC, meanSmadFC);
+    cosSim(11) = getCosSimilarity(meanAdFC, meanSmcnFC);
+    cosSim(12) = getCosSimilarity(meanCnFC, meanSmadFC);
+    X = categorical({'cn-smcn','ad-smad','ad-smcn','cn-smad','cn-smcn-dlgc','ad-smad-dlgc','ad-smcn-dlgc','cn-smad-dlgc',...
+        'cn-smcn-fc','ad-smad-fc','ad-smcn-fc','cn-smad-fc'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and SimCN by each algorithm');
 
@@ -46,6 +86,13 @@ function simulateAlzheimerDLCM
 %{
     cnDLWsNt = calculateAlzNormalityTest(cnDLWs, roiNames, 'cnec', 'dlw');
 %}
+    % compalizon test (Wilcoxon, Mann?Whitney U test)
+    [cnsmcnFCsUt, cnsmcnFCsUtP, cnsmcnFCsUtP2] = calculateAlzWilcoxonTest(cnFCs, smcnFCs, roiNames, 'cn', 'smcn', 'fc');
+    [adsmadFCsUt, adsmadFCsUtP, adsmadFCsUtP2] = calculateAlzWilcoxonTest(adFCs, smadFCs, roiNames, 'ad', 'smad', 'fc');
+    [cnsmcnDLsUt, cnsmcnDLsUtP, cnsmcnDLsUtP2] = calculateAlzWilcoxonTest(cnDLs, smcnDLs, roiNames, 'cn', 'smcn', 'dlcm');
+    [adsmadDLsUt, adsmadDLsUtP, adsmadDLsUtP2] = calculateAlzWilcoxonTest(adDLs, smadDLs, roiNames, 'ad', 'smad', 'dlcm');
+    [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, smcnDLWs, roiNames, 'cn', 'smcn', 'dlw');
+    [adsmadDLWsUt, adsmadDLWsUtP, adsmadDLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, smadDLWs, roiNames, 'ad', 'smad', 'dlw');
 end
 
 % ==================================================================================================================
