@@ -24,6 +24,9 @@ function simulateAlzheimerDLCM
     [cnDLs, meanCnDL, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 1);
     [adDLs, meanAdDL, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 1);
 
+    [cnDLRCs, meanCnDLRC, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcmrc', 1);
+    [adDLRCs, meanAdDLRC, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcmrc', 1);
+
     % check DLCM-EC and DLCM-GC of simulated CN and AD
     [smcnDLs, meanSmcnDL, ~] = calculateConnectivity(smcnSignals, roiNames, 'smcn', 'dlcm', 1);
     [smcnDLWs, meanSmcnDLW, ~] = calculateConnectivity(smcnSignals, roiNames, 'smcn', 'dlw', 1);

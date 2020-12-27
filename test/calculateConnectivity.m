@@ -106,8 +106,34 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
                     
                     parsavedlsm(dlcmName, netDLCM, si, inSignal, inControl, mat, sig, c, maxsi, minsi);
                 end
-            case 'dlw' % should be called after dlcm
-                dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            case 'dlcmrc' % should be called after dlcm
+                outName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                if exist(outName, 'file')
+                    f = load(outName);
+                    mat = f.mat;
+                else
+                    dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                    f = load(dlcmName);
+                    if isfield(f,'c'), c=f.c; else c=f.m; end
+                    % recoverty training
+                    options = trainingOptions('adam', ...
+                        'ExecutionEnvironment','cpu', ...
+                        'MaxEpochs', 1000, ...
+                        'MiniBatchSize',ceil(size(f.si,2) / 3), ...
+                        'Shuffle','every-epoch', ...
+                        'GradientThreshold',5,...
+                        'L2Regularization',0.05, ...
+                        'Verbose',false);
+                    [netDLCM, time] = recoveryTrainDlcmNetwork(f.si, f.inSignal, [], f.inControl, f.netDLCM, options);
+                    mat = calcDlcmGCI(f.si, f.inSignal, [], f.inControl, netDLCM);
+                    parsavedlsm(outName, netDLCM, f.si, f.inSignal, f.inControl, mat, f.sig, c, f.maxsi, f.minsi);
+                end
+            case {'dlw','dlwrc'} % should be called after dlcm
+                if strcmp(algorithm, 'dlw')
+                    dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                else
+                    dlcmName = ['results/ad-dlcmrc-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                end
                 f = load(dlcmName);
                 mat = calcDlcmEC(f.netDLCM, [], f.inControl);
             end
