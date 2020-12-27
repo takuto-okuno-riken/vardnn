@@ -12,12 +12,19 @@ function simulateAlzheimerDLCM
     [cnSignals, roiNames] = connData2signalsFile(base, pathesCN, 'cn');
     [adSignals] = connData2signalsFile(base, pathesAD, 'ad');
 
-    % simulate Cn signals
+    % simulate CN signals from first frame
     [cnDLWs, smcnSignals] = simulateNodeSignals(cnSignals, roiNames, 'cn', 'dlw');
     [smcnDLs, ~, ~] = calculateConnectivity(smcnSignals, roiNames, 'smcn', 'dlcm', 1);
     [smcnDLWs, meanSmcnDLW, stdSmcnDLW] = calculateConnectivity(smcnSignals, roiNames, 'smcn', 'dlw', 1);
     meanCnDLW = nanmean(cnDLWs,3);
     figure; cnsmcnDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcnDLW);
+
+    % simulate AD signals from first frame
+    [adDLWs, smadSignals] = simulateNodeSignals(adSignals, roiNames, 'ad', 'dlw');
+    [smadDLs, ~, ~] = calculateConnectivity(smadSignals, roiNames, 'smad', 'dlcm', 1);
+    [smadDLWs, meanSmadDLW, stdSmcnDLW] = calculateConnectivity(smadSignals, roiNames, 'smad', 'dlw', 1);
+    meanAdDLW = nanmean(adDLWs,3);
+    figure; adsmadDLWr = plotTwoSignalsCorrelation(meanAdDLW, meanSmadDLW);
 
     % change Z score
 %{
@@ -25,12 +32,13 @@ function simulateAlzheimerDLCM
     adDLWs = calcZScores(adDLWs);
 %}
     % plot correlation and cos similarity
-    algNum = 1;
-    meanCnDLW = nanmean(cnDLWs,3);
-%    meanAdDLW = nanmean(adDLWs,3);
+    algNum = 4;
     cosSim = zeros(algNum,1);
     cosSim(1) = getCosSimilarity(meanCnDLW, meanSmcnDLW);
-    X = categorical({'cn-smcn'});
+    cosSim(2) = getCosSimilarity(meanAdDLW, meanSmadDLW);
+    cosSim(3) = getCosSimilarity(meanAdDLW, meanSmcnDLW);
+    cosSim(4) = getCosSimilarity(meanCnDLW, meanSmadDLW);
+    X = categorical({'cn-smcn','ad-smad','ad-smcn','cn-smad'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and SimCN by each algorithm');
 
