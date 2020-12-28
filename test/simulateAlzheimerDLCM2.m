@@ -104,10 +104,10 @@ function simulateAlzheimerDLCM
 %    [smad3DLs, meanSmad3DL, ~] = calculateConnectivity(smad3Signals, roiNames, 'smad3', 'dlcm', 1);
 %    [smad3DLWs, meanSmad3DLW, ~] = calculateConnectivity(smad3Signals, roiNames, 'smad3', 'dlw', 1);
 
-    [smcn4DLs, meanSmcn4DL, ~] = calculateConnectivity(smcn4Signals, roiNames, 'smcn4', 'dlcm', 1);
-    [smcn4DLWs, meanSmcn4DLW, ~] = calculateConnectivity(smcn4Signals, roiNames, 'smcn4', 'dlw', 1);
-    [smad4DLs, meanSmad4DL, ~] = calculateConnectivity(smad4Signals, roiNames, 'smad4', 'dlcm', 1);
-    [smad4DLWs, meanSmad4DLW, ~] = calculateConnectivity(smad4Signals, roiNames, 'smad4', 'dlw', 1);
+%    [smcn4DLs, meanSmcn4DL, ~] = calculateConnectivity(smcn4Signals, roiNames, 'smcn4', 'dlcm', 1);
+%    [smcn4DLWs, meanSmcn4DLW, ~] = calculateConnectivity(smcn4Signals, roiNames, 'smcn4', 'dlw', 1);
+%    [smad4DLs, meanSmad4DL, ~] = calculateConnectivity(smad4Signals, roiNames, 'smad4', 'dlcm', 1);
+%    [smad4DLWs, meanSmad4DLW, ~] = calculateConnectivity(smad4Signals, roiNames, 'smad4', 'dlw', 1);
 
 %{
     figure; cnsmcnDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcnDLW);
