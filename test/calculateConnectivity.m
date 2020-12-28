@@ -216,6 +216,11 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
     daspect([1 1 1]);
     title(titleStr);
     colorbar;
+
+    % shutdown parallel processing
+    if NumProcessors > 1
+        delete(gcp('nocreate'))
+    end
 end
 
 function parsavemat(fName, mat)
