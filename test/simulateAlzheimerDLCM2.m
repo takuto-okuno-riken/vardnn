@@ -30,6 +30,8 @@ function simulateAlzheimerDLCM
     [adDLWs, smadSignals] = simulateNodeSignals(adSignals, roiNames, 'ad', 'dlw', 'ad');
     sigCnDLWs = (cnDLWs - nanmean(cnDLWs(:))) / nanstd(cnDLWs(:),1);
     sigAdDLWs = (adDLWs - nanmean(adDLWs(:))) / nanstd(adDLWs(:),1);
+    meanCnDLW = nanmean(cnDLWs,3);
+    meanAdDLW = nanmean(adDLWs,3);
 
     % simulate recovery trained CN & AD signals from first frame
 %    [rccnDLWs, smrccnSignals] = simulateNodeSignals(cnSignals, roiNames, 'cn', 'dlwrc', 'cn');
@@ -61,13 +63,21 @@ function simulateAlzheimerDLCM
     end
 %}
     % expanding amplitude of simulated CN & AD signals from last-1 frame (type2)
+    % finding best rate
     smcn4Signals = smcn2Signals;
     smad4Signals = smad2Signals;
-    for i=1:cnSbjNum
-        smcn4Signals{i} = expandAmplitude2(smcn2Signals{i}, 2);
-    end
-    for i=1:adSbjNum
-        smad4Signals{i} = expandAmplitude2(smad2Signals{i}, 2);
+    cnsmcn4DLWrs = zeros(1,10);
+    for k=1:10
+        for i=1:cnSbjNum
+            smcn4Signals{i} = expandAmplitude2(smcn2Signals{i}, ceil(1+0.5*k));
+        end
+        for i=1:adSbjNum
+            smad4Signals{i} = expandAmplitude2(smad2Signals{i}, ceil(1+0.5*k));
+        end
+        name = ['smcn4_' num2str(k)];
+        [smcn4DLs, meanSmcn4DL, ~] = calculateConnectivity(smcn4Signals, roiNames, name, 'dlcm', 1);
+        [smcn4DLWs, meanSmcn4DLW, ~] = calculateConnectivity(smcn4Signals, roiNames, name, 'dlw', 1);
+        figure; cnsmcn4DLWrs(k) = plotTwoSignalsCorrelation(meanCnDLW, meanSmcn4DLW);
     end
 
     % --------------------------------------------------------------------------------------------------------------
@@ -99,8 +109,6 @@ function simulateAlzheimerDLCM
     [smad4DLs, meanSmad4DL, ~] = calculateConnectivity(smad4Signals, roiNames, 'smad4', 'dlcm', 1);
     [smad4DLWs, meanSmad4DLW, ~] = calculateConnectivity(smad4Signals, roiNames, 'smad4', 'dlw', 1);
 
-    meanCnDLW = nanmean(cnDLWs,3);
-    meanAdDLW = nanmean(adDLWs,3);
 %{
     figure; cnsmcnDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcnDLW);
     figure; adsmadDLWr = plotTwoSignalsCorrelation(meanAdDLW, meanSmadDLW);
@@ -119,8 +127,8 @@ function simulateAlzheimerDLCM
 %}    
 %    figure; cnsmcn3DLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcn3DLW);
 %    figure; adsmad3DLWr = plotTwoSignalsCorrelation(meanAdDLW, meanSmad3DLW);
-    figure; cnsmcn4DLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcn4DLW);
-    figure; adsmad4DLWr = plotTwoSignalsCorrelation(meanAdDLW, meanSmad4DLW);
+%    figure; cnsmcn4DLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcn4DLW);
+%    figure; adsmad4DLWr = plotTwoSignalsCorrelation(meanAdDLW, meanSmad4DLW);
 
     % check FC of simulated CN and AD
     [cnFCs, meanCnFC, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'fc', 1);
