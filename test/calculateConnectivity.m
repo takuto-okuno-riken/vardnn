@@ -6,7 +6,7 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
     end
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 1;
+    NumProcessors = 12;
 
     % constant value
     ROINUM = size(signals{1},1);
@@ -27,8 +27,8 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
         end
 
         weights = zeros(ROINUM, ROINUM, length(signals));
-%        parfor i=1:length(signals)    % for parallel processing
-        for i=1:length(signals)
+        parfor i=1:length(signals)    % for parallel processing
+%        for i=1:length(signals)
             switch(algorithm)
             case 'fc'
                 mat = calcFunctionalConnectivity(signals{i});
@@ -199,13 +199,13 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
         clims = [-1,1];
         titleStr = [group ' : Direct LiNGAM'];
         sigWeights = meanWeights;
-    case 'dlcm'
+    case {'dlcm','dlcmrc'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : DLCM Granger Causality Index'];
-    case 'dlw'
+    case {'dlw','dlwrc'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
