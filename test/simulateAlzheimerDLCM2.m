@@ -49,14 +49,25 @@ function simulateAlzheimerDLCM
     [~, smcn2Signals] = simulateNodeSignals(cn2Signals, roiNames, 'cn2', 'dlw', 'cn');
     [~, smad2Signals] = simulateNodeSignals(ad2Signals, roiNames, 'ad2', 'dlw', 'ad');
 
-    % expanding amplitude of simulated CN & AD signals from last-1 frame
+    % expanding amplitude of simulated CN & AD signals from last-1 frame (type1) -- no effect
+%{
     smcn3Signals = smcn2Signals;
     smad3Signals = smad2Signals;
     for i=1:cnSbjNum
-        smcn3Signals{i} = expandAmplitude(smcn3Signals{i}, 1.3);
+        smcn3Signals{i} = expandAmplitude(smcn2Signals{i}, 1.3);
     end
     for i=1:adSbjNum
-        smad3Signals{i} = expandAmplitude(smad3Signals{i}, 1.3);
+        smad3Signals{i} = expandAmplitude(smad2Signals{i}, 1.3);
+    end
+%}
+    % expanding amplitude of simulated CN & AD signals from last-1 frame (type2)
+    smcn4Signals = smcn2Signals;
+    smad4Signals = smad2Signals;
+    for i=1:cnSbjNum
+        smcn4Signals{i} = expandAmplitude2(smcn2Signals{i}, 2);
+    end
+    for i=1:adSbjNum
+        smad4Signals{i} = expandAmplitude2(smad2Signals{i}, 2);
     end
 
     % --------------------------------------------------------------------------------------------------------------
@@ -77,11 +88,16 @@ function simulateAlzheimerDLCM
     [smcn2DLWs, meanSmcn2DLW, ~] = calculateConnectivity(smcn2Signals, roiNames, 'smcn2', 'dlw', 1);
     [smad2DLs, meanSmad2DL, ~] = calculateConnectivity(smad2Signals, roiNames, 'smad2', 'dlcm', 1);
     [smad2DLWs, meanSmad2DLW, ~] = calculateConnectivity(smad2Signals, roiNames, 'smad2', 'dlw', 1);
-    
-    [smcn3DLs, meanSmcn3DL, ~] = calculateConnectivity(smcn3Signals, roiNames, 'smcn3', 'dlcm', 1);
-    [smcn3DLWs, meanSmcn3DLW, ~] = calculateConnectivity(smcn3Signals, roiNames, 'smcn3', 'dlw', 1);
-    [smad3DLs, meanSmad3DL, ~] = calculateConnectivity(smad3Signals, roiNames, 'smad3', 'dlcm', 1);
-    [smad3DLWs, meanSmad3DLW, ~] = calculateConnectivity(smad3Signals, roiNames, 'smad3', 'dlw', 1);
+
+%    [smcn3DLs, meanSmcn3DL, ~] = calculateConnectivity(smcn3Signals, roiNames, 'smcn3', 'dlcm', 1);
+%    [smcn3DLWs, meanSmcn3DLW, ~] = calculateConnectivity(smcn3Signals, roiNames, 'smcn3', 'dlw', 1);
+%    [smad3DLs, meanSmad3DL, ~] = calculateConnectivity(smad3Signals, roiNames, 'smad3', 'dlcm', 1);
+%    [smad3DLWs, meanSmad3DLW, ~] = calculateConnectivity(smad3Signals, roiNames, 'smad3', 'dlw', 1);
+
+    [smcn4DLs, meanSmcn4DL, ~] = calculateConnectivity(smcn4Signals, roiNames, 'smcn4', 'dlcm', 1);
+    [smcn4DLWs, meanSmcn4DLW, ~] = calculateConnectivity(smcn4Signals, roiNames, 'smcn4', 'dlw', 1);
+    [smad4DLs, meanSmad4DL, ~] = calculateConnectivity(smad4Signals, roiNames, 'smad4', 'dlcm', 1);
+    [smad4DLWs, meanSmad4DLW, ~] = calculateConnectivity(smad4Signals, roiNames, 'smad4', 'dlw', 1);
 
     meanCnDLW = nanmean(cnDLWs,3);
     meanAdDLW = nanmean(adDLWs,3);
@@ -101,8 +117,10 @@ function simulateAlzheimerDLCM
     sigSmcnDLW = (meanSmcnDLW - m2) ./ s2;
     figure; cnsmcnDLWr = plotTwoSignalsCorrelation(sigCnDLW, sigSmcnDLW);
 %}    
-    figure; cnsmcn3DLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcn3DLW);
-    figure; adsmad3DLWr = plotTwoSignalsCorrelation(meanAdDLW, meanSmad3DLW);
+%    figure; cnsmcn3DLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcn3DLW);
+%    figure; adsmad3DLWr = plotTwoSignalsCorrelation(meanAdDLW, meanSmad3DLW);
+    figure; cnsmcn4DLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcn4DLW);
+    figure; adsmad4DLWr = plotTwoSignalsCorrelation(meanAdDLW, meanSmad4DLW);
 
     % check FC of simulated CN and AD
     [cnFCs, meanCnFC, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'fc', 1);
@@ -207,6 +225,12 @@ end
 % ==================================================================================================================
 function out = expandAmplitude(signals, rate)
     m = nanmean(signals(:));
+    d = signals - m;
+    out = d * rate + m;
+end
+
+function out = expandAmplitude2(signals, rate)
+    m = nanmean(signals,2);
     d = signals - m;
     out = d * rate + m;
 end
