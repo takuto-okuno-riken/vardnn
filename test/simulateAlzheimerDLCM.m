@@ -767,7 +767,7 @@ function [r1m, r2m, r3m, h1c, p1m, cnS3, cnIS3, vadname] = retrainDLCMAndECmulti
                     r3(j+1,k1,a) = corr2(X(~isnan(X(:))), Y(~isnan(Y(:))));
                 end; hold off;
 %                calculateAlzWilcoxonTest(vad19bDLWnss, vad2DLWnss, roiNames, 'vad19ns', vadname, 'dlw', 1, 'ranksum');
-                [h1(j+1,k1,:,:), p1(j+1,k1,:,:), ~] = calculateAlzWilcoxonTest(adDLWs, vad2bDLWs, roiNames, 'adec', vadecname, 'dlw', 1, 'ranksum', 1);
+                [h1(j+1,k1,:,:), p1(j+1,k1,:,:), ~] = calculateAlzWilcoxonTest(adDLWs, vad2bDLWs, roiNames, 'adec', vadecname, 'dlw', 1, 'ranksum', 0);
                 h1c(j+1,k1) = length(find(h1(j+1,k1,1:R,:)>0));
             end
         end
