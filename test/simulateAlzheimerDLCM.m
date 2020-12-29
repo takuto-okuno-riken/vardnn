@@ -508,7 +508,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     meanVad10DLW = nanmean(vad10DLWs,3);
     meanVad12DLW = nanmean(vad12DLWs,3);
     meanVad19DLW = nanmean(vad19DLWs,3);
-    meanVad24DLW = nanmean(vad24DLWs,3);
+%    meanVad24DLW = nanmean(vad24DLWs,3);
 %    meanVad25DLW = nanmean(vad25DLWs,3);
 %    figure; cnadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanAdDLW);
 %    figure; cnvadDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanVadDLW);
@@ -552,8 +552,8 @@ b(:,3) = squeeze(adZij(i,j,:));
     cosSim(23) = getCosSimilarity(meanAdDLW, meanVad12DLW);
     cosSim(24) = getCosSimilarity(meanCnDLW, meanVad19DLW);
     cosSim(25) = getCosSimilarity(meanAdDLW, meanVad19DLW);
-    cosSim(26) = getCosSimilarity(meanCnDLW, meanVad24DLW);
-    cosSim(27) = getCosSimilarity(meanAdDLW, meanVad24DLW);
+%    cosSim(26) = getCosSimilarity(meanCnDLW, meanVad24DLW);
+%    cosSim(27) = getCosSimilarity(meanAdDLW, meanVad24DLW);
 %    cosSim(28) = getCosSimilarity(meanCnDLW, meanVad25DLW);
 %    cosSim(29) = getCosSimilarity(meanAdDLW, meanVad25DLW);
     X = categorical({'cn-ad','cn-vad','ad-vad','cn-vad2','ad-vad2','cn-vad3','ad-vad3','cn-vad4','ad-vad4','cn-vad5','ad-vad5',...
@@ -711,7 +711,7 @@ function [r1m, r2m, r3m, h1c, p1m, cnS3, cnIS3, vadname] = retrainDLCMAndECmulti
     nanx = eye(ROINUM);
     nanx(nanx==1) = NaN;
 
-    R = 4; %ROINUM;
+    R = ROINUM;
     JMAX = 7;
     k1 = floor(101/20)+1;
     r1 = zeros(JMAX+1,k1,R);
@@ -800,7 +800,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 11;
+    NumProcessors = 14;
 
     if NumProcessors > 1
         try
@@ -842,7 +842,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
         %            'Plots','training-progress');
 
             disp('start training');
-            for j=1:4 %ROWNUM
+            for j=1:ROWNUM
                 nodeTeach = teachSignals(j,1:end,i);
                 nodeInput = [nodeSignals; exSignals];
                 if ~isempty(inControl)
@@ -954,7 +954,7 @@ function [ECs, nodeSignals] = calculateNodeSignals(signals, S2, IS2, roiNames, g
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 11;
+    NumProcessors = 14;
 
     if NumProcessors > 1
         try

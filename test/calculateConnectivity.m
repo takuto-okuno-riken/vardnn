@@ -6,7 +6,7 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
     end
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 11;
+    NumProcessors = 14;
 
     % constant value
     ROINUM = size(signals{1},1);
