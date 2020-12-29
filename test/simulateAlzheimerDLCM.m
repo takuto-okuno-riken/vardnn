@@ -800,7 +800,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 14;
+    NumProcessors = 11;
 
     if NumProcessors > 1
         try
@@ -954,7 +954,7 @@ function [ECs, nodeSignals] = calculateNodeSignals(signals, S2, IS2, roiNames, g
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 14;
+    NumProcessors = 11;
 
     if NumProcessors > 1
         try
