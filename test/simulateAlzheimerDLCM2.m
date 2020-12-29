@@ -69,10 +69,10 @@ function simulateAlzheimerDLCM
     cnsmcn4DLWrs = zeros(1,10);
     for k=1:10
         for i=1:cnSbjNum
-            smcn4Signals{i} = expandAmplitude2(smcn2Signals{i}, ceil(1+0.5*k));
+            smcn4Signals{i} = expandAmplitude2(smcn2Signals{i}, 1+0.5*k);
         end
         for i=1:adSbjNum
-            smad4Signals{i} = expandAmplitude2(smad2Signals{i}, ceil(1+0.5*k));
+            smad4Signals{i} = expandAmplitude2(smad2Signals{i}, 1+0.5*k);
         end
         name = ['smcn4_' num2str(k)];
         [smcn4DLs, meanSmcn4DL, ~] = calculateConnectivity(smcn4Signals, roiNames, name, 'dlcm', 1);
