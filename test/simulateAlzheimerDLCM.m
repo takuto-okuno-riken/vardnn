@@ -820,7 +820,10 @@ function [r1m, r2m, r3m, h1c, p1m, cnS3, cnIS3, vadname] = retrainDLCMAndECmulti
     k = 21;
     vadECij = vad19Zij - vad19DLWsR * exRate * 0.2;
 
-    for i=1:cnSbjNum
+    parpool(14);
+
+%    for i=1:cnSbjNum
+    parfor i=1:cnSbjNum
         cosSims = nan(adSbjNum,1);
         for j=1:adSbjNum
             cosSims(j,1) = getCosSimilarity(vad19DLWs(:,:,i), adDLWs(:,:,j));
@@ -891,7 +894,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 11;
+    NumProcessors = 1;
 
     if NumProcessors > 1
         try
@@ -909,8 +912,8 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
     inSignal = exSignals;
     inControl = eye(ROWNUM);
 
-%    for i=1:sbjNum
-    parfor i=1:sbjNum
+    for i=1:sbjNum
+%    parfor i=1:sbjNum
         dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROWNUM) '-net' num2str(i) '.mat'];
         if exist(dlcmName, 'file')
             f=load(dlcmName);

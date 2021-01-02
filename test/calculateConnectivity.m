@@ -6,7 +6,7 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
     end
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 11;
+    NumProcessors = 1;
 
     % constant value
     ROINUM = size(signals{1},1);
@@ -27,8 +27,8 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
         end
 
         weights = zeros(ROINUM, ROINUM, length(signals));
-        parfor i=1:length(signals)    % for parallel processing
-%        for i=1:length(signals)
+%        parfor i=1:length(signals)    % for parallel processing
+        for i=1:length(signals)
             switch(algorithm)
             case 'fc'
                 mat = calcFunctionalConnectivity(signals{i});
