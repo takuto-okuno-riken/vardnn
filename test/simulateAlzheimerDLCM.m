@@ -832,8 +832,8 @@ function [r1m, r2m, r3m, h1c, p1m, cnS3, cnIS3, vadname] = retrainDLCMAndECmulti
         idx = idxCosAdDLW(1);
         si = adSignals{idx};
         vadTeach = [vadTeach si(:,2:end)];
-        cnS3 = [cnS2(:,1:ROINUM+1) si(:,1:end-1)];
-        cnIS3 = [cnIS2(:,1:ROINUM+1) rand(ROINUM,sigLen-1)];
+        cnS3 = [repmat(cnS2(:,1),[1 k]) cnS2(:,2:ROINUM+1) si(:,1:end-1)];
+        cnIS3 = [repmat(cnIS2(:,1),[1 k]) cnIS2(:,2:ROINUM+1) rand(ROINUM,sigLen-1)];
 
         vadname = [group '-' num2str(i) '-' num2str(exRate) '-' num2str(k) 'ns'];
         vadecname = [group '-' num2str(i) '-' num2str(exRate)  '-' num2str(k) 'ec'];
