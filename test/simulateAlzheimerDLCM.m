@@ -815,8 +815,10 @@ function [r1m, r2m, r3m, h1c, p1m, cnS3, cnIS3, vadname] = retrainDLCMAndECmulti
     nanx = eye(ROINUM);
     nanx(nanx==1) = NaN;
 
-    k = 1;
-    vadECij = vad19Zij - vad19DLWsR * 0 * 0.2;
+    R = ROINUM;
+    exRate = 2;
+    k = 21;
+    vadECij = vad19Zij - vad19DLWsR * exRate * 0.2;
 
     for i=1:cnSbjNum
         cosSims = nan(adSbjNum,1);
@@ -833,21 +835,26 @@ function [r1m, r2m, r3m, h1c, p1m, cnS3, cnIS3, vadname] = retrainDLCMAndECmulti
         cnS3 = [cnS2(:,1:ROINUM+1) si(:,1:end-1)];
         cnIS3 = [cnIS2(:,1:ROINUM+1) rand(ROINUM,sigLen-1)];
 
-        vadname = [group '-' num2str(i)  '-' num2str(k) 'ns'];
-        vadecname = [group '-' num2str(i)  '-' num2str(k) 'ec'];
+        vadname = [group '-' num2str(i) '-' num2str(exRate) '-' num2str(k) 'ns'];
+        vadecname = [group '-' num2str(i) '-' num2str(exRate)  '-' num2str(k) 'ec'];
         [vad2DLWs(:,:,i), meanVad2DLWns, stdVad2DLWns] = retrainDLCMAndEC(vadTeach, cnS3, cnIS3, roiNames, vadname);
         [vad2bDLWs(:,:,i), vad2DLWnss(:,:,i)] = calculateNodeSignals(cnSignals(i), cnS3, cnIS3, roiNames, vadname, 'dlw');
     end
 
-    k1 = floor(k/20)+1;
-    vad19bDLWnss = [repmat(vad19DLWnss(:,1,:),[1 k 1]) vad19DLWnss(:,2:ROINUM+1,:) vadTeach(:,ROINUM+2:end,:)];
+    r1 = zeros(R);
+    r2 = zeros(R,cnSbjNum);
+    r3 = zeros(cnSbjNum);
+    h1 = zeros(ROINUM,ROINUM);
+    p1 = zeros(ROINUM,ROINUM);
+
+    vad19bDLWnss = [repmat(vad19DLWnss(:,1,:),[1 k 1]) vad19DLWnss(:,2:ROINUM+1,:)];
     for b=1:R
-        r1(j+1,k1,b) = corr2(squeeze(vad19bDLWnss(b,1,:)), squeeze(vad2DLWnss(b,1,:)));
+        r1(b) = corr2(squeeze(vad19bDLWnss(b,1,:)), squeeze(vad2DLWnss(b,1,:)));
 %                    figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' vadname ' row=' num2str(b)]);
         for a=1:cnSbjNum
 %                        plotTwoSignalsCorrelation(vad19bDLWnss(b,1,a), vad2DLWnss(b,1,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.5], 'd', 8);
 %                        plotTwoSignalsCorrelation(vad19bDLWnss(b,k+1:k+66,a), vad2DLWnss(b,k+1:k+66,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.8]);
-            r2(j+1,k1,b,a) = corr2(vad19bDLWnss(b,k+1:k+ROINUM,a), vad2DLWnss(b,k+1:k+ROINUM,a));
+            r2(b,a) = corr2(vad19bDLWnss(b,k+1:k+ROINUM,a), vad2DLWnss(b,k+1:k+ROINUM,a));
         end; hold off;
     end
 %                figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]); title(['ec corr: ' vadecname ' row=' num2str(b)]);
@@ -855,11 +862,11 @@ function [r1m, r2m, r3m, h1c, p1m, cnS3, cnIS3, vadname] = retrainDLCMAndECmulti
         X = vad19DLWs(1:R,1:R,a)+nanx(1:R,1:R);
         Y = vad2bDLWs(1:R,1:R,a);
 %                    plotTwoSignalsCorrelation(X, Y, [0.1*mod(a,10) 0.2*ceil(a/10) 0.5]);
-        r3(j+1,k1,a) = corr2(X(~isnan(X(:))), Y(~isnan(Y(:))));
+        r3(a) = corr2(X(~isnan(X(:))), Y(~isnan(Y(:))));
     end; hold off;
 %                calculateAlzWilcoxonTest(vad19bDLWnss, vad2DLWnss, roiNames, 'vad19ns', vadname, 'dlw', 1, 'ranksum');
-    [h1(j+1,k1,:,:), p1(j+1,k1,:,:), ~] = calculateAlzWilcoxonTest(adDLWs, vad2bDLWs, roiNames, 'adec', vadecname, 'dlw', 1, 'ranksum', 0);
-    h1c(j+1,k1) = length(find(h1(j+1,k1,1:R,:)>0));
+    [h1(:,:), p1(:,:), ~] = calculateAlzWilcoxonTest(adDLWs, vad2bDLWs, roiNames, 'adec', vadecname, 'dlw', 1, 'ranksum', 0);
+    h1c = length(find(h1(1:R,:)>0));
 end
 
 function sigEC = sigmaEC(EC)
