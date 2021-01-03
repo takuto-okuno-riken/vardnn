@@ -825,42 +825,42 @@ function [r1m, r2m, r3m, h1c, p1m, cnS3, cnIS3, vadname] = retrainDLCMAndECmulti
     p1 = zeros(JMAX+1,k1,ROINUM,ROINUM);
     h1c = zeros(JMAX+1,k1);
 
-    for i=0:0
+    for ii=0:0
         for exRate=0:6
             for k=1:20:101
                 vadECij = vad19Zij - vad19DLWsR * exRate * 0.2;
                 vadTeaches = [];
                 cnS3 = [];
                 cnIS3 = [];
-                for ii=1:cnSbjNum
+                for i=1:cnSbjNum
                     cosSims = nan(adSbjNum,1);
                     for j=1:adSbjNum
-                        cosSims(j,1) = getCosSimilarity(vad19DLWs(:,:,ii), adDLWs(:,:,j));
+                        cosSims(j,1) = getCosSimilarity(vad19DLWs(:,:,i), adDLWs(:,:,j));
                     end
                     [sortCosAdDLW,idxCosAdDLW] = sort(cosSims(:,1),'descend');
                     idx = idxCosAdDLW(1);
                     si = adSignals{idx};
 
-                    vadTeach = [repmat(vad19DLWnss(:,1,ii),[1 k 1]) vadECij(:,:,ii)]; % indivisual part of teaching data
-                    vadTeaches(:,:,ii) = [vadTeach si(:,2:end)];
-                    cnS3(:,:,ii) = [repmat(cnS2(:,1),[1 k]) cnS2(:,2:ROINUM+1) si(:,1:end-1)];
-                    cnIS3(:,:,ii) = [repmat(cnIS2(:,1),[1 k]) cnIS2(:,2:ROINUM+1) rand(ROINUM,sigLen-1)];
+                    vadTeach = [repmat(vad19DLWnss(:,1,i),[1 k 1]) vadECij(:,:,i)]; % indivisual part of teaching data
+                    vadTeaches(:,:,i) = [vadTeach si(:,2:end)];
+                    cnS3(:,:,i) = [repmat(cnS2(:,1),[1 k]) cnS2(:,2:ROINUM+1) si(:,1:end-1)];
+                    cnIS3(:,:,i) = [repmat(cnIS2(:,1),[1 k]) cnIS2(:,2:ROINUM+1) rand(ROINUM,sigLen-1)];
                 end
 
-                vadname = [group '-' num2str(i) '-' num2str(exRate) '-' num2str(k) 'ns'];
-                vadecname = [group '-' num2str(i) '-' num2str(exRate)  '-' num2str(k) 'ec'];                
+                vadname = [group '-' num2str(ii) '-' num2str(exRate) '-' num2str(k) 'ns'];
+                vadecname = [group '-' num2str(ii) '-' num2str(exRate)  '-' num2str(k) 'ec'];                
                 [vad2DLWs, meanVad2DLWns, stdVad2DLWns] = retrainDLCMAndEC(vadTeaches, cnS3, cnIS3, roiNames, vadname);
                 [vad2bDLWs, vad2DLWnss] = calculateNodeSignals(cnSignals, cnS3, cnIS3, roiNames, vadname, 'dlw');
 
                 k1 = floor(k/20)+1;
                 vad19bDLWnss = [repmat(vad19DLWnss(:,1,:),[1 k 1]) vad19DLWnss(:,2:ROINUM+1,:) vadTeaches(:,ROINUM+2:end,:)];
                 for b=1:R
-                    r1(j+1,k1,b) = corr2(squeeze(vad19bDLWnss(b,1,:)), squeeze(vad2DLWnss(b,1,:)));
+                    r1(exRate+1,k1,b) = corr2(squeeze(vad19bDLWnss(b,1,:)), squeeze(vad2DLWnss(b,1,:)));
 %                    figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' vadname ' row=' num2str(b)]);
                     for a=1:cnSbjNum
 %                        plotTwoSignalsCorrelation(vad19bDLWnss(b,1,a), vad2DLWnss(b,1,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.5], 'd', 8);
 %                        plotTwoSignalsCorrelation(vad19bDLWnss(b,k+1:k+66,a), vad2DLWnss(b,k+1:k+66,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.8]);
-                        r2(j+1,k1,b,a) = corr2(vad19bDLWnss(b,k+1:k+ROINUM,a), vad2DLWnss(b,k+1:k+ROINUM,a));
+                        r2(exRate+1,k1,b,a) = corr2(vad19bDLWnss(b,k+1:k+ROINUM,a), vad2DLWnss(b,k+1:k+ROINUM,a));
                     end; hold off;
                 end
 %                figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]); title(['ec corr: ' vadecname ' row=' num2str(b)]);
@@ -871,8 +871,8 @@ function [r1m, r2m, r3m, h1c, p1m, cnS3, cnIS3, vadname] = retrainDLCMAndECmulti
                     r3(j+1,k1,a) = corr2(X(~isnan(X(:))), Y(~isnan(Y(:))));
                 end; hold off;
 %                calculateAlzWilcoxonTest(vad19bDLWnss, vad2DLWnss, roiNames, 'vad19ns', vadname, 'dlw', 1, 'ranksum');
-                [h1(j+1,k1,:,:), p1(j+1,k1,:,:), ~] = calculateAlzWilcoxonTest(adDLWs, vad2bDLWs, roiNames, 'adec', vadecname, 'dlw', 1, 'ranksum', 0);
-                h1c(j+1,k1) = length(find(h1(j+1,k1,1:R,:)>0));
+                [h1(exRate+1,k1,:,:), p1(exRate+1,k1,:,:), ~] = calculateAlzWilcoxonTest(adDLWs, vad2bDLWs, roiNames, 'adec', vadecname, 'dlw', 1, 'ranksum', 0);
+                h1c(exRate+1,k1) = length(find(h1(exRate+1,k1,1:R,:)>0));
             end
         end
     end
