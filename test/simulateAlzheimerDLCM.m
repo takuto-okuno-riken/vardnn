@@ -816,60 +816,67 @@ function [r1m, r2m, r3m, h1c, p1m, cnS3, cnIS3, vadname] = retrainDLCMAndECmulti
     nanx(nanx==1) = NaN;
 
     R = ROINUM;
-    exRate = 2;
-    k = 21;
-    vadECij = vad19Zij - vad19DLWsR * exRate * 0.2;
+    JMAX = 7;
+    k1 = floor(101/20)+1;
+    r1 = zeros(JMAX+1,k1,R);
+    r2 = zeros(JMAX+1,k1,R,cnSbjNum);
+    r3 = zeros(JMAX+1,k1,cnSbjNum);
+    h1 = zeros(JMAX+1,k1,ROINUM,ROINUM);
+    p1 = zeros(JMAX+1,k1,ROINUM,ROINUM);
+    h1c = zeros(JMAX+1,k1);
 
-    parpool(14);
+    for i=0:0
+        for exRate=0:6
+            for k=1:20:101
+                vadECij = vad19Zij - vad19DLWsR * exRate * 0.2;
+                for ii=1:cnSbjNum
+                    cosSims = nan(adSbjNum,1);
+                    for j=1:adSbjNum
+                        cosSims(j,1) = getCosSimilarity(vad19DLWs(:,:,ii), adDLWs(:,:,j));
+                    end
+                    [sortCosAdDLW,idxCosAdDLW] = sort(cosSims(:,1),'descend');
+                    idx = idxCosAdDLW(1);
+                    si = adSignals{idx};
 
-%    for i=1:cnSbjNum
-    parfor i=1:cnSbjNum
-        cosSims = nan(adSbjNum,1);
-        for j=1:adSbjNum
-            cosSims(j,1) = getCosSimilarity(vad19DLWs(:,:,i), adDLWs(:,:,j));
-        end
-        [sortCosAdDLW,idxCosAdDLW] = sort(cosSims(:,1),'descend');
+                    vadTeach = [repmat(vad19DLWnss(:,1,ii),[1 k 1]) vadECij(:,:,ii)]; % indivisual part of teaching data
+                    vadTeaches(:,:,ii) = [vadTeach si(:,2:end)];
+                    cnS3(:,:,ii) = [repmat(cnS2(:,1),[1 k]) cnS2(:,2:ROINUM+1) si(:,1:end-1)];
+                    cnIS3(:,:,ii) = [repmat(cnIS2(:,1),[1 k]) cnIS2(:,2:ROINUM+1) rand(ROINUM,sigLen-1)];
+                end
 
-        vadTeach = [repmat(vad19DLWnss(:,1,i),[1 k 1]) vadECij(:,:,i)]; % indivisual part of teaching data
+                vadname = [group '-' num2str(i) '-' num2str(exRate) '-' num2str(k) 'ns'];
+                vadecname = [group '-' num2str(i) '-' num2str(exRate)  '-' num2str(k) 'ec'];                
+                [vad2DLWs, meanVad2DLWns, stdVad2DLWns] = retrainDLCMAndEC(vadTeaches, cnS3, cnIS3, roiNames, vadname);
+                [vad2bDLWs, vad2DLWnss] = calculateNodeSignals(cnSignals, cnS3, cnIS3, roiNames, vadname, 'dlw');
 
-        idx = idxCosAdDLW(1);
-        si = adSignals{idx};
-        vadTeach = [vadTeach si(:,2:end)];
-        cnS3 = [repmat(cnS2(:,1),[1 k]) cnS2(:,2:ROINUM+1) si(:,1:end-1)];
-        cnIS3 = [repmat(cnIS2(:,1),[1 k]) cnIS2(:,2:ROINUM+1) rand(ROINUM,sigLen-1)];
-
-        vadname = [group '-' num2str(i) '-' num2str(exRate) '-' num2str(k) 'ns'];
-        vadecname = [group '-' num2str(i) '-' num2str(exRate)  '-' num2str(k) 'ec'];
-        [vad2DLWs(:,:,i), meanVad2DLWns, stdVad2DLWns] = retrainDLCMAndEC(vadTeach, cnS3, cnIS3, roiNames, vadname);
-        [vad2bDLWs(:,:,i), vad2DLWnss(:,:,i)] = calculateNodeSignals(cnSignals(i), cnS3, cnIS3, roiNames, vadname, 'dlw');
-    end
-
-    r1 = zeros(R);
-    r2 = zeros(R,cnSbjNum);
-    r3 = zeros(cnSbjNum);
-    h1 = zeros(ROINUM,ROINUM);
-    p1 = zeros(ROINUM,ROINUM);
-
-    vad19bDLWnss = [repmat(vad19DLWnss(:,1,:),[1 k 1]) vad19DLWnss(:,2:ROINUM+1,:)];
-    for b=1:R
-        r1(b) = corr2(squeeze(vad19bDLWnss(b,1,:)), squeeze(vad2DLWnss(b,1,:)));
+                k1 = floor(k/20)+1;
+                vad19bDLWnss = [repmat(vad19DLWnss(:,1,:),[1 k 1]) vad19DLWnss(:,2:ROINUM+1,:) vadTeaches(:,ROINUM+2:end,:)];
+                for b=1:R
+                    r1(j+1,k1,b) = corr2(squeeze(vad19bDLWnss(b,1,:)), squeeze(vad2DLWnss(b,1,:)));
 %                    figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' vadname ' row=' num2str(b)]);
-        for a=1:cnSbjNum
+                    for a=1:cnSbjNum
 %                        plotTwoSignalsCorrelation(vad19bDLWnss(b,1,a), vad2DLWnss(b,1,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.5], 'd', 8);
 %                        plotTwoSignalsCorrelation(vad19bDLWnss(b,k+1:k+66,a), vad2DLWnss(b,k+1:k+66,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.8]);
-            r2(b,a) = corr2(vad19bDLWnss(b,k+1:k+ROINUM,a), vad2DLWnss(b,k+1:k+ROINUM,a));
-        end; hold off;
-    end
+                        r2(j+1,k1,b,a) = corr2(vad19bDLWnss(b,k+1:k+ROINUM,a), vad2DLWnss(b,k+1:k+ROINUM,a));
+                    end; hold off;
+                end
 %                figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]); title(['ec corr: ' vadecname ' row=' num2str(b)]);
-    for a=1:cnSbjNum
-        X = vad19DLWs(1:R,1:R,a)+nanx(1:R,1:R);
-        Y = vad2bDLWs(1:R,1:R,a);
+                for a=1:cnSbjNum
+                    X = vad19DLWs(1:R,1:R,a)+nanx(1:R,1:R);
+                    Y = vad2bDLWs(1:R,1:R,a);
 %                    plotTwoSignalsCorrelation(X, Y, [0.1*mod(a,10) 0.2*ceil(a/10) 0.5]);
-        r3(a) = corr2(X(~isnan(X(:))), Y(~isnan(Y(:))));
-    end; hold off;
+                    r3(j+1,k1,a) = corr2(X(~isnan(X(:))), Y(~isnan(Y(:))));
+                end; hold off;
 %                calculateAlzWilcoxonTest(vad19bDLWnss, vad2DLWnss, roiNames, 'vad19ns', vadname, 'dlw', 1, 'ranksum');
-    [h1(:,:), p1(:,:), ~] = calculateAlzWilcoxonTest(adDLWs, vad2bDLWs, roiNames, 'adec', vadecname, 'dlw', 1, 'ranksum', 0);
-    h1c = length(find(h1(1:R,:)>0));
+                [h1(j+1,k1,:,:), p1(j+1,k1,:,:), ~] = calculateAlzWilcoxonTest(adDLWs, vad2bDLWs, roiNames, 'adec', vadecname, 'dlw', 1, 'ranksum', 0);
+                h1c(j+1,k1) = length(find(h1(j+1,k1,1:R,:)>0));
+            end
+        end
+    end
+    r1m = nanmean(r1,3);
+    r2m = nanmean(nanmean(r2,4),3);
+    r3m = nanmean(r3,3);
+    p1m = nanmean(nanmean(p1(:,:,1:R,:),4),3);
 end
 
 function sigEC = sigmaEC(EC)
@@ -894,7 +901,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 1;
+    NumProcessors = 11;
 
     if NumProcessors > 1
         try
@@ -908,17 +915,22 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
 
     % init params
     sigLen = size(nodeSignals,2);
-    si = nodeSignals;
-    inSignal = exSignals;
     inControl = eye(ROWNUM);
 
-    for i=1:sbjNum
-%    parfor i=1:sbjNum
+%    for i=1:sbjNum
+    parfor i=1:sbjNum
         dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROWNUM) '-net' num2str(i) '.mat'];
         if exist(dlcmName, 'file')
             f=load(dlcmName);
             netDLCM = f.netDLCM;
         else
+            if size(nodeSignals,3) > 1
+                si = nodeSignals(:,:,i);
+                inSignal = exSignals(:,:,i);
+            else
+                si = nodeSignals;
+                inSignal = exSignals;
+            end
             % init DLCM network
             netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
 
@@ -938,7 +950,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
             disp('start training');
             for j=1:ROWNUM
                 nodeTeach = teachSignals(j,1:end,i);
-                nodeInput = [nodeSignals; exSignals];
+                nodeInput = [si; inSignal];
                 if ~isempty(inControl)
                     filter = repmat(inControl(i,:).', 1, size(nodeInput,2));
                     nodeInput(ROWNUM+1:end,:) = nodeInput(ROWNUM+1:end,:) .* filter;
@@ -1064,11 +1076,18 @@ function [ECs, nodeSignals] = calculateNodeSignals(signals, S2, IS2, roiNames, g
     nodeSignals = zeros(ROINUM, size(S2, 2), sbjNum);
 %    for i=1:sbjNum
     parfor i=1:sbjNum
+        if size(S2,3) > 1
+            si = S2(:,:,i);
+            inSignal = IS2(:,:,i);
+        else
+            si = S2;
+            inSignal = IS2;
+        end
         switch(algorithm)
         case 'dlw'
             dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             f=load(dlcmName);
-            [Y, time] = predictDlcmNetwork(S2, IS2, [], f.inControl, f.netDLCM);
+            [Y, time] = predictDlcmNetwork(si, inSignal, [], f.inControl, f.netDLCM);
             ec = calcDlcmEC(f.netDLCM, [], f.inControl);
         end
         ECs(:,:,i) = ec;
