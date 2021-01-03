@@ -829,6 +829,9 @@ function [r1m, r2m, r3m, h1c, p1m, cnS3, cnIS3, vadname] = retrainDLCMAndECmulti
         for exRate=0:6
             for k=1:20:101
                 vadECij = vad19Zij - vad19DLWsR * exRate * 0.2;
+                vadTeaches = [];
+                cnS3 = [];
+                cnIS3 = [];
                 for ii=1:cnSbjNum
                     cosSims = nan(adSbjNum,1);
                     for j=1:adSbjNum
@@ -901,7 +904,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 11;
+    NumProcessors = 14;
 
     if NumProcessors > 1
         try
@@ -1060,7 +1063,7 @@ function [ECs, nodeSignals] = calculateNodeSignals(signals, S2, IS2, roiNames, g
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 11;
+    NumProcessors = 14;
 
     if NumProcessors > 1
         try
