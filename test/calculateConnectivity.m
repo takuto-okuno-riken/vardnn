@@ -1,16 +1,19 @@
 % this function is only for ADNI2 alzheimer analysis
 
-function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roiNames, group, algorithm, rawFlag)
+function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(signals, roiNames, group, algorithm, isRaw)
     if nargin < 5
-        rawFlag = 0;
+        isRaw = 0;
     end
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 1;
+    NumProcessors = 11;
 
     % constant value
     ROINUM = size(signals{1},1);
     LAG = 3;
+
+    weights = zeros(ROINUM, ROINUM, length(signals));
+    subweights = zeros(ROINUM, ROINUM+1, length(signals));
 
     outfName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
@@ -26,9 +29,8 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
             parpool(NumProcessors);
         end
 
-        weights = zeros(ROINUM, ROINUM, length(signals));
-%        parfor i=1:length(signals)    % for parallel processing
-        for i=1:length(signals)
+        parfor i=1:length(signals)    % for parallel processing
+%        for i=1:length(signals)
             switch(algorithm)
             case 'fc'
                 mat = calcFunctionalConnectivity(signals{i});
@@ -73,7 +75,7 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
                     f = load(dlcmName);
                     mat = f.mat;
                 else
-                    if rawFlag
+                    if isRaw
                         si = signals{i};
                         sig=0; c=0; maxsi=0; minsi=0;
                     else
@@ -135,18 +137,18 @@ function [weights, meanWeights, stdWeights] = calculateConnectivity(signals, roi
                     dlcmName = ['results/ad-dlcmrc-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 end
                 f = load(dlcmName);
-                mat = calcDlcmEC(f.netDLCM, [], f.inControl);
+                [mat, subweights(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.inControl);
             end
             weights(:,:,i) = mat;
         end
-        save(outfName, 'weights', 'roiNames');
+        save(outfName, 'weights', 'roiNames', 'subweights');
     end
     meanWeights = nanmean(weights, 3);
     stdWeights = nanstd(weights, 1, 3);
     % counting by source region and target region
     meanSource = nanmean(meanWeights,1);
     meanTarget = nanmean(meanWeights,2);
-    save(outfName, 'weights', 'meanWeights', 'stdWeights', 'roiNames', 'meanSource', 'meanTarget');
+    save(outfName, 'weights', 'meanWeights', 'stdWeights', 'roiNames', 'meanSource', 'meanTarget', 'subweights');
 
     % show functional conectivity
     figure; 

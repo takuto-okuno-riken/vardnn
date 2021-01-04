@@ -897,6 +897,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
     outfName = ['results/adsim-retrain-' group '-roi' num2str(ROWNUM) '.mat'];
     if exist(outfName, 'file')
         f=load(outfName);
+        weights = f.weights;
         meanWeights = nanmean(f.weights, 3);
         stdWeights = nanstd(f.weights, 1, 3);
         return;
