@@ -868,7 +868,7 @@ function [r1m, r2m, r3m, h1c, p1m, cnS3, cnIS3, vadname] = retrainDLCMAndECmulti
                     X = vad19DLWs(1:R,1:R,a)+nanx(1:R,1:R);
                     Y = vad2bDLWs(1:R,1:R,a);
 %                    plotTwoSignalsCorrelation(X, Y, [0.1*mod(a,10) 0.2*ceil(a/10) 0.5]);
-                    r3(j+1,k1,a) = corr2(X(~isnan(X(:))), Y(~isnan(Y(:))));
+                    r3(exRate+1,k1,a) = corr2(X(~isnan(X(:))), Y(~isnan(Y(:))));
                 end; hold off;
 %                calculateAlzWilcoxonTest(vad19bDLWnss, vad2DLWnss, roiNames, 'vad19ns', vadname, 'dlw', 1, 'ranksum');
                 [h1(exRate+1,k1,:,:), p1(exRate+1,k1,:,:), ~] = calculateAlzWilcoxonTest(adDLWs, vad2bDLWs, roiNames, 'adec', vadecname, 'dlw', 1, 'ranksum', 0);
