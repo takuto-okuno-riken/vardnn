@@ -1,6 +1,6 @@
 % this function works after analyzeAlzheimerDLCM.m
 
-function simulateAlzheimerDLCM
+function simulateAlzheimerDLCM2
     % CONN fmri data base path :
     base = '../fmri/';
 
@@ -348,8 +348,8 @@ function [smDLWs, bSignals] = retrainDLCMAndECmultiPattern(rawSignals, DLWs, sub
 %    DLWs = abs(DLWsR);
 
     for ii=0:0
-        for exRate=0:6
-            for k=1:20:101
+        for exRate=2:2 %0:6
+            for k=1:1 %1:20:101
                 ECij = Zij - DLWsR * exRate * 0.2;
                 teaches = [];
                 S3 = [];
@@ -374,14 +374,14 @@ function [smDLWs, bSignals] = retrainDLCMAndECmultiPattern(rawSignals, DLWs, sub
                 k1 = floor(k/20)+1;
                 for b=1:R
                     r1b(exRate+1,k1,b) = corr2(squeeze(subDLWs(b,1,:)), squeeze(bSubDLWs(b,1,:)));
-%                    figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' vadname ' row=' num2str(b)]);
+%                    figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' name ' row=' num2str(b)]);
                     for a=1:cnSbjNum
 %                        plotTwoSignalsCorrelation(subDLWs(b,1,a), bSubDLWs(b,1,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.5], 'd', 8);
 %                        plotTwoSignalsCorrelation(subDLWs(b,2:77,a), bSubDLWs(b,2:77,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.8]);
                         r2b(exRate+1,k1,b,a) = corr2(subDLWs(b,2:1+nodeNum,a), bSubDLWs(b,2:1+nodeNum,a));
                     end; hold off;
                 end
-%                figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]); title(['ec corr: ' vadecname ' row=' num2str(b)]);
+%                figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]); title(['ec corr: ' ecname ' row=' num2str(b)]);
                 for a=1:cnSbjNum
                     X = DLWs(1:R,1:R,a)+nanx(1:R,1:R);
                     Y = bDLWs(1:R,1:R,a);
@@ -399,14 +399,14 @@ function [smDLWs, bSignals] = retrainDLCMAndECmultiPattern(rawSignals, DLWs, sub
 
                 for b=1:R
                     r1(exRate+1,k1,b) = corr2(squeeze(subDLWs(b,1,:)), squeeze(smSubDLWs(b,1,:)));
-%                    figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' vadname ' row=' num2str(b)]);
+%                    figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' name ' row=' num2str(b)]);
                     for a=1:cnSbjNum
 %                        plotTwoSignalsCorrelation(subDLWs(b,1,a), smSubDLWs(b,1,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.5], 'd', 8);
 %                        plotTwoSignalsCorrelation(subDLWs(b,2:77,a), smSubDLWs(b,2:77,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.8]);
                         r2(exRate+1,k1,b,a) = corr2(subDLWs(b,2:1+nodeNum,a), smSubDLWs(b,2:1+nodeNum,a));
                     end; hold off;
                 end
-%                figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]); title(['ec corr: ' vadecname ' row=' num2str(b)]);
+%                figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]); title(['ec corr: ' ecname ' row=' num2str(b)]);
                 for a=1:cnSbjNum
                     X = DLWs(1:R,1:R,a)+nanx(1:R,1:R);
                     Y = smDLWs(1:R,1:R,a);
