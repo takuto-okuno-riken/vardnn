@@ -393,7 +393,7 @@ function [smDLWs, bSignals] = retrainDLCMAndECmultiPattern(rawSignals, DLWs, sub
                 h1bc(exRate+1,k1) = length(find(h1b(exRate+1,k1,1:R,:)>0));
 
                 % simulate from first frame with the DLCM network trained by signals & expanded EC
-                [bDLWs, bSignals, bSubDLWs] = simulateNodeSignals(signals, roiNames, name, 'dlw', name, 1);
+                [bDLWs, bSignals, bSubDLWs] = simulateNodeSignals(signals, roiNames, name, 'dlw', name, 1, [k+nodeNum+1:k+nodeNum+sigLen-1]);
                 [smDLs, meanSmDL, ~] = calculateConnectivity(bSignals, roiNames, bname, 'dlcm', 1);
                 [smDLWs, meanSmDLW, ~, smSubDLWs] = calculateConnectivity(bSignals, roiNames, bname, 'dlw', 1);
 
@@ -540,7 +540,10 @@ function out = expandAmplitude2(signals, rate)
     out = d * rate + m;
 end
 
-function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, group, algorithm, orgGroup, isRaw)
+function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, group, algorithm, orgGroup, isRaw, inSiRange)
+    if nargin < 7
+        inSiRange = 0;
+    end
     if nargin < 6
         isRaw = 0;
     end
@@ -556,7 +559,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 11;
+    NumProcessors = 1;
 
     if NumProcessors > 1
         try
@@ -571,8 +574,8 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
     ECs = zeros(ROINUM, ROINUM, sbjNum);
     subECs = zeros(ROINUM, ROINUM+1, sbjNum);
     simSignals = cell(1, sbjNum);
-    parfor i=1:sbjNum    % for parallel processing
-%    for i=1:sbjNum
+%    parfor i=1:sbjNum    % for parallel processing
+    for i=1:sbjNum
         switch(algorithm)
         case {'dlw','dlwrc'}
             if strcmp(algorithm, 'dlw')
@@ -587,7 +590,12 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
             else
                 [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
             end
-            [Y, time] = simulateDlcmNetwork(si, f.inSignal, [], f.inControl, f.netDLCM);
+            if inSiRange > 0
+                inSignal = f.inSignal(:,inSiRange);
+            else
+                inSignal = f.inSignal;
+            end
+            [Y, time] = simulateDlcmNetwork(si, inSignal, [], f.inControl, f.netDLCM);
             [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.inControl);
         end
         ECs(:,:,i) = ec;
