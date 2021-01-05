@@ -68,7 +68,7 @@ function simulateAlzheimerDLCM2
     smcn4Signals = smcn2Signals;
     smad4Signals = smad2Signals;
     cnsmcn4DLWrs = zeros(1,10);
-    for k=1:10
+    for k=10:10
         for i=1:cnSbjNum
             smcn4Signals{i} = expandAmplitude2(smcn2Signals{i}, 1+0.5*k);
         end
@@ -77,7 +77,7 @@ function simulateAlzheimerDLCM2
         end
         name = ['smcn4_' num2str(k)];
         [smcn4DLs, meanSmcn4DL, ~] = calculateConnectivity(smcn4Signals, roiNames, name, 'dlcm', 1);
-        [smcn4DLWs, meanSmcn4DLW, ~] = calculateConnectivity(smcn4Signals, roiNames, name, 'dlw', 1);
+        [smcn4DLWs, meanSmcn4DLW, ~, smcn4SubDLWs] = calculateConnectivity(smcn4Signals, roiNames, name, 'dlw', 1);
         figure; cnsmcn4DLWrs(k) = plotTwoSignalsCorrelation(meanCnDLW, meanSmcn4DLW);
     end
 %}
@@ -87,6 +87,7 @@ function simulateAlzheimerDLCM2
     IS2 = ones(nodeNum, nodeNum+1);
     [smcn5DLWs, smcn5Signals] = retrainDLCMAndECmultiPattern(cnSignals, cnDLWs, cnSubDLWs, S2, IS2, roiNames, 'cn5')
 
+    % check relation between Zi and signal mean diff, and Zij and signal amplitude
     
     % --------------------------------------------------------------------------------------------------------------
     % check DLCM-EC and DLCM-GC of simulated CN and AD
@@ -447,7 +448,7 @@ function [weights, meanWeights, stdWeights, subweights] = retrainDLCMAndEC(teach
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 11;
+    NumProcessors = 14;
 
     if NumProcessors > 1
         try
@@ -559,7 +560,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 1;
+    NumProcessors = 14;
 
     if NumProcessors > 1
         try
@@ -574,8 +575,8 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
     ECs = zeros(ROINUM, ROINUM, sbjNum);
     subECs = zeros(ROINUM, ROINUM+1, sbjNum);
     simSignals = cell(1, sbjNum);
-%    parfor i=1:sbjNum    % for parallel processing
-    for i=1:sbjNum
+    parfor i=1:sbjNum    % for parallel processing
+%    for i=1:sbjNum
         switch(algorithm)
         case {'dlw','dlwrc'}
             if strcmp(algorithm, 'dlw')
