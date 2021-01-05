@@ -51,7 +51,8 @@ function simulateAlzheimerDLCM2
     [~, smcn2Signals] = simulateNodeSignals(cn2Signals, roiNames, 'cn2', 'dlw', 'cn');
     [~, smad2Signals] = simulateNodeSignals(ad2Signals, roiNames, 'ad2', 'dlw', 'ad');
 
-    % expanding amplitude of simulated CN & AD signals from last-1 frame (type1) -- no effect
+    % expanding amplitude of simulated CN & AD signals from last-1 frame (type1)
+    % -- no effect
 %{
     smcn3Signals = smcn2Signals;
     smad3Signals = smad2Signals;
@@ -63,7 +64,7 @@ function simulateAlzheimerDLCM2
     end
 %}
     % expanding amplitude of simulated CN & AD signals from last-1 frame (type2)
-    % finding best rate
+    % finding best rate -- result showed bigger k is better (k=10 is best)
 %{
     smcn4Signals = smcn2Signals;
     smad4Signals = smad2Signals;
@@ -82,13 +83,12 @@ function simulateAlzheimerDLCM2
     end
 %}
     % re-train CN & AD signals with expanded EC amplitude (type3)
+    % -- no effect. trained DLCM network showed bad simulation signals
     S2 = ones(nodeNum, nodeNum+1);
     S2(:,2:end) = S2(:, 2:end) - eye(nodeNum);
     IS2 = ones(nodeNum, nodeNum+1);
-    [smcn5DLWs, smcn5Signals] = retrainDLCMAndECmultiPattern(cnSignals, cnDLWs, cnSubDLWs, S2, IS2, roiNames, 'cn5')
+    %[smcn5DLWs, smcn5Signals] = retrainDLCMAndECmultiPattern(cnSignals, cnDLWs, cnSubDLWs, S2, IS2, roiNames, 'cn5');
 
-    % check relation between Zi and signal mean diff, and Zij and signal amplitude
-    
     % --------------------------------------------------------------------------------------------------------------
     % check DLCM-EC and DLCM-GC of simulated CN and AD
     [smcnDLs, meanSmcnDL, ~] = calculateConnectivity(smcnSignals, roiNames, 'smcn', 'dlcm', 1);
@@ -97,6 +97,9 @@ function simulateAlzheimerDLCM2
     [smadDLWs, meanSmadDLW, ~, smadSubDLWs] = calculateConnectivity(smadSignals, roiNames, 'smad', 'dlw', 1);
     sigSmcnDLWs = (smcnDLWs - nanmean(smcnDLWs(:))) / nanstd(smcnDLWs(:),1);
     sigSmadDLWs = (smadDLWs - nanmean(smadDLWs(:))) / nanstd(smadDLWs(:),1);
+
+    % check relation between Zi vs signal mean diff, and Zij vs signal amplitude
+    checkRelationSubDLWandSignals(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'cn');
 
 %    [smrccnDLs, meanSmrccnDL, ~] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlcm', 1);
 %    [smrccnDLWs, meanSmrccnDLW, ~] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlw', 1);
@@ -320,10 +323,76 @@ function simulateAlzheimerDLCM2
 end
 
 % ==================================================================================================================
+function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, simDLWs, simSubDLWs, group)
+    nodeNum = size(rawSignals{1},1);
+    sigLen = size(rawSignals{1},2);
+    sbjNum = length(rawSignals);
+    R = 8;
+    nMax = 20;
+    sbjMax = 4;
+
+    for k=1:sbjNum
+        EC = DLWs(:,:,k);
+        subEC = subDLWs(:,:,k);
+        smSi = simSignals{k};
+        smEC = simDLWs(:,:,k);
+        smSubEC = simSubDLWs(:,:,k);
+        
+        dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+        if exist(dlcmName, 'file')
+            load(dlcmName);
+        end
+        [siOrg, sig, c, maxsi, minsi] = convert2SigmoidSignal(rawSignals{k});
+
+        for i=1:R 
+            % training DLCM network
+            maxEpochs = 1000;
+            miniBatchSize = ceil(sigLen / 3);
+            options = trainingOptions('adam', ...
+                'ExecutionEnvironment','cpu', ...
+                'MaxEpochs',maxEpochs, ...
+                'MiniBatchSize',miniBatchSize, ...
+                'Shuffle','every-epoch', ...
+                'GradientThreshold',5,...
+                'L2Regularization',0.05, ...
+                'Verbose',false);
+        
+            Zi(i) = subEC(i,1); % original Zi value
+            Si1 = ones(nodeNum*2,1);
+            filter = repmat(inControl(i,:).', 1, size(Si1,2));
+            Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
+
+            for a=0:16
+                dx = (-0.32 + 0.04*a);
+                si = siOrg;
+                si(i,:) = si(i,:) + dx;
+
+                nodeTeach = si(i,2:end);
+                nodeInput = [si(:,1:end-1); inSignal(:,1:end-1)];
+                filter = repmat(inControl(i,:).', 1, size(nodeInput,2));
+                nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
+                    
+                for n=1:nMax % traial
+                    netDLCM = initDlcmNetwork(si, inSignal, [], inControl); 
+
+                    disp(['training ' num2str(i) '-' num2str(i) ' dx=' num2str(dx) ' n:' num2str(n)]);
+                    [nodeNetwork, trainInfo] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{i}, options);
+
+                    % predict DLCM network
+                    Zi2(i, n, a+1) = predict(nodeNetwork, Si1);
+                    X(i, n, a+1) = dx;
+                end
+            end
+        end
+        outfName = ['results/adsim2-checkRelation-' group '-' num2str(k) '.mat'];
+        save(outfName, 'Zi', 'Zi2', 'X');
+    end
+end
+
 function [smDLWs, bSignals] = retrainDLCMAndECmultiPattern(rawSignals, DLWs, subDLWs, S2, IS2, roiNames, group)
     nodeNum = size(rawSignals{1},1);
     sigLen = size(rawSignals{1},2);
-    cnSbjNum = length(rawSignals);
+    sbjNum = length(rawSignals);
     nanx = eye(nodeNum);
     nanx(nanx==1) = NaN;
 
@@ -331,14 +400,14 @@ function [smDLWs, bSignals] = retrainDLCMAndECmultiPattern(rawSignals, DLWs, sub
     JMAX = 7;
     k1 = floor(101/20)+1;
     r1 = zeros(JMAX+1,k1,R);
-    r2 = zeros(JMAX+1,k1,R,cnSbjNum);
-    r3 = zeros(JMAX+1,k1,cnSbjNum);
+    r2 = zeros(JMAX+1,k1,R,sbjNum);
+    r3 = zeros(JMAX+1,k1,sbjNum);
     h1 = zeros(JMAX+1,k1,nodeNum,nodeNum);
     p1 = zeros(JMAX+1,k1,nodeNum,nodeNum);
     h1c = zeros(JMAX+1,k1);
     r1b = zeros(JMAX+1,k1,R);
-    r2b = zeros(JMAX+1,k1,R,cnSbjNum);
-    r3b = zeros(JMAX+1,k1,cnSbjNum);
+    r2b = zeros(JMAX+1,k1,R,sbjNum);
+    r3b = zeros(JMAX+1,k1,sbjNum);
     h1b = zeros(JMAX+1,k1,nodeNum,nodeNum);
     p1b = zeros(JMAX+1,k1,nodeNum,nodeNum);
     h1bc = zeros(JMAX+1,k1);
@@ -356,7 +425,7 @@ function [smDLWs, bSignals] = retrainDLCMAndECmultiPattern(rawSignals, DLWs, sub
                 S3 = [];
                 IS3 = [];
                 signals = {};
-                for i=1:cnSbjNum
+                for i=1:sbjNum
                     [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(rawSignals{i});
                     signals{end+1} = si;
                     teach = [repmat(subDLWs(:,1,i),[1 k 1]) ECij(:,:,i)]; % indivisual part of teaching data
@@ -376,14 +445,14 @@ function [smDLWs, bSignals] = retrainDLCMAndECmultiPattern(rawSignals, DLWs, sub
                 for b=1:R
                     r1b(exRate+1,k1,b) = corr2(squeeze(subDLWs(b,1,:)), squeeze(bSubDLWs(b,1,:)));
 %                    figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' name ' row=' num2str(b)]);
-                    for a=1:cnSbjNum
+                    for a=1:sbjNum
 %                        plotTwoSignalsCorrelation(subDLWs(b,1,a), bSubDLWs(b,1,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.5], 'd', 8);
 %                        plotTwoSignalsCorrelation(subDLWs(b,2:77,a), bSubDLWs(b,2:77,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.8]);
                         r2b(exRate+1,k1,b,a) = corr2(subDLWs(b,2:1+nodeNum,a), bSubDLWs(b,2:1+nodeNum,a));
                     end; hold off;
                 end
 %                figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]); title(['ec corr: ' ecname ' row=' num2str(b)]);
-                for a=1:cnSbjNum
+                for a=1:sbjNum
                     X = DLWs(1:R,1:R,a)+nanx(1:R,1:R);
                     Y = bDLWs(1:R,1:R,a);
 %                    plotTwoSignalsCorrelation(X, Y, [0.1*mod(a,10) 0.2*ceil(a/10) 0.5]);
@@ -401,14 +470,14 @@ function [smDLWs, bSignals] = retrainDLCMAndECmultiPattern(rawSignals, DLWs, sub
                 for b=1:R
                     r1(exRate+1,k1,b) = corr2(squeeze(subDLWs(b,1,:)), squeeze(smSubDLWs(b,1,:)));
 %                    figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: ' name ' row=' num2str(b)]);
-                    for a=1:cnSbjNum
+                    for a=1:sbjNum
 %                        plotTwoSignalsCorrelation(subDLWs(b,1,a), smSubDLWs(b,1,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.5], 'd', 8);
 %                        plotTwoSignalsCorrelation(subDLWs(b,2:77,a), smSubDLWs(b,2:77,a), [0.1*mod(a,10) 0.2*ceil(a/10) 0.8]);
                         r2(exRate+1,k1,b,a) = corr2(subDLWs(b,2:1+nodeNum,a), smSubDLWs(b,2:1+nodeNum,a));
                     end; hold off;
                 end
 %                figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]); title(['ec corr: ' ecname ' row=' num2str(b)]);
-                for a=1:cnSbjNum
+                for a=1:sbjNum
                     X = DLWs(1:R,1:R,a)+nanx(1:R,1:R);
                     Y = smDLWs(1:R,1:R,a);
 %                    plotTwoSignalsCorrelation(X, Y, [0.1*mod(a,10) 0.2*ceil(a/10) 0.5]);
