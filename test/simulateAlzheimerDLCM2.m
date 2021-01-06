@@ -338,54 +338,91 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
         smEC = simDLWs(:,:,k);
         smSubEC = simSubDLWs(:,:,k);
         
-        dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
-        if exist(dlcmName, 'file')
-            load(dlcmName);
-        end
-        [siOrg, sig, c, maxsi, minsi] = convert2SigmoidSignal(rawSignals{k});
+        outfName = ['results/adsim2-checkRelation-' group '-' num2str(k) '.mat'];
+        if exist(outfName, 'file')
+            load(outfName);
+        else
+            % if you want to use parallel processing, set NumProcessors more than 2
+            % and change for loop to parfor loop
+            NumProcessors = 10;
 
-        for i=1:R 
-            % training DLCM network
-            maxEpochs = 1000;
-            miniBatchSize = ceil(sigLen / 3);
-            options = trainingOptions('adam', ...
-                'ExecutionEnvironment','cpu', ...
-                'MaxEpochs',maxEpochs, ...
-                'MiniBatchSize',miniBatchSize, ...
-                'Shuffle','every-epoch', ...
-                'GradientThreshold',5,...
-                'L2Regularization',0.05, ...
-                'Verbose',false);
-        
-            Zi(i) = subEC(i,1); % original Zi value
-            Si1 = ones(nodeNum*2,1);
-            filter = repmat(inControl(i,:).', 1, size(Si1,2));
-            Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
+            if NumProcessors > 1
+                try
+                    disp('Destroing any existance matlab pool session');
+                    parpool('close');
+                catch
+                    disp('No matlab pool session found');
+                end
+                parpool(NumProcessors);
+            end
+    
+            Zi2 = zeros(R, nMax, 17);
+            X = zeros(R, nMax, 17);
+            Zij2 = zeros(R, nMax, 17, nodeNum);
+            
+            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            f = load(dlcmName);
+            [siOrg, sig, c, maxsi, minsi] = convert2SigmoidSignal(rawSignals{k});
 
-            for a=0:16
-                dx = (-0.32 + 0.04*a);
-                si = siOrg;
-                si(i,:) = si(i,:) + dx;
+            for i=1:R 
+                % training DLCM network
+                maxEpochs = 1000;
+                miniBatchSize = ceil(sigLen / 3);
+                options = trainingOptions('adam', ...
+                    'ExecutionEnvironment','cpu', ...
+                    'MaxEpochs',maxEpochs, ...
+                    'MiniBatchSize',miniBatchSize, ...
+                    'Shuffle','every-epoch', ...
+                    'GradientThreshold',5,...
+                    'L2Regularization',0.05, ...
+                    'Verbose',false);
 
-                nodeTeach = si(i,2:end);
-                nodeInput = [si(:,1:end-1); inSignal(:,1:end-1)];
-                filter = repmat(inControl(i,:).', 1, size(nodeInput,2));
-                nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
-                    
-                for n=1:nMax % traial
-                    netDLCM = initDlcmNetwork(si, inSignal, [], inControl); 
+                Zi(i) = subEC(i,1); % original Zi value
+                Zij(i,:) = subEC(i,2:end); % original Zij value
+                Si1 = ones(nodeNum*2, nodeNum+1);
+                Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
+                filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
+                Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
 
-                    disp(['training ' num2str(i) '-' num2str(i) ' dx=' num2str(dx) ' n:' num2str(n)]);
-                    [nodeNetwork, trainInfo] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{i}, options);
+                for a=0:16
+                    dx = (-0.32 + 0.04*a);
+                    si = siOrg;
+                    si(i,:) = si(i,:) + dx;
 
-                    % predict DLCM network
-                    Zi2(i, n, a+1) = predict(nodeNetwork, Si1);
-                    X(i, n, a+1) = dx;
+                    nodeTeach = si(i,2:end);
+                    nodeInput = [si(:,1:end-1); f.inSignal(:,1:end-1)];
+                    filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
+                    nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
+
+                    subEC2 = cell(nMax,1);
+%                    for n=1:nMax % traial
+                    parfor n=1:nMax % traial
+                        netDLCM = initDlcmNetwork(si, f.inSignal, [], f.inControl); 
+
+                        disp(['training ' num2str(i) '-' num2str(i) ' dx=' num2str(dx) ' n:' num2str(n)]);
+                        [nodeNetwork, trainInfo] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{i}, options);
+
+                        % predict DLCM network
+                        subEC2{n} = predict(nodeNetwork, Si1);
+                    end
+                    for n=1:nMax
+                        Zi2(i, n, a+1) = subEC2{n}(1);
+                        Zij2(i, n, a+1,:) = subEC2{n}(2:end);
+                        X(i, n, a+1) = dx;
+                    end
                 end
             end
+            save(outfName, 'Zi', 'Zi2', 'Zij2', 'X');
         end
-        outfName = ['results/adsim2-checkRelation-' group '-' num2str(k) '.mat'];
-        save(outfName, 'Zi', 'Zi2', 'X');
+        
+        % plot result
+        figure;
+        for i=1:R
+            x=X(i,:,:);
+            y=Zi2(i,:,:);
+            hold on; scatter(x(:),y(:),3); hold off;
+        end;
+        daspect([1 1 1]);
     end
 end
 
