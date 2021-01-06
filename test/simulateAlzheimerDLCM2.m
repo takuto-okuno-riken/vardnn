@@ -413,6 +413,11 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
                 end
             end
             save(outfName, 'Zi', 'Zi2', 'Zij2', 'X');
+
+            % shutdown parallel processing
+            if NumProcessors > 1
+                delete(gcp('nocreate'))
+            end
         end
         
         % plot result
@@ -421,6 +426,17 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
             x=X(i,:,:);
             y=Zi2(i,:,:);
             hold on; scatter(x(:),y(:),3); hold off;
+        end
+        daspect([1 1 1]);
+
+        % plot result
+        figure;
+        for i=1:1
+            for j=1:8
+                x=X(i,:,:);
+                y=Zij2(i,:,:,j);
+                hold on; scatter(x(:),y(:),3); hold off;
+            end
         end
         daspect([1 1 1]);
     end
