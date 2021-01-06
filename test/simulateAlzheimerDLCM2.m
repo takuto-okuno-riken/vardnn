@@ -331,7 +331,8 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
     nMax = 20;
     sbjMax = 4;
 
-    for k=1:sbjNum
+    % checking signal parallel shift effect for Zi, Zij and ECij'
+    for k=1:sbjMax
         EC = DLWs(:,:,k);
         subEC = subDLWs(:,:,k);
         smSi = simSignals{k};
@@ -420,25 +421,158 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
             end
         end
         
-        % plot result
+        % plot result -- Zi2 vs dx
         figure;
         for i=1:R
             x=X(i,:,:);
             y=Zi2(i,:,:);
             hold on; scatter(x(:),y(:),3); hold off;
         end
-        daspect([1 1 1]);
+        daspect([1 1 1]); title(['sbj' num2str(k) ' Zi vs dx']);
 
-        % plot result
+        % plot result -- Zij2(1:16) vs dx
         figure;
         for i=1:1
-            for j=1:8
+            for j=1:16
                 x=X(i,:,:);
                 y=Zij2(i,:,:,j);
                 hold on; scatter(x(:),y(:),3); hold off;
             end
         end
-        daspect([1 1 1]);
+        daspect([1 1 1]); title(['sbj' num2str(k) ' Zij vs dx']);
+
+        % plot result -- Zi - Zij2(1:16) vs dx
+        figure;
+        for i=1:1
+            for j=1:16
+                x=X(i,:,:);
+                y=Zi2(i,:,:) - Zij2(i,:,:,j);
+                hold on; scatter(x(:),y(:),3); hold off;
+            end
+        end
+        daspect([1 1 1]); title(['sbj' num2str(k) ' (Zi - Zij) vs dx']);
+    end
+    
+    % checking signal amplitude change effect for Zi, Zij and ECij'
+    amps = [0, 0.01, 0.05, 0.1, 0.2, 0.5, 1, 1.2, 1.5, 2, 3, 5, 8];
+    ampsLen = length(amps);
+    for k=1:sbjMax
+        EC = DLWs(:,:,k);
+        subEC = subDLWs(:,:,k);
+
+        outfName = ['results/adsim2-checkRelation2-' group '-' num2str(k) '.mat'];
+        if exist(outfName, 'file')
+            load(outfName);
+        else
+            % if you want to use parallel processing, set NumProcessors more than 2
+            % and change for loop to parfor loop
+            NumProcessors = 20;
+
+            if NumProcessors > 1
+                try
+                    disp('Destroing any existance matlab pool session');
+                    parpool('close');
+                catch
+                    disp('No matlab pool session found');
+                end
+                parpool(NumProcessors);
+            end
+    
+            Zi2 = zeros(R, nMax, ampsLen);
+            X = zeros(R, nMax, ampsLen);
+            Zij2 = zeros(R, nMax, ampsLen, nodeNum);
+            
+            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            f = load(dlcmName);
+            [siOrg, sig, c, maxsi, minsi] = convert2SigmoidSignal(rawSignals{k});
+
+            % training options for DLCM network
+            maxEpochs = 1000;
+            miniBatchSize = ceil(sigLen / 3);
+            options = trainingOptions('adam', ...
+                'ExecutionEnvironment','cpu', ...
+                'MaxEpochs',maxEpochs, ...
+                'MiniBatchSize',miniBatchSize, ...
+                'Shuffle','every-epoch', ...
+                'GradientThreshold',5,...
+                'L2Regularization',0.05, ...
+                'Verbose',false);
+                
+            for i=1:R 
+                Zi(i) = subEC(i,1); % original Zi value
+                Zij(i,:) = subEC(i,2:end); % original Zij value
+                Si1 = ones(nodeNum*2, nodeNum+1);
+                Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
+                filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
+                Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
+
+                for a=1:ampsLen
+                    si = siOrg;
+                    amp = amps(a);
+                    m = nanmean(si(i,:));
+                    si(i,:) = (si(i,:)-m) .* amp + m;
+
+                    nodeTeach = si(i,2:end);
+                    nodeInput = [si(:,1:end-1); f.inSignal(:,1:end-1)];
+                    filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
+                    nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
+
+                    subEC2 = cell(nMax,1);
+%                    for n=1:nMax % traial
+                    parfor n=1:nMax % traial
+                        netDLCM = initDlcmNetwork(si, f.inSignal, [], f.inControl); 
+
+                        disp(['training ' num2str(k) '-' num2str(i) ' amp=' num2str(amp) ' n:' num2str(n)]);
+                        [nodeNetwork, trainInfo] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{i}, options);
+
+                        % predict DLCM network
+                        subEC2{n} = predict(nodeNetwork, Si1);
+                    end
+                    for n=1:nMax
+                        Zi2(i, n, a) = subEC2{n}(1);
+                        Zij2(i, n, a,:) = subEC2{n}(2:end);
+                        X(i, n, a) = amp;
+                    end
+                end
+            end
+            save(outfName, 'Zi', 'Zi2', 'Zij2', 'X');
+
+            % shutdown parallel processing
+            if NumProcessors > 1
+                delete(gcp('nocreate'))
+            end
+        end
+        
+        % plot result -- Zi2 vs dx
+        figure;
+        for i=1:R
+            x=X(i,:,:);
+            y=Zi2(i,:,:);
+            hold on; scatter(x(:),y(:),3); hold off;
+        end
+        daspect([1 1 1]); title(['sbj' num2str(k) ' Zi vs dx']);
+
+        % plot result -- Zij2(1:16) vs dx
+        figure;
+        for i=1:1
+            for j=1:16
+                x=X(i,:,:);
+                y=Zij2(i,:,:,j);
+                hold on; scatter(x(:),y(:),3); hold off;
+            end
+        end
+        daspect([1 1 1]); title(['sbj' num2str(k) ' Zij vs dx']);
+
+        % plot result -- Zi - Zij2(1:16) vs dx
+        figure;
+        for i=1:1
+            for j=1:16
+                x=X(i,:,:);
+                y=Zi2(i,:,:) - Zij2(i,:,:,j);
+                hold on; scatter(x(:),y(:),3); hold off;
+            end
+        end
+        daspect([1 1 1]); title(['sbj' num2str(k) ' (Zi - Zij) vs dx']);
     end
 end
 
