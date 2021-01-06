@@ -344,7 +344,7 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
         else
             % if you want to use parallel processing, set NumProcessors more than 2
             % and change for loop to parfor loop
-            NumProcessors = 10;
+            NumProcessors = 20;
 
             if NumProcessors > 1
                 try
@@ -364,19 +364,19 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
             f = load(dlcmName);
             [siOrg, sig, c, maxsi, minsi] = convert2SigmoidSignal(rawSignals{k});
 
+            % training options for DLCM network
+            maxEpochs = 1000;
+            miniBatchSize = ceil(sigLen / 3);
+            options = trainingOptions('adam', ...
+                'ExecutionEnvironment','cpu', ...
+                'MaxEpochs',maxEpochs, ...
+                'MiniBatchSize',miniBatchSize, ...
+                'Shuffle','every-epoch', ...
+                'GradientThreshold',5,...
+                'L2Regularization',0.05, ...
+                'Verbose',false);
+                
             for i=1:R 
-                % training DLCM network
-                maxEpochs = 1000;
-                miniBatchSize = ceil(sigLen / 3);
-                options = trainingOptions('adam', ...
-                    'ExecutionEnvironment','cpu', ...
-                    'MaxEpochs',maxEpochs, ...
-                    'MiniBatchSize',miniBatchSize, ...
-                    'Shuffle','every-epoch', ...
-                    'GradientThreshold',5,...
-                    'L2Regularization',0.05, ...
-                    'Verbose',false);
-
                 Zi(i) = subEC(i,1); % original Zi value
                 Zij(i,:) = subEC(i,2:end); % original Zij value
                 Si1 = ones(nodeNum*2, nodeNum+1);
@@ -399,7 +399,7 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
                     parfor n=1:nMax % traial
                         netDLCM = initDlcmNetwork(si, f.inSignal, [], f.inControl); 
 
-                        disp(['training ' num2str(i) '-' num2str(i) ' dx=' num2str(dx) ' n:' num2str(n)]);
+                        disp(['training ' num2str(k) '-' num2str(i) ' dx=' num2str(dx) ' n:' num2str(n)]);
                         [nodeNetwork, trainInfo] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{i}, options);
 
                         % predict DLCM network
@@ -421,7 +421,7 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
             x=X(i,:,:);
             y=Zi2(i,:,:);
             hold on; scatter(x(:),y(:),3); hold off;
-        end;
+        end
         daspect([1 1 1]);
     end
 end
