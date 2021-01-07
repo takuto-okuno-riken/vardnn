@@ -540,7 +540,7 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
             if exist(tmpfName, 'file')
                 load(tmpfName);
                 idx = find(X(:, 1, 1)==0);
-                rstart =idx(1) - 1;
+                rstart =idx(1);
             else
                 Zi2 = zeros(R, nMax, 17);
                 X = zeros(R, nMax, 17);
@@ -804,8 +804,8 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
             tmpfName = ['results/adsim2-checkRelation3-' group '-' num2str(k) '_tmp.mat'];
             if exist(tmpfName, 'file')
                 load(tmpfName);
-                idx = find(X(:, 1, 1)==0);
-                rstart =idx(1) - 1;
+                idx = find(X(:, 1, 3)==0);
+                rstart =idx(1);
             else
                 Zi2 = zeros(R, nMax, ampsLen);
                 X = zeros(R, nMax, ampsLen);
