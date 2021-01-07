@@ -99,7 +99,8 @@ function simulateAlzheimerDLCM2
     sigSmadDLWs = (smadDLWs - nanmean(smadDLWs(:))) / nanstd(smadDLWs(:),1);
 
     % check relation between Zi vs signal mean diff, and Zij vs signal amplitude
-    checkRelationSubDLWandSignals(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'cn');
+    checkRelationSubDLWandSignals(cnSignals, cnDLWs, cnSubDLWs, 'cn', 0);
+    checkRelationSubDLWandSignals(smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
 
     % re-train CN signals with shifting signals and expanding EC amplitude (type4)
     shiftAndExpandAmplitude(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'cn');
@@ -504,13 +505,13 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(rawSi
     end
 end
 
-function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, simDLWs, simSubDLWs, group)
-    nodeNum = size(rawSignals{1},1);
-    sigLen = size(rawSignals{1},2);
-    sbjNum = length(rawSignals);
-    R = 8;
-    nMax = 20;
-    sbjMax = 4;
+function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
+    nodeNum = size(signals{1},1);
+    sigLen = size(signals{1},2);
+    sbjNum = length(signals);
+    R = nodeNum; %8;
+    nMax = 10;
+    sbjMax = 1; %4;
 
     % checking signal parallel shift effect for Zi, Zij and ECij'
     for k=1:sbjMax
@@ -523,7 +524,7 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
         else
             % if you want to use parallel processing, set NumProcessors more than 2
             % and change for loop to parfor loop
-            NumProcessors = 20;
+            NumProcessors = 10;
 
             if NumProcessors > 1
                 try
@@ -534,15 +535,25 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
                 end
                 parpool(NumProcessors);
             end
-    
-            Zi2 = zeros(R, nMax, 17);
-            X = zeros(R, nMax, 17);
-            Zij2 = zeros(R, nMax, 17, nodeNum);
-            
+
+            tmpfName = ['results/adsim2-checkRelation-' group '-' num2str(k) '_tmp.mat'];
+            if exist(tmpfName, 'file')
+                load(tmpfName);
+                idx = find(X(:, 1, 1)==0);
+                rstart =idx(1) - 1;
+            else
+                Zi2 = zeros(R, nMax, 17);
+                X = zeros(R, nMax, 17);
+                Zij2 = zeros(R, nMax, 17, nodeNum);
+                rstart = 1;
+            end
             dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
-            [siOrg, sig, c, maxsi, minsi] = convert2SigmoidSignal(rawSignals{k});
-
+            if isRaw
+                siOrg = signals{k};
+            else
+                [siOrg, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{k});
+            end
             % training options for DLCM network
             maxEpochs = 1000;
             miniBatchSize = ceil(sigLen / 3);
@@ -555,9 +566,7 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
                 'L2Regularization',0.05, ...
                 'Verbose',false);
                 
-            for i=1:R 
-                Zi(i) = subEC(i,1); % original Zi value
-                Zij(i,:) = subEC(i,2:end); % original Zij value
+            for i=rstart:R 
                 Si1 = ones(nodeNum*2, nodeNum+1);
                 Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
                 filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
@@ -590,8 +599,9 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
                         X(i, n, a+1) = dx;
                     end
                 end
+                save(tmpfName, 'Zi2', 'Zij2', 'X');
             end
-            save(outfName, 'Zi', 'Zi2', 'Zij2', 'X');
+            save(outfName, 'Zi2', 'Zij2', 'X');
 
             % shutdown parallel processing
             if NumProcessors > 1
@@ -633,7 +643,6 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
         end
         hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' (Zi - Zij) vs dx']);
     end
-
     % checking signal amplitude change effect for Zi, Zij and ECij'
 %{
     amps = [0, 0.01, 0.05, 0.1, 0.2, 0.5, 1, 1.2, 1.5, 2, 3, 5, 8];
@@ -648,7 +657,7 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
         else
             % if you want to use parallel processing, set NumProcessors more than 2
             % and change for loop to parfor loop
-            NumProcessors = 20;
+            NumProcessors = 10;
 
             if NumProcessors > 1
                 try
@@ -791,14 +800,26 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
                 end
                 parpool(NumProcessors);
             end
-    
-            Zi2 = zeros(R, nMax, ampsLen);
-            X = zeros(R, nMax, ampsLen);
-            Zij2 = zeros(R, nMax, ampsLen, nodeNum);
+
+            tmpfName = ['results/adsim2-checkRelation3-' group '-' num2str(k) '_tmp.mat'];
+            if exist(tmpfName, 'file')
+                load(tmpfName);
+                idx = find(X(:, 1, 1)==0);
+                rstart =idx(1) - 1;
+            else
+                Zi2 = zeros(R, nMax, ampsLen);
+                X = zeros(R, nMax, ampsLen);
+                Zij2 = zeros(R, nMax, ampsLen, nodeNum);
+                rstart = 1;
+            end
             
             dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
-            [siOrg, sig, c, maxsi, minsi] = convert2SigmoidSignal(rawSignals{k});
+            if isRaw
+                siOrg = signals{k};
+            else
+                [siOrg, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{k});
+            end
 
             % training options for DLCM network
             maxEpochs = 1000;
@@ -812,9 +833,7 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
                 'L2Regularization',0.05, ...
                 'Verbose',false);
                 
-            for i=1:R 
-                Zi(i) = subEC(i,1); % original Zi value
-                Zij(i,:) = subEC(i,2:end); % original Zij value
+            for i=rstart:R 
                 Si1 = ones(nodeNum*2, nodeNum+1);
                 Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
                 filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
@@ -850,8 +869,9 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
                         X(i, n, a) = amp;
                     end
                 end
+                save(tmpfName, 'Zi2', 'Zij2', 'X');
             end
-            save(outfName, 'Zi', 'Zi2', 'Zij2', 'X');
+            save(outfName, 'Zi2', 'Zij2', 'X');
 
             % shutdown parallel processing
             if NumProcessors > 1
