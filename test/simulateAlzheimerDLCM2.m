@@ -82,7 +82,7 @@ function simulateAlzheimerDLCM2
         figure; cnsmcn4DLWrs(k) = plotTwoSignalsCorrelation(meanCnDLW, meanSmcn4DLW);
     end
 %}
-    % re-train CN & AD signals with expanded EC amplitude (type3)
+    % re-train CN signals with expanded EC amplitude (type3)
     % -- no effect. trained DLCM network showed bad simulation signals
     S2 = ones(nodeNum, nodeNum+1);
     S2(:,2:end) = S2(:, 2:end) - eye(nodeNum);
@@ -100,6 +100,9 @@ function simulateAlzheimerDLCM2
 
     % check relation between Zi vs signal mean diff, and Zij vs signal amplitude
     checkRelationSubDLWandSignals(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'cn');
+
+    % re-train CN signals with shifting signals and expanding EC amplitude (type4)
+    shiftAndExpandAmplitude(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'cn');
 
 %    [smrccnDLs, meanSmrccnDL, ~] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlcm', 1);
 %    [smrccnDLWs, meanSmrccnDLW, ~] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlw', 1);
@@ -323,6 +326,184 @@ function simulateAlzheimerDLCM2
 end
 
 % ==================================================================================================================
+function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(rawSignals, DLWs, subDLWs, simSignals, simDLWs, simSubDLWs, group)
+    nodeNum = size(rawSignals{1},1);
+    sigLen = size(rawSignals{1},2);
+    sbjNum = length(rawSignals);
+    R = nodeNum;
+    nMax = 3;
+    sbjMax = 4;
+
+    shiftDLWs = simDLWs;
+    shiftSubDLWs = simSubDLWs;
+    shiftSignals = cell(sbjNum,1);
+
+    % checking signal parallel shift effect for Zi, Zij and ECij'
+    for k=1:sbjMax
+        EC = DLWs(:,:,k);
+        subEC = subDLWs(:,:,k);
+        smSi = simSignals{k};
+        smEC = simDLWs(:,:,k);
+        smSubEC = simSubDLWs(:,:,k);
+        sftSubEC = smSubEC;
+
+        % plot correlation of original Zi vs simulating Zi
+        corrZi = corr2(subEC(1:R,1), smSubEC(1:R,1));
+        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
+        for i=1:R
+            plotTwoSignalsCorrelation(subEC(i,1), smSubEC(i,1), [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.3+0.2*ceil(i/100)], 'd', 8);
+        end
+        hold off; title(['sbj' num2str(k) ' Zi corr: original vs simulating']);
+        % plot correlation of original Zij vs simulating Zij
+        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
+        for i=1:R
+            X = subEC(i,2:end);
+            Y = smSubEC(i,2:end);
+            corrZij(i) = corr2(X(~isnan(X)), Y(~isnan(Y)));
+            plotTwoSignalsCorrelation(X, Y, [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
+        end
+        hold off; title(['sbj' num2str(k) ' Zij corr: original vs simulating']);
+        % plot original signals
+        figure; hold on;
+        plot(smSi','Color',[0.8, 0.8, 0.8]);
+        plot(smSi(1:R,:)');
+        hold off; title(['sbj' num2str(k) ' simulating signals']);
+
+        outfName = ['results/adsim2-shiftAmp-' group '-' num2str(k) '.mat'];
+        if exist(outfName, 'file')
+            load(outfName);
+        else
+            sftSubECs = zeros(nodeNum,nodeNum+1,nMax);
+            sftSignals = {};
+            corrZi2 = zeros(1,nMax);
+            corrZij2 = zeros(R,nMax);
+        end
+
+        nstart = length(sftSignals) + 1;
+        if nstart > 1
+            smSi = sftSignals{nstart-1};
+            sftSubEC = sftSubECs(:,:,nstart-1);
+        end
+        for n=nstart:nMax
+            % shift mean value of simulating signal
+            if n >= 2
+                for i=1:R
+                    dZi = sftSubEC(i,1) - subEC(i,1); % smZi - Zi
+                    smSi(i,:) = smSi(i,:) - dZi * 2 / 3;
+                end
+            end
+            % amplitude expansion of simulating signal
+            if n == 1
+                for i=1:R
+                    sdsftZij = nanstd(sftSubEC(i,2:end),1);
+                    sdZij = nanstd(subEC(i,2:end),1);
+                    a = 0.2 * (sdZij / sdsftZij) / 0.11;
+                    m = nanmean(smSi(i,:));
+                    smSi(i,:) = (smSi(i,:) - m) .* a + m;
+                end
+                smSi = convert2SigmoidSignal(smSi);
+            end
+            sftSignals{n} = smSi;
+
+            % plot shifted simulating signals
+            figure; hold on;
+            plot(smSi','Color',[0.8, 0.8, 0.8]);
+            plot(smSi(1:R,:)');
+            hold off; title(['sbj' num2str(k) ' shifted simulating signals']);
+
+            % load original signal
+            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            f = load(dlcmName);
+
+            Si1 = ones(nodeNum*2, nodeNum+1);
+            Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
+            filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
+            Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
+
+            % training DLCM network
+            maxEpochs = 1000;
+            miniBatchSize = ceil(sigLen / 3);
+            options = trainingOptions('adam', ...
+                'ExecutionEnvironment','cpu', ...
+                'MaxEpochs',maxEpochs, ...
+                'MiniBatchSize',miniBatchSize, ...
+                'Shuffle','every-epoch', ...
+                'GradientThreshold',5,...
+                'L2Regularization',0.05, ...
+                'Verbose',false);
+
+            % if you want to use parallel processing, set NumProcessors more than 2
+            % and change for loop to parfor loop
+            NumProcessors = 11;
+
+            if NumProcessors > 1
+                try
+                    disp('Destroing any existance matlab pool session');
+                    parpool('close');
+                catch
+                    disp('No matlab pool session found');
+                end
+                parpool(NumProcessors);
+            end
+
+%            for i=1:R
+            parfor i=1:R
+                netDLCM = initDlcmNetwork(smSi, f.inSignal, [], f.inControl); 
+
+                nodeTeach = smSi(i,2:end);
+                nodeInput = [smSi(:,1:end-1); f.inSignal(:,1:end-1)];
+                filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
+                nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
+
+                disp(['training sbj' num2str(k) ' ' num2str(n) '-' num2str(i)]);
+                [nodeNetwork, trainInfo] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{i}, options);
+
+                % predict DLCM network
+                sftSubEC(i,:) = predict(nodeNetwork, Si1);
+            end
+            sftSubECs(:,:,n) = sftSubEC;
+
+            % shutdown parallel processing
+            if NumProcessors > 1
+                delete(gcp('nocreate'))
+            end
+
+            % calcate correlation
+            corrZi2(n) = corr2(subEC(1:R,1), sftSubEC(1:R,1));
+            for i=1:R
+                X = subEC(i,2:end);
+                Y = sftSubEC(i,2:end); Y(i) = nan;
+                corrZij2(i,n) = corr2(X(~isnan(X)), Y(~isnan(Y)));
+            end
+            save(outfName, 'corrZi', 'corrZi2', 'corrZij', 'corrZij2', 'sftSubECs', 'sftSignals');
+        end
+
+        % find most correlated Zi & Zij signals
+        [m, idx] = max(corrZi2);
+        sftSubEC = sftSubECs(:,:,idx);
+
+        % plot correlation of original Zi vs shifted simulating Zi
+        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]); title(['sbj' num2str(k) ' Zi corr: original vs shifted sim']);
+        for i=1:R
+            plotTwoSignalsCorrelation(subEC(i,1), sftSubEC(i,1), [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.3+0.2*ceil(i/100)], 'd', 8);
+        end
+        hold off;
+        % plot correlation of original Zij vs simulating Zij
+        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
+        for i=1:R
+            X = subEC(i,2:end);
+            Y = sftSubEC(i,2:end); Y(i) = nan;
+            plotTwoSignalsCorrelation(X, Y, [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
+        end
+        hold off; title(['sbj' num2str(k) ' Zij corr: original vs shifted sim']);
+                
+        % set output matrix
+        shiftDLWs(:,:,k) = abs(repmat(sftSubEC(:,1),[1 nodeNum]) - sftSubEC(:,2:end));
+        shiftSubDLWs(:,:,k) = sftSubEC;
+        shiftSignals{k} = sftSignals{idx};
+    end
+end
+
 function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, simDLWs, simSubDLWs, group)
     nodeNum = size(rawSignals{1},1);
     sigLen = size(rawSignals{1},2);
@@ -335,9 +516,6 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
     for k=1:sbjMax
         EC = DLWs(:,:,k);
         subEC = subDLWs(:,:,k);
-        smSi = simSignals{k};
-        smEC = simDLWs(:,:,k);
-        smSubEC = simSubDLWs(:,:,k);
         
         outfName = ['results/adsim2-checkRelation-' group '-' num2str(k) '.mat'];
         if exist(outfName, 'file')
@@ -422,38 +600,42 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
         end
         
         % plot result -- Zi2 vs dx
-        figure;
+        figure; hold on;
         for i=1:R
             x=X(i,:,:);
             y=Zi2(i,:,:);
-            hold on; scatter(x(:),y(:),3); hold off;
+            scatter(x(:),y(:),3);
         end
-        daspect([1 1 1]); title(['sbj' num2str(k) ' Zi vs dx']);
+        a=1.5; b=nanmean(Zi2(:,:,9),'all');
+        plot([-0.4 0.4], [-0.4*a+b 0.4*a+b],':','Color',[0.2 0.2 0.2]);
+        hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' Zi vs dx']);
 
         % plot result -- Zij2(1:16) vs dx
-        figure;
+        figure; hold on; 
         for i=1:1
             for j=1:16
                 x=X(i,:,:);
                 y=Zij2(i,:,:,j);
-                hold on; scatter(x(:),y(:),3); hold off;
+                scatter(x(:),y(:),3);
             end
         end
-        daspect([1 1 1]); title(['sbj' num2str(k) ' Zij vs dx']);
+        plot([-0.4 0.4], [-0.4*a+b 0.4*a+b],':','Color',[0.2 0.2 0.2]);
+        hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' Zij vs dx']);
 
         % plot result -- Zi - Zij2(1:16) vs dx
-        figure;
+        figure; hold on;
         for i=1:1
             for j=1:16
                 x=X(i,:,:);
                 y=Zi2(i,:,:) - Zij2(i,:,:,j);
-                hold on; scatter(x(:),y(:),3); hold off;
+                scatter(x(:),y(:),3);
             end
         end
-        daspect([1 1 1]); title(['sbj' num2str(k) ' (Zi - Zij) vs dx']);
+        hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' (Zi - Zij) vs dx']);
     end
-    
+
     % checking signal amplitude change effect for Zi, Zij and ECij'
+%{
     amps = [0, 0.01, 0.05, 0.1, 0.2, 0.5, 1, 1.2, 1.5, 2, 3, 5, 8];
     ampsLen = length(amps);
     for k=1:sbjMax
@@ -544,35 +726,179 @@ function checkRelationSubDLWandSignals(rawSignals, DLWs, subDLWs, simSignals, si
         end
         
         % plot result -- Zi2 vs dx
-        figure;
+        figure; hold on; 
         for i=1:R
             x=X(i,:,:);
             y=Zi2(i,:,:);
-            hold on; scatter(x(:),y(:),3); hold off;
+            scatter(x(:),y(:),3);
         end
-        daspect([1 1 1]); title(['sbj' num2str(k) ' Zi vs dx']);
+        hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' Zi vs dx']);
 
-        % plot result -- Zij2(1:16) vs dx
-        figure;
+        % plot result -- Zij2(1:64) vs dx
         for i=1:1
-            for j=1:16
+            figure; hold on;
+            for j=1:64
                 x=X(i,:,:);
                 y=Zij2(i,:,:,j);
-                hold on; scatter(x(:),y(:),3); hold off;
+                scatter(x(:),y(:),3);
             end
+            hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' node' num2str(i) ' Zij vs dx']);
         end
-        daspect([1 1 1]); title(['sbj' num2str(k) ' Zij vs dx']);
 
-        % plot result -- Zi - Zij2(1:16) vs dx
-        figure;
-        for i=1:1
-            for j=1:16
+        % plot result -- Zi - Zij2(1:64) vs dx
+        for i=1:1 %R
+            figure; hold on;
+            for j=1:64
                 x=X(i,:,:);
                 y=Zi2(i,:,:) - Zij2(i,:,:,j);
-                hold on; scatter(x(:),y(:),3); hold off;
+                scatter(x(:),y(:),3); 
+            end
+            Y = repmat(squeeze(Zi2(i,:,:)),[1 1 nodeNum]) - squeeze(Zij2(i,:,:,:));
+            ecd1 = Y(:,7,:);
+            ecd8 = Y(:,ampsLen,:);
+            sd1 = std(ecd1(:),1);
+            sd8 = std(ecd8(:),1);
+            epr = 8;
+            a=0.1*(sd8/sd1)/epr; b=0;
+            a2(i) = a;
+            plot([0.5 8], [0.5*a+b 8*a+b],':','Color',[0.2 0.2 0.2]);
+            plot([0.5 8], [-0.5*a+b -8*a+b],':','Color',[0.2 0.2 0.2]);
+            hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' node' num2str(i) ' (Zi - Zij) vs dx']);
+        end
+    end
+%}
+    % checking signal amplitude change effect for Zi, Zij and ECij'
+    amps = [0, 0.01, 0.05, 0.1, 0.2, 0.5, 1, 1.2, 1.5, 2, 3, 5, 8];
+    ampsLen = length(amps);
+    for k=1:sbjMax
+        EC = DLWs(:,:,k);
+        subEC = subDLWs(:,:,k);
+
+        outfName = ['results/adsim2-checkRelation3-' group '-' num2str(k) '.mat'];
+        if exist(outfName, 'file')
+            load(outfName);
+        else
+            % if you want to use parallel processing, set NumProcessors more than 2
+            % and change for loop to parfor loop
+            NumProcessors = 10;
+
+            if NumProcessors > 1
+                try
+                    disp('Destroing any existance matlab pool session');
+                    parpool('close');
+                catch
+                    disp('No matlab pool session found');
+                end
+                parpool(NumProcessors);
+            end
+    
+            Zi2 = zeros(R, nMax, ampsLen);
+            X = zeros(R, nMax, ampsLen);
+            Zij2 = zeros(R, nMax, ampsLen, nodeNum);
+            
+            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            f = load(dlcmName);
+            [siOrg, sig, c, maxsi, minsi] = convert2SigmoidSignal(rawSignals{k});
+
+            % training options for DLCM network
+            maxEpochs = 1000;
+            miniBatchSize = ceil(sigLen / 3);
+            options = trainingOptions('adam', ...
+                'ExecutionEnvironment','cpu', ...
+                'MaxEpochs',maxEpochs, ...
+                'MiniBatchSize',miniBatchSize, ...
+                'Shuffle','every-epoch', ...
+                'GradientThreshold',5,...
+                'L2Regularization',0.05, ...
+                'Verbose',false);
+                
+            for i=1:R 
+                Zi(i) = subEC(i,1); % original Zi value
+                Zij(i,:) = subEC(i,2:end); % original Zij value
+                Si1 = ones(nodeNum*2, nodeNum+1);
+                Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
+                filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
+                Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
+
+                for a=1:ampsLen
+                    si = siOrg;
+                    mvsi = movmean(si,5,2);
+                    amp = amps(a);
+                    si(i,:) = (si(i,:)-mvsi(i,:)) .* amp + mvsi(i,:);
+%{
+                    figure; hold on; plot(siOrg(i,:)'); plot(mvsi(i,:)'); plot(si(i,:)'); hold off; title(['node' num2str(i) ' amp=' num2str(amp)]);
+%}
+                    nodeTeach = si(i,2:end);
+                    nodeInput = [si(:,1:end-1); f.inSignal(:,1:end-1)];
+                    filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
+                    nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
+
+                    subEC2 = cell(nMax,1);
+%                    for n=1:nMax % traial
+                    parfor n=1:nMax % traial
+                        netDLCM = initDlcmNetwork(si, f.inSignal, [], f.inControl); 
+
+                        disp(['training ' num2str(k) '-' num2str(i) ' amp=' num2str(amp) ' n:' num2str(n)]);
+                        [nodeNetwork, trainInfo] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{i}, options);
+
+                        % predict DLCM network
+                        subEC2{n} = predict(nodeNetwork, Si1);
+                    end
+                    for n=1:nMax
+                        Zi2(i, n, a) = subEC2{n}(1);
+                        Zij2(i, n, a,:) = subEC2{n}(2:end);
+                        X(i, n, a) = amp;
+                    end
+                end
+            end
+            save(outfName, 'Zi', 'Zi2', 'Zij2', 'X');
+
+            % shutdown parallel processing
+            if NumProcessors > 1
+                delete(gcp('nocreate'))
             end
         end
-        daspect([1 1 1]); title(['sbj' num2str(k) ' (Zi - Zij) vs dx']);
+        
+        % plot result -- Zi2 vs dx
+        figure; hold on; 
+        for i=1:R
+            x=X(i,:,:);
+            y=Zi2(i,:,:);
+            scatter(x(:),y(:),3);
+        end
+        hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' Zi vs dx']);
+
+        % plot result -- Zij2(1:64) vs dx
+        for i=1:1
+            figure; hold on;
+            for j=1:64
+                x=X(i,:,:);
+                y=Zij2(i,:,:,j);
+                scatter(x(:),y(:),3);
+            end
+            hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' node' num2str(i) ' Zij vs dx']);
+        end
+
+        % plot result -- Zi - Zij2(1:64) vs dx
+        for i=1:R
+            figure; hold on;
+            for j=1:64
+                x=X(i,:,:);
+                y=Zi2(i,:,:) - Zij2(i,:,:,j);
+                scatter(x(:),y(:),3); 
+            end
+            hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' node' num2str(i) ' (Zi - Zij) vs dx']);
+            
+            figure; hold on;
+            ECds = repmat(squeeze(Zi2(i,:,:)),[1 1 nodeNum]) - squeeze(Zij2(i,:,:,:));
+            for a=1:ampsLen
+                x=X(i,1,a);
+                ecd=ECds(:,a,:);
+                y=std(ecd(:),1);
+                scatter(x(:),y(:),3); 
+            end
+            hold off; title(['sbj' num2str(k) ' node' num2str(i) ' std(Zi - Zij) vs dx']);
+        end
     end
 end
 
