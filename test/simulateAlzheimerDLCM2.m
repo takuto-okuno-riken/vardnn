@@ -99,11 +99,11 @@ function simulateAlzheimerDLCM2
     sigSmadDLWs = (smadDLWs - nanmean(smadDLWs(:))) / nanstd(smadDLWs(:),1);
 
     % check relation between Zi vs signal mean diff, and Zij vs signal amplitude
-    checkRelationSubDLWandSignals(cnSignals, cnDLWs, cnSubDLWs, 'cn', 0);
-    checkRelationSubDLWandSignals(smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
+%    checkRelationSubDLWandSignals(cnSignals, cnDLWs, cnSubDLWs, 'cn', 0);
+%    checkRelationSubDLWandSignals(smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
 
     % re-train CN signals with shifting signals and expanding EC amplitude (type4)
-    shiftAndExpandAmplitude(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'cn');
+    shiftAndExpandAmplitude(cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn');
 
 %    [smrccnDLs, meanSmrccnDL, ~] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlcm', 1);
 %    [smrccnDLWs, meanSmrccnDLW, ~] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlw', 1);
@@ -327,12 +327,12 @@ function simulateAlzheimerDLCM2
 end
 
 % ==================================================================================================================
-function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(rawSignals, DLWs, subDLWs, simSignals, simDLWs, simSubDLWs, group)
-    nodeNum = size(rawSignals{1},1);
-    sigLen = size(rawSignals{1},2);
-    sbjNum = length(rawSignals);
+function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDLWs, signals, simDLWs, simSubDLWs, group)
+    nodeNum = size(signals{1},1);
+    sigLen = size(signals{1},2);
+    sbjNum = length(signals);
     R = nodeNum;
-    nMax = 2;
+    nMax = 1;
     sbjMax = 4;
 
     shiftDLWs = simDLWs;
@@ -341,10 +341,8 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(rawSi
 
     % checking signal parallel shift effect for Zi, Zij and ECij'
     for k=1:sbjMax
-        EC = DLWs(:,:,k);
         subEC = subDLWs(:,:,k);
-        smSi = simSignals{k};
-        smEC = simDLWs(:,:,k);
+        smSi = signals{k};
         smSubEC = simSubDLWs(:,:,k);
         sftSubEC = smSubEC;
 
@@ -376,33 +374,31 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(rawSi
         else
             sftSubECs = zeros(nodeNum,nodeNum+1,nMax);
             sftSignals = {};
-            corrZi2 = zeros(1,nMax);
-            corrZij2 = zeros(R,nMax);
+            corrZi2 = nan(1,nMax);
+            corrZij2 = nan(R,nMax);
         end
 
-        nstart = length(sftSignals) + 1;
-        if nstart > 1
-            smSi = sftSignals{nstart-1};
-            sftSubEC = sftSubECs(:,:,nstart-1);
-        end
-        for n=nstart:nMax
+        for n=1:nMax
             % shift mean value of simulating signal
-            if n >= 2
-                for i=1:R
-                    dZi = sftSubEC(i,1) - subEC(i,1); % smZi - Zi
-                    smSi(i,:) = smSi(i,:) - dZi * 2 / 3;
-                end
+            if n >= 1
+                dZi = sftSubEC(:,1) - subEC(:,1); % smZi - Zi
+                smSi = smSi(:,:) - dZi * 2 / 3;
+                smSi(smSi>1.2) = 1.2;
+                smSi(smSi<-0.2) = -0.2;
             end
             % amplitude expansion of simulating signal
-            if n == 1
-                alpha = 5;
+            if n == 0
+                alpha = 1;
                 for i=1:R
                     sdsftZij = nanstd(sftSubEC(i,2:end),1);
                     sdZij = nanstd(subEC(i,2:end),1);
                     b = sdsftZij - 0.032;
                     amp = (sdZij - b) / 0.032 * alpha;
                     mvsi = movmean(smSi,5,2);
-                    smSi(i,:) = (smSi(i,:)-mvsi(i,:)) .* amp + mvsi(i,:);
+                    tsi = (smSi(i,:)-mvsi(i,:)) .* amp + mvsi(i,:);
+                    tsi(tsi>1.2) = 1.2;
+                    tsi(tsi<-0.2) = -0.2;
+                    smSi(i,:) = tsi;
                 end
 %                smSi = convert2SigmoidSignal(smSi);
             end
@@ -414,83 +410,103 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(rawSi
             plot(smSi(1:R,:)');
             hold off; title(['sbj' num2str(k) ' shifted simulating signals']);
 
-            % load original signal
-            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
-            f = load(dlcmName);
+            if isnan(corrZi2(n))
+                % load original signal
+                dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+                f = load(dlcmName);
 
-            Si1 = ones(nodeNum*2, nodeNum+1);
-            Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
-            filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
-            Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
+                Si1 = ones(nodeNum*2, nodeNum+1);
+                Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
+                filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
+                Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
 
-            % training DLCM network
-            maxEpochs = 1000;
-            miniBatchSize = ceil(sigLen / 3);
-            options = trainingOptions('adam', ...
-                'ExecutionEnvironment','cpu', ...
-                'MaxEpochs',maxEpochs, ...
-                'MiniBatchSize',miniBatchSize, ...
-                'Shuffle','every-epoch', ...
-                'GradientThreshold',5,...
-                'L2Regularization',0.05, ...
-                'Verbose',false);
+                % training DLCM network
+                maxEpochs = 1000;
+                miniBatchSize = ceil(sigLen / 3);
+                options = trainingOptions('adam', ...
+                    'ExecutionEnvironment','cpu', ...
+                    'MaxEpochs',maxEpochs, ...
+                    'MiniBatchSize',miniBatchSize, ...
+                    'Shuffle','every-epoch', ...
+                    'GradientThreshold',5,...
+                    'L2Regularization',0.05, ...
+                    'Verbose',false);
 
-            % if you want to use parallel processing, set NumProcessors more than 2
-            % and change for loop to parfor loop
-            NumProcessors = 11;
+                % if you want to use parallel processing, set NumProcessors more than 2
+                % and change for loop to parfor loop
+                NumProcessors = 11;
 
-            if NumProcessors > 1
-                try
-                    disp('Destroing any existance matlab pool session');
-                    parpool('close');
-                catch
-                    disp('No matlab pool session found');
+                if NumProcessors > 1
+                    try
+                        disp('Destroing any existance matlab pool session');
+                        parpool('close');
+                    catch
+                        disp('No matlab pool session found');
+                    end
+                    parpool(NumProcessors);
                 end
-                parpool(NumProcessors);
+
+    %            for i=1:R
+                parfor i=1:R
+                    netDLCM = initDlcmNetwork(smSi, f.inSignal, [], f.inControl); 
+
+                    nodeTeach = smSi(i,2:end);
+                    nodeInput = [smSi(:,1:end-1); f.inSignal(:,1:end-1)];
+                    filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
+                    nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
+
+                    disp(['training sbj' num2str(k) ' ' num2str(n) '-' num2str(i)]);
+                    [nodeNetwork, trainInfo] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{i}, options);
+
+                    % predict DLCM network
+                    sftSubEC(i,:) = predict(nodeNetwork, Si1);
+                end
+                sftSubECs(:,:,n) = sftSubEC;
+
+                % shutdown parallel processing
+                if NumProcessors > 1
+                    delete(gcp('nocreate'))
+                end
+
+                % calcate correlation
+                corrZi2(n) = corr2(subEC(1:R,1), sftSubEC(1:R,1));
+                for i=1:R
+                    X = subEC(i,2:end);
+                    Y = sftSubEC(i,2:end); Y(i) = nan;
+                    corrZij2(i,n) = corr2(X(~isnan(X)), Y(~isnan(Y)));
+                end
+                save(outfName, 'corrZi', 'corrZi2', 'corrZij', 'corrZij2', 'sftSubECs', 'sftSignals');
+            else
+                sftSubEC = sftSubECs(:,:,n);
             end
-
-%            for i=1:R
-            parfor i=1:R
-                netDLCM = initDlcmNetwork(smSi, f.inSignal, [], f.inControl); 
-
-                nodeTeach = smSi(i,2:end);
-                nodeInput = [smSi(:,1:end-1); f.inSignal(:,1:end-1)];
-                filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
-                nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
-
-                disp(['training sbj' num2str(k) ' ' num2str(n) '-' num2str(i)]);
-                [nodeNetwork, trainInfo] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{i}, options);
-
-                % predict DLCM network
-                sftSubEC(i,:) = predict(nodeNetwork, Si1);
+%%{
+            % plot correlation of original Zi vs shifted simulating Zi
+            figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
+            for i=1:R
+                plotTwoSignalsCorrelation(subEC(i,1), sftSubEC(i,1), [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.3+0.2*ceil(i/100)], 'd', 8);
             end
-            sftSubECs(:,:,n) = sftSubEC;
-
-            % shutdown parallel processing
-            if NumProcessors > 1
-                delete(gcp('nocreate'))
-            end
-
-            % calcate correlation
-            corrZi2(n) = corr2(subEC(1:R,1), sftSubEC(1:R,1));
+            hold off; title(['sbj' num2str(k) ' Zi corr: original vs shifted sim']);
+            % plot correlation of original Zij vs simulating Zij
+            figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
             for i=1:R
                 X = subEC(i,2:end);
                 Y = sftSubEC(i,2:end); Y(i) = nan;
-                corrZij2(i,n) = corr2(X(~isnan(X)), Y(~isnan(Y)));
+                plotTwoSignalsCorrelation(X, Y, [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
             end
-            save(outfName, 'corrZi', 'corrZi2', 'corrZij', 'corrZij2', 'sftSubECs', 'sftSignals');
+            hold off; title(['sbj' num2str(k) ' Zij corr: original vs shifted sim']);
+%%}
         end
-
+%{
         % find most correlated Zi & Zij signals
         [m, idx] = max(corrZi2);
         sftSubEC = sftSubECs(:,:,idx);
 
         % plot correlation of original Zi vs shifted simulating Zi
-        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]); title(['sbj' num2str(k) ' Zi corr: original vs shifted sim']);
+        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
         for i=1:R
             plotTwoSignalsCorrelation(subEC(i,1), sftSubEC(i,1), [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.3+0.2*ceil(i/100)], 'd', 8);
         end
-        hold off;
+        hold off; title(['sbj' num2str(k) ' Zi corr: original vs shifted sim']);
         % plot correlation of original Zij vs simulating Zij
         figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
         for i=1:R
@@ -499,7 +515,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(rawSi
             plotTwoSignalsCorrelation(X, Y, [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
         end
         hold off; title(['sbj' num2str(k) ' Zij corr: original vs shifted sim']);
-                
+%}                
         % set output matrix
         shiftDLWs(:,:,k) = abs(repmat(sftSubEC(:,1),[1 nodeNum]) - sftSubEC(:,2:end));
         shiftSubDLWs(:,:,k) = sftSubEC;
