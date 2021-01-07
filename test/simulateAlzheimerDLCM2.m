@@ -332,7 +332,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(rawSi
     sigLen = size(rawSignals{1},2);
     sbjNum = length(rawSignals);
     R = nodeNum;
-    nMax = 3;
+    nMax = 2;
     sbjMax = 4;
 
     shiftDLWs = simDLWs;
@@ -395,14 +395,16 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(rawSi
             end
             % amplitude expansion of simulating signal
             if n == 1
+                alpha = 5;
                 for i=1:R
                     sdsftZij = nanstd(sftSubEC(i,2:end),1);
                     sdZij = nanstd(subEC(i,2:end),1);
-                    a = 0.2 * (sdZij / sdsftZij) / 0.11;
-                    m = nanmean(smSi(i,:));
-                    smSi(i,:) = (smSi(i,:) - m) .* a + m;
+                    b = sdsftZij - 0.032;
+                    amp = (sdZij - b) / 0.032 * alpha;
+                    mvsi = movmean(smSi,5,2);
+                    smSi(i,:) = (smSi(i,:)-mvsi(i,:)) .* amp + mvsi(i,:);
                 end
-                smSi = convert2SigmoidSignal(smSi);
+%                smSi = convert2SigmoidSignal(smSi);
             end
             sftSignals{n} = smSi;
 
@@ -509,7 +511,7 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
     nodeNum = size(signals{1},1);
     sigLen = size(signals{1},2);
     sbjNum = length(signals);
-    R = nodeNum; %8;
+    R = nodeNum;
     nMax = 10;
     sbjMax = 1; %4;
 
@@ -539,6 +541,9 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
             tmpfName = ['results/adsim2-checkRelation-' group '-' num2str(k) '_tmp.mat'];
             if exist(tmpfName, 'file')
                 load(tmpfName);
+                if size(X,1) < R
+                    X(R,nMax,17) = 0;
+                end
                 idx = find(X(:, 1, 1)==0);
                 rstart =idx(1);
             else
@@ -804,6 +809,9 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
             tmpfName = ['results/adsim2-checkRelation3-' group '-' num2str(k) '_tmp.mat'];
             if exist(tmpfName, 'file')
                 load(tmpfName);
+                if size(X,1) < R
+                    X(R,nMax,ampsLen) = 0;
+                end
                 idx = find(X(:, 1, 3)==0);
                 rstart =idx(1);
             else
@@ -900,6 +908,7 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
         end
 
         % plot result -- Zi - Zij2(1:64) vs dx
+%{
         for i=1:R
             figure; hold on;
             for j=1:64
@@ -908,17 +917,27 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
                 scatter(x(:),y(:),3); 
             end
             hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' node' num2str(i) ' (Zi - Zij) vs dx']);
-            
-            figure; hold on;
+        end
+%}
+        x = zeros(R, ampsLen);
+        y = zeros(R, ampsLen);
+        figure; hold on;
+        for i=1:R
             ECds = repmat(squeeze(Zi2(i,:,:)),[1 1 nodeNum]) - squeeze(Zij2(i,:,:,:));
             for a=1:ampsLen
-                x=X(i,1,a);
+                x(i,a)=X(i,1,a);
                 ecd=ECds(:,a,:);
-                y=std(ecd(:),1);
-                scatter(x(:),y(:),3); 
+                y(i,a)=std(ecd(:),1);
             end
-            hold off; title(['sbj' num2str(k) ' node' num2str(i) ' std(Zi - Zij) vs dx']);
+            scatter(x(i,:),y(i,:), 3, [0.1*mod(i,10) 0.2*ceil(i/10) 0.5]);
+            plot(x(i,:),y(i,:), ':', 'Color', [0.1*mod(i,10) 0.2*ceil(i/10) 0.5]);
         end
+        mx=mean(x,1); my=mean(y,1);
+        scatter(mx,my, 7, [0 0 0], 'd');
+        plot(mx,my, '--', 'Color', [0 0 0], 'LineWidth',0.5);
+        a=0.032; b=0.005;
+        plot([1 8], [1*a+b 8*a+b],'-','Color',[1 0.2 0.2]);
+        hold off; title(['sbj' num2str(k) ' node' num2str(i) ' std(Zi - Zij) vs dx']);
     end
 end
 
