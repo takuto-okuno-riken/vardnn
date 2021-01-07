@@ -894,7 +894,7 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
             y=Zi2(i,:,:);
             scatter(x(:),y(:),3);
         end
-        hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' Zi vs dx']);
+        hold off; title(['sbj' num2str(k) ' Zi vs dx']);
 
         % plot result -- Zij2(1:64) vs dx
         for i=1:1
@@ -904,7 +904,7 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
                 y=Zij2(i,:,:,j);
                 scatter(x(:),y(:),3);
             end
-            hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' node' num2str(i) ' Zij vs dx']);
+            hold off; title(['sbj' num2str(k) ' node' num2str(i) ' Zij vs dx']);
         end
 
         % plot result -- Zi - Zij2(1:64) vs dx
