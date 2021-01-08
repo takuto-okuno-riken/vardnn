@@ -943,8 +943,8 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
 
         % plot result -- Zij2(1:16) vs dx
         figure; hold on; 
-        for i=1:1
-            for j=1:16
+        for i=1:16
+            for j=1:R
                 x=X(i,:,:);
                 y=Zij2(i,:,:,j);
                 scatter(x(:),y(:),3);
@@ -955,8 +955,8 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
 
         % plot result -- Zi - Zij2(1:16) vs dx
         figure; hold on;
-        for i=1:1
-            for j=1:16
+        for i=1:16
+            for j=1:R
                 x=X(i,:,:);
                 y=Zi2(i,:,:) - Zij2(i,:,:,j);
                 scatter(x(:),y(:),3);
@@ -1213,9 +1213,9 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
         hold off; title(['sbj' num2str(k) ' Zi vs dx']);
 
         % plot result -- Zij2(1:64) vs dx
-        for i=1:1
+        for i=1:4
             figure; hold on;
-            for j=1:64
+            for j=1:R
                 x=X(i,:,:);
                 y=Zij2(i,:,:,j);
                 scatter(x(:),y(:),3);
@@ -1245,8 +1245,8 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
                 ecd=ECds(:,a,:);
                 y(i,a)=std(ecd(:),1);
             end
-            scatter(x(i,:),y(i,:), 3, [0.1*mod(i,10) 0.2*ceil(i/10) 0.5]);
-            plot(x(i,:),y(i,:), ':', 'Color', [0.1*mod(i,10) 0.2*ceil(i/10) 0.5]);
+            scatter(x(i,:),y(i,:), 3, [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.3+0.2*ceil(i/100)]);
+            plot(x(i,:),y(i,:), ':', 'Color', [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.3+0.2*ceil(i/100)]);
         end
         mx=mean(x,1); my=mean(y,1);
         scatter(mx,my, 7, [0 0 0], 'd');
