@@ -550,7 +550,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
             plotTwoSignalsCorrelation(X, Y, [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
         end
         hold off; title(['sbj' num2str(k) ' Zij corr: original vs shifted sim']);
-%}                
+%}
         % set output matrix
         shiftDLWs(:,:,k) = abs(repmat(sftSubEC(:,1),[1 nodeNum]) - sftSubEC(:,2:end));
         shiftSubDLWs(:,:,k) = sftSubEC;
@@ -565,9 +565,15 @@ function checkRelationSubDLWandSignals3(signals, DLWs, subDLWs, smDLWs, smSubDLW
     sbjNum = length(signals);
     sbjMax = sbjNum;
 
-    % checking signal amplitude change effect for Zi, Zij and ECij'
     amps = [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
     ampsLen = length(amps);
+
+    % calc correlation
+    ZiCr = nan(sbjMax, ampsLen+1, 1);
+    ZijCr = nan(sbjMax, ampsLen+1, nodeNum);
+    cosSim = nan(sbjMax, ampsLen+1,1);
+
+    % checking signal amplitude change effect for Zi, Zij and ECij'
     for k=1:sbjMax
         EC = DLWs(:,:,k);
         subEC = subDLWs(:,:,k);
@@ -667,31 +673,63 @@ function checkRelationSubDLWandSignals3(signals, DLWs, subDLWs, smDLWs, smSubDLW
             end
         end
 
-        % plot correlation of original Zij vs simulating Zij
+        % plot correlation of original vs simulating
         figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
         for i=1:nodeNum
             X = subEC(i,2:end);
             Y = smSubEC(i,2:end); Y(i) = nan;
             plotTwoSignalsCorrelation(X, Y, [0.3+0.07*mod(i,10) 0.3+0.07*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
         end
+        for i=1:nodeNum
+            plotTwoSignalsCorrelation(subEC(i,1), smSubEC(i,1), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'd', 8);
+        end
         hold off; title(['sbj' num2str(k) ' Zij corr: original vs simulated']);
+        figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]);
+        for i=1:nodeNum
+            plotTwoSignalsCorrelation(EC(i,:), smEC(i,:), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'x', 5);
+        end
+        hold off; title(['sbj' num2str(k) ' EC corr: original vs simulated']);
+        % calc correlation of original vs simulating
+        ZiCr(k,1) = corr2(subEC(:,1), smSubEC(:,1));
+        for i=1:nodeNum
+            X = subEC(i,2:end);
+            Y = smSubEC(i,2:end); Y(i) = nan;
+            ZijCr(k,1,i) = corr2(X(~isnan(X)), Y(~isnan(Y)));
+        end
 
-        cr1 = nan(ampsLen, nodeNum);
-        cr2 = nan(ampsLen, 1);
         for a=1:ampsLen
+            % plot correlation of original vs simulating
+            %{
             figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
             for i=1:nodeNum
                 X = subEC(i,2:end);
                 Y = subEC2s{a}(i,2:end); Y(i) = nan;
-                cr1(a,i) = plotTwoSignalsCorrelation(X, Y, [0.3+0.07*mod(i,10) 0.3+0.07*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
+                plotTwoSignalsCorrelation(X, Y, [0.3+0.07*mod(i,10) 0.3+0.07*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
             end
             for i=1:nodeNum
-                plotTwoSignalsCorrelation(subEC(i,1), subEC2s{a}(i,1), [0.6+0.2*ceil(i/100) 0.2+0.1*mod(i,5) 0.2+0.1*ceil(mod(i,50)/10)], 'd', 8);
+                plotTwoSignalsCorrelation(subEC(i,1), subEC2s{a}(i,1), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'd', 8);
             end
-            cr2(a) = corr2(subEC(:,1), subEC2s{a}(:,1));
             hold off; title(['sbj' num2str(k) ' amp=' num2str(amps(a)) ' Zij corr: original vs shifted sim']);
+            figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]);
+            for i=1:nodeNum
+                plotTwoSignalsCorrelation(EC(i,:), EC2s{a}(i,:), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'x', 5);
+            end
+            hold off; title(['sbj' num2str(k) ' amp=' num2str(amps(a)) ' EC corr: original vs shifted sim']);
+            %}
+            % calc correlation of original vs simulating
+            ZiCr(k,a+1) = corr2(subEC(:,1), subEC2s{a}(:,1));
+            for i=1:nodeNum
+                X = subEC(i,2:end);
+                Y = subEC2s{a}(i,2:end); Y(i) = nan;
+                ZijCr(k,a+1,i) = corr2(X(~isnan(X)), Y(~isnan(Y)));
+            end
         end
-        save(outfName, 'EC2s', 'subEC2s', 'inSignal', 'inControl', 'ampSi', 'ampSi2', 'ampNet', 'ampNet2', 'cr1', 'cr2');
+        % calc cos similarity
+        cosSim(k,1) = getCosSimilarity(EC, smEC);
+        for a=1:ampsLen
+            cosSim(k,a+1) = getCosSimilarity(EC, EC2s{a});
+        end
+        save(outfName, 'EC2s', 'subEC2s', 'inSignal', 'inControl', 'ampSi', 'ampSi2', 'ampNet', 'ampNet2', 'ZiCr', 'ZijCr', 'cosSim');
     end
 end
 
