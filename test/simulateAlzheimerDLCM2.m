@@ -102,7 +102,8 @@ function simulateAlzheimerDLCM2
 %    checkRelationSubDLWandSignals(cnSignals, cnDLWs, cnSubDLWs, 'cn', 0);
 %    checkRelationSubDLWandSignals(smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
 %    checkRelationSubDLWandSignals2(cnSignals, cnDLWs, cnSubDLWs, smcnDLWs, smcnSubDLWs, 'cn');
-    checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnDLWs, smcnSubDLWs, 'cn');
+    [smcn7DLWs, smcn7SubDLWs, smcn7Signals] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'cn');
+    meanSmcn7DLW = nanmean(smcn7DLWs,3);
 
     % re-train CN signals with shifting signals and expanding EC amplitude (type4)
     [smcn6DLWs, smcn6SubDLWs, smcn6Signals] = shiftAndExpandAmplitude(cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
@@ -559,11 +560,21 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
     save(sfName, 'shiftDLWs', 'shiftSubDLWs', 'shiftSignals');
 end
 
-function checkRelationSubDLWandSignals3(signals, DLWs, subDLWs, smDLWs, smSubDLWs, group)
+function [ampDLWs, ampSubDLWs, ampSignals] = checkRelationSubDLWandSignals3(signals, DLWs, subDLWs, smSignals, smDLWs, smSubDLWs, group)
     nodeNum = size(signals{1},1);
     sigLen = size(signals{1},2);
     sbjNum = length(signals);
     sbjMax = sbjNum;
+
+    sfName = ['results/adsim2-checkRelation6-' group '-all.mat'];
+    if exist(sfName, 'file')
+        load(sfName);
+        return;
+    end
+    
+    ampDLWs = DLWs;
+    ampSubDLWs = subDLWs;
+    ampSignals = cell(sbjNum,1);
 
     amps = [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
     ampsLen = length(amps);
@@ -730,7 +741,20 @@ function checkRelationSubDLWandSignals3(signals, DLWs, subDLWs, smDLWs, smSubDLW
             cosSim(k,a+1) = getCosSimilarity(EC, EC2s{a});
         end
         save(outfName, 'EC2s', 'subEC2s', 'inSignal', 'inControl', 'ampSi', 'ampSi2', 'ampNet', 'ampNet2', 'ZiCr', 'ZijCr', 'cosSim');
+        
+        % find most similar signal
+        [m,idx] = max(cosSim(k,:));
+        if idx==1
+            ampSignals{k} = smSignals{k};
+            ampDLWs(:,:,k) = smDLWs(:,:,k);
+            ampSubDLWs(:,:,k) = smSubDLWs(:,:,k);
+        else
+            ampSignals{k} = ampSi2{idx-1};
+            ampDLWs(:,:,k) = EC2s{idx-1};
+            ampSubDLWs(:,:,k) = subEC2s{idx-1};
+        end
     end
+    save(sfName, 'ampDLWs', 'ampSubDLWs', 'ampSignals', 'ZiCr', 'ZijCr', 'cosSim');
 end
 
 function checkRelationSubDLWandSignals2(signals, DLWs, subDLWs, smDLWs, smSubDLWs, group)
@@ -1020,7 +1044,7 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
     sbjNum = length(signals);
     R = nodeNum;
     nMax = 10;
-    sbjMax = 1; %4;
+    sbjMax = 4;
 
     % checking signal parallel shift effect for Zi, Zij and ECij'
     for k=1:sbjMax
