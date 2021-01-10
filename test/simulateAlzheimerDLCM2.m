@@ -657,10 +657,10 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
         [ZiCr(k,1), ZijCr(k,1,:)] = calcCorrelationZiZij(subEC, smSubEC, nodeNum);
 
         % plot & calc correlation of original vs simulating
-        for a=1:ampsLen
-            plotCorrelationZiZij(EC, subEC, EC2s{a}, subEC2s{a}, nodeNum, ['sbj' num2str(k) ' amp=' num2str(amps(a))], 'original', 'shifted sim');
-            [ZiCr(k,a+1), ZijCr(k,a+1,:)] = calcCorrelationZiZij(subEC, subEC2s{a}, nodeNum);
-        end
+%        for a=1:ampsLen
+%            plotCorrelationZiZij(EC, subEC, EC2s{a}, subEC2s{a}, nodeNum, ['sbj' num2str(k) ' amp=' num2str(amps(a))], 'original', 'shifted sim');
+%            [ZiCr(k,a+1), ZijCr(k,a+1,:)] = calcCorrelationZiZij(subEC, subEC2s{a}, nodeNum);
+%        end
 
         % calc cos similarity
         cosSim(k,1) = getCosSimilarity(EC, smEC);
@@ -683,7 +683,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
             ampDLs(:,:,k) = calcDlcmGCI(ampSi2{idx-1}, inSignal, [], inControl, ampNet2{idx-1});
         end
     end
-    save(sfName, 'ampDLWs', 'ampSubDLWs', 'ampSignals', 'ZiCr', 'ZijCr', 'cosSim');
+    save(sfName, 'ampDLWs', 'ampSubDLWs', 'ampSignals', 'ampDLs', 'ZiCr', 'ZijCr', 'cosSim');
 end
 
 function plotCorrelationZiZij(EC, subEC, smEC, smSubEC, nodeNum, prefix, orig, sim)
