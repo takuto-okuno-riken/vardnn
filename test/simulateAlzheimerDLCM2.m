@@ -250,6 +250,7 @@ function simulateAlzheimerDLCM2
         cosSims(i,11) = getCosSimilarity(meanCnDL, cnDLs(:,:,i));
         cosSims(i,12) = getCosSimilarity(meanCnDL, smcnDLs(:,:,i));
         cosSims(i,13) = getCosSimilarity(meanCnDL, smcn2DLs(:,:,i));
+        cosSims(i,14) = getCosSimilarity(meanCnDL, smcn7DLs(:,:,i));
         cosSims(i,21) = getCosSimilarity(meanCnFC, cnFCs(:,:,i));
         cosSims(i,22) = getCosSimilarity(meanCnFC, smcnFCs(:,:,i));
         cosSims(i,23) = getCosSimilarity(meanCnFC, smcn2FCs(:,:,i));
@@ -300,6 +301,7 @@ function simulateAlzheimerDLCM2
         cosSims(i,4) = getCosSimilarity(cnDLWs(:,:,i), smcn7DLWs(:,:,i));
         cosSims(i,11) = getCosSimilarity(cnDLs(:,:,i), smcnDLs(:,:,i));
         cosSims(i,12) = getCosSimilarity(cnDLs(:,:,i), smcn2DLs(:,:,i));
+        cosSims(i,13) = getCosSimilarity(cnDLs(:,:,i), smcn7DLs(:,:,i));
         cosSims(i,21) = getCosSimilarity(cnFCs(:,:,i), smcnFCs(:,:,i));
         cosSims(i,22) = getCosSimilarity(cnFCs(:,:,i), smcn2FCs(:,:,i));
         cosSims(i,23) = getCosSimilarity(cnFCs(:,:,i), smcn6FCs(:,:,i));
