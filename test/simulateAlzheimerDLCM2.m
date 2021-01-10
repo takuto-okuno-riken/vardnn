@@ -102,8 +102,9 @@ function simulateAlzheimerDLCM2
 %    checkRelationSubDLWandSignals(cnSignals, cnDLWs, cnSubDLWs, 'cn', 0);
 %    checkRelationSubDLWandSignals(smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
 %    checkRelationSubDLWandSignals2(cnSignals, cnDLWs, cnSubDLWs, smcnDLWs, smcnSubDLWs, 'cn');
-    [smcn7DLWs, smcn7SubDLWs, smcn7Signals] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'cn');
+    [smcn7DLWs, smcn7SubDLWs, smcn7Signals, smcn7DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn');
     meanSmcn7DLW = nanmean(smcn7DLWs,3);
+    meanSmcn7DL = nanmean(smcn7DLs,3);
 
     % re-train CN signals with shifting signals and expanding EC amplitude (type4)
     [smcn6DLWs, smcn6SubDLWs, smcn6Signals] = shiftAndExpandAmplitude(cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
@@ -185,11 +186,13 @@ function simulateAlzheimerDLCM2
     cosSim(4) = getCosSimilarity(meanCnDLW, meanSmcn7DLW);
     cosSim(5) = getCosSimilarity(meanCnDL, meanSmcnDL);
     cosSim(6) = getCosSimilarity(meanCnDL, meanSmcn2DL);
-    cosSim(7) = getCosSimilarity(meanCnFC, meanSmcnFC);
-    cosSim(8) = getCosSimilarity(meanCnFC, meanSmcn2FC);
-    cosSim(9) = getCosSimilarity(meanCnFC, meanSmcn6FC);
-    cosSim(10) = getCosSimilarity(meanCnFC, meanSmcn7FC);
-    X = categorical({'dlec-cn-smcn','dlec-cn-smcn2','dlec-cn-smcn6','dlec-cn-smcn7','dlgc-cn-smcn','dlgc-cn-smcn2',...
+    cosSim(7) = getCosSimilarity(meanCnDL, meanSmcn7DL);
+    cosSim(8) = getCosSimilarity(meanCnFC, meanSmcnFC);
+    cosSim(9) = getCosSimilarity(meanCnFC, meanSmcn2FC);
+    cosSim(10) = getCosSimilarity(meanCnFC, meanSmcn6FC);
+    cosSim(11) = getCosSimilarity(meanCnFC, meanSmcn7FC);
+    X = categorical({'dlec-cn-smcn','dlec-cn-smcn2','dlec-cn-smcn6','dlec-cn-smcn7',...
+        'dlgc-cn-smcn','dlgc-cn-smcn2','dlgc-cn-smcn7',...
         'fc-cn-smcn','fc-cn-smcn2','fc-cn-smcn6','fc-cn-smcn7'});
     figure; bar(X, cosSim); title('cos similarity between mean CN matrix and SimCN by each algorithm');
 
@@ -524,7 +527,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
     save(sfName, 'shiftDLWs', 'shiftSubDLWs', 'shiftSignals');
 end
 
-function [ampDLWs, ampSubDLWs, ampSignals] = checkRelationSubDLWandSignals3(signals, DLWs, subDLWs, smSignals, smDLWs, smSubDLWs, group)
+function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSignals3(signals, DLWs, subDLWs, smSignals, smDLWs, smSubDLWs, smDLs, group)
     nodeNum = size(signals{1},1);
     sigLen = size(signals{1},2);
     sbjNum = length(signals);
@@ -539,6 +542,7 @@ function [ampDLWs, ampSubDLWs, ampSignals] = checkRelationSubDLWandSignals3(sign
     ampDLWs = DLWs;
     ampSubDLWs = subDLWs;
     ampSignals = cell(sbjNum,1);
+    ampDLs = nan(nodeNum,nodeNum,sbjNum);
 
     amps = [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
     ampsLen = length(amps);
@@ -671,10 +675,12 @@ function [ampDLWs, ampSubDLWs, ampSignals] = checkRelationSubDLWandSignals3(sign
             ampSignals{k} = smSignals{k};
             ampDLWs(:,:,k) = smDLWs(:,:,k);
             ampSubDLWs(:,:,k) = smSubDLWs(:,:,k);
+            ampDLs(:,:,k) = smDLs(:,:,k);
         else
             ampSignals{k} = ampSi2{idx-1};
             ampDLWs(:,:,k) = EC2s{idx-1};
             ampSubDLWs(:,:,k) = subEC2s{idx-1};
+            ampDLs(:,:,k) = calcDlcmGCI(ampSi2{idx-1}, inSignal, [], inControl, ampNet2{idx-1});
         end
     end
     save(sfName, 'ampDLWs', 'ampSubDLWs', 'ampSignals', 'ZiCr', 'ZijCr', 'cosSim');
