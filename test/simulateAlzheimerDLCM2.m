@@ -22,8 +22,8 @@ function simulateAlzheimerDLCM2
     sigCnDLs = (cnDLs - nanmean(cnDLs(:))) / nanstd(cnDLs(:),1);
     sigAdDLs = (adDLs - nanmean(adDLs(:))) / nanstd(adDLs(:),1);
 
-%    [rccnDLs, meanRcCnDL, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcmrc', 1); % do recovery training
-%    [rcadDLs, meanRcAdDL, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcmrc', 1); % do recovery training
+    [rccnDLs, meanRcCnDL, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcmrc', 1); % do recovery training
+    [rcadDLs, meanRcAdDL, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcmrc', 1); % do recovery training
 
     % simulate CN & AD signals from first frame
     [cnDLWs, smcnSignals, cnSubDLWs] = simulateNodeSignals(cnSignals, roiNames, 'cn', 'dlw', 'cn');
@@ -34,8 +34,8 @@ function simulateAlzheimerDLCM2
     meanAdDLW = nanmean(adDLWs,3);
 
     % simulate recovery trained CN & AD signals from first frame
-%    [rccnDLWs, smrccnSignals] = simulateNodeSignals(cnSignals, roiNames, 'cn', 'dlwrc', 'cn');
-%    [rcadDLWs, smrcadSignals] = simulateNodeSignals(adSignals, roiNames, 'ad', 'dlwrc', 'ad');
+    [rccnDLWs, smrccnSignals] = simulateNodeSignals(cnSignals, roiNames, 'cn', 'dlwrc', 'cn');
+    [rcadDLWs, smrcadSignals] = simulateNodeSignals(adSignals, roiNames, 'ad', 'dlwrc', 'ad');
 
     % simulate CN & AD signals from last-1 frame
     cn2Signals = cnSignals;
@@ -109,11 +109,16 @@ function simulateAlzheimerDLCM2
     [smcn6DLWs, smcn6SubDLWs, smcn6Signals] = shiftAndExpandAmplitude(cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
     meanSmcn6DLW = nanmean(smcn6DLWs,3);
 
-%    [smrccnDLs, meanSmrccnDL, ~] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlcm', 1);
-%    [smrccnDLWs, meanSmrccnDLW, ~] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlw', 1);
-%    [smrcadDLs, meanSmrcadDL, ~] = calculateConnectivity(smrcadSignals, roiNames, 'smrcad', 'dlcm', 1);
-%    [smrcadDLWs, meanSmrcadDLW, ~] = calculateConnectivity(smrcadSignals, roiNames, 'smrcad', 'dlw', 1);
-
+    [smrccnDLs, meanSmrccnDL, ~] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlcm', 1);
+    [smrccnDLWs, meanSmrccnDLW, ~, smrccnSubDLWs] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlw', 1);
+    [smrcadDLs, meanSmrcadDL, ~] = calculateConnectivity(smrcadSignals, roiNames, 'smrcad', 'dlcm', 1);
+    [smrcadDLWs, meanSmrcadDLW, ~, smrcadSubDLWs] = calculateConnectivity(smrcadSignals, roiNames, 'smrcad', 'dlw', 1);
+%{
+    for i=1:cnSbjNum
+        plotCorrelationZiZij([], cnSubDLWs(:,:,i), [], smcnSubDLWs(:,:,i), nodeNum, ['sbj' num2str(i)], 'original', 'smcn');
+        plotCorrelationZiZij([], cnSubDLWs(:,:,i), [], smrccnSubDLWs(:,:,i), nodeNum, ['sbj' num2str(i)], 'original', 'smrccn');
+    end
+%}
     [smcn2DLs, meanSmcn2DL, ~] = calculateConnectivity(smcn2Signals, roiNames, 'smcn2', 'dlcm', 1);
     [smcn2DLWs, meanSmcn2DLW, ~, smcn2SubDLWs] = calculateConnectivity(smcn2Signals, roiNames, 'smcn2', 'dlw', 1);
     [smad2DLs, meanSmad2DL, ~] = calculateConnectivity(smad2Signals, roiNames, 'smad2', 'dlcm', 1);
@@ -160,6 +165,7 @@ function simulateAlzheimerDLCM2
     [smcn2FCs, meanSmcn2FC, ~] = calculateConnectivity(smcn2Signals, roiNames, 'smcn2', 'fc', 1);
     [smad2FCs, meanSmad2FC, ~] = calculateConnectivity(smad2Signals, roiNames, 'smad2', 'fc', 1);
     [smcn6FCs, meanSmcn6FC, ~] = calculateConnectivity(smcn6Signals, roiNames, 'smcn6', 'fc', 1);
+    [smcn7FCs, meanSmcn7FC, ~] = calculateConnectivity(smcn7Signals, roiNames, 'smcn7', 'fc', 1);
 %{
     figure; cnsmcnFCr = plotTwoSignalsCorrelation(meanCnFC, meanSmcnFC);
     figure; adsmadFCr = plotTwoSignalsCorrelation(meanAdFC, meanSmadFC);
@@ -176,12 +182,15 @@ function simulateAlzheimerDLCM2
     cosSim(1) = getCosSimilarity(meanCnDLW, meanSmcnDLW);
     cosSim(2) = getCosSimilarity(meanCnDLW, meanSmcn2DLW);
     cosSim(3) = getCosSimilarity(meanCnDLW, meanSmcn6DLW);
-    cosSim(4) = getCosSimilarity(meanCnDL, meanSmcnDL);
-    cosSim(5) = getCosSimilarity(meanCnDL, meanSmcn2DL);
-    cosSim(6) = getCosSimilarity(meanCnFC, meanSmcnFC);
-    cosSim(7) = getCosSimilarity(meanCnFC, meanSmcn2FC);
-    cosSim(8) = getCosSimilarity(meanCnFC, meanSmcn6FC);
-    X = categorical({'dlec-cn-smcn','dlec-cn-smcn2','dlec-cn-smcn6','dlgc-cn-smcn','dlgc-cn-smcn2','fc-cn-smcn','fc-cn-smcn2','fc-cn-smcn6'});
+    cosSim(4) = getCosSimilarity(meanCnDLW, meanSmcn7DLW);
+    cosSim(5) = getCosSimilarity(meanCnDL, meanSmcnDL);
+    cosSim(6) = getCosSimilarity(meanCnDL, meanSmcn2DL);
+    cosSim(7) = getCosSimilarity(meanCnFC, meanSmcnFC);
+    cosSim(8) = getCosSimilarity(meanCnFC, meanSmcn2FC);
+    cosSim(9) = getCosSimilarity(meanCnFC, meanSmcn6FC);
+    cosSim(10) = getCosSimilarity(meanCnFC, meanSmcn7FC);
+    X = categorical({'dlec-cn-smcn','dlec-cn-smcn2','dlec-cn-smcn6','dlec-cn-smcn7','dlgc-cn-smcn','dlgc-cn-smcn2',...
+        'fc-cn-smcn','fc-cn-smcn2','fc-cn-smcn6','fc-cn-smcn7'});
     figure; bar(X, cosSim); title('cos similarity between mean CN matrix and SimCN by each algorithm');
 
     cosSim = zeros(algNum,1);
@@ -228,27 +237,29 @@ function simulateAlzheimerDLCM2
     title('cos similarity between CN and SimCN by each algorithm');
 %}
     % plot box-and-whisker plot of cos similarity between mean ec matrix and each subject ec
-    cosSims = nan(cnSbjNum,11);
+    cosSims = nan(cnSbjNum,30);
     for i=1:cnSbjNum
         cosSims(i,1) = getCosSimilarity(meanCnDLW, cnDLWs(:,:,i));
         cosSims(i,2) = getCosSimilarity(meanCnDLW, smcnDLWs(:,:,i));
         cosSims(i,3) = getCosSimilarity(meanCnDLW, smcn2DLWs(:,:,i));
         cosSims(i,4) = getCosSimilarity(meanCnDLW, smcn6DLWs(:,:,i));
-        cosSims(i,5) = getCosSimilarity(meanCnDL, cnDLs(:,:,i));
-        cosSims(i,6) = getCosSimilarity(meanCnDL, smcnDLs(:,:,i));
-        cosSims(i,7) = getCosSimilarity(meanCnDL, smcn2DLs(:,:,i));
-        cosSims(i,8) = getCosSimilarity(meanCnFC, cnFCs(:,:,i));
-        cosSims(i,9) = getCosSimilarity(meanCnFC, smcnFCs(:,:,i));
-        cosSims(i,10) = getCosSimilarity(meanCnFC, smcn2FCs(:,:,i));
-        cosSims(i,11) = getCosSimilarity(meanCnFC, smcn6FCs(:,:,i));
+        cosSims(i,5) = getCosSimilarity(meanCnDLW, smcn7DLWs(:,:,i));
+        cosSims(i,11) = getCosSimilarity(meanCnDL, cnDLs(:,:,i));
+        cosSims(i,12) = getCosSimilarity(meanCnDL, smcnDLs(:,:,i));
+        cosSims(i,13) = getCosSimilarity(meanCnDL, smcn2DLs(:,:,i));
+        cosSims(i,21) = getCosSimilarity(meanCnFC, cnFCs(:,:,i));
+        cosSims(i,22) = getCosSimilarity(meanCnFC, smcnFCs(:,:,i));
+        cosSims(i,23) = getCosSimilarity(meanCnFC, smcn2FCs(:,:,i));
+        cosSims(i,24) = getCosSimilarity(meanCnFC, smcn6FCs(:,:,i));
+        cosSims(i,25) = getCosSimilarity(meanCnFC, smcn7FCs(:,:,i));
     end
     figure; boxplot(cosSims);
-    [anovaP,tbl,stats] = kruskalwallis(cosSims(:,1:11));
+    [anovaP,tbl,stats] = kruskalwallis(cosSims(:,1:30));
     c = multcompare(stats);
 %    [p1,h1] = ranksum(cosSims(:,1),cosSims(:,2));
 %    [p2,h2] = ranksum(cosSims(:,1),cosSims(:,3));
     [sortCosCnDLW,idxCosCnDLW] = sort(cosSims(:,1),'descend');
-    [sortCosCnFC,idxCosCnFC] = sort(cosSims(:,7),'descend');
+    [sortCosCnFC,idxCosCnFC] = sort(cosSims(:,21),'descend');
 
     cosSims = nan(adSbjNum,9);
     for i=1:adSbjNum
@@ -271,32 +282,25 @@ function simulateAlzheimerDLCM2
     [sortCosAdFC,idxCosAdFC] = sort(cosSims(:,7),'descend');
 
     % plot correlation between original EC matrix and simulated signals EC matrix
-    R = 4; %nodeNum;
-    r1 = zeros(R);
-    r2 = zeros(R,cnSbjNum);
-    for i=1:R
-        r1(i) = corr2(squeeze(cnSubDLWs(i,1,:)), squeeze(smcnSubDLWs(i,1,:)));
-        figure; hold on; plot([0.6 1.1], [0.6 1.1],':','Color',[0.5 0.5 0.5]); title(['nss corr: cn row=' num2str(i)]);
-        for j=1:cnSbjNum
-            plotTwoSignalsCorrelation(cnSubDLWs(i,1,j), smcnSubDLWs(i,1,j), [0.1*mod(j,10) 0.2*ceil(j/10) 0.5], 'd', 8);
-            plotTwoSignalsCorrelation(cnSubDLWs(i,2:nodeNum+1,j), smcnSubDLWs(i,2:nodeNum+1,j), [0.1*mod(j,10) 0.2*ceil(j/10) 0.8]);
-            X = cnSubDLWs(i,2:nodeNum+1,j);
-            Y = smcnSubDLWs(i,2:nodeNum+1,j);
-            r2(i,j) = corr2(X(~isnan(X)), Y(~isnan(Y)));
-        end; hold off;
+    for i=1:1 %cnSbjNum
+        % calc & plot correlation of original Zi vs simulating Zi
+        [corrZi, corrZij] = calcCorrelationZiZij(cnSubDLWs(:,:,i), smcnSubDLWs(:,:,i), nodeNum);
+        plotCorrelationZiZij(cnDLWs(:,:,i), cnSubDLWs(:,:,i), smcnDLWs(:,:,i), smcnSubDLWs(:,:,i), nodeNum, ['sbj' num2str(i)], 'original', 'simulating');
     end
 
     % plot box-and-whisker plot of cos similarity between original ec matrix and simulated signals ec matrix
-    cosSims = nan(cnSbjNum,8);
+    cosSims = nan(cnSbjNum,30);
     for i=1:cnSbjNum
         cosSims(i,1) = getCosSimilarity(cnDLWs(:,:,i), smcnDLWs(:,:,i));
         cosSims(i,2) = getCosSimilarity(cnDLWs(:,:,i), smcn2DLWs(:,:,i));
         cosSims(i,3) = getCosSimilarity(cnDLWs(:,:,i), smcn6DLWs(:,:,i));
-        cosSims(i,4) = getCosSimilarity(cnDLs(:,:,i), smcnDLs(:,:,i));
-        cosSims(i,5) = getCosSimilarity(cnDLs(:,:,i), smcn2DLs(:,:,i));
-        cosSims(i,6) = getCosSimilarity(cnFCs(:,:,i), smcnFCs(:,:,i));
-        cosSims(i,7) = getCosSimilarity(cnFCs(:,:,i), smcn2FCs(:,:,i));
-        cosSims(i,8) = getCosSimilarity(cnFCs(:,:,i), smcn6FCs(:,:,i));
+        cosSims(i,4) = getCosSimilarity(cnDLWs(:,:,i), smcn7DLWs(:,:,i));
+        cosSims(i,11) = getCosSimilarity(cnDLs(:,:,i), smcnDLs(:,:,i));
+        cosSims(i,12) = getCosSimilarity(cnDLs(:,:,i), smcn2DLs(:,:,i));
+        cosSims(i,21) = getCosSimilarity(cnFCs(:,:,i), smcnFCs(:,:,i));
+        cosSims(i,22) = getCosSimilarity(cnFCs(:,:,i), smcn2FCs(:,:,i));
+        cosSims(i,23) = getCosSimilarity(cnFCs(:,:,i), smcn6FCs(:,:,i));
+        cosSims(i,24) = getCosSimilarity(cnFCs(:,:,i), smcn7FCs(:,:,i));
     end
     figure; boxplot(cosSims);
     cosSims = nan(cnSbjNum,6);
@@ -328,10 +332,12 @@ function simulateAlzheimerDLCM2
     [cnsmcn2FCsUt, cnsmcn2FCsUtP, cnsmcn2FCsUtP2] = calculateAlzWilcoxonTest(cnFCs, smcn2FCs, roiNames, 'cn', 'smcn2', 'fc');
     [adsmad2FCsUt, adsmad2FCsUtP, adsmad2FCsUtP2] = calculateAlzWilcoxonTest(adFCs, smad2FCs, roiNames, 'ad', 'smad2', 'fc');
     [cnsmcn6FCsUt, cnsmcn6FCsUtP, cnsmcn6FCsUtP2] = calculateAlzWilcoxonTest(cnFCs, smcn6FCs, roiNames, 'cn', 'smcn6', 'fc');
+    [cnsmcn7FCsUt, cnsmcn7FCsUtP, cnsmcn7FCsUtP2] = calculateAlzWilcoxonTest(cnFCs, smcn7FCs, roiNames, 'cn', 'smcn7', 'fc');
     [cnsmcnDLsUt, cnsmcnDLsUtP, cnsmcnDLsUtP2] = calculateAlzWilcoxonTest(cnDLs, smcnDLs, roiNames, 'cn', 'smcn', 'dlcm');
     [adsmadDLsUt, adsmadDLsUtP, adsmadDLsUtP2] = calculateAlzWilcoxonTest(adDLs, smadDLs, roiNames, 'ad', 'smad', 'dlcm');
     [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, smcnDLWs, roiNames, 'cn', 'smcn', 'dlw');
     [adsmadDLWsUt, adsmadDLWsUtP, adsmadDLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, smadDLWs, roiNames, 'ad', 'smad', 'dlw');
+    [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, smcn7DLWs, roiNames, 'cn', 'smcn7', 'dlw');
     [~, ~, ~] = calculateAlzWilcoxonTest(sigCnDLWs, sigSmcnDLWs, roiNames, 'sigcn', 'sigsmcn', 'dlw');
     [~, ~, ~] = calculateAlzWilcoxonTest(sigAdDLWs, sigSmadDLWs, roiNames, 'sigad', 'sigsmad', 'dlw');
 %    [cnsmrccnDLWsUt, cnsmrccnDLWsUtP, cnsmrccnDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, smrccnDLWs, roiNames, 'cn', 'smrccn', 'dlw');
@@ -365,22 +371,9 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
         sftSubEC = smSubEC;
         sftSignals = {};
 
-        % plot correlation of original Zi vs simulating Zi
-        corrZi = corr2(subEC(1:R,1), smSubEC(1:R,1));
-        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
-        for i=1:R
-            plotTwoSignalsCorrelation(subEC(i,1), smSubEC(i,1), [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.3+0.2*ceil(i/100)], 'd', 8);
-        end
-        hold off; title(['sbj' num2str(k) ' Zi corr: original vs simulating']);
-        % plot correlation of original Zij vs simulating Zij
-        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
-        for i=1:R
-            X = subEC(i,2:end);
-            Y = smSubEC(i,2:end);
-            corrZij(i) = corr2(X(~isnan(X)), Y(~isnan(Y)));
-            plotTwoSignalsCorrelation(X, Y, [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
-        end
-        hold off; title(['sbj' num2str(k) ' Zij corr: original vs simulating']);
+        % calc & plot correlation of original Zi vs simulating Zi
+        [corrZi, corrZij] = calcCorrelationZiZij(subEC, smSubEC, R);
+        plotCorrelationZiZij([], subEC, [], smSubEC, R, ['sbj' num2str(k)], 'original', 'simulating');
         % plot original signals
         figure; hold on;
         plot(smSi','Color',[0.8, 0.8, 0.8]);
@@ -505,53 +498,24 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
                 end
 
                 % calcate correlation
-                corrZi2(n) = corr2(subEC(1:R,1), sftSubEC(1:R,1));
-                for i=1:R
-                    X = subEC(i,2:end);
-                    Y = sftSubEC(i,2:end); Y(i) = nan;
-                    corrZij2(i,n) = corr2(X(~isnan(X)), Y(~isnan(Y)));
-                end
+                [corrZi2(n), corrZij2(i,n)] = calcCorrelationZiZij(subEC, sftSubEC, R);
+
                 save(outfName, 'corrZi', 'corrZi2', 'corrZij', 'corrZij2', 'sftSubECs', 'sftSignals');
             else
                 sftSubEC = sftSubECs(:,:,n);
             end
-%%{
+            
             % plot correlation of original Zi vs shifted simulating Zi
-            figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
-            for i=1:R
-                plotTwoSignalsCorrelation(subEC(i,1), sftSubEC(i,1), [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.3+0.2*ceil(i/100)], 'd', 8);
-            end
-            hold off; title(['sbj' num2str(k) ' Zi corr: original vs shifted sim']);
-            % plot correlation of original Zij vs simulating Zij
-            figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
-            for i=1:R
-                X = subEC(i,2:end);
-                Y = sftSubEC(i,2:end); Y(i) = nan;
-                plotTwoSignalsCorrelation(X, Y, [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
-            end
-            hold off; title(['sbj' num2str(k) ' Zij corr: original vs shifted sim']);
-%%}
+%            plotCorrelationZiZij([], subEC, [], sftSubEC, R, ['sbj' num2str(k)], 'original', 'shifted sim');
         end
 
         % find most correlated Zi & Zij signals
         [m, idx] = max(corrZi2);
         sftSubEC = sftSubECs(:,:,idx);
-%{
+
         % plot correlation of original Zi vs shifted simulating Zi
-        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
-        for i=1:R
-            plotTwoSignalsCorrelation(subEC(i,1), sftSubEC(i,1), [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.3+0.2*ceil(i/100)], 'd', 8);
-        end
-        hold off; title(['sbj' num2str(k) ' Zi corr: original vs shifted sim']);
-        % plot correlation of original Zij vs simulating Zij
-        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
-        for i=1:R
-            X = subEC(i,2:end);
-            Y = sftSubEC(i,2:end); Y(i) = nan;
-            plotTwoSignalsCorrelation(X, Y, [0.1*mod(i,10) 0.1*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
-        end
-        hold off; title(['sbj' num2str(k) ' Zij corr: original vs shifted sim']);
-%}
+%        plotCorrelationZiZij([], subEC, [], sftSubEC, R, ['sbj' num2str(k)], 'original', 'shifted sim');
+
         % set output matrix
         shiftDLWs(:,:,k) = abs(repmat(sftSubEC(:,1),[1 nodeNum]) - sftSubEC(:,2:end));
         shiftSubDLWs(:,:,k) = sftSubEC;
@@ -684,57 +648,16 @@ function [ampDLWs, ampSubDLWs, ampSignals] = checkRelationSubDLWandSignals3(sign
             end
         end
 
-        % plot correlation of original vs simulating
-        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
-        for i=1:nodeNum
-            X = subEC(i,2:end);
-            Y = smSubEC(i,2:end); Y(i) = nan;
-            plotTwoSignalsCorrelation(X, Y, [0.3+0.07*mod(i,10) 0.3+0.07*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
-        end
-        for i=1:nodeNum
-            plotTwoSignalsCorrelation(subEC(i,1), smSubEC(i,1), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'd', 8);
-        end
-        hold off; title(['sbj' num2str(k) ' Zij corr: original vs simulated']);
-        figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]);
-        for i=1:nodeNum
-            plotTwoSignalsCorrelation(EC(i,:), smEC(i,:), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'x', 5);
-        end
-        hold off; title(['sbj' num2str(k) ' EC corr: original vs simulated']);
-        % calc correlation of original vs simulating
-        ZiCr(k,1) = corr2(subEC(:,1), smSubEC(:,1));
-        for i=1:nodeNum
-            X = subEC(i,2:end);
-            Y = smSubEC(i,2:end); Y(i) = nan;
-            ZijCr(k,1,i) = corr2(X(~isnan(X)), Y(~isnan(Y)));
+        % plot & calc correlation of original vs simulating
+        plotCorrelationZiZij(EC, subEC, smEC, smSubEC, nodeNum, ['sbj' num2str(k)], 'original', 'simulated');
+        [ZiCr(k,1), ZijCr(k,1,:)] = calcCorrelationZiZij(subEC, smSubEC, nodeNum);
+
+        % plot & calc correlation of original vs simulating
+        for a=1:ampsLen
+            plotCorrelationZiZij(EC, subEC, EC2s{a}, subEC2s{a}, nodeNum, ['sbj' num2str(k) ' amp=' num2str(amps(a))], 'original', 'shifted sim');
+            [ZiCr(k,a+1), ZijCr(k,a+1,:)] = calcCorrelationZiZij(subEC, subEC2s{a}, nodeNum);
         end
 
-        for a=1:ampsLen
-            % plot correlation of original vs simulating
-            %{
-            figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
-            for i=1:nodeNum
-                X = subEC(i,2:end);
-                Y = subEC2s{a}(i,2:end); Y(i) = nan;
-                plotTwoSignalsCorrelation(X, Y, [0.3+0.07*mod(i,10) 0.3+0.07*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
-            end
-            for i=1:nodeNum
-                plotTwoSignalsCorrelation(subEC(i,1), subEC2s{a}(i,1), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'd', 8);
-            end
-            hold off; title(['sbj' num2str(k) ' amp=' num2str(amps(a)) ' Zij corr: original vs shifted sim']);
-            figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]);
-            for i=1:nodeNum
-                plotTwoSignalsCorrelation(EC(i,:), EC2s{a}(i,:), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'x', 5);
-            end
-            hold off; title(['sbj' num2str(k) ' amp=' num2str(amps(a)) ' EC corr: original vs shifted sim']);
-            %}
-            % calc correlation of original vs simulating
-            ZiCr(k,a+1) = corr2(subEC(:,1), subEC2s{a}(:,1));
-            for i=1:nodeNum
-                X = subEC(i,2:end);
-                Y = subEC2s{a}(i,2:end); Y(i) = nan;
-                ZijCr(k,a+1,i) = corr2(X(~isnan(X)), Y(~isnan(Y)));
-            end
-        end
         % calc cos similarity
         cosSim(k,1) = getCosSimilarity(EC, smEC);
         for a=1:ampsLen
@@ -755,6 +678,38 @@ function [ampDLWs, ampSubDLWs, ampSignals] = checkRelationSubDLWandSignals3(sign
         end
     end
     save(sfName, 'ampDLWs', 'ampSubDLWs', 'ampSignals', 'ZiCr', 'ZijCr', 'cosSim');
+end
+
+function plotCorrelationZiZij(EC, subEC, smEC, smSubEC, nodeNum, prefix, orig, sim)
+    if ~isempty(subEC)
+        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
+        for i=1:nodeNum
+            X = subEC(i,2:end);
+            Y = smSubEC(i,2:end); Y(i) = nan;
+            plotTwoSignalsCorrelation(X, Y, [0.3+0.07*mod(i,10) 0.3+0.07*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
+        end
+        for i=1:nodeNum
+            plotTwoSignalsCorrelation(subEC(i,1), smSubEC(i,1), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'd', 8);
+        end
+        hold off; title([prefix ' Zij corr: ' orig ' vs ' sim]);
+    end
+    if ~isempty(EC)
+        figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]);
+        for i=1:nodeNum
+            plotTwoSignalsCorrelation(EC(i,:), smEC(i,:), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'x', 5);
+        end
+        hold off; title([prefix ' Zi corr: ' orig ' vs ' sim]);
+    end
+end
+
+function [ZiCorr, ZijCorr] = calcCorrelationZiZij(subEC, smSubEC, nodeNum)        
+    ZiCorr = corr2(subEC(:,1), smSubEC(:,1));
+    ZijCorr = nan(nodeNum,1);
+    for i=1:nodeNum
+        X = subEC(i,2:end);
+        Y = smSubEC(i,2:end); Y(i) = nan;
+        ZijCorr(i) = corr2(X(~isnan(X)), Y(~isnan(Y)));
+    end
 end
 
 function checkRelationSubDLWandSignals2(signals, DLWs, subDLWs, smDLWs, smSubDLWs, group)
@@ -880,23 +835,15 @@ function checkRelationSubDLWandSignals2(signals, DLWs, subDLWs, smDLWs, smSubDLW
             end
         end
 
-        % plot correlation of original Zij vs simulating Zij
-        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
+        % calc & plot correlation of original Zij vs simulating Zij
+        plotCorrelationZiZij([], subEC, [], smSubEC, R, ['sbj' num2str(k)], 'original', 'shifted sim');
         for i=1:R
-            X = subEC(i,2:end);
-            Y = smSubEC(i,2:end); Y(i) = nan;
-            plotTwoSignalsCorrelation(X, Y, [0.7 0.7 0.7]);
-
             for a=1:ampsLen
-                X = subEC(i,2:end);
-                Y = Zij2(i,a,1,:); Y(i) = nan;
-                plotTwoSignalsCorrelation(X, Y, [0.5+0.1*mod(a,5) 0.5+0.1*ceil(mod(i,50)/5) 0.5+0.4/ampsLen*mod(a,ampsLen)]);
-            end
-            for a=1:ampsLen
-                plotTwoSignalsCorrelation(subEC(i,1), Zi2(i,a,1), [0.1*mod(a,5) 0.1*ceil(mod(i,50)/5) 0.4/ampsLen*mod(a,ampsLen)], 'd', 8);
+                for n=1:nMax % traial
+                    plotCorrelationZiZij([], subEC, [], subEC2s{i,a,n}, R, ['sbj' num2str(k)], 'original', 'shifted sim');
+                end
             end
         end
-        hold off; title(['sbj' num2str(k) ' Zij corr: original vs shifted sim']);
     end
 %}
 
@@ -1019,22 +966,14 @@ function checkRelationSubDLWandSignals2(signals, DLWs, subDLWs, smDLWs, smSubDLW
         end
 
         % plot correlation of original Zij vs simulating Zij
-        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
+        plotCorrelationZiZij([], subEC, [], smSubEC, R, ['sbj' num2str(k)], 'original', 'shifted sim');
         for i=1:1 %R
-            X = subEC(i,2:end);
-            Y = smSubEC(i,2:end); Y(i) = nan;
-            plotTwoSignalsCorrelation(X, Y, [0.7 0.7 0.7]);
-
             for a=4:4 %1:ampsLen
-                X = subEC(i,2:end);
-                Y = Zij2(i,a,1,:); Y(i) = nan;
-                plotTwoSignalsCorrelation(X, Y, [0.5+0.1*mod(a,5) 0.5+0.1*ceil(mod(i,50)/5) 0.5+0.4/ampsLen*mod(a,ampsLen)]);
-            end
-            for a=4:4 %1:ampsLen
-                plotTwoSignalsCorrelation(subEC(i,1), Zi2(i,a,1), [0.1*mod(a,5) 0.1*ceil(mod(i,50)/5) 0.4/ampsLen*mod(a,ampsLen)], 'd', 8);
+                for n=1:1 %nMax % traial
+                    plotCorrelationZiZij([], subEC, [], subEC2s{i,a,n}, R, ['sbj' num2str(k)], 'original', 'shifted sim');
+                end
             end
         end
-        hold off; title(['sbj' num2str(k) ' Zij corr: original vs shifted sim']);
     end
 end
 
@@ -1712,7 +1651,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 14;
+    NumProcessors = 11;
 
     if NumProcessors > 1
         try
