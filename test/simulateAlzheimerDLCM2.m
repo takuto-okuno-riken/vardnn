@@ -98,7 +98,7 @@ function simulateAlzheimerDLCM2
     sigSmcnDLWs = (smcnDLWs - nanmean(smcnDLWs(:))) / nanstd(smcnDLWs(:),1);
     sigSmadDLWs = (smadDLWs - nanmean(smadDLWs(:))) / nanstd(smadDLWs(:),1);
 
-    % check relation between Zi vs signal mean diff, and Zij vs signal amplitude
+    % check relation between Zi vs signal mean diff, and Zij vs signal amplitude (change teaching signal)
 %    checkRelationSubDLWandSignals(cnSignals, cnDLWs, cnSubDLWs, 'cn', 0);
 %    checkRelationSubDLWandSignals(smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
 %    checkRelationSubDLWandSignals2(cnSignals, cnDLWs, cnSubDLWs, smcnDLWs, smcnSubDLWs, 'cn');
@@ -108,9 +108,15 @@ function simulateAlzheimerDLCM2
     [smcn7DLWs, smcn7SubDLWs, smcn7Signals, smcn7DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn');
     meanSmcn7DLW = nanmean(smcn7DLWs,3);
     meanSmcn7DL = nanmean(smcn7DLs,3);
-    
-    checkRelationSubDLWandSignals4(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn');
 
+    % check relation between Zij vs signal amplitude (change other input signals)
+    % -- not working well
+%    checkRelationSubDLWandSignals4(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn');
+
+    % check relation between Zij vs node weights (change other input signals)
+    % -- very effective, but only for network weight
+    checkRelationSubDLWandWeights(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn');
+    
     % re-train CN signals with shifting signals and expanding EC amplitude (type4)
     % -- parallel shift does not affect EC (both Zi and Zij shifted)
     % -- move mean (range=5) based amplitude expansion does not work well
@@ -535,6 +541,131 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
         shiftSignals{k} = sftSignals{idx};
     end
     save(sfName, 'shiftDLWs', 'shiftSubDLWs', 'shiftSignals');
+end
+
+function checkRelationSubDLWandWeights(signals, DLWs, subDLWs, smSignals, smDLWs, smSubDLWs, group)
+    nodeNum = size(signals{1},1);
+    sigLen = size(signals{1},2);
+    sbjNum = length(signals);
+    R = 1; %nodeNum;
+    sbjMax = 2;
+
+    % checking signal parallel shift effect for Zi, Zij and ECij'
+    for k=1:sbjMax
+        Zi = subDLWs(:,1,k);
+        Zij = subDLWs(:,2:end,k);
+        smZi = smSubDLWs(:,1,k);
+        smZij = smSubDLWs(:,2:end,k);
+        ECd = Zij - repmat(Zi,[1,nodeNum]);
+        smECd = smZij - repmat(smZi,[1,nodeNum]);
+        
+        outfName = ['results/adsim2-checkRelation7-' group '-' num2str(k) '.mat'];
+        if exist(outfName, 'file')
+            load(outfName);
+        else
+            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            f = load(dlcmName);
+            siOrg = smSignals{k};
+            
+            % training options for DLCM network
+            options = trainingOptions('adam', 'InitialLearnRate', 0.0001, 'ExecutionEnvironment','cpu', 'MaxEpochs',1, 'Verbose',false);
+                
+            % if you want to use parallel processing, set NumProcessors more than 2
+            % and change for loop to parfor loop
+            NumProcessors = 1;
+
+            if NumProcessors > 1
+                try
+                    disp('Destroing any existance matlab pool session');
+                    parpool('close');
+                catch
+                    disp('No matlab pool session found');
+                end
+                parpool(NumProcessors);
+            end
+
+            % training loop
+            for i=1:R 
+                Si1 = ones(nodeNum*2, nodeNum+1);
+                Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
+                filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
+                Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
+
+                % change weight value
+                tmpL = f.netDLCM.nodeNetwork{i}.Layers;
+                for j=1:nodeNum
+                    if i==j, continue; end
+                    dx = ECd(i,j) - smECd(i,j);
+                    tmpL(2).Weights(:,j) = tmpL(2).Weights(:,j) - dx * 0.7;
+                end
+                Layers = makeDlcmLayers(tmpL);
+
+                nodeTeach = f.si(i,2:end);
+                nodeInput = [f.si(:,1:end-1); f.inSignal(:,1:end-1)];
+                filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
+                nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
+
+                disp(['training ' num2str(k) '-' num2str(i)]);
+                [nodeNetwork, trainInfo] = trainNetwork(nodeInput, nodeTeach, Layers, options);
+                % predict DLCM network
+                smSubEC2 = predict(nodeNetwork, Si1);
+                smZi2 = smSubEC2(1);
+                smZij2 = smSubEC2(2:end);
+                smECd2 = smZij2 - repmat(smZi2,[1,nodeNum]);
+%%{
+                for j=3:3
+                    % plot Zi-Zij scat
+                    figure; hold on; plot([-0.2 0.2], [-0.2 0.2],':','Color',[0.5 0.5 0.5]);
+                    scatter(ECd(i,:),smECd(i,:),3,[0.7 0.7 0.7]);
+                    scatter(ECd(i,:),smECd2(:),3,[0.4 0.3 0.3]);
+                    scatter(ECd(i,j),smECd2(j),3,[0.7 0.2 0.2]);
+                    hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' Zij-Zi corr : original vs shifted sim']);
+
+                    % plot Zi-Zij scat
+                    figure; hold on; plot([-0.2 0.2], [-0.2 0.2],':','Color',[0.5 0.5 0.5]);
+                    scatter(smECd(i,:),smECd2(:),3,[0.3 0.3 0.3]);
+                    scatter(smECd(i,j),smECd2(j),3,[0.7 0.2 0.2]);
+                    hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' Zij-Zi corr : simulated vs shifted sim']);
+                end
+%%}
+            end
+
+            % shutdown parallel processing
+            if NumProcessors > 1
+                delete(gcp('nocreate'))
+            end
+        end
+    end
+end
+
+function layers = makeDlcmLayers(oldLayers)
+    % init first fully connected layer
+    inputNum = size(oldLayers(2).Weights,2);
+    hiddenNums(1) = size(oldLayers(2).Weights,1);
+    hiddenNums(2) = size(oldLayers(4).Weights,1);
+    
+    inLayers = [
+        % input layer
+        sequenceInputLayer(inputNum);
+        % Add a fully connected layer
+        fullyConnectedLayer(hiddenNums(1), 'Weights', oldLayers(2).Weights, 'Bias', oldLayers(2).Bias);
+        % Add an ReLU non-linearity.
+        reluLayer();
+        ];
+    hdLayers = [
+        % Add a fully connected layer
+        fullyConnectedLayer(hiddenNums(2), 'Weights', oldLayers(4).Weights, 'Bias', oldLayers(4).Bias)
+        % Add an ReLU non-linearity.
+        reluLayer();
+    ];
+    layers = [
+        inLayers;
+        hdLayers;
+        % Add a fully connected layer
+        fullyConnectedLayer(1, 'Weights', oldLayers(6).Weights, 'Bias', oldLayers(6).Bias);
+        % reggression for learning
+        regressionLayer();
+    ];
 end
 
 function checkRelationSubDLWandSignals4(signals, DLWs, subDLWs, smSignals, smDLWs, smSubDLWs, group)
