@@ -115,8 +115,13 @@ function simulateAlzheimerDLCM2
 
     % check relation between Zij vs node weights (change other input signals)
     % -- very effective, but only for network weight
-    checkRelationSubDLWandWeights(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn');
-    
+%    checkRelationSubDLWandWeights(cnSignals, cnSubDLWs, smcnSubDLWs, 'smcn');
+
+    % check relation between Zij vs node weights (change other input signals)
+    [smcn8DLWs, smcn8SubDLWs, smcn8Signals, smcn8DLs] = checkRelationSubDLWandWeights2(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn');
+    meanSmcn8DLW = nanmean(smcn8DLWs,3);
+    meanSmcn8DL = nanmean(smcn8DLs,3);
+
     % re-train CN signals with shifting signals and expanding EC amplitude (type4)
     % -- parallel shift does not affect EC (both Zi and Zij shifted)
     % -- move mean (range=5) based amplitude expansion does not work well
@@ -543,7 +548,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
     save(sfName, 'shiftDLWs', 'shiftSubDLWs', 'shiftSignals');
 end
 
-function checkRelationSubDLWandWeights(signals, DLWs, subDLWs, smSignals, smDLWs, smSubDLWs, group)
+function checkRelationSubDLWandWeights(signals, subDLWs, smSubDLWs, group)
     nodeNum = size(signals{1},1);
     sigLen = size(signals{1},2);
     sbjNum = length(signals);
@@ -565,25 +570,10 @@ function checkRelationSubDLWandWeights(signals, DLWs, subDLWs, smSignals, smDLWs
         else
             dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
-            siOrg = smSignals{k};
             
             % training options for DLCM network
             options = trainingOptions('adam', 'InitialLearnRate', 0.0001, 'ExecutionEnvironment','cpu', 'MaxEpochs',1, 'Verbose',false);
                 
-            % if you want to use parallel processing, set NumProcessors more than 2
-            % and change for loop to parfor loop
-            NumProcessors = 1;
-
-            if NumProcessors > 1
-                try
-                    disp('Destroing any existance matlab pool session');
-                    parpool('close');
-                catch
-                    disp('No matlab pool session found');
-                end
-                parpool(NumProcessors);
-            end
-
             % training loop
             for i=1:R 
                 Si1 = ones(nodeNum*2, nodeNum+1);
@@ -629,13 +619,211 @@ function checkRelationSubDLWandWeights(signals, DLWs, subDLWs, smSignals, smDLWs
                 end
 %%}
             end
+        end
+    end
+end
+
+function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(signals, DLWs, subDLWs, smSignals, smDLWs, smSubDLWs, smDLs, group)
+    nodeNum = size(signals{1},1);
+    sigLen = size(signals{1},2);
+    sbjNum = length(signals);
+    sbjMax = sbjNum;
+
+    sfName = ['results/adsim2-checkRelation8-' group '-all.mat'];
+    if exist(sfName, 'file')
+        load(sfName);
+        return;
+    end
+    
+    weDLWs = DLWs;
+    weSubDLWs = subDLWs;
+    weSignals = cell(sbjNum,1);
+    weDLs = nan(nodeNum,nodeNum,sbjNum);
+
+    wes = [0.6];
+    weLen = length(wes);
+
+    % calc correlation
+    ECdCr = nan(sbjMax, nodeNum);
+    smECd2Cr = nan(sbjMax, weLen+1, nodeNum);
+    cosSim = nan(sbjMax, weLen+1,1);
+
+    % checking signal parallel shift effect for Zi, Zij and ECij'
+    for k=1:sbjMax
+        EC = DLWs(:,:,k);
+        smEC = smDLWs(:,:,k);
+        Zi = subDLWs(:,1,k);
+        Zij = subDLWs(:,2:end,k);
+        smZi = smSubDLWs(:,1,k);
+        smZij = smSubDLWs(:,2:end,k);
+        ECd = Zij - repmat(Zi,[1,nodeNum]);
+        smECd = smZij - repmat(smZi,[1,nodeNum]);
+        
+        outfName = ['results/adsim2-checkRelation8-' group '-' num2str(k) '.mat'];
+        if exist(outfName, 'file')
+            load(outfName);
+        else
+            tmpfName = ['results/adsim2-checkRelation8-' group '-' num2str(k) '_tmp.mat'];
+            if exist(tmpfName, 'file')
+                load(tmpfName);
+                westart = length(weSi) + 1;
+            else
+                EC2s = cell(weLen,1);
+                subEC2s = cell(weLen,1);
+                weSi = {};
+                weSi2 = {};
+                weNet = {};
+                weNet2 = {};
+                westart = 1;
+            end
+
+            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            f = load(dlcmName);
+            
+            % training options for weight expansion training
+            weOptions = trainingOptions('adam', 'InitialLearnRate', 0.0001, 'ExecutionEnvironment','cpu', 'MaxEpochs',1, 'Verbose',false);
+            % training options for DLCM network
+            maxEpochs = 1000;
+            miniBatchSize = ceil(sigLen / 3);
+            options = trainingOptions('adam', ...
+                'ExecutionEnvironment','cpu', ...
+                'MaxEpochs',maxEpochs, ...
+                'MiniBatchSize',miniBatchSize, ...
+                'Shuffle','every-epoch', ...
+                'GradientThreshold',5,...
+                'L2Regularization',0.05, ...
+                'Verbose',false);
+
+            % if you want to use parallel processing, set NumProcessors more than 2
+            % and change for loop to parfor loop
+            NumProcessors = 1;
+
+            if NumProcessors > 1
+                try
+                    disp('Destroing any existance matlab pool session');
+                    parpool('close');
+                catch
+                    disp('No matlab pool session found');
+                end
+                parpool(NumProcessors);
+            end
+
+            netDLCM = f.netDLCM;
+            inSignal = f.inSignal;
+            inControl = f.inControl;
+            [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{k});
+            weSi{end+1} = si;
+
+            for a=westart:weLen
+                weRate = wes(a);
+
+                % weight expansion training loop
+                for i=1:nodeNum
+                    % change weight value
+                    tmpL = f.netDLCM.nodeNetwork{i}.Layers;
+                    for j=1:nodeNum
+                        if i==j, continue; end
+                        dx = ECd(i,j) - smECd(i,j);
+                        tmpL(2).Weights(:,j) = tmpL(2).Weights(:,j) - dx * weRate;
+                    end
+                    layers = makeDlcmLayers(tmpL);
+
+                    nodeTeach = si(i,2:end);
+                    nodeInput = [si(:,1:end-1); inSignal(:,1:end-1)];
+                    filter = repmat(inControl(i,:).', 1, size(nodeInput,2));
+                    nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
+
+                    disp(['sbj' num2str(k) ' weight expansion training ' num2str(i)]);
+                    [netDLCM.nodeNetwork{i}, ~] = trainNetwork(nodeInput, nodeTeach, layers, weOptions);
+                end
+                weNet{end+1} = netDLCM;
+
+                % simulate signal from first frame
+                [si2, time] = simulateDlcmNetwork(si, inSignal, [], inControl, netDLCM);
+                weSi2{end+1} = si2;
+
+                % train DLCM network with simulated signal of amplitude expanded DLCM network
+                netDLCM2 = initDlcmNetwork(si2, inSignal, [], inControl); 
+
+                disp(['sbj' num2str(k) ' training 2nd']);
+                netDLCM2 = trainDlcmNetwork(si2, inSignal, [], inControl, netDLCM2, options);
+                weNet2{end+1} = netDLCM2;
+
+                % calculate DLCM-EC
+                [EC2s{a}, subEC2s{a}] = calcDlcmEC(netDLCM2, [], inControl);
+
+                save(tmpfName, 'EC2s', 'subEC2s', 'inSignal', 'inControl', 'weSi', 'weSi2', 'weNet', 'weNet2');
+            end
+
+            % calc correlation between ECd and smECd2
+            for a=1:weLen
+                weRate = wes(a);
+                smZi2 = subEC2s{a}(:,1);
+                smZij2 = subEC2s{a}(:,2:end);
+                smECd2 = smZij2 - repmat(smZi2,[1,nodeNum]);
+
+                for i=1:nodeNum
+                    ECdCr(k,i) = ecCorr(ECd(i,:),smECd(i,:), i);
+                    smECd2Cr(k,a+1,i) = ecCorr(ECd(i,:),smECd2(i,:), i);
+
+                    % plot Zi-Zij scat
+%                    figure; hold on; plot([-0.2 0.2], [-0.2 0.2],':','Color',[0.5 0.5 0.5]);
+%                    scatter(ECd(i,:),smECd(i,:),3,[0.8 0.8 0.8]);
+%                    scatter(ECd(i,:),smECd2(:),3,[0.5 0.3 0.3]);
+%                    hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' Zij-Zi corr : original vs shifted sim']);
+                end
+
+                % plot Zi-Zij all node
+                figure; hold on; plot([-0.6 0.6], [-0.6 0.6],':','Color',[0.5 0.5 0.5]);
+                for i=1:nodeNum
+                    plotTwoSignalsCorrelation(ECd(i,:),smECd(i,:), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'x', 5);
+                end
+                hold off; title(['sbj' num2str(k) ' rate=' num2str(weRate) ' Zij-Zi corr : original vs simulated']);
+                figure; hold on; plot([-0.6 0.6], [-0.6 0.6],':','Color',[0.5 0.5 0.5]);
+                for i=1:nodeNum
+                    plotTwoSignalsCorrelation(ECd(i,:),smECd2(i,:), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'x', 5);
+                end
+                hold off; title(['sbj' num2str(k) ' rate=' num2str(weRate) ' Zij-Zi corr : original vs shifted sim']);
+                % plot Zi & Zij all node
+                plotCorrelationZiZij([], subDLWs(:,:,k), [], subEC2s{a}, nodeNum, ['sbj' num2str(k) ' rate=' num2str(weRate)], 'original', 'shifted sim');
+            end
+            
+            % calc cos similarity
+            cosSim(k,1) = getCosSimilarity(EC, smEC);
+            for a=1:weLen
+                cosSim(k,a+1) = getCosSimilarity(EC, EC2s{a});
+            end
+            save(outfName, 'EC2s', 'subEC2s', 'ECdCr', 'smECd2Cr', 'inSignal', 'inControl', 'weSi', 'weSi2', 'weNet', 'weNet2');
 
             % shutdown parallel processing
             if NumProcessors > 1
                 delete(gcp('nocreate'))
             end
         end
+        
+        % find most similar signal
+        [m,idx] = max(cosSim(k,:));
+        if idx==1
+            weSignals{k} = smSignals{k};
+            weDLWs(:,:,k) = smDLWs(:,:,k);
+            weSubDLWs(:,:,k) = smSubDLWs(:,:,k);
+            weDLs(:,:,k) = smDLs(:,:,k);
+        else
+            weSignals{k} = weSi2{idx-1};
+            weDLWs(:,:,k) = EC2s{idx-1};
+            weSubDLWs(:,:,k) = subEC2s{idx-1};
+            weDLs(:,:,k) = calcDlcmGCI(weSi2{idx-1}, inSignal, [], inControl, weNet2{idx-1});
+        end
     end
+    save(sfName, 'weDLWs', 'weSubDLWs', 'weSignals', 'weDLs', 'ECdCr', 'smECd2Cr', 'cosSim');
+end
+
+function cr = ecCorr(X, Y, i)
+    X(i) = nan;
+    Y(i) = nan;
+    A = X(~isnan(X));
+    B = Y(~isnan(Y));
+    cr = corr2(A(:), B(:));
 end
 
 function layers = makeDlcmLayers(oldLayers)
