@@ -792,20 +792,19 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
                 plotCorrelationZiZij([], subDLWs(:,:,k), [], subEC2s{a}, nodeNum, ['sbj' num2str(k) ' rate=' num2str(weRate)], 'original', 'shifted sim');
 %}
             end
-            
-            % calc cos similarity
-            cosSim(k,1) = getCosSimilarity(EC, smEC);
-            for a=1:weLen
-                cosSim(k,a+1) = getCosSimilarity(EC, EC2s{a});
-            end
             save(outfName, 'EC2s', 'subEC2s', 'ECdCr', 'smECd2Cr', 'inSignal', 'inControl', 'weSi', 'weSi2', 'weNet', 'weNet2');
-
+            
             % shutdown parallel processing
             if NumProcessors > 1
                 delete(gcp('nocreate'))
             end
         end
         
+        % calc cos similarity
+        cosSim(k,1) = getCosSimilarity(EC, smEC);
+        for a=1:weLen
+            cosSim(k,a+1) = getCosSimilarity(EC, EC2s{a});
+        end
         % find most similar signal
         [m,idx] = max(cosSim(k,:));
         if idx==1
