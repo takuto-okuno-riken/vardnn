@@ -640,7 +640,7 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
     weSignals = cell(sbjNum,1);
     weDLs = nan(nodeNum,nodeNum,sbjNum);
 
-    wes = [0.6];
+    wes = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8];
     weLen = length(wes);
 
     % calc correlation
@@ -696,7 +696,7 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
 
             % if you want to use parallel processing, set NumProcessors more than 2
             % and change for loop to parfor loop
-            NumProcessors = 1;
+            NumProcessors = 20;
 
             if NumProcessors > 1
                 try
@@ -716,9 +716,11 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
 
             for a=westart:weLen
                 weRate = wes(a);
+                nodeNetwork = cell(nodeNum,1);
 
                 % weight expansion training loop
-                for i=1:nodeNum
+%                for i=1:nodeNum
+                parfor i=1:nodeNum
                     % change weight value
                     tmpL = f.netDLCM.nodeNetwork{i}.Layers;
                     for j=1:nodeNum
@@ -734,8 +736,9 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
                     nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
 
                     disp(['sbj' num2str(k) ' weight expansion training ' num2str(i)]);
-                    [netDLCM.nodeNetwork{i}, ~] = trainNetwork(nodeInput, nodeTeach, layers, weOptions);
+                    [nodeNetwork{i}, ~] = trainNetwork(nodeInput, nodeTeach, layers, weOptions);
                 end
+                netDLCM.nodeNetwork = nodeNetwork;
                 weNet{end+1} = netDLCM;
 
                 % simulate signal from first frame
@@ -774,6 +777,7 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
                 end
 
                 % plot Zi-Zij all node
+%{
                 figure; hold on; plot([-0.6 0.6], [-0.6 0.6],':','Color',[0.5 0.5 0.5]);
                 for i=1:nodeNum
                     plotTwoSignalsCorrelation(ECd(i,:),smECd(i,:), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'x', 5);
@@ -786,6 +790,7 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
                 hold off; title(['sbj' num2str(k) ' rate=' num2str(weRate) ' Zij-Zi corr : original vs shifted sim']);
                 % plot Zi & Zij all node
                 plotCorrelationZiZij([], subDLWs(:,:,k), [], subEC2s{a}, nodeNum, ['sbj' num2str(k) ' rate=' num2str(weRate)], 'original', 'shifted sim');
+%}
             end
             
             % calc cos similarity
