@@ -1205,7 +1205,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
     cosSim = nan(sbjMax, ampsLen+1,1);
 
     % checking signal amplitude change effect for Zi, Zij and ECij'
-    for k=38:sbjMax
+    for k=1:sbjMax
         EC = DLWs(:,:,k);
         subEC = subDLWs(:,:,k);
         smEC = smDLWs(:,:,k);
