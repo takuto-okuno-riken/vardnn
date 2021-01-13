@@ -111,7 +111,7 @@ function simulateAlzheimerDLCM2
     [smcn2DLs, meanSmcn2DL, ~] = calculateConnectivity(smcn2Signals, roiNames, 'smcn2', 'dlcm', 1);
     [smcn2DLWs, meanSmcn2DLW, ~, smcn2SubDLWs] = calculateConnectivity(smcn2Signals, roiNames, 'smcn2', 'dlw', 1);
     [smad2DLs, meanSmad2DL, ~] = calculateConnectivity(smad2Signals, roiNames, 'smad2', 'dlcm', 1);
-    [smad2DLWs, meanSmad2DLW, ~, smcn2SubDLWs] = calculateConnectivity(smad2Signals, roiNames, 'smad2', 'dlw', 1);
+    [smad2DLWs, meanSmad2DLW, ~, smad2SubDLWs] = calculateConnectivity(smad2Signals, roiNames, 'smad2', 'dlw', 1);
 
 %    [smcn3DLs, meanSmcn3DL, ~] = calculateConnectivity(smcn3Signals, roiNames, 'smcn3', 'dlcm', 1);
 %    [smcn3DLWs, meanSmcn3DLW, ~] = calculateConnectivity(smcn3Signals, roiNames, 'smcn3', 'dlw', 1);
@@ -1205,7 +1205,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
     cosSim = nan(sbjMax, ampsLen+1,1);
 
     % checking signal amplitude change effect for Zi, Zij and ECij'
-    for k=1:sbjMax
+    for k=38:sbjMax
         EC = DLWs(:,:,k);
         subEC = subDLWs(:,:,k);
         smEC = smDLWs(:,:,k);
@@ -1229,7 +1229,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
             inControl = f.inControl;
 
             % and change for loop to parfor loop
-            NumProcessors = 11;
+            NumProcessors = 20;
 
             if NumProcessors > 1
                 try
@@ -1274,24 +1274,21 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
             if NumProcessors > 1
                 delete(gcp('nocreate'))
             end
-
-            % plot & calc correlation of original vs simulating
-            plotCorrelationZiZij(EC, subEC, smEC, smSubEC, nodeNum, ['sbj' num2str(k)], 'original', 'simulated');
-            [ZiCr(k,1), ZijCr(k,1,:)] = calcCorrelationZiZij(subEC, smSubEC, nodeNum);
-
-            % plot & calc correlation of original vs simulating
-%            for a=1:ampsLen
-%                plotCorrelationZiZij(EC, subEC, EC2s{a}, subEC2s{a}, nodeNum, ['sbj' num2str(k) ' amp=' num2str(amps(a))], 'original', 'shifted sim');
-%                [ZiCr(k,a+1), ZijCr(k,a+1,:)] = calcCorrelationZiZij(subEC, subEC2s{a}, nodeNum);
-%            end
-
             save(outfName, 'EC2s', 'subEC2s', 'inSignal', 'inControl', 'ampSi2', 'ampNet2');
         end
         
-        % calc cos similarity
+        % plot & calc correlation of original vs simulating
+        plotCorrelationZiZij(EC, subEC, smEC, smSubEC, nodeNum, ['sbj' num2str(k)], 'original', 'simulated');
+        [ZiCr(k,1), ZijCr(k,1,:)] = calcCorrelationZiZij(subEC, smSubEC, nodeNum);
+
+        % calc cos similarity & corrleation
         cosSim(k,1) = getCosSimilarity(EC, smEC);
         for a=1:ampsLen
             cosSim(k,a+1) = getCosSimilarity(EC, EC2s{a});
+
+            % plot & calc correlation of original vs simulating
+%            plotCorrelationZiZij(EC, subEC, EC2s{a}, subEC2s{a}, nodeNum, ['sbj' num2str(k) ' amp=' num2str(amps(a))], 'original', 'shifted sim');
+            [ZiCr(k,a+1), ZijCr(k,a+1,:)] = calcCorrelationZiZij(subEC, subEC2s{a}, nodeNum);
         end
         % find most similar signal
         [m,idx] = max(cosSim(k,:));
