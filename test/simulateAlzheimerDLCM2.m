@@ -144,14 +144,19 @@ function simulateAlzheimerDLCM2
 
     % check relation between Zij vs node weights (change other input signals)
     % -- very effective, but only for network weight
-%    checkRelationSubDLWandWeights(cnSignals, cnSubDLWs, smcnSubDLWs, 'smcn');
+%    checkRelationSubDLWandWeights(cnSignals, cnSubDLWs, smcnSubDLWs, 'smcn', 1);
+%    checkRelationSubDLWandWeights(cnSignals, cnSubDLWs, smcnSubDLWs, 'smcn', 2);
 
     % check relation between Zij vs node weights (change other input signals)
     % -- change original DLCM weight -> simulate -> calc EC
     % -- somehow working well, but not better than smcn7DLWs
-    [smcn9DLWs, smcn9SubDLWs, smcn9Signals, smcn9DLs] = checkRelationSubDLWandWeights2(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn');
+    [smcn9DLWs, smcn9SubDLWs, smcn9Signals, smcn9DLs] = checkRelationSubDLWandWeights2(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 1);
     meanSmcn9DLW = nanmean(smcn9DLWs,3);
     meanSmcn9DL = nanmean(smcn9DLs,3);
+    % -- type==2 does not work at all
+%    [smcn10DLWs, smcn10SubDLWs, smcn10Signals, smcn10DLs] = checkRelationSubDLWandWeights2(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 2);
+%    meanSmcn10DLW = nanmean(smcn10DLWs,3);
+%    meanSmcn10DL = nanmean(smcn10DLs,3);
 
     % re-train CN signals with shifting signals and expanding EC amplitude (type4)
     % -- parallel shift does not affect EC (both Zi and Zij shifted)
@@ -574,7 +579,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
     save(sfName, 'shiftDLWs', 'shiftSubDLWs', 'shiftSignals');
 end
 
-function checkRelationSubDLWandWeights(signals, subDLWs, smSubDLWs, group)
+function checkRelationSubDLWandWeights(signals, subDLWs, smSubDLWs, group, type)
     nodeNum = size(signals{1},1);
     sigLen = size(signals{1},2);
     sbjNum = length(signals);
@@ -611,8 +616,13 @@ function checkRelationSubDLWandWeights(signals, subDLWs, smSubDLWs, group)
                 tmpL = f.netDLCM.nodeNetwork{i}.Layers;
                 for j=1:nodeNum
                     if i==j, continue; end
-                    dx = ECd(i,j) - smECd(i,j);
-                    tmpL(2).Weights(:,j) = tmpL(2).Weights(:,j) - dx * 0.7;
+                    if type == 1
+                        dx = ECd(i,j) - smECd(i,j);
+                        tmpL(2).Weights(:,j) = tmpL(2).Weights(:,j) - dx * 0.7;
+                    elseif type == 2
+                        dx = smECd(i,j) / ECd(i,j);
+                        tmpL(2).Weights(:,j) = tmpL(2).Weights(:,j) / dx;
+                    end
                 end
                 Layers = makeDlcmLayers(tmpL);
 
@@ -649,13 +659,16 @@ function checkRelationSubDLWandWeights(signals, subDLWs, smSubDLWs, group)
     end
 end
 
-function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(signals, DLWs, subDLWs, smSignals, smDLWs, smSubDLWs, smDLs, group)
+function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(signals, DLWs, subDLWs, smSignals, smDLWs, smSubDLWs, smDLs, group, type)
     nodeNum = size(signals{1},1);
     sigLen = size(signals{1},2);
     sbjNum = length(signals);
     sbjMax = sbjNum;
 
-    sfName = ['results/adsim2-checkRelation8-' group '-all.mat'];
+    typename = '';
+    if type==2, typename='t2'; end
+    
+    sfName = ['results/adsim2-checkRelation8' typename '-' group '-all.mat'];
     if exist(sfName, 'file')
         load(sfName);
         return;
@@ -666,7 +679,11 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
     weSignals = cell(sbjNum,1);
     weDLs = nan(nodeNum,nodeNum,sbjNum);
 
-    wes = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8];
+    if type == 1
+        wes = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8];
+    elseif type == 2
+        wes = [0.1,0.3,1];
+    end
     weLen = length(wes);
 
     % calc correlation
@@ -685,11 +702,11 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
         ECd = Zij - repmat(Zi,[1,nodeNum]);
         smECd = smZij - repmat(smZi,[1,nodeNum]);
         
-        outfName = ['results/adsim2-checkRelation8-' group '-' num2str(k) '.mat'];
+        outfName = ['results/adsim2-checkRelation8' typename '-' group '-' num2str(k) '.mat'];
         if exist(outfName, 'file')
             load(outfName);
         else
-            tmpfName = ['results/adsim2-checkRelation8-' group '-' num2str(k) '_tmp.mat'];
+            tmpfName = ['results/adsim2-checkRelation8' typename '-' group '-' num2str(k) '_tmp.mat'];
             if exist(tmpfName, 'file')
                 load(tmpfName);
                 westart = length(weSi) + 1;
@@ -722,7 +739,7 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
 
             % if you want to use parallel processing, set NumProcessors more than 2
             % and change for loop to parfor loop
-            NumProcessors = 20;
+            NumProcessors = 11;
 
             if NumProcessors > 1
                 try
@@ -751,8 +768,14 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
                     tmpL = f.netDLCM.nodeNetwork{i}.Layers;
                     for j=1:nodeNum
                         if i==j, continue; end
-                        dx = ECd(i,j) - smECd(i,j);
-                        tmpL(2).Weights(:,j) = tmpL(2).Weights(:,j) - dx * weRate;
+                        if type == 1
+                            dx = ECd(i,j) - smECd(i,j);
+                            tmpL(2).Weights(:,j) = tmpL(2).Weights(:,j) - dx * weRate;
+                        elseif type == 2
+                            dx = smECd(i,j) / ECd(i,j);
+                            tmpL(2).Weights(:,j) = tmpL(2).Weights(:,j) / dx * weRate;
+                        end
+                    
                     end
                     layers = makeDlcmLayers(tmpL);
 
