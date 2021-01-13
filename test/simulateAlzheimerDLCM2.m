@@ -98,37 +98,6 @@ function simulateAlzheimerDLCM2
     sigSmcnDLWs = (smcnDLWs - nanmean(smcnDLWs(:))) / nanstd(smcnDLWs(:),1);
     sigSmadDLWs = (smadDLWs - nanmean(smadDLWs(:))) / nanstd(smadDLWs(:),1);
 
-    % check relation between Zi vs signal mean diff, and Zij vs signal amplitude (change teaching signal)
-%    checkRelationSubDLWandSignals(cnSignals, cnDLWs, cnSubDLWs, 'cn', 0);
-%    checkRelationSubDLWandSignals(smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
-%    checkRelationSubDLWandSignals2(cnSignals, cnDLWs, cnSubDLWs, smcnDLWs, smcnSubDLWs, 'cn');
-
-    % -- move mean (range=65) based amplitude expansion of whole signal
-    % -- change original cnSignals -> simulate -> calc EC
-    [smcn7DLWs, smcn7SubDLWs, smcn7Signals, smcn7DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn');
-    meanSmcn7DLW = nanmean(smcn7DLWs,3);
-    meanSmcn7DL = nanmean(smcn7DLs,3);
-
-    % check relation between Zij vs signal amplitude (change other input signals)
-    % -- not working well
-%    checkRelationSubDLWandSignals4(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn');
-
-    % check relation between Zij vs node weights (change other input signals)
-    % -- very effective, but only for network weight
-%    checkRelationSubDLWandWeights(cnSignals, cnSubDLWs, smcnSubDLWs, 'smcn');
-
-    % check relation between Zij vs node weights (change other input signals)
-    [smcn8DLWs, smcn8SubDLWs, smcn8Signals, smcn8DLs] = checkRelationSubDLWandWeights2(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn');
-    meanSmcn8DLW = nanmean(smcn8DLWs,3);
-    meanSmcn8DL = nanmean(smcn8DLs,3);
-
-    % re-train CN signals with shifting signals and expanding EC amplitude (type4)
-    % -- parallel shift does not affect EC (both Zi and Zij shifted)
-    % -- move mean (range=5) based amplitude expansion does not work well
-    % -- change simulated signals -> calc EC
-    [smcn6DLWs, smcn6SubDLWs, smcn6Signals] = shiftAndExpandAmplitude(cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
-    meanSmcn6DLW = nanmean(smcn6DLWs,3);
-
     [smrccnDLs, meanSmrccnDL, ~] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlcm', 1);
     [smrccnDLWs, meanSmrccnDLW, ~, smrccnSubDLWs] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlw', 1);
     [smrcadDLs, meanSmrcadDL, ~] = calculateConnectivity(smrcadSignals, roiNames, 'smrcad', 'dlcm', 1);
@@ -153,6 +122,43 @@ function simulateAlzheimerDLCM2
 %    [smcn4DLWs, meanSmcn4DLW, ~] = calculateConnectivity(smcn4Signals, roiNames, 'smcn4', 'dlw', 1);
 %    [smad4DLs, meanSmad4DL, ~] = calculateConnectivity(smad4Signals, roiNames, 'smad4', 'dlcm', 1);
 %    [smad4DLWs, meanSmad4DLW, ~] = calculateConnectivity(smad4Signals, roiNames, 'smad4', 'dlw', 1);
+
+    % check relation between Zi vs signal mean diff, and Zij vs signal amplitude (change teaching signal)
+%    checkRelationSubDLWandSignals(cnSignals, cnDLWs, cnSubDLWs, 'cn', 0);
+%    checkRelationSubDLWandSignals(smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
+%    checkRelationSubDLWandSignals2(cnSignals, cnDLWs, cnSubDLWs, smcnDLWs, smcnSubDLWs, 'cn');
+
+    % -- move mean (range=65) based amplitude expansion of whole signal
+    % -- change original cnSignals -> simulate -> calc EC
+    % -- somehow working well
+    [smcn7DLWs, smcn7SubDLWs, smcn7Signals, smcn7DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn');
+    [smcn8DLWs, smcn8SubDLWs, smcn8Signals, smcn8DLs] = checkRelationSubDLWandSignals3b(cn2Signals, cnDLWs, cnSubDLWs, smcn2Signals, smcn2DLWs, smcn2SubDLWs, smcn2DLs, 'cn2', 'cn');
+    meanSmcn7DLW = nanmean(smcn7DLWs,3);
+    meanSmcn8DLW = nanmean(smcn8DLWs,3);
+    meanSmcn7DL = nanmean(smcn7DLs,3);
+    meanSmcn8DL = nanmean(smcn8DLs,3);
+
+    % check relation between Zij vs signal amplitude (change other input signals)
+    % -- not working well
+%    checkRelationSubDLWandSignals4(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn');
+
+    % check relation between Zij vs node weights (change other input signals)
+    % -- very effective, but only for network weight
+%    checkRelationSubDLWandWeights(cnSignals, cnSubDLWs, smcnSubDLWs, 'smcn');
+
+    % check relation between Zij vs node weights (change other input signals)
+    % -- change original DLCM weight -> simulate -> calc EC
+    % -- somehow working well, but not better than smcn7DLWs
+    [smcn9DLWs, smcn9SubDLWs, smcn9Signals, smcn9DLs] = checkRelationSubDLWandWeights2(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn');
+    meanSmcn9DLW = nanmean(smcn9DLWs,3);
+    meanSmcn9DL = nanmean(smcn9DLs,3);
+
+    % re-train CN signals with shifting signals and expanding EC amplitude (type4)
+    % -- parallel shift does not affect EC (both Zi and Zij shifted)
+    % -- move mean (range=5) based amplitude expansion does not work well
+    % -- change simulated signals -> calc EC
+    [smcn6DLWs, smcn6SubDLWs, smcn6Signals] = shiftAndExpandAmplitude(cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
+    meanSmcn6DLW = nanmean(smcn6DLWs,3);
 
 %{
     figure; cnsmcnDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcnDLW);
@@ -1146,6 +1152,137 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
         end
         save(outfName, 'EC2s', 'subEC2s', 'inSignal', 'inControl', 'ampSi', 'ampSi2', 'ampNet', 'ampNet2', 'ZiCr', 'ZijCr', 'cosSim');
         
+        % find most similar signal
+        [m,idx] = max(cosSim(k,:));
+        if idx==1
+            ampSignals{k} = smSignals{k};
+            ampDLWs(:,:,k) = smDLWs(:,:,k);
+            ampSubDLWs(:,:,k) = smSubDLWs(:,:,k);
+            ampDLs(:,:,k) = smDLs(:,:,k);
+        else
+            ampSignals{k} = ampSi2{idx-1};
+            ampDLWs(:,:,k) = EC2s{idx-1};
+            ampSubDLWs(:,:,k) = subEC2s{idx-1};
+            ampDLs(:,:,k) = calcDlcmGCI(ampSi2{idx-1}, inSignal, [], inControl, ampNet2{idx-1});
+        end
+    end
+    save(sfName, 'ampDLWs', 'ampSubDLWs', 'ampSignals', 'ampDLs', 'ZiCr', 'ZijCr', 'cosSim');
+end
+
+function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSignals3b(signals, DLWs, subDLWs, smSignals, smDLWs, smSubDLWs, smDLs, group, orgGroup)
+    nodeNum = size(signals{1},1);
+    sigLen = size(signals{1},2);
+    sbjNum = length(signals);
+    sbjMax = sbjNum;
+
+    sfName = ['results/adsim2-checkRelation6b-' group '-all.mat'];
+    if exist(sfName, 'file')
+        load(sfName);
+        return;
+    end
+    
+    ampDLWs = DLWs;
+    ampSubDLWs = subDLWs;
+    ampSignals = cell(sbjNum,1);
+    ampDLs = nan(nodeNum,nodeNum,sbjNum);
+
+    amps = [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+    ampsLen = length(amps);
+
+    % calc correlation
+    ZiCr = nan(sbjMax, ampsLen+1, 1);
+    ZijCr = nan(sbjMax, ampsLen+1, nodeNum);
+    cosSim = nan(sbjMax, ampsLen+1,1);
+
+    % checking signal amplitude change effect for Zi, Zij and ECij'
+    for k=1:sbjMax
+        EC = DLWs(:,:,k);
+        subEC = subDLWs(:,:,k);
+        smEC = smDLWs(:,:,k);
+        smSubEC = smSubDLWs(:,:,k);
+        
+        outfName = ['results/adsim2-checkRelation6b-' group '-' num2str(k) '.mat'];
+        if exist(outfName, 'file')
+            load(outfName);
+        else
+            EC2s = cell(ampsLen,1);
+            subEC2s = cell(ampsLen,1);
+            ampSi2 = {};
+            ampNet2 = {};
+            
+            ampfName = ['results/adsim2-checkRelation6-' orgGroup '-' num2str(k) '.mat'];
+            af=load(ampfName);        
+
+            dlcmName = ['results/ad-dlcm-' orgGroup '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            f = load(dlcmName);
+            inSignal = f.inSignal;
+            inControl = f.inControl;
+
+            % and change for loop to parfor loop
+            NumProcessors = 11;
+
+            if NumProcessors > 1
+                try
+                    disp('Destroing any existance matlab pool session');
+                    parpool('close');
+                catch
+                    disp('No matlab pool session found');
+                end
+                parpool(NumProcessors);
+            end
+
+            % training options for DLCM network
+            maxEpochs = 1000;
+            miniBatchSize = ceil(sigLen / 3);
+            options = trainingOptions('adam', ...
+                'ExecutionEnvironment','cpu', ...
+                'MaxEpochs',maxEpochs, ...
+                'MiniBatchSize',miniBatchSize, ...
+                'Shuffle','every-epoch', ...
+                'GradientThreshold',5,...
+                'L2Regularization',0.05, ...
+                'Verbose',false);
+
+            for a=1:ampsLen
+                % simulate signal from first frame
+                [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{k});
+                [si2, time] = simulateDlcmNetwork(si, inSignal, [], inControl, af.ampNet{a});
+                ampSi2{end+1} = si2;
+
+                % train DLCM network with simulated signal of amplitude expanded DLCM network
+                netDLCM2 = initDlcmNetwork(si2, inSignal, [], inControl); 
+
+                disp(['sbj' num2str(k) ' training 2nd amp=' num2str(amps(a))]);
+                netDLCM2 = trainDlcmNetwork(si2, inSignal, [], inControl, netDLCM2, options);
+                ampNet2{end+1} = netDLCM2;
+
+                % calculate DLCM-EC
+                [EC2s{a}, subEC2s{a}] = calcDlcmEC(netDLCM2, [], inControl);
+            end
+
+            % shutdown parallel processing
+            if NumProcessors > 1
+                delete(gcp('nocreate'))
+            end
+
+            % plot & calc correlation of original vs simulating
+            plotCorrelationZiZij(EC, subEC, smEC, smSubEC, nodeNum, ['sbj' num2str(k)], 'original', 'simulated');
+            [ZiCr(k,1), ZijCr(k,1,:)] = calcCorrelationZiZij(subEC, smSubEC, nodeNum);
+
+            % plot & calc correlation of original vs simulating
+%            for a=1:ampsLen
+%                plotCorrelationZiZij(EC, subEC, EC2s{a}, subEC2s{a}, nodeNum, ['sbj' num2str(k) ' amp=' num2str(amps(a))], 'original', 'shifted sim');
+%                [ZiCr(k,a+1), ZijCr(k,a+1,:)] = calcCorrelationZiZij(subEC, subEC2s{a}, nodeNum);
+%            end
+
+            save(outfName, 'EC2s', 'subEC2s', 'inSignal', 'inControl', 'ampSi2', 'ampNet2');
+        end
+        
+        % calc cos similarity
+        cosSim(k,1) = getCosSimilarity(EC, smEC);
+        for a=1:ampsLen
+            cosSim(k,a+1) = getCosSimilarity(EC, EC2s{a});
+        end
         % find most similar signal
         [m,idx] = max(cosSim(k,:));
         if idx==1
