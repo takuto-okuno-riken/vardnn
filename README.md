@@ -2,11 +2,11 @@
 
 ## Introduction
 DLCM is a powerful tool of data-driven analysis and simulation technique to estimate Effective Connectivity (EC).
+Based on DLCM framework, two types of EC are defined, such as DLCM-EC and DLCM-GC to measure causal relation among multiple time-series data.
 <div align="center">
 <img src="data/figure1.jpg">
 </div>
 
-Based on DLCM framework, two types of EC are defined, such as DLCM-EC and DLCM-GC to measure causal relation among multiple time-series data.
 This toolbox includes several causal analysis algorithms, such as DLCM-EC, DLCM-GC, multivariate Granger Causality, pair-wised Granger Causality,
 linear Transfer Entropy, Functional Connectivity (Correlation), Partial Correlation and Wavelet Coherence to estimate EC from multiple node signals.
 <div align="center">
