@@ -10,7 +10,7 @@ Based on DLCM framework, two types of EC are defined, such as DLCM-EC and DLCM-G
 This toolbox includes several causal analysis algorithms, such as DLCM-EC, DLCM-GC, multivariate Granger Causality, pair-wised Granger Causality,
 linear Transfer Entropy, Functional Connectivity (Correlation), Partial Correlation and Wavelet Coherence to estimate EC from multiple node signals.
 <div align="center">
-<img src="data/figure7b.jpg">
+<img src="data/figure3b.jpg">
 </div>
 
 Command line tool could perform EC estimation with several causal analysis algorithms from node signals in csv file or mat file,
