@@ -1,4 +1,4 @@
-# Deep-Learning based Causal Model (DLCM) analysis toolbox
+# Deep-Learning based Causal Model (DLCM) toolbox
 
 ## Introduction
 DLCM is a powerful tool of data-driven analysis and simulation technique to estimate Effective Connectivity (EC).
@@ -61,7 +61,7 @@ usage: dlcm [options] filename.csv ...
 <img src="data/figure9b.jpg">
 </div>
 
-## Citing DLCM
+## Citing DLCM toolbox
 If you find DLCM useful in your research, please consider citing:  
 Takuto Okuno, Alexander Woodward,
 ["DLCM: A Data-Driven Deep-Learning Based Effective Connectivity Estimation Toolbox"](https://yahoo.com/), under reviewing.
