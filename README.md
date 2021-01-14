@@ -22,8 +22,7 @@ then show output causal relational matrix and save data in csv file.
 
 ## Command line tool
 ~~~
->> dlcm
-no input files. please specify node status signal files.
+>> dlcm -h
 usage: dlcm [options] filename.csv ...
   -e, --dlec          output DLCM Effective Connectivity matrix result (<filename>_dlec.csv)
   -d, --dlgc          output DLCM Granger Causality matrix result (<filename>_dlgc.csv)
