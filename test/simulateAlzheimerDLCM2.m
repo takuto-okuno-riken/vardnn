@@ -137,7 +137,10 @@ function simulateAlzheimerDLCM2
     meanSmcn8DLW = nanmean(smcn8DLWs,3);
     meanSmcn7DL = nanmean(smcn7DLs,3);
     meanSmcn8DL = nanmean(smcn8DLs,3);
-    [smcn11DLWs, smcn11SubDLWs, smcn11Signals, smcn11DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 2);
+    % -- type=2 does not perform better than type=1
+%    [smcn11DLWs, smcn11SubDLWs, smcn11Signals, smcn11DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 2);
+    % -- type=3 does not perform better than type=1
+%    [smcn12DLWs, smcn12SubDLWs, smcn12Signals, smcn12DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 3);
 
     % check relation between Zij vs signal amplitude (change other input signals)
     % -- not working well
@@ -154,7 +157,7 @@ function simulateAlzheimerDLCM2
     [smcn9DLWs, smcn9SubDLWs, smcn9Signals, smcn9DLs] = checkRelationSubDLWandWeights2(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 1);
     meanSmcn9DLW = nanmean(smcn9DLWs,3);
     meanSmcn9DL = nanmean(smcn9DLs,3);
-    % -- type==2 does not work at all
+    % -- type=2 does not work at all
 %    [smcn10DLWs, smcn10SubDLWs, smcn10Signals, smcn10DLs] = checkRelationSubDLWandWeights2(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 2);
 %    meanSmcn10DLW = nanmean(smcn10DLWs,3);
 %    meanSmcn10DL = nanmean(smcn10DLs,3);
@@ -1052,6 +1055,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
 
     typename = '';
     if type==2, typename='t2'; end
+    if type==3, typename='t3'; end
     
     sfName = ['results/adsim2-checkRelation6' typename '-' group '-all.mat'];
     if exist(sfName, 'file')
@@ -1068,6 +1072,8 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
         amps = [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
     elseif type == 2
         amps = [0.5, 1, 1.5, 2, 2.5];
+    elseif type == 3
+        amps = [0.5, 1, 1.5];
     end
     ampsLen = length(amps);
 
@@ -1161,6 +1167,15 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
                 elseif type == 2
                     orgStd = nanstd(ECd,1);
                     smStd = nanstd(smECd,1);
+                    dAmp = orgStd ./ smStd;
+                    mvsi = movmean(siOrg,65,2);
+                    for i=1:nodeNum % target node
+                        siOrg(i,:) = (siOrg(i,:)-mvsi(i,:)) * dAmp(i) * amp + mvsi(i,:);
+                        siOrg(i,:) = siOrg(i,:) - nanmean(siOrg(i,:));
+                    end
+                elseif type == 3
+                    orgStd = nanstd(ECd,1,2);
+                    smStd = nanstd(smECd,1,2);
                     dAmp = orgStd ./ smStd;
                     mvsi = movmean(siOrg,65,2);
                     for i=1:nodeNum % target node
