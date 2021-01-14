@@ -2,11 +2,18 @@
 
 ## Introduction
 DLCM is a powerful tool of data-driven analysis and simulation technique to estimate Effective Connectivity (EC).
-![](data/figure1.png)
+<div align="center">
+<img src="data/figure1.png" width="708px">
+</div>
+![](data/)
+
 Based on DLCM framework, two types of EC are defined, such as DLCM-EC and DLCM-GC to measure causal relation among multiple time-series data.
 This toolbox includes several causal analysis algorithms, such as DLCM-EC, DLCM-GC, multivariate Granger Causality, pair-wised Granger Causality,
 linear Transfer Entropy, Functional Connectivity (Correlation), Partial Correlation and Wavelet Coherence to estimate EC from multiple node signals.
-![](data/figure7b.png)
+<div align="center">
+<img src="data/figure7b.jpg" width="908px">
+</div>
+
 Command line tool could perform EC estimation with several causal analysis algorithms from node signals in csv file or mat file,
 then show output causal relational matrix and save data in csv file.
 
@@ -18,7 +25,9 @@ then show output causal relational matrix and save data in csv file.
 dlcm.m
 
 ## Example Results
-![](data/figure10b.png)
+<div align="center">
+<img src="data/figure9b.jpg" width="1050px">
+</div>
 
 ## Citing DLCM
 If you find DLCM useful in your research, please consider citing:
