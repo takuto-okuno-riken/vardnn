@@ -1211,8 +1211,8 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
 
         % plot & calc correlation of original vs shifted sim
         for a=1:ampsLen
-            plotCorrelationZiZij(EC, subEC, EC2s{a}, subEC2s{a}, nodeNum, ['sbj' num2str(k) ' amp=' num2str(amps(a))], 'original', 'shifted sim');
-%            [ZiCr(k,a+1), ZijCr(k,a+1,:)] = calcCorrelationZiZij(subEC, subEC2s{a}, nodeNum);
+%            plotCorrelationZiZij(EC, subEC, EC2s{a}, subEC2s{a}, nodeNum, ['sbj' num2str(k) ' amp=' num2str(amps(a))], 'original', 'shifted sim');
+            [ZiCr(k,a+1), ZijCr(k,a+1,:)] = calcCorrelationZiZij(subEC, subEC2s{a}, nodeNum);
         end
 
         % calc cos similarity
