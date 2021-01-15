@@ -31,6 +31,7 @@ function dlcm(varargin)
     handles.groundTruth = {};
     handles.roiNames = {};
     handles.commandError = 0;
+    handles.outpath = 'results';
     handles.dlec = 0;
     handles.dlgc = 0;
     handles.mvgc = 0;
@@ -80,6 +81,9 @@ function dlcm(varargin)
                 handles.pc = 1;
             case {'-w','--wc'}
                 handles.wc = 1;
+            case {'--outpath'}
+                handles.outpath = varargin{i+1};
+                i = i + 1;
             case {'--lag'}
                 handles.lag = str2num(varargin{i+1});
                 i = i + 1;
@@ -178,6 +182,7 @@ function showUsage()
     disp('  -f, --fc            output Functional Conectivity matrix result (<filename>_fc.csv)');
     disp('  -p, --pc            output Partial Correlation matrix result (<filename>_pc.csv)');
     disp('  -w, --wc            output Wavelet Coherence matrix result (<filename>_wc.csv)');
+    disp('  --outpath           output files path (default:"results")');
     disp('  --pval              save P-value matrix of DLCM-GC, mvGC, pwGC, TE, FC and PC (<filename>_*_pval.csv)');
     disp('  --fval alpha        save F-value with <alpha> matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_fval.csv, <filename>_*_fcrit.csv)');
     disp('  --aic               save AIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_aic.csv)');
@@ -727,9 +732,9 @@ end
 %
 function saveResultFiles(handles, Index, P, F, cvFd, AIC, BIC, auc, outname)
     if handles.format == 1
-        save([outname '.mat'],'Index', 'P', 'F', 'cvFd', 'AIC', 'BIC', 'auc');
+        save([handles.outpath '/' outname '.mat'],'Index', 'P', 'F', 'cvFd', 'AIC', 'BIC', 'auc');
     elseif handles.format == 2
-        fname = [outname '_all.mat'];
+        fname = [handles.outpath '/' outname '_all.mat'];
         if exist(fname,'file')
             t = load(fname);
             t.Index(:,:,end+1) = Index; Index = t.Index;
@@ -743,32 +748,32 @@ function saveResultFiles(handles, Index, P, F, cvFd, AIC, BIC, auc, outname)
         save(fname,'Index', 'P', 'F', 'cvFd', 'AIC', 'BIC', 'auc');
     else
         % output result matrix csv file
-        outputCsvFile(Index, [outname '.csv']);
+        outputCsvFile(Index, [handles.outpath '/' outname '.csv']);
 
         % output result P-value matrix csv file
         if handles.pval > 0 && ~isempty(P)
-            outputCsvFile(P, [outname '_pval.csv']);
+            outputCsvFile(P, [handles.outpath '/' outname '_pval.csv']);
         end
 
         % output result F-value matrix csv file
         if handles.fval > 0 && ~isempty(F)
-            outputCsvFile(F, [outname '_fval.csv']);
-            outputCsvFile(cvFd, [outname '_fcrit.csv']);
+            outputCsvFile(F, [handles.outpath '/' outname '_fval.csv']);
+            outputCsvFile(cvFd, [handles.outpath '/' outname '_fcrit.csv']);
         end
 
         % output AIC matrix csv file
         if handles.aic > 0 && ~isempty(AIC)
-            outputCsvFile(AIC, [outname '_aic.csv']);
+            outputCsvFile(AIC, [handles.outpath '/' outname '_aic.csv']);
         end
 
         % output BIC matrix csv file
         if handles.bic > 0 && ~isempty(BIC)
-            outputCsvFile(BIC, [outname '_bic.csv']);
+            outputCsvFile(BIC, [handles.outpath '/' outname '_bic.csv']);
         end
 
         % output auc csv file
         if ~isnan(auc)
-            outputCsvFile(auc, [outname '_auc.csv']);
+            outputCsvFile(auc, [handles.outpath '/' outname '_auc.csv']);
         end
     end
 end
