@@ -187,10 +187,10 @@ function showUsage()
     disp('  --fval alpha        save F-value with <alpha> matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_fval.csv, <filename>_*_fcrit.csv)');
     disp('  --aic               save AIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_aic.csv)');
     disp('  --bic               save BIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_bic.csv)');
+    disp('  --format type       save file format <type> 0:csv, 1:mat(each), 2:mat(all) (default:0)');
     disp('  --groundtruth files calculate ROC curve and save AUC of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC (<filename>_*_auc.csv)');
     disp('  --transform type    input signal transform <type> 0:raw, 1:sigmoid (default:0)');
     disp('  --transopt num      signal transform option <num> (for type 1:centroid value)');
-    disp('  --format type       save file format <type> 0:csv, 1:mat(each), 2:mat(all) (default:0)');
     disp('  --lag num           time lag <num> for mvGC, pwGC and TE (default:3)');
     disp('  --ex files          DLCM exogenouse input signal <files> (file1.csv[:file2.csv:...])');
     disp('  --nctrl files       DLCM node status control <files> (file1.csv[:file2.csv:...])');
