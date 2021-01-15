@@ -94,7 +94,7 @@ output csv file : results/signal8_dlgc.csv
 ~~~
 ___
 This demo inputs 32 nodes synthetic fMRI BOLD signals of .mat file and outputs FC, PC, mvGC, TE, DLCM-GC and DLCM-EC results.
-Result matrices of EC, P-value, F-value, AIC and BIC are saved in ww32-1_<algorithm>_all.mat file.
+Result matrices of EC, P-value, F-value, AIC and BIC are saved in ww32-1_&lt;algorithm&gt;_all.mat file.
 ~~~
 >> dlcm -e -d -f -p -m -t --transform 1 --pval --lag 5 --epoch 500 --l2 0.1 --fval 0.05 --aic --bic --format 2 --roiname roi32.csv --showsig --showmat --showcg --showroc data/ww32-1.mat data/ww32-2.mat data/ww32-3.mat data/ww32-4.mat
 start training
@@ -111,7 +111,7 @@ DLCM training result : rsme=0.017795
 | name | matrix | description |
 |:---|:---|:---|
 |X |&lt;nodes&gt; x &lt;length&gt;(double)|node signals|
-|inSignal|&lt;exogenous nodes&gt; x &lt;length&gt(double)|exogenous signals|
+|inSignal|&lt;exogenous nodes&gt; x &lt;length&gt;(double)|exogenous signals|
 |nodeControl|&lt;nodes&gt x &lt;nodes&gt;(double)|node connection control matrix|
 |inControl|&lt;nodes&gt x &lt;nodes&gt;(double)|exogenous node connection control matrix|
 |groundTruth|&lt;nodes&gt x &lt;nodes&gt;(logical)|ground truth of network connection for ROC curve|
