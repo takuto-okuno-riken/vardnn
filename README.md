@@ -55,8 +55,35 @@ usage: dlcm [options] filename.csv ...
   -v, --version       show version number
   -h, --help          show command line help
 ~~~
+## Command line tool Demo
+This demo inputs 8 nodes random signal and outputs FC, mvGC, DLCM-GC and DLCM-EC results csv files and matrix graphs.
+~~~
+>> dlcm -e -d -f -m --showsig --showmat --transform 1 --epoch 100 data/signal8.csv
+start training
+start training whole DLCM network
+training node 1
+training node 2
+training node 3
+training node 4
+training node 5
+training node 6
+training node 7
+training node 8
+finish training whole DLCM network! t = 4.3548s
+DLCM training result : rsme=0.16263
+output csv file : results/signal8_dlec.csv
+output csv file : results/signal8_dlgc.csv
+output csv file : results/signal8_mvgc.csv
+output csv file : results/signal8_fc.csv
+~~~
+These are output graphs of dlcm command.
+<div align="center">
+<img src="data/rdmfig1.jpg">
+</div>
 
 ## Example Results
+Example results of causal relation matrix graphs of human fMRI signals (132 ROI).
+(Generating brain connectome image is not included in dlcm command)
 <div align="center">
 <img src="data/figure9b.jpg">
 </div>
