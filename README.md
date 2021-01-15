@@ -56,6 +56,7 @@ usage: dlcm [options] filename.csv ...
   -v, --version       show version number
   -h, --help          show command line help
 ~~~
+
 ## Command line tool Demo
 This demo inputs 8 nodes random signal and outputs FC, mvGC, DLCM-GC and DLCM-EC results csv files and matrix graphs.
 (Copy and paste this command line. Demo data is included in DLCM toolbox.)
@@ -83,6 +84,7 @@ These are output graphs of dlcm command.
 <img src="data/rdmfig1.jpg">
 </div>
 
+___
 DLCM can take exogenous input signals with control matrix.
 ~~~
 >> dlcm -e -d --showmat --epoch 100 --transform 1 --ex data/signal8ex.csv --ectrl data/ctrleye.csv data/signal8.csv
@@ -90,7 +92,7 @@ DLCM can take exogenous input signals with control matrix.
 output csv file : results/signal8_dlec.csv
 output csv file : results/signal8_dlgc.csv
 ~~~
-
+___
 This demo inputs 32 nodes synthetic fMRI BOLD signals of .mat file and outputs FC, PC, mvGC, TE, DLCM-GC and DLCM-EC results.
 Result matrices of EC, P-value, F-value, AIC and BIC are saved in ww32-1_<algorithm>_all.mat file.
 ~~~
@@ -108,11 +110,12 @@ DLCM training result : rsme=0.017795
 .mat file includes input data matrices.
 | name | matrix | description |
 |:---|:---|:---|
-|X |<nodes> x <length>(double)|node signals|
-|inSignal|<exogenous nodes> x <length>(double)|exogenous signals|
-|nodeControl|<nodes> x <nodes>(double)|node connection control matrix|
-|inControl|<nodes> x <nodes>(double)|exogenous node connection control matrix|
-|groundTruth|<nodes> x <nodes>(logical)|ground truth of network connection for ROC curve|
+|X |&lt;nodes&gt; x &lt;length&gt;(double)|node signals|
+|inSignal|&lt;exogenous nodes&gt; x &lt;length&gt(double)|exogenous signals|
+|nodeControl|&lt;nodes&gt x &lt;nodes&gt;(double)|node connection control matrix|
+|inControl|&lt;nodes&gt x &lt;nodes&gt;(double)|exogenous node connection control matrix|
+|groundTruth|&lt;nodes&gt x &lt;nodes&gt;(logical)|ground truth of network connection for ROC curve|
+
 Several graphs are shown by dlcm command.
 <div align="center">
 <img src="data/rdmfig2.jpg">
