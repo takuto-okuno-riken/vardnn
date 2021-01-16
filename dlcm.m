@@ -470,10 +470,10 @@ function processInputFiles(handles)
         if handles.mvgc > 0
             % show mvGC matrix
             if handles.showMat > 0
-                figure; [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, handles.lag, 0, 0, handles.alpha, 1);
+                figure; [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, 1);
                 title(['multivariate Granger Causality Index : ' name]);
             else
-                [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, handles.lag, handles.alpha);
+                [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, exSignal, nodeControl, exControl, handles.lag, handles.alpha, 1);
             end
             
             if handles.showCG > 0
@@ -526,10 +526,10 @@ function processInputFiles(handles)
         if handles.te > 0
             % show TE matrix
             if handles.showMat > 0
-                figure; [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotLinueTE(X, handles.lag, 0, 0, handles.alpha);
+                figure; [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotLinueTE(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, 1);
                 title(['Transfer Entropy (LINUE) : ' name]);
             else
-                [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, handles.lag, handles.alpha);
+                [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSignal, nodeControl, exControl, handles.lag, handles.alpha, 1);
             end
             
             if handles.showCG > 0

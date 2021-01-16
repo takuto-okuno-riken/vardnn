@@ -10,18 +10,16 @@
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  netDLCM      trained DLCM network
 %  range        plotting minimum and maximum range of GCI (default:10)
+%               if range==0, range shows standard deviation [-3 sigma, 3 sigma]
 %  alpha        the significance level of F-statistic (optional)
-%  isFullNode   return both node & exogenous causality matrix (optional)
+%  isFullNode   return both node & exogenous causality matrix (default:0)
 
 function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, exSignal, nodeControl, exControl, netDLCM, range, alpha, isFullNode)
-    if nargin < 9
+    if nargin < 8
         isFullNode = 0;
     end
-    if nargin < 8
-        alpha = 0.05;
-    end
     if nargin < 7
-        rowcut = 0;
+        alpha = 0.05;
     end
     if nargin < 6
         range = 10;
@@ -35,7 +33,6 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, exSig
     else
         gcI2 = gcI;
     end
-    if rowcut>0, gcI2(end-rowcut+1:end,:) = []; end
     clims = [-range, range];
     imagesc(gcI2,clims);
     daspect([1 1 1]);

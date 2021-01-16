@@ -98,7 +98,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 
         disp('initial state before training');
         netDLCM = trainDlcmNetwork(si, [], [], [], netDLCM, options);
-        [t,mae,maeerr] = plotNodeSignals(nodeNum,si,inSignal,netDLCM);
+        [t,mae,maeerr] = plotNodeSignals(nodeNum,si,exSignal,netDLCM);
         disp(['t=' num2str(t) ', mae=' num2str(mae)]);
         %}
         % training DLCM network

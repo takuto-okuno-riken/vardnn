@@ -8,11 +8,8 @@
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
 function [EC] = plotDlcmEC(netDLCM, nodeControl, exControl, range, isFullNode)
-    if nargin < 6
-        isFullNode = 0;
-    end
     if nargin < 5
-        rowcut = 0;
+        isFullNode = 0;
     end
     if nargin < 4
         range = 0.5;
@@ -34,7 +31,6 @@ function [EC] = plotDlcmEC(netDLCM, nodeControl, exControl, range, isFullNode)
     else
         EC2 = EC;
     end
-    if rowcut>0, EC2(end-rowcut+1:end,:) = []; end
     clims = [-range, range];
     imagesc(EC2,clims);
     daspect([1 1 1]);

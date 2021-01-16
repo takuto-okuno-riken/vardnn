@@ -5,7 +5,7 @@
 %  X       multivariate time series matrix (node x time series)
 %  lags    number of lags for autoregression (default:3)
 %  range   plotting minimum and maximum range of GCI (default:10)
-%          if range==0, range shows standard deviation [-5 sigma, 5 sigma]
+%          if range==0, range shows standard deviation [-3 sigma, 3 sigma]
 %  rowcut  cut bottom rows of result gcI matris (default:0)
 
 function [gcI] = plotMultivariateGCI(X, lag, range, rowcut)

@@ -15,7 +15,7 @@ X(4,2:end) = X(6,1:sigLen-1);
 %X(2,2:end) = X(6,1:sigLen-1);
 %X(4,3:end) = X(2,2:sigLen-1);
 
-TE = calcLinueTE(X, p); % calc transfer entropy index of lag |p|
+TE = calcLinueTE(X,[],[],[],p); % calc transfer entropy index of lag |p|
 
 % plot matrix
 figure;
@@ -30,7 +30,7 @@ TE3 = zeros(nodeNum,nodeNum,maxLag);
 nodeAIC = zeros(nodeNum,maxLag);
 nodeBIC = zeros(nodeNum,maxLag);
 for k=1:maxLag
-    [TE3(:,:,k), h, P, ~, ~, ~, ~, nodeAIC(:,k), nodeBIC(:,k)] = calcLinueTE(X, k);
+    [TE3(:,:,k), h, P, ~, ~, ~, ~, nodeAIC(:,k), nodeBIC(:,k)] = calcLinueTE(X,[],[],[],k);
     h2 = double(P<0.05);
     h(isnan(h)) = 0;
     if isequal(h,h2)

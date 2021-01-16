@@ -10,7 +10,7 @@
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  netDLCM      trained DLCM network
 %  alpha        the significance level of F-statistic (optional)
-%  isFullNode   return both node & exogenous causality matrix (optional)
+%  isFullNode   return both node & exogenous causality matrix (default:0)
 
 function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, exSignal, nodeControl, exControl, netDLCM, alpha, isFullNode)
     if nargin < 7

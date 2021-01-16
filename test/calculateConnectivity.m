@@ -50,7 +50,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
             case 'pgc'
                 mat = calcPairwiseGCI(signals{i}, LAG);
             case 'te'
-                mat = calcLinueTE(signals{i}, LAG);
+                mat = calcLinueTE(signals{i}, inSignal, [], inControl, LAG);
             case 'pcs'
                 csvFile = ['results/tetrad/pcs-ad-signal-' group '-roi' num2str(ROINUM) '-' num2str(i) '.csv'];
                 mat = readmatrix(csvFile);

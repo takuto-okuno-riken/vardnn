@@ -4,36 +4,49 @@
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
 % and AIC, BIC (of node vector)
 % input:
-%  X       multivariate time series matrix (node x time series)
-%  lags    number of lags for autoregression (default:3)
-%  range   plotting minimum and maximum range of TE (default:0.1)
-%          if range==0, range shows standard deviation [-5 sigma, 5 sigma]
-%  rowcut  cut bottom rows of result gcI matris (default:0)
-%  alpha   the significance level of F-statistic (default:0.05)
+%  X            multivariate time series matrix (node x time series)
+%  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
+%  nodeControl  node control matrix (node x node) (optional)
+%  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
+%  lags         number of lags for autoregression (default:3)
+%  range        plotting minimum and maximum range of GCI (default:10)
+%               if range==0, range shows standard deviation [-3 sigma, 3 sigma]
+%  alpha        the significance level of F-statistic (default:0.05)
+%  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotLinueTE(X, lag, range, rowcut, alpha)
-    if nargin < 5
+function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotLinueTE(X, exSignal, nodeControl, exControl, lag, range, alpha, isFullNode)
+    if nargin < 8
+        isFullNode = 0;
+    end
+    if nargin < 7
         alpha = 0.05;
     end
-    if nargin < 4
-        rowcut = 0;
+    if nargin < 6
+        range = 10;
     end
-    if nargin < 3
-        range = 0.1;
-    end
-    if nargin < 2
+    if nargin < 5
         lag = 3;
     end
+    if nargin < 4
+        exControl = [];
+    end
+    if nargin < 3
+        nodeControl = [];
+    end
+    if nargin < 2
+        exSignal = [];
+    end
+    [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSignal, nodeControl, exControl, lag, alpha, isFullNode);
     clims = [0, range];
-    [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, lag, alpha);
     if range <= 0
         sigma = std(TE(:),1,'omitnan');
         avg = mean(TE(:),'omitnan');
-        TE = (TE - avg) / sigma;
+        TE2 = (TE - avg) / sigma;
         clims = [-3, 3];
+    else
+        TE2 = TE;
     end
-    if rowcut>0, TE(end-rowcut+1:end,:) = []; end
-    imagesc(TE,clims);
+    imagesc(TE2,clims);
     daspect([1 1 1]);
     title('Transfer Entropy (LINUE)');
     xlabel('Source Nodes');
