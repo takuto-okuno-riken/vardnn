@@ -25,7 +25,7 @@ function [EC] = plotDlcmEC(netDLCM, nodeControl, inControl, range, rowcut, isFul
         nodeControl = [];
     end
     nodeNum = length(netDLCM.nodeNetwork);
-    EC = calcDlcmEC(netDLCM, nodeControl, inControl, isFullNode);
+    EC = calcDlcmEC_(netDLCM, nodeControl, inControl, isFullNode);
     % show DLCM weight causality of predicted node signals
     if range <= 0
         sigma = std(EC(:),1,'omitnan');

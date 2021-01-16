@@ -970,7 +970,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
         end
 
         % recalculate EC
-        weights(:,:,i) = calcDlcmEC(netDLCM, [], inControl);
+        weights(:,:,i) = calcDlcmEC_(netDLCM, [], inControl);
     end
     save(outfName, 'weights', 'roiNames');
     meanWeights = nanmean(weights, 3);
@@ -1092,7 +1092,7 @@ function [ECs, nodeSignals] = calculateNodeSignals(signals, S2, IS2, roiNames, g
             dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             f=load(dlcmName);
             [Y, time] = predictDlcmNetwork(si, inSignal, [], f.inControl, f.netDLCM);
-            ec = calcDlcmEC(f.netDLCM, [], f.inControl);
+            ec = calcDlcmEC_(f.netDLCM, [], f.inControl);
         end
         ECs(:,:,i) = ec;
         nodeSignals(:,:,i) = Y;
@@ -1130,7 +1130,7 @@ function [ECs, nodeSignals, inSignals, inControls] = calculateNodeSignals2(signa
             dlcmName = ['results/' prefix '-dlcm-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             load(dlcmName);
             [Y, time] = predictDlcmNetwork(S2, IS2, [], inControl, netDLCM);
-            ec = calcDlcmEC(netDLCM, [], inControl);
+            ec = calcDlcmEC_(netDLCM, [], inControl);
         end
         ECs(:,:,i) = ec;
         nodeSignals(:,:,i) = Y;

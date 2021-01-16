@@ -126,7 +126,7 @@ function performanceCheckDCMy2DLCM
             % training DLCM network
             netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
             % calc dlcm-gc
-            mat = calcDlcmGCI(si, inSignal, [], inControl, netDLCM);
+            mat = calcDlcmGCI_(si, inSignal, [], inControl, netDLCM);
             time = toc(ticHdl);
             disp(['finish calculating DLCM-GC! t = ' num2str(time) 's']);
 
@@ -138,7 +138,7 @@ function performanceCheckDCMy2DLCM
         
         % calculate DLCM-EC and get computational time
         ticHdl = tic;
-        mat = calcDlcmEC(netDLCM, [], inControl);
+        mat = calcDlcmEC_(netDLCM, [], inControl);
         time = toc(ticHdl) + netDLCM.trainTime;
         DLEtime(k,1) = time;
         disp(['finish DLCM-EC! t = ' num2str(time) 's']);        

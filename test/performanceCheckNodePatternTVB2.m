@@ -179,7 +179,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         end
         if isempty(dlGC)
             % show DLCM-GC
-            dlGC = calcDlcmGCI(Y, inSignal, [], inControl, netDLCM);
+            dlGC = calcDlcmGCI_(Y, inSignal, [], inControl, netDLCM);
             save(dlcmFile, 'netDLCM', 'Y', 'inSignal', 'si', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2', 'dlGC');
         end
         
