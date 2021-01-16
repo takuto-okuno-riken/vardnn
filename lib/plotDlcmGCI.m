@@ -31,12 +31,14 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSig
     if range <= 0
         sigma = std(gcI(:),1,'omitnan');
         avg = mean(gcI(:),'omitnan');
-        gcI = (gcI - avg) / sigma;
+        gcI2 = (gcI - avg) / sigma;
         range = 3;
+    else
+        gcI2 = gcI;
     end
-    if rowcut>0, gcI(end-rowcut+1:end,:) = []; end
+    if rowcut>0, gcI2(end-rowcut+1:end,:) = []; end
     clims = [-range, range];
-    imagesc(gcI,clims);
+    imagesc(gcI2,clims);
     daspect([1 1 1]);
     title('DLCM Granger Causality');
     xlabel('Source Nodes');

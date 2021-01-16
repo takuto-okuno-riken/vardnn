@@ -30,12 +30,14 @@ function [EC] = plotDlcmEC(netDLCM, nodeControl, inControl, range, rowcut, isFul
     if range <= 0
         sigma = std(EC(:),1,'omitnan');
         avg = mean(EC(:),'omitnan');
-        EC = (EC - avg) / sigma;
+        EC2 = (EC - avg) / sigma;
         range = 3;
+    else
+        EC2 = EC;
     end
-    if rowcut>0, EC(end-rowcut+1:end,:) = []; end
+    if rowcut>0, EC2(end-rowcut+1:end,:) = []; end
     clims = [-range, range];
-    imagesc(EC,clims);
+    imagesc(EC2,clims);
     daspect([1 1 1]);
     title('DLCM Weight Causality Index');
     colorbar;
