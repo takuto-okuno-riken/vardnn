@@ -312,7 +312,7 @@ function processInputFiles(handles)
 
         % load exogenous input control csv file
         if inNum > 0 && isempty(inControl)
-            inControl = eye(nodeNum, inNum);
+            inControl = ones(nodeNum, inNum);
         end
         if ~isempty(handles.inControls)
             if length(handles.inControls)==1
