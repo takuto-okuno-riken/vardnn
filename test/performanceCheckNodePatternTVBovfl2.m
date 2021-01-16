@@ -74,7 +74,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             dlErr(k,j) = rsme;
             
             % show DLCM-GC
-            dlGC = calcDlcmGCI_(Y, inSignal, [], inControl, netDLCM);
+            dlGC = calcDlcmGCI(Y, inSignal, [], inControl, netDLCM);
 
             % calc ROC curve
             [~, ~, dlAUC(k,j)] = calcROCcurve(dlGC, weights, 100, 1, Gth);

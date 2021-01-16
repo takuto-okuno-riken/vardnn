@@ -113,7 +113,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             save(dlcmFile, 'netDLCM', 'Y', 'inSignal', 'Y', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
         end
         % show DLCM-GC
-        dlGC = calcDlcmGCI_(Y, inSignal, [], inControl, netDLCM);
+        dlGC = calcDlcmGCI(Y, inSignal, [], inControl, netDLCM);
         
         % calc ROC curve
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, weights, 100, 1, Gth); hold off;

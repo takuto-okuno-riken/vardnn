@@ -104,7 +104,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
                     disp(['end training : rsme=' num2str(rsme)]);
                     % calc dlcm-gc
-                    mat = calcDlcmGCI_(si, inSignal, [], inControl, netDLCM);
+                    mat = calcDlcmGCI(si, inSignal, [], inControl, netDLCM);
                     
                     parsavedlsm(dlcmName, netDLCM, si, inSignal, inControl, mat, sig, c, maxsi, minsi);
                 end
@@ -127,7 +127,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                         'L2Regularization',0.05, ...
                         'Verbose',false);
                     [netDLCM, time] = recoveryTrainDlcmNetwork(f.si, f.inSignal, [], f.inControl, f.netDLCM, options);
-                    mat = calcDlcmGCI_(f.si, f.inSignal, [], f.inControl, netDLCM);
+                    mat = calcDlcmGCI(f.si, f.inSignal, [], f.inControl, netDLCM);
                     parsavedlsm(outName, netDLCM, f.si, f.inSignal, f.inControl, mat, f.sig, c, f.maxsi, f.minsi);
                 end
             case {'dlw','dlwrc'} % should be called after dlcm
@@ -137,7 +137,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     dlcmName = ['results/ad-dlcmrc-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 end
                 f = load(dlcmName);
-                [mat, subweights(:,:,i)] = calcDlcmEC_(f.netDLCM, [], f.inControl);
+                [mat, subweights(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.inControl);
             end
             weights(:,:,i) = mat;
         end

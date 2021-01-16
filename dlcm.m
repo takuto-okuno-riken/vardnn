@@ -417,7 +417,7 @@ function processInputFiles(handles)
                 figure; dlEC = plotDlcmEC(netDLCM, nodeControl, inControl, 0, 0, 1);
                 title(['DLCM Effective Connectivity : ' name]);
             else
-                dlEC = calcDlcmEC_(netDLCM, nodeControl, inControl, 1);
+                dlEC = calcDlcmEC(netDLCM, nodeControl, inControl, 1);
             end
             
             if handles.showCG > 0
@@ -445,7 +445,7 @@ function processInputFiles(handles)
                 figure; [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, 0, 0, handles.alpha, 1);
                 title(['DLCM Granger Causality Index : ' name]);
             else
-                [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI_(X, inSignal, nodeControl, inControl, netDLCM, handles.alpha, 1);
+                [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, handles.alpha, 1);
             end
             
             if handles.showCG > 0

@@ -806,7 +806,7 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
                 weNet2{end+1} = netDLCM2;
 
                 % calculate DLCM-EC
-                [EC2s{a}, subEC2s{a}] = calcDlcmEC_(netDLCM2, [], inControl);
+                [EC2s{a}, subEC2s{a}] = calcDlcmEC(netDLCM2, [], inControl);
 
                 save(tmpfName, 'EC2s', 'subEC2s', 'inSignal', 'inControl', 'weSi', 'weSi2', 'weNet', 'weNet2');
             end
@@ -869,7 +869,7 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
             weSignals{k} = weSi2{idx-1};
             weDLWs(:,:,k) = EC2s{idx-1};
             weSubDLWs(:,:,k) = subEC2s{idx-1};
-            weDLs(:,:,k) = calcDlcmGCI_(weSi2{idx-1}, inSignal, [], inControl, weNet2{idx-1});
+            weDLs(:,:,k) = calcDlcmGCI(weSi2{idx-1}, inSignal, [], inControl, weNet2{idx-1});
         end
     end
     save(sfName, 'weDLWs', 'weSubDLWs', 'weSignals', 'weDLs', 'ECdCr', 'smECd2Cr', 'cosSim');
@@ -1208,7 +1208,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
                 ampNet2{end+1} = netDLCM2;
 
                 % calculate DLCM-EC
-                [EC2s{a}, subEC2s{a}] = calcDlcmEC_(netDLCM2, [], inControl);
+                [EC2s{a}, subEC2s{a}] = calcDlcmEC(netDLCM2, [], inControl);
 
                 save(tmpfName, 'EC2s', 'subEC2s', 'inSignal', 'inControl', 'ampSi', 'ampSi2', 'ampNet', 'ampNet2');
             end
@@ -1246,7 +1246,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
             ampSignals{k} = ampSi2{idx-1};
             ampDLWs(:,:,k) = EC2s{idx-1};
             ampSubDLWs(:,:,k) = subEC2s{idx-1};
-            ampDLs(:,:,k) = calcDlcmGCI_(ampSi2{idx-1}, inSignal, [], inControl, ampNet2{idx-1});
+            ampDLs(:,:,k) = calcDlcmGCI(ampSi2{idx-1}, inSignal, [], inControl, ampNet2{idx-1});
         end
     end
     save(sfName, 'ampDLWs', 'ampSubDLWs', 'ampSignals', 'ampDLs', 'ZiCr', 'ZijCr', 'cosSim');
@@ -1340,7 +1340,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
                 ampNet2{end+1} = netDLCM2;
 
                 % calculate DLCM-EC
-                [EC2s{a}, subEC2s{a}] = calcDlcmEC_(netDLCM2, [], inControl);
+                [EC2s{a}, subEC2s{a}] = calcDlcmEC(netDLCM2, [], inControl);
             end
 
             % shutdown parallel processing
@@ -1374,7 +1374,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
             ampSignals{k} = ampSi2{idx-1};
             ampDLWs(:,:,k) = EC2s{idx-1};
             ampSubDLWs(:,:,k) = subEC2s{idx-1};
-            ampDLs(:,:,k) = calcDlcmGCI_(ampSi2{idx-1}, inSignal, [], inControl, ampNet2{idx-1});
+            ampDLs(:,:,k) = calcDlcmGCI(ampSi2{idx-1}, inSignal, [], inControl, ampNet2{idx-1});
         end
     end
     save(sfName, 'ampDLWs', 'ampSubDLWs', 'ampSignals', 'ampDLs', 'ZiCr', 'ZijCr', 'cosSim');
@@ -1517,7 +1517,7 @@ function checkRelationSubDLWandSignals2(signals, DLWs, subDLWs, smDLWs, smSubDLW
                         netDLCM2 = trainDlcmNetwork(si2, f.inSignal, [], f.inControl, netDLCM2, options);
                         
                         % calculate DLCM-EC
-                        [~, subEC2s{i,a,n}] = calcDlcmEC_(netDLCM2, [], f.inControl);
+                        [~, subEC2s{i,a,n}] = calcDlcmEC(netDLCM2, [], f.inControl);
                     end
                     for n=1:nMax
                         Zi2(i, a, n) = subEC2s{i,a,n}(i,1);
@@ -2304,7 +2304,7 @@ function [weights, meanWeights, stdWeights, subweights] = retrainDLCMAndEC(teach
         end
 
         % recalculate EC
-        [weights(:,:,i), subweights(:,:,i)] = calcDlcmEC_(netDLCM, [], inControl);
+        [weights(:,:,i), subweights(:,:,i)] = calcDlcmEC(netDLCM, [], inControl);
     end
     save(outfName, 'weights', 'roiNames', 'subweights');
     meanWeights = nanmean(weights, 3);
@@ -2388,7 +2388,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
                 inSignal = f.inSignal;
             end
             [Y, time] = simulateDlcmNetwork(si, inSignal, [], f.inControl, f.netDLCM);
-            [ec, subECs(:,:,i)] = calcDlcmEC_(f.netDLCM, [], f.inControl);
+            [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.inControl);
         end
         ECs(:,:,i) = ec;
         simSignals{i} = Y;
