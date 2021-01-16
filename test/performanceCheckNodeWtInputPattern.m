@@ -11,7 +11,7 @@ function performanceCheckNodeWtInputPattern
     si = siOrg(1:nodeNum, 1:sigLen);
     exSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
     exControl = logical(ones(nodeNum,inputNum));
-    
+
     %% pattern 1 -------------------------------------------------
 %{
     disp('full random -- full independent nodes');
@@ -126,12 +126,12 @@ function [FC, dlEC, gcI] = checkingPattern(si, exSignal, exControl, idx)
     disp(['t=' num2str(t) ', mae=' num2str(mae)]);
 
     % show original signal FC
-    figure; FC = plotFunctionalConnectivity(si,exSignal,[],exControl);
+    figure; FC = plotFunctionalConnectivity(si,exSignal,[],exControl,1);
     % show original signal granger causality index (gc-EC)
-    figure; gcI = plotPairwiseGCI([si; exSignal],3,10,inputNum);
+    figure; gcI = plotPairwiseGCI(si,exSignal,[],exControl,3,10,0.05,1);
     % show original time shifted correlation (tsc-FC)
     %figure; tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
-    figure; dlEC = plotDlcmECmeanWeight(netDLCM);    
+    figure; dlEC = plotDlcmEC(netDLCM, [], exControl, 0, 1);    
 end
 

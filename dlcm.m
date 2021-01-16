@@ -498,10 +498,10 @@ function processInputFiles(handles)
         if handles.pwgc > 0
             % show pwGC matrix
             if handles.showMat > 0
-                figure; [pwGC, h, P, F, cvFd, AIC, BIC] = plotPairwiseGCI(X, handles.lag, 0, 0, handles.alpha);
+                figure; [pwGC, h, P, F, cvFd, AIC, BIC] = plotPairwiseGCI(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, 1);
                 title(['pairwised Granger Causality Index : ' name]);
             else
-                [pwGC, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, handles.lag, handles.alpha);
+                [pwGC, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, exSignal, nodeControl, exControl, handles.lag, handles.alpha, 1);
             end
             
             if handles.showCG > 0

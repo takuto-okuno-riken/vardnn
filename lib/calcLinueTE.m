@@ -122,7 +122,7 @@ function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSign
         end
     end
     if ~isempty(exControl) && isFullNode > 0
-        exControl(exControl==0) = nan;
+        exControl=double(exControl); exControl(exControl==0) = nan;
         TE(:,nodeNum+1:end) = TE(:,nodeNum+1:end) .* exControl;
         F(:,nodeNum+1:end) = F(:,nodeNum+1:end) .* exControl;
         P(:,nodeNum+1:end) = P(:,nodeNum+1:end) .* exControl;

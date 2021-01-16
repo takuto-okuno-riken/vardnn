@@ -55,8 +55,8 @@ function testSimulationMarmo
     figure; FC = plotFunctionalConnectivity(si);
 %    figure; FC = plotFunctionalConnectivity(S);
     % show original & simulated signal granger causality index (gc-EC)
-    figure; gcI = plotPairwiseGCI(si,3,0);
-%    figure; gcI = plotPairwiseGCI(S,3,0);
+    figure; gcI = plotPairwiseGCI(si,[],[],[],3,0);
+%    figure; gcI = plotPairwiseGCI(S,[],[],[],3,0);
     % show DLCM-GC
     figure; dlGC = plotDlcmGCI(si, inSignal, [], inControl, netDLCM, 0);
 end

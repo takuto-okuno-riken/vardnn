@@ -5,6 +5,7 @@
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  range        plotting minimum and maximum range of GCI (default:0.5)
+%               if range==0, range shows standard deviation [-3 sigma, 3 sigma]
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
 function [EC] = plotDlcmEC(netDLCM, nodeControl, exControl, range, isFullNode)
@@ -20,7 +21,6 @@ function [EC] = plotDlcmEC(netDLCM, nodeControl, exControl, range, isFullNode)
     if nargin < 2
         nodeControl = [];
     end
-    nodeNum = length(netDLCM.nodeNetwork);
     EC = calcDlcmEC(netDLCM, nodeControl, exControl, isFullNode);
     % show DLCM weight causality of predicted node signals
     if range <= 0
