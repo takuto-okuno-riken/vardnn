@@ -3,12 +3,12 @@
 % input:
 %  netDLCM      trained DLCM network
 %  nodeControl  node control matrix (node x node) (optional)
-%  inControl    exogenous input control matrix for each node (node x exogenous input) (optional)
+%  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  range        plotting minimum and maximum range of GCI (default:0.5)
 %  rowcut       cut bottom rows of result CI matrix (default:0)
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [EC] = plotDlcmEC(netDLCM, nodeControl, inControl, range, rowcut, isFullNode)
+function [EC] = plotDlcmEC(netDLCM, nodeControl, exControl, range, rowcut, isFullNode)
     if nargin < 6
         isFullNode = 0;
     end
@@ -19,13 +19,13 @@ function [EC] = plotDlcmEC(netDLCM, nodeControl, inControl, range, rowcut, isFul
         range = 0.5;
     end
     if nargin < 3
-        inControl = [];
+        exControl = [];
     end
     if nargin < 2
         nodeControl = [];
     end
     nodeNum = length(netDLCM.nodeNetwork);
-    EC = calcDlcmEC(netDLCM, nodeControl, inControl, isFullNode);
+    EC = calcDlcmEC(netDLCM, nodeControl, exControl, isFullNode);
     % show DLCM weight causality of predicted node signals
     if range <= 0
         sigma = std(EC(:),1,'omitnan');

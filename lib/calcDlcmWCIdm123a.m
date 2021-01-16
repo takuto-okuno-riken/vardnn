@@ -3,15 +3,15 @@
 % input:
 %  netDLCM      trained DLCM network
 %  nodeControl  node control matrix (node x node) (optional)
-%  inControl    exogenous input control matrix for each node (node x exogenous input) (optional)
+%  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [wcI, wcNS] = calcDlcmWCIdm123a(netDLCM, nodeControl, inControl, isFullNode)
+function [wcI, wcNS] = calcDlcmWCIdm123a(netDLCM, nodeControl, exControl, isFullNode)
     if nargin < 4
         isFullNode = 0;
     end
     if nargin < 3
-        inControl = [];
+        exControl = [];
     end
     if nargin < 2
         nodeControl = [];
@@ -28,8 +28,8 @@ function [wcI, wcNS] = calcDlcmWCIdm123a(netDLCM, nodeControl, inControl, isFull
         if ~isempty(nodeControl)
             control = nodeControl(i,:);
         end
-        if ~isempty(inControl)
-            excontrol = inControl(i,:);
+        if ~isempty(exControl)
+            excontrol = exControl(i,:);
         end
         ctrl = [control, excontrol];
 

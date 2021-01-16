@@ -9,82 +9,82 @@ function performanceCheckNodeWtInputPattern
     sigLen = 100;
 
     si = siOrg(1:nodeNum, 1:sigLen);
-    inSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
-    inControl = logical(ones(nodeNum,inputNum));
+    exSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
+    exControl = logical(ones(nodeNum,inputNum));
     
     %% pattern 1 -------------------------------------------------
 %{
     disp('full random -- full independent nodes');
-    checkingPattern(si, inSignal, inControl, 1);
+    checkingPattern(si, exSignal, exControl, 1);
 %}
     %% pattern 2 -------------------------------------------------
 %%{
     disp('node 2 and exogenous input1 are syncronized');
-    si(2,:) = inSignal(1,:);
-    checkingPattern(si, inSignal, inControl, 2);
+    si(2,:) = exSignal(1,:);
+    checkingPattern(si, exSignal, exControl, 2);
 %%}
     %% pattern 3 -------------------------------------------------
 %%{
     disp('node 2 is excited by exogenous input 1');
     si = siOrg(1:nodeNum, 1:sigLen);
-    si(2,2:end) = inSignal(1,1:sigLen-1);
-    checkingPattern(si, inSignal, inControl, 3);
+    si(2,2:end) = exSignal(1,1:sigLen-1);
+    checkingPattern(si, exSignal, exControl, 3);
 %%}
     %% pattern 4 -------------------------------------------------
 %{
     disp('node 2 is excited half by exogenous input 1');
     si = siOrg(1:nodeNum, 1:sigLen);
-    si(2,2:end) = inSignal(1,1:sigLen-1) * 0.5;
-    checkingPattern(si, inSignal, inControl, 4);
+    si(2,2:end) = exSignal(1,1:sigLen-1) * 0.5;
+    checkingPattern(si, exSignal, exControl, 4);
 %}
     %% pattern 5 -------------------------------------------------
 %%{
     disp('node 2,4 is excited by exogenous input 2');
     si = siOrg(1:nodeNum, 1:sigLen);
     
-    si(2,2:end) = inSignal(2,1:sigLen-1);
-    si(4,2:end) = inSignal(2,1:sigLen-1);
-    checkingPattern(si, inSignal, inControl, 5);
+    si(2,2:end) = exSignal(2,1:sigLen-1);
+    si(4,2:end) = exSignal(2,1:sigLen-1);
+    checkingPattern(si, exSignal, exControl, 5);
 %%}
     %% pattern 6 -------------------------------------------------
 %%{
     disp('nodes are excited exIn2-.->2, 2-.->4');
     si = siOrg(1:nodeNum, 1:sigLen);
-    si(2,2:end) = inSignal(2,1:sigLen-1);
+    si(2,2:end) = exSignal(2,1:sigLen-1);
     si(4,2:end) = si(2,1:sigLen-1);
-    checkingPattern(si, inSignal, inControl, 6);
+    checkingPattern(si, exSignal, exControl, 6);
 %}
     %% pattern 7 -------------------------------------------------
 %%{
     disp('node 2,4 and exogenous input1 are syncronized, only 4 receive input1');
     si = siOrg(1:nodeNum, 1:sigLen);
-    inSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
-    si(2,:) = inSignal(1,:);
-    si(4,:) = inSignal(1,:);
-    inControl = logical(zeros(nodeNum,inputNum));
-    inControl(4,1) = 1;
-    checkingPattern(si, inSignal, inControl, 7);
+    exSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
+    si(2,:) = exSignal(1,:);
+    si(4,:) = exSignal(1,:);
+    exControl = logical(zeros(nodeNum,inputNum));
+    exControl(4,1) = 1;
+    checkingPattern(si, exSignal, exControl, 7);
 %%}
     %% pattern 8 -------------------------------------------------
 %%{
     disp('node 2,4 are excited by exogenous input1, only 4 receive input1');
     si = siOrg(1:nodeNum, 1:sigLen);
-    si(2,2:end) = inSignal(1,1:sigLen-1);
-    si(4,3:end) = inSignal(1,2:sigLen-1);
-    inControl = logical(zeros(nodeNum,inputNum));
-    inControl(4,1) = 1;
-    checkingPattern(si, inSignal, inControl, 8);
+    si(2,2:end) = exSignal(1,1:sigLen-1);
+    si(4,3:end) = exSignal(1,2:sigLen-1);
+    exControl = logical(zeros(nodeNum,inputNum));
+    exControl(4,1) = 1;
+    checkingPattern(si, exSignal, exControl, 8);
 %%}
 end
 
 %% 
-function [FC, dlEC, gcI] = checkingPattern(si, inSignal, inControl, idx)
+function [FC, dlEC, gcI] = checkingPattern(si, exSignal, exControl, idx)
     nodeNum = size(si,1);
-    inputNum = size(inSignal,1);
+    inputNum = size(exSignal,1);
     sigLen = size(si,2);
 
     % layer parameters
-    netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
+    netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
 
     % show signals before training
     %{
@@ -100,8 +100,8 @@ function [FC, dlEC, gcI] = checkingPattern(si, inSignal, inControl, idx)
 %            'Plots','training-progress');
 
     disp('initial state before training');
-    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
-    [t,mae,maeerr] = plotNodeSignals(nodeNum,si,inSignal,netDLCM);
+    netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+    [t,mae,maeerr] = plotNodeSignals(nodeNum,si,exSignal,netDLCM);
     disp(['t=' num2str(t) ', mae=' num2str(mae)]);
     %}
     % training DLCM network
@@ -117,22 +117,21 @@ function [FC, dlEC, gcI] = checkingPattern(si, inSignal, inControl, idx)
 %            'Plots','training-progress');
 
     disp('start training');
-    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
     dlcmFile = ['results/net-pat-in' num2str(idx) '.mat'];
     save(dlcmFile, 'netDLCM');
 
     % show signals after training
-    [S, t,mae,maeerr] = plotPredictSignals(si,inSignal,[],inControl,netDLCM);
+    [S, t,mae,maeerr] = plotPredictSignals(si,exSignal,[],exControl,netDLCM);
     disp(['t=' num2str(t) ', mae=' num2str(mae)]);
 
-    siWithInput = [si; inSignal];
     % show original signal FC
-    FC = plotFunctionalConnectivity(siWithInput,inputNum);
+    figure; FC = plotFunctionalConnectivity(si,exSignal,[],exControl);
     % show original signal granger causality index (gc-EC)
-    gcI = plotPairwiseGCI(siWithInput,3,10,inputNum);
+    figure; gcI = plotPairwiseGCI([si; exSignal],3,10,inputNum);
     % show original time shifted correlation (tsc-FC)
-    %tscFC = plotTimeShiftedCorrelation(si);
+    %figure; tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
-    dlEC = plotDlcmECmeanWeight(netDLCM);    
+    figure; dlEC = plotDlcmECmeanWeight(netDLCM);    
 end
 

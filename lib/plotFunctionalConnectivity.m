@@ -2,16 +2,28 @@
 % Plot Functional Connectivity
 % returns Functional Connectivity (FC) and p-values (P)
 % input:
-%  X       multivariate time series matrix (node x time series)
-%  rowcut  cut bottom rows of result gcI matris (default:0)
+%  X            multivariate time series matrix (node x time series)
+%  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
+%  nodeControl  node control matrix (node x node) (optional)
+%  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
+%  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [FC, P] = plotFunctionalConnectivity(X, rowcut)
-    if nargin < 2
-        rowcut = 0;
+function [FC, P] = plotFunctionalConnectivity(X, exSignal, nodeControl, exControl, isFullNode)
+    if nargin < 5
+        isFullNode = 0;
     end
+    if nargin < 4
+        exControl = [];
+    end
+    if nargin < 3
+        nodeControl = [];
+    end
+    if nargin < 2
+        exSignal = [];
+    end
+    [FC, P] = calcFunctionalConnectivity(X, exSignal, nodeControl, exControl, isFullNode);
+
     % show functional conectivity
-    [FC, P] = calcFunctionalConnectivity(X);
-    if rowcut>0, FC(end-rowcut+1:end,:) = []; end
     clims = [-1,1];
     imagesc(FC,clims);
     daspect([1 1 1]);

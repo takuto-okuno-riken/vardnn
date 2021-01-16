@@ -5,14 +5,14 @@
 % and AIC, BIC (of node vector)
 % input:
 %  X            multivariate time series matrix (node x time series)
-%  inSignal     multivariate time series matrix (exogenous input x time series) (optional)
+%  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
-%  inControl    exogenous input control matrix for each node (node x exogenous input) (optional)
+%  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  netDLCM      trained DLCM network
 %  alpha        the significance level of F-statistic (optional)
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, alpha, isFullNode)
+function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, exSignal, nodeControl, exControl, netDLCM, alpha, isFullNode)
     if nargin < 7
         isFullNode = 0;
     end
@@ -20,15 +20,15 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSig
         alpha = 0.05;
     end
     nodeNum = size(X,1);
-    nodeInNum = nodeNum + size(inSignal,1);
+    nodeInNum = nodeNum + size(exSignal,1);
     sigLen = size(X,2);
     if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
     
     % set node input
-    if isempty(inSignal)
+    if isempty(exSignal)
         nodeInputOrg = X(:,1:sigLen-1);
     else
-        nodeInputOrg = [X(:,1:sigLen-1); inSignal(:,1:sigLen-1)];
+        nodeInputOrg = [X(:,1:sigLen-1); exSignal(:,1:sigLen-1)];
     end
 
     % calc DLCM granger causality
@@ -47,8 +47,8 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSig
             filter = nodeControl(i,:).';
             nodeInput(1:nodeNum,1) = nodeInput(1:nodeNum,1) .* filter;
         end
-        if ~isempty(inControl)
-            filter = inControl(i,:).';
+        if ~isempty(exControl)
+            filter = exControl(i,:).';
             nodeInput(nodeNum+1:end,1) = nodeInput(nodeNum+1:end,1) .* filter;
         end
         nodeTeach = X(i,2:end);
@@ -60,7 +60,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSig
         % AIC and BIC of this node (assuming residuals are gausiann distribution)
         T = sigLen-1;
         RSS = err*err';
-        k = nodeNum + size(inSignal, 1) + 1; % input + bias
+        k = nodeNum + size(exSignal, 1) + 1; % input + bias
         %for j=2:2:length(netDLCM.nodeNetwork{i, 1}.Layers)
         %    k = k + length(netDLCM.nodeNetwork{i, 1}.Layers(j, 1).Bias);   % added hidden neuron number
         %end
@@ -82,7 +82,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSig
             % AIC and BIC (assuming residuals are gausiann distribution)
             % BIC = n*ln(RSS/n)+k*ln(n)
             RSS1 = err*err';
-            k1 = nodeNum - 1 + size(inSignal, 1) + 1;
+            k1 = nodeNum - 1 + size(exSignal, 1) + 1;
             AIC(i,j) = T*log(RSS1/T) + 2 * k1;
             BIC(i,j) = T*log(RSS1/T) + k1*log(T);
 

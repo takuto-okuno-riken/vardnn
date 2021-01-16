@@ -554,10 +554,10 @@ function processInputFiles(handles)
         if handles.fc > 0
             % show FC matrix
             if handles.showMat > 0
-                figure; [FC,P] = plotFunctionalConnectivity(X);
+                figure; [FC,P] = plotFunctionalConnectivity(X, inSignal, nodeControl, inControl, 1);
                 title(['Functional Connectivity : ' name]);
             else
-                [FC,P] = calcFunctionalConnectivity(X);
+                [FC,P] = calcFunctionalConnectivity(X, inSignal, nodeControl, inControl, 1);
             end
             
             if handles.showCG > 0
