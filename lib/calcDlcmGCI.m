@@ -45,11 +45,11 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, exSig
         nodeInput = nodeInputOrg;
         if ~isempty(nodeControl)
             filter = nodeControl(i,:).';
-            nodeInput(1:nodeNum,1) = nodeInput(1:nodeNum,1) .* filter;
+            nodeInput(1:nodeNum,:) = nodeInput(1:nodeNum,:) .* filter;
         end
         if ~isempty(exControl)
             filter = exControl(i,:).';
-            nodeInput(nodeNum+1:end,1) = nodeInput(nodeNum+1:end,1) .* filter;
+            nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
         end
         nodeTeach = X(i,2:end);
         % predict 

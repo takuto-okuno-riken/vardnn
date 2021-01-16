@@ -582,10 +582,10 @@ function processInputFiles(handles)
         if handles.pc > 0
             % show PC matrix
             if handles.showMat > 0
-                figure; [PC,P] = plotPartialCorrelation(X);
+                figure; [PC,P] = plotPartialCorrelation(X, inSignal, nodeControl, inControl, 1);
                 title(['Partial Correlation : ' name]);
             else
-                [PC,P] = calcPartialCorrelation(X);
+                [PC,P] = calcPartialCorrelation(X, inSignal, nodeControl, inControl, 1);
             end
             
             if handles.showCG > 0
@@ -610,10 +610,10 @@ function processInputFiles(handles)
         if handles.wc > 0
             % show WC matrix
             if handles.showMat > 0
-                figure; [mWCS, WCOH, WCS] = plotWaveletCoherence(X);
+                figure; [mWCS, WCOH, WCS] = plotWaveletCoherence(X, inSignal, nodeControl, inControl, 1);
                 title(['Wavelet Coherence : ' name]);
             else
-                [mWCS, WCOH, WCS] = calcWaveletCoherence(X);
+                [mWCS, WCOH, WCS] = calcWaveletCoherence(X, inSignal, nodeControl, inControl, 1);
             end
             
             if handles.showCG > 0
