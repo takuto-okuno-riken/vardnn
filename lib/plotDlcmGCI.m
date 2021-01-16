@@ -12,8 +12,12 @@
 %  range        plotting minimum and maximum range of GCI (default:10)
 %  rowcut       cut bottom rows of result gcI matris (default:0)
 %  alpha        the significance level of F-statistic (optional)
+%  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, range, rowcut, alpha)
+function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, range, rowcut, alpha, isFullNode)
+    if nargin < 9
+        isFullNode = 0;
+    end
     if nargin < 8
         alpha = 0.05;
     end
@@ -23,7 +27,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSig
     if nargin < 6
         range = 10;
     end
-    [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, alpha);
+    [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, alpha, isFullNode);
     if range <= 0
         sigma = std(gcI(:),1,'omitnan');
         avg = mean(gcI(:),'omitnan');

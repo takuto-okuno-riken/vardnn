@@ -57,6 +57,7 @@ function dlcm(varargin)
     handles.showROC = 0;
     handles.maxEpochs = 1000;
     handles.L2Regularization = 0.05;
+    handles.noCache = 0;
 
     % load command line input
     i = 1;
@@ -136,6 +137,8 @@ function dlcm(varargin)
                 handles.showCG = 1;
             case {'--showroc'}
                 handles.showROC = 1;
+            case {'--nocache'}
+                handles.noCache = 1;
             case {'-h','--help'}
                 showUsage();
                 return;
@@ -203,6 +206,7 @@ function showUsage()
     disp('  --showmat           show result matrix of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC');
     disp('  --showcg            show circle graph of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC');
     disp('  --showroc           show ROC curve (by GroundTruth) of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC');
+    disp('  --nocache           do not use cache file for DLCM training');
     disp('  -v, --version       show version number');
     disp('  -h, --help          show command line help');
 end
@@ -350,7 +354,7 @@ function processInputFiles(handles)
             T = readtable(roiname, 'ReadVariableNames', 0);
             roiNames = table2array(T);
         elseif isempty(roiNames)
-            roiNames = generateNumberROINames(nodeNum);
+            roiNames = generateNumberROINames(nodeNum+inNum);
         end
 
         % signal transform raw or not
@@ -379,7 +383,7 @@ function processInputFiles(handles)
         % train DLCM network
         if handles.dlec > 0 || handles.dlgc > 0
             dlcmFile = [exePath '/results/cache-dlcm-' name '.mat'];
-            if exist(dlcmFile, 'file')
+            if exist(dlcmFile, 'file') && handles.noCache == 0
                 disp(['read cache file : ' dlcmFile]);
                 load(dlcmFile);
             else
@@ -400,7 +404,9 @@ function processInputFiles(handles)
                 netDLCM = trainDlcmNetwork(X, inSignal, nodeControl, inControl, netDLCM, options);
                 [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
                 disp(['DLCM training result : rsme=' num2str(rsme)]);
-                save(dlcmFile, 'netDLCM');
+                if handles.noCache == 0
+                    save(dlcmFile, 'netDLCM');
+                end
             end
         end
         
@@ -408,10 +414,10 @@ function processInputFiles(handles)
         if handles.dlec > 0
             % show DLCM-EC matrix
             if handles.showMat > 0
-                figure; dlEC = plotDlcmEC(netDLCM, nodeControl, inControl, 0, 0);
+                figure; dlEC = plotDlcmEC(netDLCM, nodeControl, inControl, 0, 0, 1);
                 title(['DLCM Effective Connectivity : ' name]);
             else
-                dlEC = calcDlcmEC(netDLCM, nodeControl, inControl);
+                dlEC = calcDlcmEC(netDLCM, nodeControl, inControl, 1);
             end
             
             if handles.showCG > 0
@@ -436,10 +442,10 @@ function processInputFiles(handles)
         if handles.dlgc > 0
             % show DLCM-GC matrix
             if handles.showMat > 0
-                figure; [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, 0, 0, handles.alpha);
+                figure; [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, 0, 0, handles.alpha, 1);
                 title(['DLCM Granger Causality Index : ' name]);
             else
-                [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, handles.alpha);
+                [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, handles.alpha, 1);
             end
             
             if handles.showCG > 0
@@ -464,7 +470,7 @@ function processInputFiles(handles)
         if handles.mvgc > 0
             % show mvGC matrix
             if handles.showMat > 0
-                figure; [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, handles.lag, 0, 0, handles.alpha);
+                figure; [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, handles.lag, 0, 0, handles.alpha, 1);
                 title(['multivariate Granger Causality Index : ' name]);
             else
                 [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, handles.lag, handles.alpha);
@@ -683,7 +689,13 @@ function plotCircleGraph(mat, matname, roiNames, rmin, rmax, rstep, isRaw)
     end
     rangeW = -rmin:-rstep:-rmax;
     rangeS = rmin:rstep:rmax;
-
+    
+    % fix matrix size to Square
+    if size(mOrg,1) < size(mOrg,2)
+        m = nan(size(mOrg,2));
+        m(1:size(mOrg,1),:) = mOrg;
+        mOrg = m;
+    end
     % plot weaker weights
     cstep = 0.8 / length(rangeW);
     for i=1:length(rangeW)
@@ -692,8 +704,9 @@ function plotCircleGraph(mat, matname, roiNames, rmin, rmax, rstep, isRaw)
         if i<length(rangeW)
             m(m<=rangeW(i+1)) = 0;
         end
+        m(isnan(m)) = 0;
         hold on; 
-        G = digraph(m, 'omitselfloops');
+        G = digraph(m', 'omitselfloops');
         gp=plot(G);
         layout(gp,'circle');
         gp.LineStyle = '-';
@@ -709,8 +722,9 @@ function plotCircleGraph(mat, matname, roiNames, rmin, rmax, rstep, isRaw)
         if i<length(rangeS)
             m(m>=rangeS(i+1)) = 0;
         end
+        m(isnan(m)) = 0;
         hold on; 
-        G = digraph(m, 'omitselfloops');
+        G = digraph(m', 'omitselfloops');
         gp=plot(G);
         layout(gp,'circle');
         gp.LineStyle = '-';

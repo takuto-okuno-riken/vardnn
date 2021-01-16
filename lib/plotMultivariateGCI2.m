@@ -10,8 +10,12 @@
 %          if range==0, range shows standard deviation [-5 sigma, 5 sigma]
 %  rowcut  cut bottom rows of result gcI matris (default:0)
 %  alpha  the significance level of F-statistic (default:0.05)
+%  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, lag, range, rowcut, alpha)
+function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, lag, range, rowcut, alpha, isFullNode)
+    if nargin < 6
+        isFullNode = 0;
+    end
     if nargin < 5
         alpha = 0.05;
     end

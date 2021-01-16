@@ -10,13 +10,19 @@
 %  inControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  netDLCM      trained DLCM network
 %  alpha        the significance level of F-statistic (optional)
+%  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, alpha)
+function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, alpha, isFullNode)
+    if nargin < 7
+        isFullNode = 0;
+    end
     if nargin < 6
         alpha = 0.05;
     end
     nodeNum = size(X,1);
+    nodeInNum = nodeNum + size(inSignal,1);
     sigLen = size(X,2);
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
     
     % set node input
     if isempty(inSignal)
@@ -28,13 +34,13 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSig
     % calc DLCM granger causality
     nodeAIC = zeros(nodeNum,1);
     nodeBIC = zeros(nodeNum,1);
-    gcI = nan(nodeNum, nodeNum);
-    h = nan(nodeNum,nodeNum);
-    P = nan(nodeNum,nodeNum);
-    F = nan(nodeNum,nodeNum);
-    cvFd = nan(nodeNum,nodeNum);
-    AIC = nan(nodeNum,nodeNum);
-    BIC = nan(nodeNum,nodeNum);
+    gcI = nan(nodeNum, nodeMax);
+    h = nan(nodeNum,nodeMax);
+    P = nan(nodeNum,nodeMax);
+    F = nan(nodeNum,nodeMax);
+    cvFd = nan(nodeNum,nodeMax);
+    AIC = nan(nodeNum,nodeMax);
+    BIC = nan(nodeNum,nodeMax);
     for i=1:nodeNum
         nodeInput = nodeInputOrg;
         if ~isempty(nodeControl)
@@ -62,7 +68,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSig
         nodeBIC(i) = T*log(RSS/T) + k*log(T);
 
         % imparement node signals
-        for j=1:nodeNum
+        for j=1:nodeMax
             if i==j, continue; end
             impInput = nodeInput;
             impInput(j,:) = 0;
