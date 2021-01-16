@@ -5,10 +5,9 @@
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  range        plotting minimum and maximum range of GCI (default:0.5)
-%  rowcut       cut bottom rows of result CI matrix (default:0)
-%  isFullNode   return both node & exogenous causality matrix (optional)
+%  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [EC] = plotDlcmEC(netDLCM, nodeControl, exControl, range, rowcut, isFullNode)
+function [EC] = plotDlcmEC(netDLCM, nodeControl, exControl, range, isFullNode)
     if nargin < 6
         isFullNode = 0;
     end

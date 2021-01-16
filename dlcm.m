@@ -27,7 +27,7 @@ function dlcm(varargin)
     handles.csvFiles = {};
     handles.exoFiles = {};
     handles.nodeControls = {};
-    handles.inControls = {};
+    handles.exControls = {};
     handles.groundTruth = {};
     handles.roiNames = {};
     handles.commandError = 0;
@@ -119,7 +119,7 @@ function dlcm(varargin)
                 handles.nodeControls = strsplit(varargin{i+1},':');
                 i = i + 1;
             case {'--ectrl'}
-                handles.inControls = strsplit(varargin{i+1},':');
+                handles.exControls = strsplit(varargin{i+1},':');
                 i = i + 1;
             case {'--groundtruth'}
                 handles.groundTruth = strsplit(varargin{i+1},':');
@@ -243,9 +243,9 @@ function processInputFiles(handles)
     for i = 1:N
         % init data
         X = [];
-        inSignal = [];
+        exSignal = [];
         nodeControl = [];
-        inControl = [];
+        exControl = [];
         inNum = 0;
         groundTruth = [];
         roiNames = [];
@@ -260,7 +260,7 @@ function processInputFiles(handles)
         [path,name,ext] = fileparts(fname);
         if strcmp(ext,'.mat')
             load(fname);
-            inNum = size(inSignal, 1);
+            inNum = size(exSignal, 1);
         else
             T = readtable(fname);
             X = table2array(T);
@@ -287,13 +287,13 @@ function processInputFiles(handles)
                 continue;
             end
             T = readtable(exoname);
-            inSignal = table2array(T);
-            inNum = size(inSignal, 1);
-            if size(inSignal,2) < sigLen
+            exSignal = table2array(T);
+            inNum = size(exSignal, 1);
+            if size(exSignal,2) < sigLen
                 disp(['error : exogenous signal length is smaller than node status signal length : ' exoname]);
                 continue;
             end
-            inSignal = inSignal(:,1:sigLen);
+            exSignal = exSignal(:,1:sigLen);
         end
 
         % load node control csv file
@@ -311,20 +311,20 @@ function processInputFiles(handles)
         end
 
         % load exogenous input control csv file
-        if inNum > 0 && isempty(inControl)
-            inControl = ones(nodeNum, inNum);
+        if inNum > 0 && isempty(exControl)
+            exControl = ones(nodeNum, inNum);
         end
-        if ~isempty(handles.inControls)
-            if length(handles.inControls)==1
-                incntrolname = handles.inControls{1};
-            elseif length(handles.inControls) >= i
-                incntrolname = handles.inControls{i};
+        if ~isempty(handles.exControls)
+            if length(handles.exControls)==1
+                incntrolname = handles.exControls{1};
+            elseif length(handles.exControls) >= i
+                incntrolname = handles.exControls{i};
             else
                 disp(['error : bad exogenous input control file list with ' fname]);
                 continue;
             end
             T = readtable(incntrolname);
-            inControl = table2array(T);
+            exControl = table2array(T);
         end
 
         % load ground truth csv file
@@ -360,8 +360,8 @@ function processInputFiles(handles)
         % signal transform raw or not
         if handles.transform == 1
             [X, sig, c, maxsi, minsi] = convert2SigmoidSignal(X, handles.transopt);
-            if ~isempty(inSignal)
-                [inSignal, sig, c, maxsi, minsi] = convert2SigmoidSignal(inSignal, handles.transopt);
+            if ~isempty(exSignal)
+                [exSignal, sig, c, maxsi, minsi] = convert2SigmoidSignal(exSignal, handles.transopt);
             end
         end
 
@@ -373,8 +373,8 @@ function processInputFiles(handles)
             ylabel('Signal Value');
         end
         % show exogenous input signals
-        if handles.showEx > 0 && ~isempty(inSignal)
-            figure; plot(inSignal.');
+        if handles.showEx > 0 && ~isempty(exSignal)
+            figure; plot(exSignal.');
             title(['Exogenous Input Signals : ' exoname]);
             xlabel('Time Series');
             ylabel('Signal Value');
@@ -388,7 +388,7 @@ function processInputFiles(handles)
                 load(dlcmFile);
             else
                 % layer parameters
-                netDLCM = initDlcmNetwork(X, inSignal, nodeControl, inControl);
+                netDLCM = initDlcmNetwork(X, exSignal, nodeControl, exControl);
                 % training DLCM network
                 miniBatchSize = ceil(sigLen / 3);
                 options = trainingOptions('adam', ...
@@ -401,7 +401,7 @@ function processInputFiles(handles)
                     'Verbose',false);
 
                 disp('start training');
-                netDLCM = trainDlcmNetwork(X, inSignal, nodeControl, inControl, netDLCM, options);
+                netDLCM = trainDlcmNetwork(X, exSignal, nodeControl, exControl, netDLCM, options);
                 [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
                 disp(['DLCM training result : rsme=' num2str(rsme)]);
                 if handles.noCache == 0
@@ -414,10 +414,10 @@ function processInputFiles(handles)
         if handles.dlec > 0
             % show DLCM-EC matrix
             if handles.showMat > 0
-                figure; dlEC = plotDlcmEC(netDLCM, nodeControl, inControl, 0, 0, 1);
+                figure; dlEC = plotDlcmEC(netDLCM, nodeControl, exControl, 0, 1);
                 title(['DLCM Effective Connectivity : ' name]);
             else
-                dlEC = calcDlcmEC(netDLCM, nodeControl, inControl, 1);
+                dlEC = calcDlcmEC(netDLCM, nodeControl, exControl, 1);
             end
             
             if handles.showCG > 0
@@ -442,10 +442,10 @@ function processInputFiles(handles)
         if handles.dlgc > 0
             % show DLCM-GC matrix
             if handles.showMat > 0
-                figure; [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, 0, 0, handles.alpha, 1);
+                figure; [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, exSignal, nodeControl, exControl, netDLCM, 0, handles.alpha, 1);
                 title(['DLCM Granger Causality Index : ' name]);
             else
-                [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, inSignal, nodeControl, inControl, netDLCM, handles.alpha, 1);
+                [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, exSignal, nodeControl, exControl, netDLCM, handles.alpha, 1);
             end
             
             if handles.showCG > 0
@@ -554,10 +554,10 @@ function processInputFiles(handles)
         if handles.fc > 0
             % show FC matrix
             if handles.showMat > 0
-                figure; [FC,P] = plotFunctionalConnectivity(X, inSignal, nodeControl, inControl, 1);
+                figure; [FC,P] = plotFunctionalConnectivity(X, exSignal, nodeControl, exControl, 1);
                 title(['Functional Connectivity : ' name]);
             else
-                [FC,P] = calcFunctionalConnectivity(X, inSignal, nodeControl, inControl, 1);
+                [FC,P] = calcFunctionalConnectivity(X, exSignal, nodeControl, exControl, 1);
             end
             
             if handles.showCG > 0
@@ -582,10 +582,10 @@ function processInputFiles(handles)
         if handles.pc > 0
             % show PC matrix
             if handles.showMat > 0
-                figure; [PC,P] = plotPartialCorrelation(X, inSignal, nodeControl, inControl, 1);
+                figure; [PC,P] = plotPartialCorrelation(X, exSignal, nodeControl, exControl, 1);
                 title(['Partial Correlation : ' name]);
             else
-                [PC,P] = calcPartialCorrelation(X, inSignal, nodeControl, inControl, 1);
+                [PC,P] = calcPartialCorrelation(X, exSignal, nodeControl, exControl, 1);
             end
             
             if handles.showCG > 0
@@ -610,10 +610,10 @@ function processInputFiles(handles)
         if handles.wc > 0
             % show WC matrix
             if handles.showMat > 0
-                figure; [mWCS, WCOH, WCS] = plotWaveletCoherence(X, inSignal, nodeControl, inControl, 1);
+                figure; [mWCS, WCOH, WCS] = plotWaveletCoherence(X, exSignal, nodeControl, exControl, 1);
                 title(['Wavelet Coherence : ' name]);
             else
-                [mWCS, WCOH, WCS] = calcWaveletCoherence(X, inSignal, nodeControl, inControl, 1);
+                [mWCS, WCOH, WCS] = calcWaveletCoherence(X, exSignal, nodeControl, exControl, 1);
             end
             
             if handles.showCG > 0
