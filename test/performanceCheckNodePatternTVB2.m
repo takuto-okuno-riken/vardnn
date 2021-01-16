@@ -117,12 +117,12 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of WCS (pat=' num2str(i) ')']);
 
         % show result of granger causality index (mvGC)
-        gcI = calcMultivariateGCI(si,lag);
+        gcI = calcMultivariateGCI(si,[],[],[],lag);
         figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, weights, 100, 1, Gth); hold off;
         title(['ROC curve of mvGC (pat=' num2str(i) ')']);
 
         % show result of granger causality index (pwGC)
-        gcI = calcPairwiseGCI(si,lag);
+        gcI = calcPairwiseGCI(si,[],[],[],lag);
         figure(pgcRf); hold on; [pgcROC{k,1}, pgcROC{k,2}, pgcAUC(k)] = plotROCcurve(gcI, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pwGC (pat=' num2str(i) ')']);
 

@@ -24,13 +24,16 @@ function [PC, P] = calcPartialCorrelation(X, exSignal, nodeControl, exControl, i
     nodeNum = size(X,1);
     
     % set node input
-    if ~isempty(exSignal) && isFullNode > 0
+    if ~isempty(exSignal)
         X = [X; exSignal];
     end
     [PC, P] = partialcorr(X.');
 
     if ~isempty(exSignal)
         PC = PC(1:nodeNum,:); P = P(1:nodeNum,:); 
+    end
+    if isFullNode == 0
+        PC = PC(:,1:nodeNum); P = P(:,1:nodeNum); 
     end
     if ~isempty(nodeControl)
         nodeControl=double(nodeControl); nodeControl(nodeControl==0) = nan;

@@ -2,32 +2,46 @@
 % Plotting multivariate Granger causality Index matrix
 % returns Granger Causality Index (gcI)
 % input:
-%  X       multivariate time series matrix (node x time series)
-%  lags    number of lags for autoregression (default:3)
-%  range   plotting minimum and maximum range of GCI (default:10)
-%          if range==0, range shows standard deviation [-3 sigma, 3 sigma]
-%  rowcut  cut bottom rows of result gcI matris (default:0)
+%  X            multivariate time series matrix (node x time series)
+%  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
+%  nodeControl  node control matrix (node x node) (optional)
+%  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
+%  lags         number of lags for autoregression (default:3)
+%  range        plotting minimum and maximum range of GCI (default:10)
+%               if range==0, range shows standard deviation [-3 sigma, 3 sigma]
+%  alpha        the significance level of F-statistic (default:0.05)
+%  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [gcI] = plotMultivariateGCI(X, lag, range, rowcut)
-    if nargin < 4
-        rowcut = 0;
+function [gcI] = plotMultivariateGCI(X, exSignal, nodeControl, exControl, lag, range, isFullNode)
+    if nargin < 7
+        isFullNode = 0;
     end
-    if nargin < 3
+    if nargin < 6
         range = 10;
     end
-    if nargin < 2
+    if nargin < 5
         lag = 3;
     end
-    gcI = calcMultivariateGCI(X, lag);
+    if nargin < 4
+        exControl = [];
+    end
+    if nargin < 3
+        nodeControl = [];
+    end
+    if nargin < 2
+        exSignal = [];
+    end
+    gcI = calcMultivariateGCI(X, exSignal, nodeControl, exControl, lag, isFullNode);
     if range <= 0
         sigma = std(gcI(:),1,'omitnan');
         avg = mean(gcI(:),'omitnan');
-        gcI = (gcI - avg) / sigma;
+        gcI2 = (gcI - avg) / sigma;
         range = 3;
+    else
+        gcI2 = gcI;
     end
-    if rowcut>0, gcI(end-rowcut+1:end,:) = []; end
     clims = [-range, range];
-    imagesc(gcI,clims);
+    imagesc(gcI2,clims);
     daspect([1 1 1]);
     title('multivariate Granger Causality Index');
     xlabel('Source Nodes');

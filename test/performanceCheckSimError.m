@@ -162,8 +162,8 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weigh
             cs = getCosSimilarity(FC,sFC);
             winFCcos = [winFCcos; cs];
             % cosine similarity between GC and simulated GC
-            gcI  = calcPairwiseGCI(wSi,3);
-            sgcI = calcPairwiseGCI(S,3);
+            gcI  = calcPairwiseGCI(wSi, sInSignal, [], inControl, 3);
+            sgcI = calcPairwiseGCI(S, sInSignal, [], inControl, 3);
             nidx = find(isnan(gcI)); gcI(nidx) = 0; % remove NaN
             nidx = find(isnan(sgcI)); sgcI(nidx) = 0; % remove NaN
             cs = getCosSimilarity(gcI,sgcI);

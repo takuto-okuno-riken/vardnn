@@ -12,7 +12,7 @@ function initWeight = estimateInitWeightByGCI(X, p, range)
     if nargin < 2
         p = 3;
     end
-    initWeight = calcPairwiseGCI(X, p);
+    initWeight = calcPairwiseGCI(X, [], [], [], p);
     idx = find(~isfinite(initWeight)); % remove inf or nan
     initWeight(idx) = 0;
     idx = find(initWeight>=range); % set maxmum

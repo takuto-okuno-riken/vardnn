@@ -3,18 +3,45 @@
 % returns Granger causality index matrix (gcI)
 % VAR coefficients (A), VAR residuals (E) and VAR residuals covariance matrix (vE)
 % input:
-%  X      multivariate time series matrix (node x time series)
-%  lags   number of lags for autoregression
+%  X            multivariate time series matrix (node x time series)
+%  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
+%  nodeControl  node control matrix (node x node) (optional)
+%  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
+%  lags         number of lags for autoregression (default:3)
+%  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [gcI, A, E, vE] = calcMultivariateGCI(X, lags)
-    n = size(X,1);
-    gcI = nan(n,n);
+function [gcI, A, E, vE] = calcMultivariateGCI(X, exSignal, nodeControl, exControl, lags, isFullNode)
+    if nargin < 6
+        isFullNode = 0;
+    end
+    if nargin < 5
+        lags = 3;
+    end
+    if nargin < 4
+        exControl = [];
+    end
+    if nargin < 3
+        nodeControl = [];
+    end
+    if nargin < 2
+        exSignal = [];
+    end
+    nodeNum = size(X,1);
+    nodeInNum = nodeNum + size(exSignal,1);
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
+    
+    % set node input
+    if ~isempty(exSignal)
+        X = [X; exSignal];
+    end
+
+    gcI = nan(nodeNum,nodeMax);
 
     % full regression
     [A,E,vE]   = calcVARcoeff(X,lags);
     lvE = log(diag(vE)); % log of variances of residuals
 
-    for j = 1:n
+    for j = 1:nodeMax
         Y = X;
         Y(j,:) = [];
 
@@ -22,10 +49,18 @@ function [gcI, A, E, vE] = calcMultivariateGCI(X, lags)
         [~,~,rvE] = calcVARcoeff(Y,lags);
         lrvE = log(diag(rvE)); % log of variances of residuals
 
-        G = nan(n,1);
+        G = nan(nodeMax,1);
         if j>1, G(1:j-1) = lrvE(1:j-1); end
-        if j<n, G(j+1:n) = lrvE(j:n-1); end
-        gcI(:,j) = G - lvE; % log rvE/vE
+        if j<nodeMax, G(j+1:nodeMax) = lrvE(j:nodeMax-1); end
+        gcI(:,j) = G - lvE(1:nodeMax); % log rvE/vE
+    end
+    if ~isempty(nodeControl)
+        nodeControl=double(nodeControl); nodeControl(nodeControl==0) = nan;
+        gcI(:,1:nodeNum) = gcI(:,1:nodeNum) .* nodeControl;
+    end
+    if ~isempty(exControl) && isFullNode > 0
+        exControl=double(exControl); exControl(exControl==0) = nan;
+        gcI(:,nodeNum+1:end) = gcI(:,nodeNum+1:end) .* exControl;
     end
 end
 

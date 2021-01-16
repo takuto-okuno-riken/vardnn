@@ -46,11 +46,11 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     parsavemat(fName, mat);
                 end
             case 'gc'
-                mat = calcMultivariateGCI(signals{i}, LAG);
+                mat = calcMultivariateGCI(signals{i}, [], [], [], LAG);
             case 'pgc'
-                mat = calcPairwiseGCI(signals{i}, LAG);
+                mat = calcPairwiseGCI(signals{i}, [], [], [], LAG);
             case 'te'
-                mat = calcLinueTE(signals{i}, inSignal, [], inControl, LAG);
+                mat = calcLinueTE(signals{i}, [], [], [], LAG);
             case 'pcs'
                 csvFile = ['results/tetrad/pcs-ad-signal-' group '-roi' num2str(ROINUM) '-' num2str(i) '.csv'];
                 mat = readmatrix(csvFile);
@@ -83,9 +83,9 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     end
                     % si = signals{i} - nanmin(signals{i}, [], 'all'); % simple linear transform
                     sigLen = size(si,2);
-                    inSignal = rand(ROINUM, sigLen);
-                    inControl = eye(ROINUM);
-                    netDLCM = initDlcmNetwork(si, inSignal, [], inControl); 
+                    exSignal = rand(ROINUM, sigLen);
+                    exControl = eye(ROINUM);
+                    netDLCM = initDlcmNetwork(si, exSignal, [], exControl); 
                     % training DLCM network
                     maxEpochs = 1000;
                     miniBatchSize = ceil(sigLen / 3);
@@ -100,13 +100,13 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 %            'Plots','training-progress');
 
                     disp('start training');
-                    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+                    netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
                     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
                     disp(['end training : rsme=' num2str(rsme)]);
                     % calc dlcm-gc
-                    mat = calcDlcmGCI(si, inSignal, [], inControl, netDLCM);
+                    mat = calcDlcmGCI(si, exSignal, [], exControl, netDLCM);
                     
-                    parsavedlsm(dlcmName, netDLCM, si, inSignal, inControl, mat, sig, c, maxsi, minsi);
+                    parsavedlsm(dlcmName, netDLCM, si, exSignal, exControl, mat, sig, c, maxsi, minsi);
                 end
             case 'dlcmrc' % should be called after dlcm
                 outName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
@@ -126,9 +126,9 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                         'GradientThreshold',5,...
                         'L2Regularization',0.05, ...
                         'Verbose',false);
-                    [netDLCM, time] = recoveryTrainDlcmNetwork(f.si, f.inSignal, [], f.inControl, f.netDLCM, options);
-                    mat = calcDlcmGCI(f.si, f.inSignal, [], f.inControl, netDLCM);
-                    parsavedlsm(outName, netDLCM, f.si, f.inSignal, f.inControl, mat, f.sig, c, f.maxsi, f.minsi);
+                    [netDLCM, time] = recoveryTrainDlcmNetwork(f.si, f.exSignal, [], f.exControl, f.netDLCM, options);
+                    mat = calcDlcmGCI(f.si, f.exSignal, [], f.exControl, netDLCM);
+                    parsavedlsm(outName, netDLCM, f.si, f.exSignal, f.exControl, mat, f.sig, c, f.maxsi, f.minsi);
                 end
             case {'dlw','dlwrc'} % should be called after dlcm
                 if strcmp(algorithm, 'dlw')
@@ -137,7 +137,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     dlcmName = ['results/ad-dlcmrc-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 end
                 f = load(dlcmName);
-                [mat, subweights(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.inControl);
+                [mat, subweights(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl);
             end
             weights(:,:,i) = mat;
         end
@@ -229,6 +229,6 @@ function parsavemat(fName, mat)
     save(fName, 'mat');
 end
 
-function parsavedlsm(dlcmName, netDLCM, si, inSignal, inControl, mat, sig, c, maxsi, minsi)
-    save(dlcmName, 'netDLCM', 'si', 'inSignal', 'inControl', 'mat', 'sig', 'c', 'maxsi', 'minsi');
+function parsavedlsm(dlcmName, netDLCM, si, exSignal, exControl, mat, sig, c, maxsi, minsi)
+    save(dlcmName, 'netDLCM', 'si', 'exSignal', 'exControl', 'mat', 'sig', 'c', 'maxsi', 'minsi');
 end

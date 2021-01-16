@@ -15,7 +15,7 @@ X(4,2:end) = X(6,1:sigLen-1);
 %X(2,2:end) = X(6,1:sigLen-1);
 %X(4,3:end) = X(2,2:sigLen-1);
 
-gcI = calcPairwiseGCI(X, p); % calc granger causality index of lag |p|
+gcI = calcPairwiseGCI(X, [], [], [], p); % calc granger causality index of lag |p|
 
 % plot matrix
 figure;
@@ -24,7 +24,7 @@ imagesc(gcI,clims);
 title('pairwise Granger Causality Index');
 colorbar;
 
-gcI2 = calcMultivariateGCI(X, p); % calc granger causality index of lag |p|
+gcI2 = calcMultivariateGCI(X, [], [], [], p); % calc granger causality index of lag |p|
 
 % plot matrix
 figure;

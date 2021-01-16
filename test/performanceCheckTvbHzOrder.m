@@ -32,7 +32,7 @@ function performanceCheckTvbHzOrder
         for j=1:length(orders)
             lag = orders(j);
             % show original signal granger causality index (mvGC)
-            gcI = calcMultivariateGCI(si,lag);
+            gcI = calcMultivariateGCI(si,[],[],[],lag);
             figure(gcRf); hold on; [~,~, gcAUC(i,j)] = plotROCcurve(gcI, weights, 100, 1, Gth); hold off;
             title(['ROC curve of GC (tvb sampling ' num2str(hz) 'hz)']);
             

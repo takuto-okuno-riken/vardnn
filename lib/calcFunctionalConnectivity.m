@@ -24,13 +24,16 @@ function [FC, P] = calcFunctionalConnectivity(X, exSignal, nodeControl, exContro
     nodeNum = size(X,1);
     
     % set node input
-    if ~isempty(exSignal) && isFullNode > 0
+    if ~isempty(exSignal)
         X = [X; exSignal];
     end
     [FC, P] = corr(X.', X.');
 
     if ~isempty(exSignal)
         FC = FC(1:nodeNum,:); P = P(1:nodeNum,:); 
+    end
+    if isFullNode == 0
+        FC = FC(:,1:nodeNum); P = P(:,1:nodeNum); 
     end
     if ~isempty(nodeControl)
         nodeControl=double(nodeControl); nodeControl(nodeControl==0) = nan;

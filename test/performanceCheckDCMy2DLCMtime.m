@@ -75,14 +75,14 @@ function performanceCheckDCMy2DLCM
 
         % calculate mvGC and get computational time
         ticHdl = tic;
-        mat = calcMultivariateGCI(si, LAG);
+        mat = calcMultivariateGCI(si, inSignal, [], inControl, LAG);
         time = toc(ticHdl);
         mGCtime(k,1) = time;
         disp(['finish mvGC! t = ' num2str(time) 's']);
 
         % calculate pwGC and get computational time
         ticHdl = tic;
-        mat = calcPairwiseGCI(si, LAG);
+        mat = calcPairwiseGCI(si, inSignal, [], inControl, LAG);
         time = toc(ticHdl);
         pGCtime(k,1) = time;
         disp(['finish pwGC! t = ' num2str(time) 's']);
