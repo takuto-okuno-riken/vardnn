@@ -22,12 +22,33 @@ function [PC, P] = calcPartialCorrelation(X, exSignal, nodeControl, exControl, i
         exSignal = [];
     end
     nodeNum = size(X,1);
+    nodeMax = nodeNum + size(exSignal,1);
     
     % set node input
     if ~isempty(exSignal)
         X = [X; exSignal];
     end
-    [PC, P] = partialcorr(X.');
+    if isempty(nodeControl) && isempty(exControl)
+        [PC, P] = partialcorr(X.');
+    else
+        PC = nan(nodeNum, nodeMax);
+        P = nan(nodeNum, nodeMax);
+        for i=1:nodeNum
+            nodeIdx = [1:nodeNum];
+            if ~isempty(nodeControl)
+                [~,nodeIdx] = find(nodeControl(i,:)==1);
+            end
+            exIdx = [nodeNum+1:nodeNum+size(exSignal,1)];
+            if ~isempty(exControl)
+                [~,exIdx] = find(exControl(i,:)==1);
+                exIdx = exIdx + nodeNum;
+            end
+            X2 = X([nodeIdx, exIdx],:);
+            [PC2, P2] = partialcorr(X2.');
+            PC(i,[nodeIdx, exIdx]) = PC2(i,:);
+            P(i,[nodeIdx, exIdx]) = P2(i,:);
+        end
+    end
 
     % output control
     if ~isempty(exSignal)
