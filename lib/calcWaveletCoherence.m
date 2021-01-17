@@ -23,8 +23,7 @@ function [mWCS, WCOH, WCS] = calcWaveletCoherence(X, exSignal, nodeControl, exCo
         exSignal = [];
     end
     nodeNum = size(X,1);
-    nodeInNum = nodeNum + size(exSignal,1);
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
+    nodeMax = nodeNum + size(exSignal,1);
     
     % set node input
     if ~isempty(exSignal)
@@ -51,5 +50,18 @@ function [mWCS, WCOH, WCS] = calcWaveletCoherence(X, exSignal, nodeControl, exCo
             WCS{i,j} = wcs;
             mWCS(i,j) = nanmean(real(wcs),'all');
         end
+    end
+
+    % output control
+    if isFullNode == 0
+        mWCS = mWCS(:,1:nodeNum);
+    end
+    if ~isempty(nodeControl)
+        nodeControl=double(nodeControl); nodeControl(nodeControl==0) = nan;
+        mWCS(:,1:nodeNum) = mWCS(:,1:nodeNum) .* nodeControl;
+    end
+    if ~isempty(exControl) && ~isempty(exControl) && isFullNode > 0
+        exControl=double(exControl); exControl(exControl==0) = nan;
+        mWCS(:,nodeNum+1:end) = mWCS(:,nodeNum+1:end) .* exControl;
     end
 end

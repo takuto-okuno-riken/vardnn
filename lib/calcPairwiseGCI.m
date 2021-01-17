@@ -32,8 +32,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, exSignal, nodeContr
         exSignal = [];
     end
     nodeNum = size(X,1);
-    nodeInNum = nodeNum + size(exSignal,1);
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
+    nodeMax = nodeNum + size(exSignal,1);
     
     % set node input
     if ~isempty(exSignal)
@@ -61,6 +60,36 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, exSignal, nodeContr
             if i==j, continue; end
             [gcI(i,j), h(i,j), P(i,j), F(i,j), cvFd(i,j), AIC(i,j), BIC(i,j)] = calcPairGrangerCausality(Y(i,:), Y(j,:), lags, alpha);
         end
+    end
+    % output control
+    if isFullNode==0
+        gcI = gcI(:,1:nodeNum);
+        F = F(:,1:nodeNum);
+        P = P(:,1:nodeNum);
+        cvFd = cvFd(:,1:nodeNum);
+        h = h(:,1:nodeNum);
+        AIC = AIC(:,1:nodeNum);
+        BIC = BIC(:,1:nodeNum);
+    end
+    if ~isempty(nodeControl)
+        nodeControl=double(nodeControl); nodeControl(nodeControl==0) = nan;
+        gcI(:,1:nodeNum) = gcI(:,1:nodeNum) .* nodeControl;
+        F(:,1:nodeNum) = F(:,1:nodeNum) .* nodeControl;
+        P(:,1:nodeNum) = P(:,1:nodeNum) .* nodeControl;
+        cvFd(:,1:nodeNum) = cvFd(:,1:nodeNum) .* nodeControl;
+        h(:,1:nodeNum) = h(:,1:nodeNum) .* nodeControl;
+        AIC(:,1:nodeNum) = AIC(:,1:nodeNum) .* nodeControl;
+        BIC(:,1:nodeNum) = BIC(:,1:nodeNum) .* nodeControl;
+    end
+    if ~isempty(exControl) && ~isempty(exControl) && isFullNode > 0
+        exControl=double(exControl); exControl(exControl==0) = nan;
+        gcI(:,nodeNum+1:end) = gcI(:,nodeNum+1:end) .* exControl;
+        F(:,nodeNum+1:end) = F(:,nodeNum+1:end) .* exControl;
+        P(:,nodeNum+1:end) = P(:,nodeNum+1:end) .* exControl;
+        cvFd(:,nodeNum+1:end) = cvFd(:,nodeNum+1:end) .* exControl;
+        h(:,nodeNum+1:end) = h(:,nodeNum+1:end) .* exControl;
+        AIC(:,nodeNum+1:end) = AIC(:,nodeNum+1:end) .* exControl;
+        BIC(:,nodeNum+1:end) = BIC(:,nodeNum+1:end) .* exControl;
     end
 end
 

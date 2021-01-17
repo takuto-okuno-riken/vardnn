@@ -119,6 +119,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2
             h(i,j) = F(i,j) > cvFd(i,j);
         end
     end
+    % output control
     if isFullNode==0
         gcI = gcI(:,1:nodeNum);
         F = F(:,1:nodeNum);
@@ -127,6 +128,16 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2
         h = h(:,1:nodeNum);
         AIC = AIC(:,1:nodeNum);
         BIC = BIC(:,1:nodeNum);
+    end
+    if ~isempty(nodeControl)
+        nodeControl=double(nodeControl); nodeControl(nodeControl==0) = nan;
+        gcI(:,1:nodeNum) = gcI(:,1:nodeNum) .* nodeControl;
+        F(:,1:nodeNum) = F(:,1:nodeNum) .* nodeControl;
+        P(:,1:nodeNum) = P(:,1:nodeNum) .* nodeControl;
+        cvFd(:,1:nodeNum) = cvFd(:,1:nodeNum) .* nodeControl;
+        h(:,1:nodeNum) = h(:,1:nodeNum) .* nodeControl;
+        AIC(:,1:nodeNum) = AIC(:,1:nodeNum) .* nodeControl;
+        BIC(:,1:nodeNum) = BIC(:,1:nodeNum) .* nodeControl;
     end
     if ~isempty(exControl) && ~isempty(exControl) && isFullNode > 0
         exControl=double(exControl); exControl(exControl==0) = nan;
