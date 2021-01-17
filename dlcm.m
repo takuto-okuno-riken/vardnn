@@ -479,6 +479,8 @@ function processInputFiles(handles)
                 figure; [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, isFullNode);
                 title(['multivariate Granger Causality Index : ' name]);
             else
+%                mvGCa = calcMultivariateGCI(X, exSignal, nodeControl, exControl, handles.lag, isFullNode);
+%                mvGCb = calcMultivariateGCI_(X, exSignal, nodeControl, exControl, handles.lag, isFullNode);
                 [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, exSignal, nodeControl, exControl, handles.lag, handles.alpha, isFullNode);
             end
             

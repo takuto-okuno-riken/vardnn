@@ -76,7 +76,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2
 
         % multivariate autoregression
         Xt = Y(1:len-p,i);
-        Xti = Yj;
+        Xti = [Yj, ones(len-p,1)]; % need bias
         Xti(:,[nodeDel, exDel]) = [];
         % apply the regress function
         [b,bint,r] = regress(Xt,Xti);
@@ -94,7 +94,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2
             delrow = [];
             for a=1:p, delrow = [delrow j+nodeMax*(a-1)]; end
             
-            Yt = Yj;
+            Yt = [Yj, ones(len-p,1)]; % need bias
             Yt(:,[nodeDel, exDel, delrow]) = [];
             [b,bint,r] = regress(Xt,Yt);
             Vyt = var(r);

@@ -10,7 +10,7 @@
 %  lags         number of lags for autoregression (default:3)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [gcI, A, E, vE] = calcMultivariateGCI(X, exSignal, nodeControl, exControl, lags, isFullNode)
+function [gcI, A, E, vE] = calcMultivariateGCI_(X, exSignal, nodeControl, exControl, lags, isFullNode)
     if nargin < 6
         isFullNode = 0;
     end
@@ -36,34 +36,23 @@ function [gcI, A, E, vE] = calcMultivariateGCI(X, exSignal, nodeControl, exContr
 
     gcI = nan(nodeMax,nodeMax);
 
-    for i=1:nodeNum
-        nodeIdx = [1:nodeNum];
-        if ~isempty(nodeControl)
-            [~,nodeIdx] = find(nodeControl(i,:)==1);
-        end
-        exIdx = [nodeNum+1:nodeNum+size(exSignal,1)];
-        if ~isempty(exControl)
-            [~,exIdx] = find(exControl(i,:)==1);
-            exIdx = exIdx + nodeNum;
-        end
-        % full regression
-        Y = X([nodeIdx, exIdx],:);
-        [A,E,vE]   = calcVARcoeff(Y,lags);
-        rsd = log(diag(vE)); % log of variances of residuals
-        lvE = nan(nodeMax,1);
-        lvE([nodeIdx, exIdx]) = rsd;
+    % full regression
+    [A,E,vE]   = calcVARcoeff(X,lags);
+    lvE = log(diag(vE)); % log of variances of residuals
+
+    for j = 1:nodeMax
+        Y = X;
+        Y(j,:) = [];
 
         % reduced regression
-        [~,idx] = find(nodeIdx==i); nodeIdx(idx) = [];
-        Y = X([nodeIdx, exIdx],:);
         [~,~,rvE] = calcVARcoeff(Y,lags);
         lrvE = log(diag(rvE)); % log of variances of residuals
 
         G = nan(nodeMax,1);
-        G([nodeIdx, exIdx]) = lrvE;
-        gcI(:,i) = G - lvE; % log rvE/vE
+        if j>1, G(1:j-1) = lrvE(1:j-1); end
+        if j<nodeMax, G(j+1:nodeMax) = lrvE(j:nodeMax-1); end
+        gcI(:,j) = G - lvE(1:nodeMax); % log rvE/vE
     end
-    gcI(1:nodeNum,nodeNum+1:end) = gcI(nodeNum+1:end, 1:nodeNum)';
 
     % output control
     if ~isempty(exSignal)
@@ -92,7 +81,7 @@ function [A, E, vE] = calcVARcoeff(X, p)
     [n,m] = size(X);
 
     U = ones(1,m);
-    X = X-mean(X,2)*U; % x - E(x) of time series
+    X = X-mean(X,2)*U; % x - E(x) of time seriase
     rm = (m-p);
 
     % lags

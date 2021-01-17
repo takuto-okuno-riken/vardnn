@@ -76,7 +76,7 @@ function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSign
         
         % multivariate autoregression
         Xt = Y(1:len-p,i);
-        Xti = Yj;
+        Xti = [Yj, ones(len-p,1)]; % need bias
         Xti(:,[nodeDel, exDel]) = [];
 
         % apply the regress function
@@ -97,7 +97,7 @@ function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSign
             delrow = [];
             for a=1:p, delrow = [delrow j+nodeMax*(a-1)]; end
             
-            Yt = Yj;
+            Yt = [Yj, ones(len-p,1)]; % need bias
             Yt(:,[nodeDel, exDel, delrow]) = [];
 
             %coeff = Xt.'/(Yjs{j}.');
