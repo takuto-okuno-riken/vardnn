@@ -53,6 +53,7 @@ usage: dlcm [options] filename.csv ...
   --showmat           show result matrix of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC
   --showcg            show circle graph of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC
   --showroc           show ROC curve (by GroundTruth) of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC
+  --nocache           do not use cache file for DLCM training
   -v, --version       show version number
   -h, --help          show command line help
 ~~~
@@ -87,7 +88,7 @@ These are output graphs of dlcm command.
 ___
 DLCM can take exogenous input signals with control matrix.
 ~~~
->> dlcm -e -d --showmat --epoch 100 --transform 1 --ex data/signal8ex.csv --ectrl data/ctrleye.csv data/signal8.csv
+>> dlcm -e -d --showmat --epoch 100 --transform 1 --nocache --ex data/signal8ex.csv --ectrl data/ctrleye.csv data/signal8.csv
 ...
 output csv file : results/signal8_dlec.csv
 output csv file : results/signal8_dlgc.csv

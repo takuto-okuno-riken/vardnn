@@ -32,8 +32,7 @@ function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSign
         exSignal = [];
     end
     nodeNum = size(X,1);
-    nodeInNum = nodeNum + size(exSignal,1);
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
+    nodeMax = nodeNum + size(exSignal,1);
     
     % set node input
     if ~isempty(exSignal)
@@ -45,15 +44,9 @@ function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSign
     Y = flipud(X.'); % need to flip signal
 
     % first, calculate multivariate autoregression without target
-    Yjs = cell(1,nodeMax);
-    nn1 = nodeMax-1;
-    for j=1:nodeMax
-        Ytj = zeros(len-p, p*nn1);
-        Yj = [Y(:,1:j-1), Y(:,j+1:end)];
-        for k=1:p
-            Ytj(:,1+nn1*(k-1):nn1*k) = Yj(1+k:len-p+k,:);
-        end
-        Yjs{j} = Ytj;
+    Yj = zeros(len-p, p*nodeMax);
+    for k=1:p
+        Yj(:,1+nodeMax*(k-1):nodeMax*k) = Y(1+k:len-p+k,:);
     end
 
     nodeAIC = zeros(nodeNum,1);
@@ -66,21 +59,26 @@ function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSign
     AIC = nan(nodeNum,nodeMax);
     BIC = nan(nodeNum,nodeMax);
     for i=1:nodeNum
-        X2 = X;
+        nodeDel = [];
         if ~isempty(nodeControl)
-            filter = nodeControl(i,:).';
-            X2(1:nodeNum,:) = X2(1:nodeNum,:) .* filter;
+            [~,idx] = find(nodeControl(i,:)==0);
+            if ~isempty(idx)
+                for a=1:p, nodeDel = [nodeDel idx+nodeMax*(a-1)]; end
+            end
         end
-        % input signal is time [1 ... last]
-        % need to flip signal
-        Xi = flipud(X2(i,:).');
-
+        exDel = [];
+        if ~isempty(exControl) && ~isempty(exSignal)
+            [~,idx] = find(exControl(i,:)==0);
+            if ~isempty(idx)
+                for a=1:p, exDel = [exDel idx+(nodeNum+nodeMax*(a-1))]; end
+            end
+        end
+        
         % multivariate autoregression
-        Xt = Xi(1:len-p);
-        Xti = zeros(len-p, p*nodeMax);
-        for k=1:p
-            Xti(:,1+nodeMax*(k-1):nodeMax*k) = Y(1+k:len-p+k,:);
-        end
+        Xt = Y(1:len-p,i);
+        Xti = Yj;
+        Xti(:,[nodeDel, exDel]) = [];
+
         % apply the regress function
         %coeff = Xt.'/(Xti.');
         %r = Xt.' - coeff * Xti.';
@@ -90,15 +88,21 @@ function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSign
         % AIC and BIC of this node (assuming residuals are gausiann distribution)
         T = len-p;
         RSS = r'*r;
-        k = p * nodeMax;
+        k = size(Xti,2);
         nodeAIC(i) = T*log(RSS/T) + 2 * k;
         nodeBIC(i) = T*log(RSS/T) + k*log(T);
 
         for j=1:nodeMax
             if i==j, continue; end
+            delrow = [];
+            for a=1:p, delrow = [delrow j+nodeMax*(a-1)]; end
+            
+            Yt = Yj;
+            Yt(:,[nodeDel, exDel, delrow]) = [];
+
             %coeff = Xt.'/(Yjs{j}.');
             %r = Xt.' - coeff * Yjs{j}.';
-            [b,bint,r] = regress(Xt,Yjs{j});
+            [b,bint,r] = regress(Xt,Yt);
             Hyt = 0.5*log(det(cov(r))); % + 0.5*size(Xt,1)*log(2*pi*exp(1));
 
             TE(i,j) = Hyt - Hxt;
@@ -106,7 +110,7 @@ function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSign
             % AIC and BIC (assuming residuals are gausiann distribution)
             % BIC = n*ln(RSS/n)+k*ln(n)
             RSS1 = r'*r;
-            k1 = p * nn1;
+            k1 = size(Yt,2);
             AIC(i,j) = T*log(RSS1/T) + 2 * k1;
             BIC(i,j) = T*log(RSS1/T) + k1*log(T);
 
@@ -121,7 +125,16 @@ function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSign
             h(i,j) = F(i,j) > cvFd(i,j);
         end
     end
-    if ~isempty(exControl) && isFullNode > 0
+    if isFullNode==0
+        TE = TE(:,1:nodeNum);
+        F = F(:,1:nodeNum);
+        P = P(:,1:nodeNum);
+        cvFd = cvFd(:,1:nodeNum);
+        h = h(:,1:nodeNum);
+        AIC = AIC(:,1:nodeNum);
+        BIC = BIC(:,1:nodeNum);
+    end
+    if ~isempty(exControl) && ~isempty(exControl) && isFullNode > 0
         exControl=double(exControl); exControl(exControl==0) = nan;
         TE(:,nodeNum+1:end) = TE(:,nodeNum+1:end) .* exControl;
         F(:,nodeNum+1:end) = F(:,nodeNum+1:end) .* exControl;

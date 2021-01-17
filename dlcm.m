@@ -342,6 +342,7 @@ function processInputFiles(handles)
         end
 
         % load ROI names csv file
+        roiNames = generateNumberROINames(nodeNum+inNum);
         if ~isempty(handles.roiNames)
             if length(handles.roiNames)==1
                 roiname = handles.roiNames{1};
@@ -352,9 +353,8 @@ function processInputFiles(handles)
                 continue;
             end
             T = readtable(roiname, 'ReadVariableNames', 0);
-            roiNames = table2array(T);
-        elseif isempty(roiNames)
-            roiNames = generateNumberROINames(nodeNum+inNum);
+            tn = table2array(T);
+            roiNames(1:length(tn)) = tn;
         end
 
         % signal transform raw or not
@@ -410,14 +410,20 @@ function processInputFiles(handles)
             end
         end
         
+        % groundTruth size check
+        isFullNode = 1;
+        if ~isempty(groundTruth) && size(groundTruth,2) == nodeNum
+            isFullNode = 0;
+        end
+
         % calc DLCM-EC
         if handles.dlec > 0
             % show DLCM-EC matrix
             if handles.showMat > 0
-                figure; dlEC = plotDlcmEC(netDLCM, nodeControl, exControl, 0, 1);
+                figure; dlEC = plotDlcmEC(netDLCM, nodeControl, exControl, 0, isFullNode);
                 title(['DLCM Effective Connectivity : ' name]);
             else
-                dlEC = calcDlcmEC(netDLCM, nodeControl, exControl, 1);
+                dlEC = calcDlcmEC(netDLCM, nodeControl, exControl, isFullNode);
             end
             
             if handles.showCG > 0
@@ -442,10 +448,10 @@ function processInputFiles(handles)
         if handles.dlgc > 0
             % show DLCM-GC matrix
             if handles.showMat > 0
-                figure; [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, exSignal, nodeControl, exControl, netDLCM, 0, handles.alpha, 1);
+                figure; [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, exSignal, nodeControl, exControl, netDLCM, 0, handles.alpha, isFullNode);
                 title(['DLCM Granger Causality Index : ' name]);
             else
-                [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, exSignal, nodeControl, exControl, netDLCM, handles.alpha, 1);
+                [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, exSignal, nodeControl, exControl, netDLCM, handles.alpha, isFullNode);
             end
             
             if handles.showCG > 0
@@ -470,10 +476,10 @@ function processInputFiles(handles)
         if handles.mvgc > 0
             % show mvGC matrix
             if handles.showMat > 0
-                figure; [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, 1);
+                figure; [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, isFullNode);
                 title(['multivariate Granger Causality Index : ' name]);
             else
-                [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, exSignal, nodeControl, exControl, handles.lag, handles.alpha, 1);
+                [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, exSignal, nodeControl, exControl, handles.lag, handles.alpha, isFullNode);
             end
             
             if handles.showCG > 0
@@ -498,10 +504,10 @@ function processInputFiles(handles)
         if handles.pwgc > 0
             % show pwGC matrix
             if handles.showMat > 0
-                figure; [pwGC, h, P, F, cvFd, AIC, BIC] = plotPairwiseGCI(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, 1);
+                figure; [pwGC, h, P, F, cvFd, AIC, BIC] = plotPairwiseGCI(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, isFullNode);
                 title(['pairwised Granger Causality Index : ' name]);
             else
-                [pwGC, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, exSignal, nodeControl, exControl, handles.lag, handles.alpha, 1);
+                [pwGC, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, exSignal, nodeControl, exControl, handles.lag, handles.alpha, isFullNode);
             end
             
             if handles.showCG > 0
@@ -526,10 +532,10 @@ function processInputFiles(handles)
         if handles.te > 0
             % show TE matrix
             if handles.showMat > 0
-                figure; [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotLinueTE(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, 1);
+                figure; [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotLinueTE(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, isFullNode);
                 title(['Transfer Entropy (LINUE) : ' name]);
             else
-                [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSignal, nodeControl, exControl, handles.lag, handles.alpha, 1);
+                [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSignal, nodeControl, exControl, handles.lag, handles.alpha, isFullNode);
             end
             
             if handles.showCG > 0
@@ -554,10 +560,10 @@ function processInputFiles(handles)
         if handles.fc > 0
             % show FC matrix
             if handles.showMat > 0
-                figure; [FC,P] = plotFunctionalConnectivity(X, exSignal, nodeControl, exControl, 1);
+                figure; [FC,P] = plotFunctionalConnectivity(X, exSignal, nodeControl, exControl, isFullNode);
                 title(['Functional Connectivity : ' name]);
             else
-                [FC,P] = calcFunctionalConnectivity(X, exSignal, nodeControl, exControl, 1);
+                [FC,P] = calcFunctionalConnectivity(X, exSignal, nodeControl, exControl, isFullNode);
             end
             
             if handles.showCG > 0
@@ -582,10 +588,10 @@ function processInputFiles(handles)
         if handles.pc > 0
             % show PC matrix
             if handles.showMat > 0
-                figure; [PC,P] = plotPartialCorrelation(X, exSignal, nodeControl, exControl, 1);
+                figure; [PC,P] = plotPartialCorrelation(X, exSignal, nodeControl, exControl, isFullNode);
                 title(['Partial Correlation : ' name]);
             else
-                [PC,P] = calcPartialCorrelation(X, exSignal, nodeControl, exControl, 1);
+                [PC,P] = calcPartialCorrelation(X, exSignal, nodeControl, exControl, isFullNode);
             end
             
             if handles.showCG > 0
@@ -610,10 +616,10 @@ function processInputFiles(handles)
         if handles.wc > 0
             % show WC matrix
             if handles.showMat > 0
-                figure; [mWCS, WCOH, WCS] = plotWaveletCoherence(X, exSignal, nodeControl, exControl, 1);
+                figure; [mWCS, WCOH, WCS] = plotWaveletCoherence(X, exSignal, nodeControl, exControl, isFullNode);
                 title(['Wavelet Coherence : ' name]);
             else
-                [mWCS, WCOH, WCS] = calcWaveletCoherence(X, exSignal, nodeControl, exControl, 1);
+                [mWCS, WCOH, WCS] = calcWaveletCoherence(X, exSignal, nodeControl, exControl, isFullNode);
             end
             
             if handles.showCG > 0
@@ -733,7 +739,7 @@ function plotCircleGraph(mat, matname, roiNames, rmin, rmax, rstep, isRaw)
         hold off;
     end
     gp.NodeColor = [0.7, 0.7, 0.7];
-    gp.NodeLabel = roiNames;
+    gp.NodeLabel = roiNames(1:size(mOrg,1));
     ax = gca;
     ax.XAxis.Visible = 'off';
     ax.YAxis.Visible = 'off';
