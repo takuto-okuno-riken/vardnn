@@ -502,10 +502,12 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
                 % load original signal
                 dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
                 f = load(dlcmName);
+                if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+                if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
 
                 Si1 = ones(nodeNum*2, nodeNum+1);
                 Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
-                filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
+                filter = repmat(f.exControl(i,:).', 1, size(Si1,2));
                 Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
 
                 % training DLCM network
@@ -536,11 +538,11 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
 
     %            for i=1:R
                 parfor i=1:R
-                    netDLCM = initDlcmNetwork(smSi, f.inSignal, [], f.inControl); 
+                    netDLCM = initDlcmNetwork(smSi, f.exSignal, [], f.exControl); 
 
                     nodeTeach = smSi(i,2:end);
-                    nodeInput = [smSi(:,1:end-1); f.inSignal(:,1:end-1)];
-                    filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
+                    nodeInput = [smSi(:,1:end-1); f.exSignal(:,1:end-1)];
+                    filter = repmat(f.exControl(i,:).', 1, size(nodeInput,2));
                     nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
 
                     disp(['training sbj' num2str(k) ' ' num2str(n) '-' num2str(i)]);
@@ -613,7 +615,7 @@ function checkRelationSubDLWandWeights(signals, subDLWs, smSubDLWs, group, type)
             for i=1:R 
                 Si1 = ones(nodeNum*2, nodeNum+1);
                 Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
-                filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
+                filter = repmat(f.exControl(i,:).', 1, size(Si1,2));
                 Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
 
                 % change weight value
@@ -631,8 +633,8 @@ function checkRelationSubDLWandWeights(signals, subDLWs, smSubDLWs, group, type)
                 Layers = makeDlcmLayers(tmpL);
 
                 nodeTeach = f.si(i,2:end);
-                nodeInput = [f.si(:,1:end-1); f.inSignal(:,1:end-1)];
-                filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
+                nodeInput = [f.si(:,1:end-1); f.exSignal(:,1:end-1)];
+                filter = repmat(f.exControl(i,:).', 1, size(nodeInput,2));
                 nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
 
                 disp(['training ' num2str(k) '-' num2str(i)]);
@@ -726,7 +728,9 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
 
             dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
-            
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
+
             % training options for weight expansion training
             weOptions = trainingOptions('adam', 'InitialLearnRate', 0.0001, 'ExecutionEnvironment','cpu', 'MaxEpochs',1, 'Verbose',false);
             % training options for DLCM network
@@ -756,8 +760,8 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
             end
 
             netDLCM = f.netDLCM;
-            inSignal = f.inSignal;
-            inControl = f.inControl;
+            exSignal = f.exSignal;
+            exControl = f.exControl;
             [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{k});
             weSi{end+1} = si;
 
@@ -784,8 +788,8 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
                     layers = makeDlcmLayers(tmpL);
 
                     nodeTeach = si(i,2:end);
-                    nodeInput = [si(:,1:end-1); inSignal(:,1:end-1)];
-                    filter = repmat(inControl(i,:).', 1, size(nodeInput,2));
+                    nodeInput = [si(:,1:end-1); exSignal(:,1:end-1)];
+                    filter = repmat(exControl(i,:).', 1, size(nodeInput,2));
                     nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
 
                     disp(['sbj' num2str(k) ' weight expansion training ' num2str(i)]);
@@ -795,20 +799,20 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
                 weNet{end+1} = netDLCM;
 
                 % simulate signal from first frame
-                [si2, time] = simulateDlcmNetwork(si, inSignal, [], inControl, netDLCM);
+                [si2, time] = simulateDlcmNetwork(si, exSignal, [], exControl, netDLCM);
                 weSi2{end+1} = si2;
 
                 % train DLCM network with simulated signal of amplitude expanded DLCM network
-                netDLCM2 = initDlcmNetwork(si2, inSignal, [], inControl); 
+                netDLCM2 = initDlcmNetwork(si2, exSignal, [], exControl); 
 
                 disp(['sbj' num2str(k) ' training 2nd']);
-                netDLCM2 = trainDlcmNetwork(si2, inSignal, [], inControl, netDLCM2, options);
+                netDLCM2 = trainDlcmNetwork(si2, exSignal, [], exControl, netDLCM2, options);
                 weNet2{end+1} = netDLCM2;
 
                 % calculate DLCM-EC
-                [EC2s{a}, subEC2s{a}] = calcDlcmEC(netDLCM2, [], inControl);
+                [EC2s{a}, subEC2s{a}] = calcDlcmEC(netDLCM2, [], exControl);
 
-                save(tmpfName, 'EC2s', 'subEC2s', 'inSignal', 'inControl', 'weSi', 'weSi2', 'weNet', 'weNet2');
+                save(tmpfName, 'EC2s', 'subEC2s', 'exSignal', 'exControl', 'weSi', 'weSi2', 'weNet', 'weNet2');
             end
 
             % calc correlation between ECd and smECd2
@@ -845,7 +849,7 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
                 plotCorrelationZiZij([], subDLWs(:,:,k), [], subEC2s{a}, nodeNum, ['sbj' num2str(k) ' rate=' num2str(weRate)], 'original', 'shifted sim');
 %}
             end
-            save(outfName, 'EC2s', 'subEC2s', 'ECdCr', 'smECd2Cr', 'inSignal', 'inControl', 'weSi', 'weSi2', 'weNet', 'weNet2');
+            save(outfName, 'EC2s', 'subEC2s', 'ECdCr', 'smECd2Cr', 'exSignal', 'exControl', 'weSi', 'weSi2', 'weNet', 'weNet2');
             
             % shutdown parallel processing
             if NumProcessors > 1
@@ -869,7 +873,7 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
             weSignals{k} = weSi2{idx-1};
             weDLWs(:,:,k) = EC2s{idx-1};
             weSubDLWs(:,:,k) = subEC2s{idx-1};
-            weDLs(:,:,k) = calcDlcmGCI(weSi2{idx-1}, inSignal, [], inControl, weNet2{idx-1});
+            weDLs(:,:,k) = calcDlcmGCI(weSi2{idx-1}, exSignal, [], exControl, weNet2{idx-1});
         end
     end
     save(sfName, 'weDLWs', 'weSubDLWs', 'weSignals', 'weDLs', 'ECdCr', 'smECd2Cr', 'cosSim');
@@ -885,13 +889,13 @@ end
 
 function layers = makeDlcmLayers(oldLayers)
     % init first fully connected layer
-    inputNum = size(oldLayers(2).Weights,2);
+    inNum = size(oldLayers(2).Weights,2);
     hiddenNums(1) = size(oldLayers(2).Weights,1);
     hiddenNums(2) = size(oldLayers(4).Weights,1);
     
     inLayers = [
         % input layer
-        sequenceInputLayer(inputNum);
+        sequenceInputLayer(inNum);
         % Add a fully connected layer
         fullyConnectedLayer(hiddenNums(1), 'Weights', oldLayers(2).Weights, 'Bias', oldLayers(2).Bias);
         % Add an ReLU non-linearity.
@@ -976,7 +980,7 @@ function checkRelationSubDLWandSignals4(signals, DLWs, subDLWs, smSignals, smDLW
             for i=1:R 
                 Si1 = ones(nodeNum*2, nodeNum+1);
                 Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
-                filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
+                filter = repmat(f.exControl(i,:).', 1, size(Si1,2));
                 Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
 
                 si = siOrg;
@@ -998,11 +1002,11 @@ function checkRelationSubDLWandSignals4(signals, DLWs, subDLWs, smSignals, smDLW
                 figure; hold on; plot(siOrg','Color',[0.7 0.7 0.7]); plot(si','Color',[0.8 0.4 0.4]); hold off;
 
                 % DLCM network training
-                netDLCM = initDlcmNetwork(si, f.inSignal, [], f.inControl); 
+                netDLCM = initDlcmNetwork(si, f.exSignal, [], f.exControl); 
 
                 nodeTeach = si(i,2:end);
-                nodeInput = [si(:,1:end-1); f.inSignal(:,1:end-1)];
-                filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
+                nodeInput = [si(:,1:end-1); f.exSignal(:,1:end-1)];
+                filter = repmat(f.exControl(i,:).', 1, size(nodeInput,2));
                 nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
 
                 disp(['training ' num2str(k) '-' num2str(i)]);
@@ -1140,8 +1144,8 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
             
             dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
-            inSignal = f.inSignal;
-            inControl = f.inControl;
+            exSignal = f.exSignal;
+            exControl = f.exControl;
 
             % training options for DLCM network
             maxEpochs = 1000;
@@ -1190,29 +1194,29 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
 %                figure; plot(si'); figure; si2 = convert2SigmoidSignal(signals{k}); plot(si2');
 
                 % train DLCM network with amplitude expanded signal
-                netDLCM = initDlcmNetwork(si, inSignal, [], inControl); 
+                netDLCM = initDlcmNetwork(si, exSignal, [], exControl); 
 
                 disp(['sbj' num2str(k) ' training 1st amp=' num2str(amp)]);
-                netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+                netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
                 ampNet{end+1} = netDLCM;
 
                 % simulate signal from first frame
-                [si2, time] = simulateDlcmNetwork(si, inSignal, [], inControl, netDLCM);
+                [si2, time] = simulateDlcmNetwork(si, exSignal, [], exControl, netDLCM);
                 ampSi2{end+1} = si2;
 
                 % train DLCM network with simulated signal of amplitude expanded DLCM network
-                netDLCM2 = initDlcmNetwork(si2, inSignal, [], inControl); 
+                netDLCM2 = initDlcmNetwork(si2, exSignal, [], exControl); 
 
                 disp(['sbj' num2str(k) ' training 2nd amp=' num2str(amp)]);
-                netDLCM2 = trainDlcmNetwork(si2, inSignal, [], inControl, netDLCM2, options);
+                netDLCM2 = trainDlcmNetwork(si2, exSignal, [], exControl, netDLCM2, options);
                 ampNet2{end+1} = netDLCM2;
 
                 % calculate DLCM-EC
-                [EC2s{a}, subEC2s{a}] = calcDlcmEC(netDLCM2, [], inControl);
+                [EC2s{a}, subEC2s{a}] = calcDlcmEC(netDLCM2, [], exControl);
 
-                save(tmpfName, 'EC2s', 'subEC2s', 'inSignal', 'inControl', 'ampSi', 'ampSi2', 'ampNet', 'ampNet2');
+                save(tmpfName, 'EC2s', 'subEC2s', 'exSignal', 'exControl', 'ampSi', 'ampSi2', 'ampNet', 'ampNet2');
             end
-            save(outfName, 'EC2s', 'subEC2s', 'inSignal', 'inControl', 'ampSi', 'ampSi2', 'ampNet', 'ampNet2');
+            save(outfName, 'EC2s', 'subEC2s', 'exSignal', 'exControl', 'ampSi', 'ampSi2', 'ampNet', 'ampNet2');
             
             % shutdown parallel processing
             if NumProcessors > 1
@@ -1246,7 +1250,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
             ampSignals{k} = ampSi2{idx-1};
             ampDLWs(:,:,k) = EC2s{idx-1};
             ampSubDLWs(:,:,k) = subEC2s{idx-1};
-            ampDLs(:,:,k) = calcDlcmGCI(ampSi2{idx-1}, inSignal, [], inControl, ampNet2{idx-1});
+            ampDLs(:,:,k) = calcDlcmGCI(ampSi2{idx-1}, exSignal, [], exControl, ampNet2{idx-1});
         end
     end
     save(sfName, 'ampDLWs', 'ampSubDLWs', 'ampSignals', 'ampDLs', 'ZiCr', 'ZijCr', 'cosSim');
@@ -1298,8 +1302,10 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
 
             dlcmName = ['results/ad-dlcm-' orgGroup '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
-            inSignal = f.inSignal;
-            inControl = f.inControl;
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
+            exSignal = f.exSignal;
+            exControl = f.exControl;
 
             % and change for loop to parfor loop
             NumProcessors = 20;
@@ -1329,25 +1335,25 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
             for a=1:ampsLen
                 % simulate signal from first frame
                 [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{k});
-                [si2, time] = simulateDlcmNetwork(si, inSignal, [], inControl, af.ampNet{a});
+                [si2, time] = simulateDlcmNetwork(si, exSignal, [], exControl, af.ampNet{a});
                 ampSi2{end+1} = si2;
 
                 % train DLCM network with simulated signal of amplitude expanded DLCM network
-                netDLCM2 = initDlcmNetwork(si2, inSignal, [], inControl); 
+                netDLCM2 = initDlcmNetwork(si2, exSignal, [], exControl); 
 
                 disp(['sbj' num2str(k) ' training 2nd amp=' num2str(amps(a))]);
-                netDLCM2 = trainDlcmNetwork(si2, inSignal, [], inControl, netDLCM2, options);
+                netDLCM2 = trainDlcmNetwork(si2, exSignal, [], exControl, netDLCM2, options);
                 ampNet2{end+1} = netDLCM2;
 
                 % calculate DLCM-EC
-                [EC2s{a}, subEC2s{a}] = calcDlcmEC(netDLCM2, [], inControl);
+                [EC2s{a}, subEC2s{a}] = calcDlcmEC(netDLCM2, [], exControl);
             end
 
             % shutdown parallel processing
             if NumProcessors > 1
                 delete(gcp('nocreate'))
             end
-            save(outfName, 'EC2s', 'subEC2s', 'inSignal', 'inControl', 'ampSi2', 'ampNet2');
+            save(outfName, 'EC2s', 'subEC2s', 'exSignal', 'exControl', 'ampSi2', 'ampNet2');
         end
         
         % plot & calc correlation of original vs simulating
@@ -1374,7 +1380,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
             ampSignals{k} = ampSi2{idx-1};
             ampDLWs(:,:,k) = EC2s{idx-1};
             ampSubDLWs(:,:,k) = subEC2s{idx-1};
-            ampDLs(:,:,k) = calcDlcmGCI(ampSi2{idx-1}, inSignal, [], inControl, ampNet2{idx-1});
+            ampDLs(:,:,k) = calcDlcmGCI(ampSi2{idx-1}, exSignal, [], exControl, ampNet2{idx-1});
         end
     end
     save(sfName, 'ampDLWs', 'ampSubDLWs', 'ampSignals', 'ampDLs', 'ZiCr', 'ZijCr', 'cosSim');
@@ -1467,6 +1473,8 @@ function checkRelationSubDLWandSignals2(signals, DLWs, subDLWs, smDLWs, smSubDLW
             
             dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
 
             % training options for DLCM network
             maxEpochs = 1000;
@@ -1502,22 +1510,22 @@ function checkRelationSubDLWandSignals2(signals, DLWs, subDLWs, smDLWs, smSubDLW
                     for n=1:nMax % traial
 %                    parfor n=1:nMax % traial
                         % train DLCM network with amplitude expanded signal
-                        netDLCM = initDlcmNetwork(si, f.inSignal, [], f.inControl); 
+                        netDLCM = initDlcmNetwork(si, f.exSignal, [], f.exControl); 
 
                         disp(['training 1st ' num2str(k) '-' num2str(i) ' amp=' num2str(amp) ' n:' num2str(n)]);
-                        netDLCM = trainDlcmNetwork(si, f.inSignal, [], f.inControl, netDLCM, options);
+                        netDLCM = trainDlcmNetwork(si, f.exSignal, [], f.exControl, netDLCM, options);
 
                         % simulate signal from first frame
-                        [si2, time] = simulateDlcmNetwork(si, f.inSignal, [], f.inControl, netDLCM);
+                        [si2, time] = simulateDlcmNetwork(si, f.exSignal, [], f.exControl, netDLCM);
                         
                         % train DLCM network with simulated signal of amplitude expanded DLCM network
-                        netDLCM2 = initDlcmNetwork(si2, f.inSignal, [], f.inControl); 
+                        netDLCM2 = initDlcmNetwork(si2, f.exSignal, [], f.exControl); 
 
                         disp(['training 2nd ' num2str(k) '-' num2str(i) ' amp=' num2str(amp) ' n:' num2str(n)]);
-                        netDLCM2 = trainDlcmNetwork(si2, f.inSignal, [], f.inControl, netDLCM2, options);
+                        netDLCM2 = trainDlcmNetwork(si2, f.exSignal, [], f.exControl, netDLCM2, options);
                         
                         % calculate DLCM-EC
-                        [~, subEC2s{i,a,n}] = calcDlcmEC(netDLCM2, [], f.inControl);
+                        [~, subEC2s{i,a,n}] = calcDlcmEC(netDLCM2, [], f.exControl);
                     end
                     for n=1:nMax
                         Zi2(i, a, n) = subEC2s{i,a,n}(i,1);
@@ -1582,6 +1590,8 @@ function checkRelationSubDLWandSignals2(signals, DLWs, subDLWs, smDLWs, smSubDLW
             
             dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
 
             % training options for DLCM network
             maxEpochs = 1000;
@@ -1600,7 +1610,7 @@ function checkRelationSubDLWandSignals2(signals, DLWs, subDLWs, smDLWs, smSubDLW
                 amp = amps(a);
 
                 % train DLCM network with amplitude expanded signal
-                netDLCM = initDlcmNetwork(signals{k}, f.inSignal, [], f.inControl); 
+                netDLCM = initDlcmNetwork(signals{k}, f.exSignal, [], f.exControl); 
 
                 nodeLayers = netDLCM.nodeLayers;
                 nodeNetwork = cell(nodeNum,1);
@@ -1617,8 +1627,8 @@ function checkRelationSubDLWandSignals2(signals, DLWs, subDLWs, smDLWs, smSubDLW
                     figure; hold on; plot(si','Color',[0.8 0.8 0.8]); plot(si(i,:)'); hold off; 
 %}
                     nodeTeach = si(i,2:end);
-                    nodeInput = [si(:,1:end-1); f.inSignal(:,1:end-1)];
-                    filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
+                    nodeInput = [si(:,1:end-1); f.exSignal(:,1:end-1)];
+                    filter = repmat(f.exControl(i,:).', 1, size(nodeInput,2));
                     nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
 
                     disp(['training 1st ' num2str(k) '-' num2str(i) ' amp=' num2str(amp) ' n:' num2str(n)]);
@@ -1630,16 +1640,16 @@ function checkRelationSubDLWandSignals2(signals, DLWs, subDLWs, smDLWs, smSubDLW
                 netDLCM.initWeights = initWeights;
                 netDLCM.trainOptions = options;
 
-                [si2, time] = simulateDlcmNetwork(signals{k}, f.inSignal, [], f.inControl, netDLCM);
+                [si2, time] = simulateDlcmNetwork(signals{k}, f.exSignal, [], f.exControl, netDLCM);
                         
                 i = 1;
                 % train DLCM network with simulated signal of amplitude expanded DLCM network
                 disp(['training 2nd ' num2str(k) '-' num2str(i) ' amp=' num2str(amp) ' n:' num2str(n)]);
 
-                netDLCM2 = initDlcmNetwork(si2, f.inSignal, [], f.inControl); 
+                netDLCM2 = initDlcmNetwork(si2, f.exSignal, [], f.exControl); 
                 nodeTeach = si2(i,2:end);
-                nodeInput = [si2(:,1:end-1); f.inSignal(:,1:end-1)];
-                filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
+                nodeInput = [si2(:,1:end-1); f.exSignal(:,1:end-1)];
+                filter = repmat(f.exControl(i,:).', 1, size(nodeInput,2));
                 nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
                 
                 [trainedNet, ~] = trainNetwork(nodeInput, nodeTeach, netDLCM2.nodeLayers{i}, options);
@@ -1647,7 +1657,7 @@ function checkRelationSubDLWandSignals2(signals, DLWs, subDLWs, smDLWs, smSubDLW
                 % predict DLCM network
                 Si1 = ones(nodeNum*2, nodeNum+1);
                 Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
-                filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
+                filter = repmat(f.exControl(i,:).', 1, size(Si1,2));
                 Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
 
                 subEC2s{i,a,n} = predict(trainedNet, Si1);
@@ -1724,6 +1734,8 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
             end
             dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
             if isRaw
                 siOrg = signals{k};
             else
@@ -1744,7 +1756,7 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
             for i=rstart:R 
                 Si1 = ones(nodeNum*2, nodeNum+1);
                 Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
-                filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
+                filter = repmat(f.exControl(i,:).', 1, size(Si1,2));
                 Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
 
                 for a=0:16
@@ -1753,14 +1765,14 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
                     si(i,:) = si(i,:) + dx;
 
                     nodeTeach = si(i,2:end);
-                    nodeInput = [si(:,1:end-1); f.inSignal(:,1:end-1)];
-                    filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
+                    nodeInput = [si(:,1:end-1); f.exSignal(:,1:end-1)];
+                    filter = repmat(f.exControl(i,:).', 1, size(nodeInput,2));
                     nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
 
                     subEC2 = cell(nMax,1);
 %                    for n=1:nMax % traial
                     parfor n=1:nMax % traial
-                        netDLCM = initDlcmNetwork(si, f.inSignal, [], f.inControl); 
+                        netDLCM = initDlcmNetwork(si, f.exSignal, [], f.exControl); 
 
                         disp(['training ' num2str(k) '-' num2str(i) ' dx=' num2str(dx) ' n:' num2str(n)]);
                         [nodeNetwork, trainInfo] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{i}, options);
@@ -1869,7 +1881,7 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
                 Zij(i,:) = subEC(i,2:end); % original Zij value
                 Si1 = ones(nodeNum*2, nodeNum+1);
                 Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
-                filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
+                filter = repmat(f.exControl(i,:).', 1, size(Si1,2));
                 Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
 
                 for a=1:ampsLen
@@ -1879,14 +1891,14 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
                     si(i,:) = (si(i,:)-m) .* amp + m;
 
                     nodeTeach = si(i,2:end);
-                    nodeInput = [si(:,1:end-1); f.inSignal(:,1:end-1)];
-                    filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
+                    nodeInput = [si(:,1:end-1); f.exSignal(:,1:end-1)];
+                    filter = repmat(f.exControl(i,:).', 1, size(nodeInput,2));
                     nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
 
                     subEC2 = cell(nMax,1);
 %                    for n=1:nMax % traial
                     parfor n=1:nMax % traial
-                        netDLCM = initDlcmNetwork(si, f.inSignal, [], f.inControl); 
+                        netDLCM = initDlcmNetwork(si, f.exSignal, [], f.exControl); 
 
                         disp(['training ' num2str(k) '-' num2str(i) ' amp=' num2str(amp) ' n:' num2str(n)]);
                         [nodeNetwork, trainInfo] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{i}, options);
@@ -1993,6 +2005,8 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
             
             dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
             if isRaw
                 siOrg = signals{k};
             else
@@ -2014,7 +2028,7 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
             for i=rstart:R 
                 Si1 = ones(nodeNum*2, nodeNum+1);
                 Si1(1:nodeNum, 2:end) = ones(nodeNum,nodeNum) - eye(nodeNum);
-                filter = repmat(f.inControl(i,:).', 1, size(Si1,2));
+                filter = repmat(f.exControl(i,:).', 1, size(Si1,2));
                 Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
 
                 for a=1:ampsLen
@@ -2026,14 +2040,14 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
                     figure; hold on; plot(siOrg(i,:)'); plot(mvsi(i,:)'); plot(si(i,:)'); hold off; title(['node' num2str(i) ' amp=' num2str(amp)]);
 %}
                     nodeTeach = si(i,2:end);
-                    nodeInput = [si(:,1:end-1); f.inSignal(:,1:end-1)];
-                    filter = repmat(f.inControl(i,:).', 1, size(nodeInput,2));
+                    nodeInput = [si(:,1:end-1); f.exSignal(:,1:end-1)];
+                    filter = repmat(f.exControl(i,:).', 1, size(nodeInput,2));
                     nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
 
                     subEC2 = cell(nMax,1);
 %                    for n=1:nMax % traial
                     parfor n=1:nMax % traial
-                        netDLCM = initDlcmNetwork(si, f.inSignal, [], f.inControl); 
+                        netDLCM = initDlcmNetwork(si, f.exSignal, [], f.exControl); 
 
                         disp(['training ' num2str(k) '-' num2str(i) ' amp=' num2str(amp) ' n:' num2str(n)]);
                         [nodeNetwork, trainInfo] = trainNetwork(nodeInput, nodeTeach, netDLCM.nodeLayers{i}, options);
@@ -2253,24 +2267,26 @@ function [weights, meanWeights, stdWeights, subweights] = retrainDLCMAndEC(teach
 
     % init params
     sigLen = size(nodeSignals,2);
-    inControl = eye(ROWNUM);
+    exControl = eye(ROWNUM);
 
 %    for i=1:sbjNum
     parfor i=1:sbjNum
         dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROWNUM) '-net' num2str(i) '.mat'];
         if exist(dlcmName, 'file')
             f=load(dlcmName);
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
             netDLCM = f.netDLCM;
         else
             if size(nodeSignals,3) > 1
                 si = nodeSignals(:,:,i);
-                inSignal = exSignals(:,:,i);
+                exSignal = exSignals(:,:,i);
             else
                 si = nodeSignals;
-                inSignal = exSignals;
+                exSignal = exSignals;
             end
             % init DLCM network
-            netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
+            netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
 
             % training DLCM network
             maxEpochs = 1000;
@@ -2288,9 +2304,9 @@ function [weights, meanWeights, stdWeights, subweights] = retrainDLCMAndEC(teach
             disp('start training');
             for j=1:ROWNUM
                 nodeTeach = teachSignals(j,1:end,i);
-                nodeInput = [si; inSignal];
-                if ~isempty(inControl)
-                    filter = repmat(inControl(i,:).', 1, size(nodeInput,2));
+                nodeInput = [si; exSignal];
+                if ~isempty(exControl)
+                    filter = repmat(exControl(i,:).', 1, size(nodeInput,2));
                     nodeInput(ROWNUM+1:end,:) = nodeInput(ROWNUM+1:end,:) .* filter;
                 end
                 idx = find(isnan(nodeTeach));
@@ -2300,11 +2316,11 @@ function [weights, meanWeights, stdWeights, subweights] = retrainDLCMAndEC(teach
                 disp(['virtual alzheimer (' group ') training node ' num2str(i) '-' num2str(j) ' rmse=' num2str(netDLCM.trainInfo{j}.TrainingRMSE(maxEpochs))]);
             end
 
-            parsavedlsm(dlcmName, netDLCM, si, inSignal, inControl, options);
+            parsavedlsm(dlcmName, netDLCM, si, exSignal, exControl, options);
         end
 
         % recalculate EC
-        [weights(:,:,i), subweights(:,:,i)] = calcDlcmEC(netDLCM, [], inControl);
+        [weights(:,:,i), subweights(:,:,i)] = calcDlcmEC(netDLCM, [], exControl);
     end
     save(outfName, 'weights', 'roiNames', 'subweights');
     meanWeights = nanmean(weights, 3);
@@ -2316,8 +2332,8 @@ function [weights, meanWeights, stdWeights, subweights] = retrainDLCMAndEC(teach
     end
 end
 
-function parsavedlsm(dlcmName, netDLCM, si, inSignal, inControl, options)
-    save(dlcmName, 'netDLCM', 'si', 'inSignal', 'inControl', 'options');
+function parsavedlsm(dlcmName, netDLCM, si, exSignal, exControl, options)
+    save(dlcmName, 'netDLCM', 'si', 'exSignal', 'exControl', 'options');
 end
 
 function out = expandAmplitude(signals, rate)
@@ -2376,6 +2392,8 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
                 dlcmName = ['results/ad-dlcmrc-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             end
             f = load(dlcmName);
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
             if isRaw
                 si = signals{i};
                 sig=0; c=0; maxsi=0; minsi=0;
@@ -2383,12 +2401,12 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
                 [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
             end
             if inSiRange > 0
-                inSignal = f.inSignal(:,inSiRange);
+                exSignal = f.exSignal(:,inSiRange);
             else
-                inSignal = f.inSignal;
+                exSignal = f.exSignal;
             end
-            [Y, time] = simulateDlcmNetwork(si, inSignal, [], f.inControl, f.netDLCM);
-            [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.inControl);
+            [Y, time] = simulateDlcmNetwork(si, exSignal, [], f.exControl, f.netDLCM);
+            [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl);
         end
         ECs(:,:,i) = ec;
         simSignals{i} = Y;

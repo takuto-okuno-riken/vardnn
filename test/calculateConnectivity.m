@@ -116,7 +116,9 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 else
                     dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                     f = load(dlcmName);
-                    if isfield(f,'c'), c=f.c; else c=f.m; end
+                    if isfield(f,'c'), c=f.c; else c=f.m; end % for compatibility
+                    if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+                    if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
                     % recoverty training
                     options = trainingOptions('adam', ...
                         'ExecutionEnvironment','cpu', ...
@@ -137,6 +139,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     dlcmName = ['results/ad-dlcmrc-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 end
                 f = load(dlcmName);
+                if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
                 [mat, subweights(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl);
             end
             weights(:,:,i) = mat;
