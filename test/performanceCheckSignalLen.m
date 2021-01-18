@@ -5,7 +5,7 @@ function performanceCheckSignalLen
     siOrg = si;
     
     nodeNum = 32;
-    inputNum = 10;
+    exNum = 10;
     hiddenNums = [48; ceil(48*2/3)];
 
     start = 100;
@@ -13,9 +13,9 @@ function performanceCheckSignalLen
     stepMax = 20;
     for i=start:step:step*stepMax
         si = siOrg(1:nodeNum,1:i);
-        inSignal = [];
-        if inputNum > 0
-            inSignal = zeros(inputNum, size(si,2)); % exogenous input matrix
+        exSignal = [];
+        if exNum > 0
+            exSignal = zeros(exNum, size(si,2)); % exogenous input matrix
         end
         sigLen = size(si,2);
 
@@ -40,10 +40,10 @@ function performanceCheckSignalLen
         end
 
         % layer parameters
-        netDLCM = createDlcmNetwork(nodeNum, inputNum, hiddenNums);
+        netDLCM = createDlcmNetwork(nodeNum, exNum, hiddenNums);
 
         % training DLCM network
-        netDLCM = trainDlcmNetwork(si, inSignal, [], [], netDLCM, options);
+        netDLCM = trainDlcmNetwork(si, exSignal, [], [], netDLCM, options);
         save(dlcmFile, 'netDLCM');
     end
     
@@ -65,17 +65,17 @@ function performanceCheckSignalLen
 
         % set signals
         si = siOrg(1:nodeNum,1:i*step);
-        inSignal = [];
-        if inputNum > 0
-            inSignal = zeros(inputNum, size(si,2)); % exogenous input matrix
+        exSignal = [];
+        if exNum > 0
+            exSignal = zeros(exNum, size(si,2)); % exogenous input matrix
         end
         
         a=0; b=0; c=0; d=0; e=0;
         for k=1:nodeNum
-            if isempty(inSignal)
+            if isempty(exSignal)
                 nodeInput = si(:,1:end-1);
             else
-                nodeInput = [si(:,1:end-1); inSignal(:,1:end-1)];
+                nodeInput = [si(:,1:end-1); exSignal(:,1:end-1)];
             end
             nodeTeach = single(si(k,2:end));
             zPred = predict(netDLCM.nodeNetwork{k}, nodeInput);

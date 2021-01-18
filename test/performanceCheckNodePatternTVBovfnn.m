@@ -40,16 +40,17 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         % calcurate and show DLCM-GC
         nodeNum = size(si,1);
         sigLen = size(si,2);
-        inputNum = size(uu,1);
-        inControl = eye(nodeNum, nodeNum);
+        exNum = size(uu,1);
+        exControl = eye(nodeNum, nodeNum);
         for j=1:trial
             dlcmFile = ['results/net-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) 'ovfnn' num2str(j) '.mat'];
             if exist(dlcmFile, 'file')
                 load(dlcmFile);
+                if exist('inSignal','var'), exSignal=inSignal; end % for compatibility
             else
                 % train DLCM
                 Y = si;
-                inSignal = uu;
+                exSignal = uu;
 
                 % estimate neuron number of hidden layers
                 hiddenNums = zeros(2,1);
@@ -60,7 +61,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
                 biasMat = ones(hiddenNums(1),1) * 0;
 
                 % layer parameters
-                netDLCM = createDlcmNetwork(nodeNum, inputNum, hiddenNums, [], inControl, [], [], biasMat);
+                netDLCM = createDlcmNetwork(nodeNum, exNum, hiddenNums, [], exControl, [], [], biasMat);
 
                 % training DLCM network
                 maxEpochs = 1000;
@@ -76,15 +77,15 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             %            'Plots','training-progress');
 
                 disp('start training');
-                netDLCM = trainDlcmNetwork(Y, inSignal, [], inControl, netDLCM, options);
-                save(dlcmFile, 'netDLCM', 'Y', 'inSignal', 'Y', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
+                netDLCM = trainDlcmNetwork(Y, exSignal, [], exControl, netDLCM, options);
+                save(dlcmFile, 'netDLCM', 'Y', 'exSignal', 'Y', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
             end
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
             disp(['end training : rsme=' num2str(rsme)]);
             dlErr(k,j) = rsme;
             
             % show DLCM-GC
-            dlGC = calcDlcmGCI(Y, inSignal, [], inControl, netDLCM);
+            dlGC = calcDlcmGCI(Y, exSignal, [], exControl, netDLCM);
 
             % calc ROC curve
             [~, ~, dlAUC(k,j)] = calcROCcurve(dlGC, weights, 100, 1, Gth);

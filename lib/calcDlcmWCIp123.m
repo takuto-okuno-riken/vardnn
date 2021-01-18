@@ -3,11 +3,11 @@
 % input:
 %  netDLCM      trained DLCM network
 %  nodeControl  node control matrix (node x node) (optional)
-%  inControl    exogenous input control matrix for each node (node x exogenous input) (optional)
+%  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 
-function wcI = calcDlcmWCIp123(netDLCM, nodeControl, inControl)
+function wcI = calcDlcmWCIp123(netDLCM, nodeControl, exControl)
     if nargin < 3
-        inControl = [];
+        exControl = [];
     end
     if nargin < 2
         nodeControl = [];
@@ -22,8 +22,8 @@ function wcI = calcDlcmWCIp123(netDLCM, nodeControl, inControl)
         if ~isempty(nodeControl)
             control = nodeControl(i,:);
         end
-        if ~isempty(inControl)
-            excontrol = inControl(i,:);
+        if ~isempty(exControl)
+            excontrol = exControl(i,:);
         end
         ctrl = [control, excontrol];
 

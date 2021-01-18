@@ -4,19 +4,19 @@ function performanceCheckSimPattern
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
     nodeNum = 8;
-    inputNum = 4;
+    exNum = 4;
     sigLen = 100;
     si = siOrg(1:nodeNum,1:sigLen);
-    exSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
+    exSignal = siOrg(nodeNum+1:nodeNum+exNum,1:sigLen);
     % control is all positive input
-    exControl = logical(ones(nodeNum,inputNum));
+    exControl = logical(ones(nodeNum,exNum));
 
     %% pattern 1 -------------------------------------------------
 %{
     disp('full random -- full independent nodes');
     si = siOrg(1:nodeNum,1:sigLen);
-    exSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
-    exControl = logical(ones(nodeNum,inputNum));
+    exSignal = siOrg(nodeNum+1:nodeNum+exNum,1:sigLen);
+    exControl = logical(ones(nodeNum,exNum));
     checkingPattern(si, exSignal, exControl, 1);
 %}
     %% pattern 2 -------------------------------------------------
@@ -77,11 +77,11 @@ end
 
 function checkingPattern(si, exSignal, exControl, idx)
     nodeNum = size(si,1);
-    inputNum = size(exSignal,1);
+    exNum = size(exSignal,1);
     sigLen = size(si,2);
 
     % do training or load DLCM network
-    dlcmFile = ['results/net-sim-pat' num2str(idx) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+    dlcmFile = ['results/net-sim-pat' num2str(idx) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) '.mat'];
     if exist(dlcmFile, 'file')
         load(dlcmFile);
     else

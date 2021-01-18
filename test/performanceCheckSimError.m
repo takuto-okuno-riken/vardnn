@@ -30,28 +30,28 @@ function performanceCheckSimError
 %%{
     for i=1:imax
         nodeNum = inum * i;
-        inputNum = 10;
+        exNum = 10;
         sigLen = 200;
         winLen = 100;
 
         si = siOrg(1:nodeNum,1:sigLen);
-        inSignal = uuOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
+        exSignal = uuOrg(nodeNum+1:nodeNum+exNum,1:sigLen);
         % control is all positive input
-        inControl = logical(ones(nodeNum,inputNum));
+        exControl = logical(ones(nodeNum,exNum));
 
         % training and simulation
-        checkingPattern(si, inSignal, inControl, winLen, i, prefix, l2, weightFunc, weightParam, bias);
+        checkingPattern(si, exSignal, exControl, winLen, i, prefix, l2, weightFunc, weightParam, bias);
     end
 %%}
     % plot wisker-box graph
     Mae = []; R = []; FCcos = []; GCcos = []; Tm = []; mTm = [];
     for i=1:imax
         nodeNum = inum * i;
-        inputNum = 10;
+        exNum = 10;
         sigLen = 200;
         winLen = 100;
 
-        dlcmFile = ['results/sim-err' prefix num2str(i) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+        dlcmFile = ['results/sim-err' prefix num2str(i) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) '.mat'];
         load(dlcmFile);
         Mae = [Mae, eachMae];
         R = [R, eachR];
@@ -81,13 +81,13 @@ function performanceCheckSimError
     bar(mTm);
 end
 
-function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weightFunc, weightParam, bias)
+function checkingPattern(si, exSignal, exControl, winLen, idx, prefix, l2, weightFunc, weightParam, bias)
     % traial number
     maxTrain = 8;
     maxWin = 10;
     % init
     nodeNum = size(si,1);
-    inputNum = size(inSignal,1);
+    exNum = size(exSignal,1);
     sigLen = size(si,2);
     allErr = []; allrS = []; allrSi = []; allTime = []; % all trained result
     eachMae = []; eachR = []; eachFCcos = []; eachGCcos = []; % each trained result
@@ -95,12 +95,12 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weigh
 
     for k = 1:maxTrain
         % do training or load DLCM network
-        dlcmFile = ['results/net-sim-err' prefix num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+        dlcmFile = ['results/net-sim-err' prefix num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) '.mat'];
         if exist(dlcmFile, 'file')
             load(dlcmFile);
         else
             % init DLCM network
-            netDLCM = initDlcmNetwork(si, inSignal, [], inControl, weightFunc, weightParam, bias);
+            netDLCM = initDlcmNetwork(si, exSignal, [], exControl, weightFunc, weightParam, bias);
 
             % set training options
             maxEpochs = 1000;
@@ -118,9 +118,9 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weigh
         %            'Plots','training-progress');
 
             % training DLCM network
-            netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+            netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
             % recover training 
-            [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+            [netDLCM, time] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
             disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
             %plotDlcmWeight(netDLCM);
@@ -128,7 +128,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weigh
         end
 
         % simulate DLCM network with 1st frame & exogenous input signal
-        dlcmFile = ['results/net-sim-err' prefix num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) 'sim.mat'];
+        dlcmFile = ['results/net-sim-err' prefix num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) 'sim.mat'];
         if exist(dlcmFile, 'file')
             load(dlcmFile);
         else
@@ -140,10 +140,10 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weigh
             st = floor(1 + (i-1)*(size(si,2)-winLen)/maxWin);
             en = st + winLen - 1;
             wSi = si(:,st:en);
-            sInSignal = inSignal(:,st:en);
+            sExSignal = exSignal(:,st:en);
             % do simulation
             if isempty(allS{i})
-                [S, time] = simulateDlcmNetwork(wSi, sInSignal, [], inControl, netDLCM);
+                [S, time] = simulateDlcmNetwork(wSi, sExSignal, [], exControl, netDLCM);
                 allS{i,1} = S; simTime(i) = time;
             else
                 S = allS{i,1}; time = simTime(i);
@@ -162,8 +162,8 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weigh
             cs = getCosSimilarity(FC,sFC);
             winFCcos = [winFCcos; cs];
             % cosine similarity between GC and simulated GC
-            gcI  = calcPairwiseGCI(wSi, sInSignal, [], inControl, 3);
-            sgcI = calcPairwiseGCI(S, sInSignal, [], inControl, 3);
+            gcI  = calcPairwiseGCI(wSi, sExSignal, [], exControl, 3);
+            sgcI = calcPairwiseGCI(S, sExSignal, [], exControl, 3);
             nidx = find(isnan(gcI)); gcI(nidx) = 0; % remove NaN
             nidx = find(isnan(sgcI)); sgcI(nidx) = 0; % remove NaN
             cs = getCosSimilarity(gcI,sgcI);
@@ -228,7 +228,7 @@ function checkingPattern(si, inSignal, inControl, winLen, idx, prefix, l2, weigh
     hold off;
     drawnow;
 
-    dlcmFile = ['results/sim-err' prefix num2str(idx) '_' num2str(nodeNum) '-' num2str(inputNum) 'x' num2str(sigLen) '.mat'];
+    dlcmFile = ['results/sim-err' prefix num2str(idx) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) '.mat'];
     save(dlcmFile, 'allErr', 'allrSi', 'allrS', 'allTime', 'eachMae', 'eachR', 'eachFCcos', 'eachGCcos');
 end
 
