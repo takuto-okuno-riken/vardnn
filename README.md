@@ -114,7 +114,7 @@ DLCM training result : rsme=0.017795
 |X |&lt;nodes&gt; x &lt;length&gt;(double)|node signals|
 |exSignal|&lt;exogenous nodes&gt; x &lt;length&gt;(double)|exogenous signals|
 |nodeControl|&lt;nodes&gt; x &lt;nodes&gt;(logical)|node connection control matrix|
-|exControl|&lt;nodes&gt; x &lt;nodes&gt;(logical)|exogenous node connection control matrix|
+|exControl|&lt;nodes&gt; x &lt;exogenous nodes&gt;(logical)|exogenous node connection control matrix|
 |groundTruth|&lt;nodes&gt; x &lt;nodes&gt;(logical)|ground truth of network connection for ROC curve|
 
 Several graphs (node signals, result matrix, circle graph, ROC curve) of each algorithm are shown by dlcm command.
