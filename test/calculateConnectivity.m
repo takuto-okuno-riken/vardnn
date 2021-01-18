@@ -46,7 +46,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     parsavemat(fName, mat);
                 end
             case 'gc'
-                mat = calcMultivariateGCI(signals{i}, [], [], [], LAG);
+                mat = calcMultivariateGCI_(signals{i}, [], [], [], LAG);
             case 'pgc'
                 mat = calcPairwiseGCI(signals{i}, [], [], [], LAG);
             case 'te'

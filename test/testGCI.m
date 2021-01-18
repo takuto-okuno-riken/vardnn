@@ -24,7 +24,7 @@ imagesc(gcI,clims);
 title('pairwise Granger Causality Index');
 colorbar;
 
-gcI2 = calcMultivariateGCI(X, [], [], [], p); % calc granger causality index of lag |p|
+gcI2 = calcMultivariateGCI_(X, [], [], [], p); % calc granger causality index of lag |p|
 
 % plot matrix
 figure;
@@ -39,7 +39,7 @@ gcI3 = zeros(nodeNum,nodeNum,maxLag);
 nodeAIC = zeros(nodeNum,maxLag);
 nodeBIC = zeros(nodeNum,maxLag);
 for k=1:maxLag
-    [gcI3(:,:,k), h, P, ~, ~, ~, ~, nodeAIC(:,k), nodeBIC(:,k)] = calcMultivariateGCI2(X,[],[],[],k); % calc granger causality index of lag |p|
+    [gcI3(:,:,k), h, P, ~, ~, ~, ~, nodeAIC(:,k), nodeBIC(:,k)] = calcMultivariateGCI(X,[],[],[],k); % calc granger causality index of lag |p|
     h2 = double(P<0.05);
     h(isnan(h)) = 0;
     if isequal(h,h2)

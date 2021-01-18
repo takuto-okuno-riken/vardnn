@@ -212,6 +212,6 @@ function [gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     colorbar;
 
     % show GC
-    figure; gcI = plotMultivariateGCI(orgY.',3,0);
+    figure; gcI = plotMultivariateGCI_(orgY.',[],[],[],3,0);
 end
 

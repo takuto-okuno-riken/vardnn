@@ -476,12 +476,12 @@ function processInputFiles(handles)
         if handles.mvgc > 0
             % show mvGC matrix
             if handles.showMat > 0
-                figure; [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI2(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, isFullNode);
+                figure; [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, isFullNode);
                 title(['multivariate Granger Causality Index : ' name]);
             else
-%                mvGCa = calcMultivariateGCI(X, exSignal, nodeControl, exControl, handles.lag, isFullNode);
-%                mvGCb = calcMultivariateGCI_(X, exSignal, nodeControl, exControl, handles.lag, isFullNode);
-                [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI2(X, exSignal, nodeControl, exControl, handles.lag, handles.alpha, isFullNode);
+%                mvGCa = calcMultivariateGCI_(X, exSignal, nodeControl, exControl, handles.lag, isFullNode);
+%                mvGCb = calcMultivariateGCI__(X, exSignal, nodeControl, exControl, handles.lag, isFullNode);
+                [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI(X, exSignal, nodeControl, exControl, handles.lag, handles.alpha, isFullNode);
             end
             
             if handles.showCG > 0

@@ -177,15 +177,15 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 
     % train DLCM
     si = bold2dnnSignal(y2.');
-    inSignal = bold2dnnSignal(u2.');
-    inControl = eye(n,n);
+    exSignal = bold2dnnSignal(u2.');
+    exControl = eye(n,n);
     figure; plot(si.');
-    figure; plot(inSignal.');
+    figure; plot(exSignal.');
     nodeNum = size(si,1);
     sigLen = size(si,2);
     if isempty(netDLCM)
         % layer parameters
-        netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
+        netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
         % training DLCM network
         maxEpochs = 1000;
         miniBatchSize = ceil(sigLen / 3);
@@ -200,20 +200,20 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     %            'Plots','training-progress');
 
         disp('start training');
-        netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+        netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
         % recoverty training
-        [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+        [netDLCM, time] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
         save(dlcmFile, 'netDLCM', 'pP', 'M', 'U', 'N','T','n','TR', 'y2', 'u2', 'si', 'A', 'Uus', 'RMS', 'CSD');
     end
 
     % show signals after training
-    figure; [S, t,mae,maeerr] = plotPredictSignals(si,inSignal,[],inControl,netDLCM);
+    figure; [S, t,mae,maeerr] = plotPredictSignals(si,exSignal,[],exControl,netDLCM);
     disp(['t=' num2str(t) ', mae=' num2str(mae)]);
 
     % show original signal FC
     figure; FC = plotFunctionalConnectivity(si);
     % show original signal granger causality index (gc-EC)
-    figure; gcI = plotMultivariateGCI(si,3,0);
+    figure; gcI = plotMultivariateGCI_(si,[],[],[],3,0);
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
@@ -222,7 +222,7 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 %    figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
 %    figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
     % show DLCM-GC
-    figure; dlGC = plotDlcmGCI(si, inSignal, [], inControl, netDLCM, 0);
+    figure; dlGC = plotDlcmGCI(si, exSignal, [], exControl, netDLCM, 0);
 
 end
 

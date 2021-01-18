@@ -192,7 +192,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         fg = figure; WCS = plotWaveletCoherence(y2.'); close(fg);
         figure(wcsRf); hold on; [wcsROC{k,1}, wcsROC{k,2}, wcsAUC(k)] = plotROCcurve(WCS, pP.A, 100, 1, 0.2); hold off;
         % show result of granger causality index (mvGC)
-        fg = figure; gcI = plotMultivariateGCI(y2.',3,0); close(fg);
+        fg = figure; gcI = plotMultivariateGCI_(y2.',[],[],[],3,0); close(fg);
         figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, pP.A, 100, 1, 0.2); hold off;
         title('mvGC');
         % show result of granger causality index (pwGC)

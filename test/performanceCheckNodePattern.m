@@ -129,7 +129,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     % show original signal mWCS
     figure; mWCS = plotWaveletCoherence(si);
     % show original signal granger causality index (gc-EC)
-    figure; gcI = plotMultivariateGCI(si, 3, 0);
+    figure; gcI = plotMultivariateGCI_(si, [], [], [], 3, 0);
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity

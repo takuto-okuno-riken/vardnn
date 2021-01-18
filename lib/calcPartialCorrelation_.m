@@ -5,7 +5,7 @@
 %  X       multivariate time series matrix (node x time series)
 %  lambda  regularisation level
 
-function [iCov] = calcPartialCorrelation2(X,lambda)
+function [iCov] = calcPartialCorrelation_(X,lambda)
     if nargin < 2
         lambda = 0;
     end
