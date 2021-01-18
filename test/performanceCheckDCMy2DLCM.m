@@ -39,12 +39,12 @@ function performanceCheckDCMy2DLCM
         U.u = Uus{k,N};  % endogenous fluctuations
         y   = spm_int_J(pP,M,U);            % integrate with observer
         si  = y(ySt:end,:).';
-        inSignal = U.u(ySt:end,:).';
-        inControl = eye(n,n);
+        exSignal = U.u(ySt:end,:).';
+        exControl = eye(n,n);
 
         % normalize signal to [0, 1] 
         si = bold2dnnSignal(si);
-        inSignal = bold2dnnSignal(inSignal);
+        exSignal = bold2dnnSignal(exSignal);
 
         % do training or load DLCM network
         dlcmFile = ['results/net-vsDCM-' num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];
@@ -52,7 +52,7 @@ function performanceCheckDCMy2DLCM
             load(dlcmFile);
         else
             % init DLCM network
-            netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
+            netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
 
             % set training options
             maxEpochs = 1000;
@@ -71,9 +71,9 @@ function performanceCheckDCMy2DLCM
 %                'GradientThresholdMethod', 'global-l2norm' , ...
 
             % training DLCM network
-            netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+            netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
             % recover training 
-            [netDLCM, time, mae] = recoveryTrainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+            [netDLCM, time, mae] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
             disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 
@@ -85,7 +85,7 @@ function performanceCheckDCMy2DLCM
         end
         
         % simulate DLCM network with 1st frame & exogenous input signal
-        [S, time] = simulateDlcmNetwork(si, inSignal, [], inControl, netDLCM);
+        [S, time] = simulateDlcmNetwork(si, exSignal, [], exControl, netDLCM);
 
         % show original & simulated signal correlation        
         figure; DLCorr(k,1) = plotTwoSignalsCorrelation(S, si);

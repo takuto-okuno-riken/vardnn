@@ -2,18 +2,18 @@
 % Prot predicted signals by traind DLCM
 % input:
 %  X            multivariate time series matrix (node x time series)
-%  inSignal     multivariate time series matrix (exogenous input x time series) (optional)
+%  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
-%  inControl    exogenous input control matrix for each node (node x exogenous input) (optional)
+%  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  netDLCM      trained DLCM network
 
-function [Y, time] = predictDlcmNetwork(X, inSignal, nodeControl, inControl, netDLCM)
+function [Y, time] = predictDlcmNetwork(X, exSignal, nodeControl, exControl, netDLCM)
     nodeNum = size(X,1);
     Y = X;
-    if isempty(inSignal)
+    if isempty(exSignal)
         nodeInputOrg = X;
     else
-        nodeInputOrg = [X; inSignal];
+        nodeInputOrg = [X; exSignal];
     end
     ticH = tic;
     for i=1:nodeNum
@@ -22,8 +22,8 @@ function [Y, time] = predictDlcmNetwork(X, inSignal, nodeControl, inControl, net
             filter = repmat(nodeControl(i,:).', 1, size(nodeInput,2));
             nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
         end
-        if ~isempty(inControl)
-            filter = repmat(inControl(i,:).', 1, size(nodeInput,2));
+        if ~isempty(exControl)
+            filter = repmat(exControl(i,:).', 1, size(nodeInput,2));
             nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
         end
         zPred = predict(netDLCM.nodeNetwork{i}, nodeInput);

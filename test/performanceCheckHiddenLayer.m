@@ -5,9 +5,9 @@ function performanceCheckHiddenLayer
     si = si(1:32,1:200);
 
     inputNum = 10;
-    inSignal = [];
+    exSignal = [];
     if inputNum > 0
-        inSignal = zeros(inputNum, size(si,2)); % exogenous input matrix
+        exSignal = zeros(inputNum, size(si,2)); % exogenous input matrix
     end
     
     sigLen = size(si,2);
@@ -42,7 +42,7 @@ function performanceCheckHiddenLayer
             netDLCM = createDlcmNetwork(nodeNum, inputNum, hiddenNums);
 
             % training DLCM network
-            netDLCM = trainDlcmNetwork(si, inSignal, [], [], netDLCM, options);
+            netDLCM = trainDlcmNetwork(si, exSignal, [], [], netDLCM, options);
             save(dlcmFile, 'netDLCM');
         end
     end
@@ -64,10 +64,10 @@ function performanceCheckHiddenLayer
 
             a=0; b=0; c=0; d=0; e=0;
             for k=1:nodeNum
-                if isempty(inSignal)
+                if isempty(exSignal)
                     nodeInput = si(:,1:end-1);
                 else
-                    nodeInput = [si(:,1:end-1); inSignal(:,1:end-1)];
+                    nodeInput = [si(:,1:end-1); exSignal(:,1:end-1)];
                 end
                 nodeTeach = single(si(k,2:end));
                 zPred = predict(netDLCM.nodeNetwork{k}, nodeInput);

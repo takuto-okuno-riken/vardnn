@@ -2,12 +2,12 @@
 % Simulate node signals by traind DLCM and exogenous input
 % input:
 %  X            multivariate time series matrix (node x time series)
-%  inSignal     multivariate time series matrix (exogenous input x time series) (optional)
+%  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
-%  inControl    exogenous input control matrix for each node (node x exogenous input) (optional)
+%  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  netDLCM      trained DLCM network
 
-function [S, time] = simulateDlcmNetwork(X, inSignal, nodeControl, inControl, netDLCM)
+function [S, time] = simulateDlcmNetwork(X, exSignal, nodeControl, exControl, netDLCM)
     nodeNum = size(X,1);
     sigLen = size(X,2); % TODO:
 
@@ -18,10 +18,10 @@ function [S, time] = simulateDlcmNetwork(X, inSignal, nodeControl, inControl, ne
     ticH = tic;
     for t=1:sigLen-1
         if mod(t,10)==0, disp(['step : ' num2str(t)]); end
-        if isempty(inSignal)
+        if isempty(exSignal)
             nodeInputOrg = S(:,t);
         else
-            nodeInputOrg = [S(:,t); inSignal(:,t)];
+            nodeInputOrg = [S(:,t); exSignal(:,t)];
         end
         for i=1:nodeNum
             nodeInput = nodeInputOrg;
@@ -29,8 +29,8 @@ function [S, time] = simulateDlcmNetwork(X, inSignal, nodeControl, inControl, ne
                 filter = nodeControl(i,:).';
                 nodeInput(1:nodeNum,1) = nodeInput(1:nodeNum,1) .* filter;
             end
-            if ~isempty(inControl)
-                filter = inControl(i,:).';
+            if ~isempty(exControl)
+                filter = exControl(i,:).';
                 nodeInput(nodeNum+1:end,1) = nodeInput(nodeNum+1:end,1) .* filter;
             end
             % predict next time step

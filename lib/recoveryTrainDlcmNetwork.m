@@ -2,14 +2,14 @@
 % Return trained DLCM network
 % input :
 %  X             multivariate time series matrix (node x time series)
-%  inSignal      multivariate time series matrix (exogenous input x time series) (optional)
+%  exSignal      multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl   node control matrix (node x node) (optional)
-%  inControl     exogenous input control matrix for each node (node x exogenous input)
+%  exControl     exogenous input control matrix for each node (node x exogenous input)
 %  net           DLCM network structure
 %  options       training options
 %  maeTh         MAE threshold to finish recovery training (default:0.05)
 
-function [trainedNet, time, mae] = recoveryTrainDlcmNetwork(X, inSignal, nodeControl, inControl, net, options, maeTh)
+function [trainedNet, time, mae] = recoveryTrainDlcmNetwork(X, exSignal, nodeControl, exControl, net, options, maeTh)
     if nargin < 7, maeTh = 0.05; end
     nodeNum = size(X,1);
     sigLen = size(X,2);
@@ -18,7 +18,7 @@ function [trainedNet, time, mae] = recoveryTrainDlcmNetwork(X, inSignal, nodeCon
     ticH = tic; % start stop watch
 
     % simulate DLCM network with 1st frame & exogenous input signal
-    [S, time] = simulateDlcmNetwork(X, inSignal, nodeControl, inControl, net);
+    [S, time] = simulateDlcmNetwork(X, exSignal, nodeControl, exControl, net);
     [mae, ~] = getTwoSignalsError(X, S);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
     if mae < maeTh
@@ -27,7 +27,7 @@ function [trainedNet, time, mae] = recoveryTrainDlcmNetwork(X, inSignal, nodeCon
 
     % recovery training whole DLCM network
     lastsi = X(:,1:end-1);
-    lastinSignal = inSignal(:,1:end-1);
+    lastexSignal = exSignal(:,1:end-1);
     lastTeach = X(:,2:end);
     lastS = S;
     lastmae = mae;
@@ -52,37 +52,37 @@ end
 %{
         rts = 6 + (k-1)*10;
         rte = 20 + (k-1)*10;
-        if isempty(inSignal)
+        if isempty(exSignal)
             nodeInput = [lastsi, S(:,rts:rte)];
             lastsi = nodeInput;
         else
             si2 = [lastsi, S(:,rts:rte)];
-            inSig2 = [lastinSignal, inSignal(:,rts:rte)];
+            inSig2 = [lastexSignal, exSignal(:,rts:rte)];
             nodeInput = [si2; inSig2];
             lastsi = si2;
-            lastinSignal = inSig2;
+            lastexSignal = inSig2;
         end
         nodeTeach = [lastTeach, si(:,rts+1:rte+1)]; 
         lastTeach = nodeTeach;
 %}
         rte = rtes(k);
 %        rte = 10 + floor((k-1)*(sigLen/10) + correct);
-        if isempty(inSignal)
+        if isempty(exSignal)
             nodeInputOrg = [lastsi, lastS(:,1:rte)];
         else
             si2 = [lastsi, lastS(:,1:rte)];
-            inSig2 = [lastinSignal, inSignal(:,1:rte)];
+            inSig2 = [lastexSignal, exSignal(:,1:rte)];
             nodeInputOrg = [si2; inSig2];
         end
         nodeTeach = [lastTeach, X(:,2:rte+1)]; 
 %{
         rte = 20 + (k-1)*10;
 %        rte = 99;
-        if isempty(inSignal)
+        if isempty(exSignal)
             nodeInput = S(:,1:rte);
         else
             si2 = S(:,1:rte);
-            inSig2 = inSignal(:,1:rte);
+            inSig2 = exSignal(:,1:rte);
             nodeInput = [si2; inSig2];
         end
         nodeTeach = si(:,2:rte+1); 
@@ -113,8 +113,8 @@ else
                 filter = repmat(nodeControl(i,:).', 1, size(nodeInput,2));
                 nodeInput(1:nodeNum,1) = nodeInput(1:nodeNum,1) .* filter;
             end
-            if ~isempty(inControl)
-                filter = repmat(inControl(i,:).', 1, size(nodeInput,2));
+            if ~isempty(exControl)
+                filter = repmat(exControl(i,:).', 1, size(nodeInput,2));
                 nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
             end
             [net.nodeNetwork{i}, net.trainInfo{i}] = trainNetwork(nodeInput, nodeTeach(i,:), trainedNet.nodeNetwork{i}.Layers, trainOpt);
@@ -129,7 +129,7 @@ end
 %}
 % for debug ---------------
         % simulate again DLCM network with 1st frame & exogenous input signal
-        [S, time] = simulateDlcmNetwork(X, inSignal, nodeControl, inControl, net);
+        [S, time] = simulateDlcmNetwork(X, exSignal, nodeControl, exControl, net);
         [err, ~] = getTwoSignalsError(X, S);
         disp(['recovery training (' num2str(k) '): simulation time=' num2str(time) ', mae=' num2str(err)]);
 %{

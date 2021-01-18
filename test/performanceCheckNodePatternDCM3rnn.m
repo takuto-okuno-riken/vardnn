@@ -9,10 +9,10 @@ function performanceCheckNodePatternDCM3rnn
     T  = 300;                             % number of observations (scans)
     n  = 8;                               % number of regions or nodes
 
-    prefix = 'net-pat3-';                 % original weight file prefix (result of *NodePatternDCM3d.m)
-    Gth = 0;                              % 0 for pat3. 0.2 for pat4.
-%    prefix = 'net-pat4-';                  % original weight file prefix (result of *NodePatternDCM3d.m)
-%    Gth = 0.2;                             % 0 for pat3. 0.2 for pat4.
+%    prefix = 'net-pat3-';                 % original weight file prefix (result of *NodePatternDCM3d.m)
+%    Gth = 0;                              % 0 for pat3. 0.2 for pat4.
+    prefix = 'net-pat4-';                  % original weight file prefix (result of *NodePatternDCM3d.m)
+    Gth = 0.2;                             % 0 for pat3. 0.2 for pat4.
 
     %% pattern 1 -------------------------------------------------
 %%{

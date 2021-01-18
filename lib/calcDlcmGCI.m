@@ -89,7 +89,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, exSig
             % calc F-statistic
             % https://en.wikipedia.org/wiki/F-test
             % F = ((RSS1 - RSS2) / (p2 - p1)) / (RSS2 / n - p2)
-            %RSS1 = err*err';  % p1 = nodeNum - 1 + size(inSignal, 1) + 1;
+            %RSS1 = err*err';  % p1 = nodeNum - 1 + size(exSignal, 1) + 1;
             RSS2 = RSS;       % p2 = k
             F(i,j) = ((RSS1 - RSS2)/1) / (RSS2 / (sigLen - k));
             P(i,j) = 1 - fcdf(F(i,j),1,(sigLen - k));

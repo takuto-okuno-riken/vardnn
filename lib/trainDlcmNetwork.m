@@ -2,13 +2,13 @@
 % Return trained DLCM network
 % input :
 %  X             multivariate time series matrix (node x time series)
-%  inSignal      multivariate time series matrix (exogenous input x time series) (optional)
+%  exSignal      multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl   node control matrix (node x node) (optional)
-%  inControl     exogenous input control matrix for each node (node x exogenous input) (optional)
+%  exControl     exogenous input control matrix for each node (node x exogenous input) (optional)
 %  net           DLCM network structure
 %  options       training options
 
-function trainedNet = trainDlcmNetwork(X, inSignal, nodeControl, inControl, net, options)
+function trainedNet = trainDlcmNetwork(X, exSignal, nodeControl, exControl, net, options)
     global dlcmInitWeights;
     nodeNum = length(net.nodeLayers);
     trainedNet = net;
@@ -16,10 +16,10 @@ function trainedNet = trainDlcmNetwork(X, inSignal, nodeControl, inControl, net,
     % training whole DLCM network
     disp('start training whole DLCM network');
     ticH = tic;
-    if isempty(inSignal)
+    if isempty(exSignal)
         nodeInputOrg = X(:,1:end-1);
     else
-        nodeInputOrg = [X(:,1:end-1); inSignal(:,1:end-1)];
+        nodeInputOrg = [X(:,1:end-1); exSignal(:,1:end-1)];
     end
     nodeLayers = trainedNet.nodeLayers;
     nodeNetwork = cell(nodeNum,1);
@@ -34,8 +34,8 @@ function trainedNet = trainDlcmNetwork(X, inSignal, nodeControl, inControl, net,
             filter = repmat(nodeControl(i,:).', 1, size(nodeInput,2));
             nodeInput(1:nodeNum,:) = nodeInput(1:nodeNum,:) .* filter;
         end
-        if ~isempty(inControl)
-            filter = repmat(inControl(i,:).', 1, size(nodeInput,2));
+        if ~isempty(exControl)
+            filter = repmat(exControl(i,:).', 1, size(nodeInput,2));
             nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
         end
         [nodeNetwork{i}, trainInfo{i}] = trainNetwork(nodeInput, nodeTeach, nodeLayers{i}, options);

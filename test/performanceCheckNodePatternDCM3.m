@@ -206,23 +206,23 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 
         % show DCM signals
         [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(y2.', 0);
-        [inSignal, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(u2.', 0);
+        [exSignal, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(u2.', 0);
         % si = si - 0.5; (bad DLCM-EC)
-        % inSignal = inSignal - 0.5; (bad DLCM-EC)
+        % exSignal = exSignal - 0.5; (bad DLCM-EC)
         % si = y2.'; % test raw data (bad DLCM-EC)
-        % inSignal = u2.'; % test raw data (bad DLCM-EC)
+        % exSignal = u2.'; % test raw data (bad DLCM-EC)
         % si = y2.' - min(y2,[],'all'); % test raw data (nice DLCM-EC)
-        % inSignal = u2.' - min(u2,[],'all');; % test raw data (nice DLCM-EC)
-        inControl = eye(n,n);
+        % exSignal = u2.' - min(u2,[],'all');; % test raw data (nice DLCM-EC)
+        exControl = eye(n,n);
         figure; plot(si.');
-        %figure; plot(inSignal.');
+        %figure; plot(exSignal.');
 
         % train DLCM
         nodeNum = size(si,1);
         sigLen = size(si,2);
         if isempty(netDLCM)
             % layer parameters
-            netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
+            netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
             % training DLCM network
             maxEpochs = 1000;
             miniBatchSize = ceil(sigLen / 3);
@@ -237,23 +237,23 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         %            'Plots','training-progress');
 
             disp('start training');
-            netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+            netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
             % recoverty training
-            %[netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+            %[netDLCM, time] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
             save(dlcmFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
         end
 
         % show signals after training
-        figure; [S, t,mae,maeerr] = plotPredictSignals(si,inSignal,[],inControl,netDLCM);
+        figure; [S, t,mae,maeerr] = plotPredictSignals(si,exSignal,[],exControl,netDLCM);
         disp(['t=' num2str(t) ', mae=' num2str(mae)]);
 
         % show result of DLCM-GC
-        fg = figure; dlGC = plotDlcmGCI(si, inSignal, [], inControl, netDLCM, 0); close(fg);
+        fg = figure; dlGC = plotDlcmGCI(si, exSignal, [], exControl, netDLCM, 0); close(fg);
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A); hold off;
         title('DLCM-GC');
 
         % show result of DLCM weight causality index (DLCM-wci) as DLCM-EC
-        fg = figure; dlwGC = plotDlcmEC(netDLCM, [], inControl, 0); close(fg);
+        fg = figure; dlwGC = plotDlcmEC(netDLCM, [], exControl, 0); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A); hold off;
         title('DLCM-EC');
     end
