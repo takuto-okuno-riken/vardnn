@@ -4,10 +4,10 @@ function performanceCheckHiddenLayer
     load('test/testTrain-rand500-uniform.mat');
     si = si(1:32,1:200);
 
-    inputNum = 10;
+    exNum = 10;
     exSignal = [];
-    if inputNum > 0
-        exSignal = zeros(inputNum, size(si,2)); % exogenous input matrix
+    if exNum > 0
+        exSignal = zeros(exNum, size(si,2)); % exogenous input matrix
     end
     
     sigLen = size(si,2);
@@ -39,7 +39,7 @@ function performanceCheckHiddenLayer
 
             % layer parameters
             hiddenNums = [i; j];
-            netDLCM = createDlcmNetwork(nodeNum, inputNum, hiddenNums);
+            netDLCM = createDlcmNetwork(nodeNum, exNum, hiddenNums);
 
             % training DLCM network
             netDLCM = trainDlcmNetwork(si, exSignal, [], [], netDLCM, options);

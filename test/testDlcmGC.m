@@ -4,12 +4,12 @@ function testDlcmGC
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
     nodeNum = 8;
-    inputNum = 0;
+    exNum = 0;
     sigLen = 200;
     si = siOrg(1:nodeNum,1:sigLen);
-    inSignal = [];
+    exSignal = [];
     % control is all positive input
-    inControl = [];
+    exControl = [];
     si(2,2:end) = si(6,1:sigLen-1);
     si(4,2:end) = si(6,1:sigLen-1);
 
@@ -30,24 +30,24 @@ function testDlcmGC
 
     %% test pattern 1 
     % do training or load DLCM network
-    dlcmFile = ['results/dlcm-gc-test' num2str(nodeNum) '-' num2str(inputNum) '.mat'];
+    dlcmFile = ['results/dlcm-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
     if exist(dlcmFile, 'file')
         load(dlcmFile);
     else
         % init DLCM network
-        netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
+        netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
         % training DLCM network
-        netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+        netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
         [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 
         % recoverty training
-        [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+        [netDLCM, time] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
         save(dlcmFile, 'netDLCM');
     end
     
     % simulate DLCM network with 1st frame & exogenous input signal
-    [S, time] = simulateDlcmNetwork(si, inSignal, [], inControl, netDLCM);
+    [S, time] = simulateDlcmNetwork(si, exSignal, [], exControl, netDLCM);
 
     [mae, maeerr] = plotTwoSignals(si, S);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
@@ -60,6 +60,6 @@ function testDlcmGC
     figure; gcI = plotPairwiseGCI(S);
 
     % show DLCM-GC
-    figure; dlGC = plotDlcmGCI(si, inSignal, [], inControl, netDLCM);
+    figure; dlGC = plotDlcmGCI(si, exSignal, [], exControl, netDLCM);
 end
 

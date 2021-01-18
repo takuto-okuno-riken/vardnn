@@ -4,10 +4,10 @@ function testInputSignal
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
     nodeNum = 8;
-    inputNum = 4;
+    exNum = 4;
     sigLen = 200;
     si = siOrg(1:nodeNum,1:sigLen);
-    inSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
+    exSignal = siOrg(nodeNum+1:nodeNum+exNum,1:sigLen);
 
     % set training options
     maxEpochs = 1000;
@@ -23,7 +23,7 @@ function testInputSignal
         'Verbose',false);
 %            'Plots','training-progress');
 
-    %% test pattern 1 -- no input signal (default weight initializer)
+    %% test pattern 1 -- no exogenous signal (default weight initializer)
 %%{
     % init DLCM network
     netDLCM = initDlcmNetwork(si);
@@ -32,85 +32,85 @@ function testInputSignal
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['1) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 %%}
-    %% test pattern 2 -- input signal without input control (default weight initializer)
+    %% test pattern 2 -- exogenous signal without exogenous control (default weight initializer)
 %{
     % init DLCM network
-    netDLCM = initDlcmNetwork(si, inSignal, []);
+    netDLCM = initDlcmNetwork(si, exSignal, []);
     % training DLCM network
-    netDLCM = trainDlcmNetwork(si, inSignal, [], [], netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, exSignal, [], [], netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['2) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotDlcmWeight(netDLCM);
 %}
-    %% test pattern 3 -- input signal with input control (default weight initializer)
+    %% test pattern 3 -- exogenous signal with exogenous control (default weight initializer)
 %%{
     % control is all zero
-    inControl = logical(zeros(nodeNum,inputNum));
+    exControl = logical(zeros(nodeNum,exNum));
     % init DLCM network
-    netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
+    netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
     % training DLCM network
-    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotDlcmWeight(netDLCM);
 %%}
-    %% test pattern 4 -- input signal with input control (default weight initializer)
+    %% test pattern 4 -- exogenous signal with exogenous control (default weight initializer)
 %{
     % control one by one
-    inControl = logical(zeros(nodeNum,inputNum));
+    exControl = logical(zeros(nodeNum,exNum));
     for i=1:nodeNum
-        inControl(i, mod(i-1,4)+1) = 1;
+        exControl(i, mod(i-1,4)+1) = 1;
     end
     % init DLCM network
-    netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
+    netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
     % training DLCM network
-    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotDlcmWeight(netDLCM);
 %}
-    %% test pattern 5 -- input signal with input control (default weight initializer)
+    %% test pattern 5 -- exogenous signal with exogenous control (default weight initializer)
 %%{
     % control one by one
-    inControl = logical(zeros(nodeNum,inputNum));
+    exControl = logical(zeros(nodeNum,exNum));
     for i=1:nodeNum
-        inControl(i, mod(i-1,4)+1) = 1;
-        inControl(i, mod(i+1,4)+1) = 1;
+        exControl(i, mod(i-1,4)+1) = 1;
+        exControl(i, mod(i+1,4)+1) = 1;
     end
     % init DLCM network
-    netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
+    netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
     % training DLCM network
-    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotDlcmWeight(netDLCM);
 %%}
-    %% test pattern 6 -- input signal with input control (default weight initializer)
+    %% test pattern 6 -- exogenous signal with exogenous control (default weight initializer)
 %{
     % control one by one
-    inControl = logical(ones(nodeNum,inputNum));
+    exControl = logical(ones(nodeNum,exNum));
     % init DLCM network
-    netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
+    netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
     % training DLCM network
-    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotDlcmWeight(netDLCM);
 %}
-    %% test pattern 7 -- input signal with input control without weight initializer
+    %% test pattern 7 -- exogenous signal with exogenous control without weight initializer
 %%{
     % control one by one
-    inControl = logical(zeros(nodeNum,inputNum));
+    exControl = logical(zeros(nodeNum,exNum));
     for i=1:nodeNum
-        inControl(i, mod(i-1,4)+1) = 1;
-        inControl(i, mod(i+1,4)+1) = 1;
+        exControl(i, mod(i-1,4)+1) = 1;
+        exControl(i, mod(i+1,4)+1) = 1;
     end
     % estimate neuron number of hidden layers
     hiddenNums = estimateHiddenNeurons(nodeNum, sigLen);
     % layer parameters
-    netDLCM = createDlcmNetwork(nodeNum, inputNum, hiddenNums, [], inControl, []);
+    netDLCM = createDlcmNetwork(nodeNum, exNum, hiddenNums, [], exControl, []);
     % training DLCM network
-    netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+    netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotDlcmWeight(netDLCM);

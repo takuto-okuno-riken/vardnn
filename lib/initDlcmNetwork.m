@@ -20,7 +20,7 @@ function net = initDlcmNetwork(X, exSignal, nodeControl, exControl, initWeightFu
     if nargin < 2, exSignal = []; end
     nodeNum = size(X,1);
     sigLen = size(X,2);
-    inputNum = size(exSignal,1);
+    exNum = size(exSignal,1);
 
     % estimate neuron number of hidden layers
     hiddenNums = estimateHiddenNeurons(nodeNum, sigLen);
@@ -29,5 +29,5 @@ function net = initDlcmNetwork(X, exSignal, nodeControl, exControl, initWeightFu
     biasMat = ones(hiddenNums(1),1) * initBias;
 
     % layer parameters
-    net = createDlcmNetwork(nodeNum, inputNum, hiddenNums, nodeControl, exControl, initWeightFunc, initWeightParam, biasMat);
+    net = createDlcmNetwork(nodeNum, exNum, hiddenNums, nodeControl, exControl, initWeightFunc, initWeightParam, biasMat);
 end

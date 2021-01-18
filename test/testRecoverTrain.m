@@ -4,12 +4,12 @@ function testRecoverTrain
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
     nodeNum = 8;
-    inputNum = 4;
+    exNum = 4;
     sigLen = 100;
     si = siOrg(1:nodeNum,1:sigLen);
-    inSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
+    exSignal = siOrg(nodeNum+1:nodeNum+exNum,1:sigLen);
     % control is all positive input
-    inControl = logical(ones(nodeNum,inputNum));
+    exControl = logical(ones(nodeNum,exNum));
 
     % set training options
     maxEpochs = 1000;
@@ -33,9 +33,9 @@ function testRecoverTrain
         load(dlcmFile);
     else
         % init DLCM network
-        netDLCM = initDlcmNetwork(si, inSignal, [], inControl);
+        netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
         % training DLCM network
-        netDLCM = trainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+        netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
         [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
         %plotDlcmWeight(netDLCM);
@@ -43,10 +43,10 @@ function testRecoverTrain
     end
     
     % recoverty training
-    [netDLCM, time] = recoveryTrainDlcmNetwork(si, inSignal, [], inControl, netDLCM, options);
+    [netDLCM, time] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
 
     % show result of recoverty training
-    [S, time] = simulateDlcmNetwork(si, inSignal, [], inControl, netDLCM);
+    [S, time] = simulateDlcmNetwork(si, exSignal, [], exControl, netDLCM);
     [mae, maeerr] = plotTwoSignals(si, S);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
     save(dlcmFile, 'netDLCM');

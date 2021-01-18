@@ -5,12 +5,12 @@ function performanceCheckNodeWtInputPattern
     siOrg = si;
     
     nodeNum = 8;
-    inputNum = 2;
+    exNum = 2;
     sigLen = 100;
 
     si = siOrg(1:nodeNum, 1:sigLen);
-    exSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
-    exControl = logical(ones(nodeNum,inputNum));
+    exSignal = siOrg(nodeNum+1:nodeNum+exNum,1:sigLen);
+    exControl = logical(ones(nodeNum,exNum));
 
     %% pattern 1 -------------------------------------------------
 %{
@@ -58,10 +58,10 @@ function performanceCheckNodeWtInputPattern
 %%{
     disp('node 2,4 and exogenous input1 are syncronized, only 4 receive input1');
     si = siOrg(1:nodeNum, 1:sigLen);
-    exSignal = siOrg(nodeNum+1:nodeNum+inputNum,1:sigLen);
+    exSignal = siOrg(nodeNum+1:nodeNum+exNum,1:sigLen);
     si(2,:) = exSignal(1,:);
     si(4,:) = exSignal(1,:);
-    exControl = logical(zeros(nodeNum,inputNum));
+    exControl = logical(zeros(nodeNum,exNum));
     exControl(4,1) = 1;
     checkingPattern(si, exSignal, exControl, 7);
 %%}
@@ -71,7 +71,7 @@ function performanceCheckNodeWtInputPattern
     si = siOrg(1:nodeNum, 1:sigLen);
     si(2,2:end) = exSignal(1,1:sigLen-1);
     si(4,3:end) = exSignal(1,2:sigLen-1);
-    exControl = logical(zeros(nodeNum,inputNum));
+    exControl = logical(zeros(nodeNum,exNum));
     exControl(4,1) = 1;
     checkingPattern(si, exSignal, exControl, 8);
 %%}
@@ -80,7 +80,7 @@ end
 %% 
 function [FC, dlEC, gcI] = checkingPattern(si, exSignal, exControl, idx)
     nodeNum = size(si,1);
-    inputNum = size(exSignal,1);
+    exNum = size(exSignal,1);
     sigLen = size(si,2);
 
     % layer parameters
