@@ -137,6 +137,12 @@ function simulateAlzheimerDLCM2
     meanSmcn8DLW = nanmean(smcn8DLWs,3);
     meanSmcn7DL = nanmean(smcn7DLs,3);
     meanSmcn8DL = nanmean(smcn8DLs,3);
+    [smad7DLWs, smad7SubDLWs, smad7Signals, smad7DLs] = checkRelationSubDLWandSignals3(adSignals, adDLWs, adSubDLWs, smadSignals, smadDLWs, smadSubDLWs, smadDLs, 'ad', 1);
+    [smad8DLWs, smad8SubDLWs, smad8Signals, smad8DLs] = checkRelationSubDLWandSignals3b(ad2Signals, adDLWs, adSubDLWs, smad2Signals, smad2DLWs, smad2SubDLWs, smad2DLs, 'ad2', 'ad');
+    meanSmad7DLW = nanmean(smad7DLWs,3);
+    meanSmad8DLW = nanmean(smad8DLWs,3);
+    meanSmad7DL = nanmean(smad7DLs,3);
+    meanSmad8DL = nanmean(smad8DLs,3);
     % -- type=2 does not perform better than type=1
 %    [smcn11DLWs, smcn11SubDLWs, smcn11Signals, smcn11DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 2);
     % -- type=3 does not perform better than type=1
