@@ -613,6 +613,8 @@ function checkRelationSubDLWandWeights(signals, subDLWs, smSubDLWs, group, type)
         else
             dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
             
             % training options for DLCM network
             options = trainingOptions('adam', 'InitialLearnRate', 0.0001, 'ExecutionEnvironment','cpu', 'MaxEpochs',1, 'Verbose',false);
@@ -954,6 +956,8 @@ function checkRelationSubDLWandSignals4(signals, DLWs, subDLWs, smSignals, smDLW
 
             dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
             siOrg = smSignals{k};
             
             % training options for DLCM network
@@ -1150,6 +1154,8 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
             
             dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
             exSignal = f.exSignal;
             exControl = f.exControl;
 
@@ -1868,6 +1874,8 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
             
             dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
             [siOrg, sig, c, maxsi, minsi] = convert2SigmoidSignal(rawSignals{k});
 
             % training options for DLCM network
