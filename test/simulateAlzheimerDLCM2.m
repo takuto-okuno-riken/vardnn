@@ -227,25 +227,13 @@ function simulateAlzheimerDLCM2
 %}
 
     % --------------------------------------------------------------------------------------------------------------
-    % PCA test -- does not work well. first 3 component describes only 15% of whole variable.
-    sbjDLWRoiVec = nan(cnSbjNum+adSbjNum,nodeNum*nodeNum-nodeNum);
-    for i=1:cnSbjNum
-        cnDLW = cnDLWs(:,:,i);
-        cnDLW(isnan(cnDLW)) = [];
-        sbjDLWRoiVec(i,:) = cnDLW(:);
-    end
-    for i=1:adSbjNum
-        adDLW = adDLWs(:,:,i);
-        adDLW(isnan(adDLW)) = [];
-        sbjDLWRoiVec(cnSbjNum+i,:) = adDLW(:);
-    end
-    [coeff,score,latent,tsquared,explained,mu] = pca(sbjDLWRoiVec);
-    figure; hold on;
-    scatter3(score(1:cnSbjNum,1),score(1:cnSbjNum,2),score(1:cnSbjNum,3),18,'r','filled');
-    scatter3(score(cnSbjNum+1:end,1),score(cnSbjNum+1:end,2),score(cnSbjNum+1:end,3),18,'b','filled');
-    hold off; title('PCA analysis of AD and HC regional vectors'); view(40,35)
-    xlabel('component1'); ylabel('component2'); 
-
+    % PCA test -- not work well. first 3 components describe only 15% of whole variable.
+    % -- and first 3 most significantly different HC vs AD components are still not separated well.
+    [score, explained, pvals] = checkPCAHCvsAD(cnDLWs, adDLWs, nodeNum, 'DLCM-EC');
+    [score, explained, pvals] = checkPCAHCvsAD(cnDLs, adDLs, nodeNum, 'DLCM-GC');
+    [score, explained, pvals] = checkPCAHCvsAD(cnFCs, adFCs, nodeNum, 'FC');
+    [score, explained, pvals] = checkPCAHCvsAD(smcnDLWs, smadDLWs, nodeNum, 'DLCM-EC');
+    
     % --------------------------------------------------------------------------------------------------------------
     % plot correlation and cos similarity
     algNum = 30;
@@ -458,6 +446,35 @@ function simulateAlzheimerDLCM2
 end
 
 % ==================================================================================================================
+function [score, explained, pvals] = checkPCAHCvsAD(cnECs, adECs, nodeNum, algorithm)
+    cnSbjNum = size(cnECs,3);
+    adSbjNum = size(adECs,3);
+    sbjECRoiVec = nan(cnSbjNum+adSbjNum,nodeNum*nodeNum-nodeNum);
+    NE = eye(nodeNum); NE(NE==1) = nan;
+    for i=1:cnSbjNum
+        cnEC = cnECs(:,:,i) + NE;
+        cnEC(isnan(cnEC)) = [];
+        sbjECRoiVec(i,:) = cnEC(:);
+    end
+    for i=1:adSbjNum
+        adEC = adECs(:,:,i) + NE;
+        adEC(isnan(adEC)) = [];
+        sbjECRoiVec(cnSbjNum+i,:) = adEC(:);
+    end
+    [coeff,score,latent,tsquared,explained,mu] = pca(sbjECRoiVec);
+    % find well separated component by u test
+    pvals = nan(size(score,2),1);
+    for i=1:size(score,2)
+        [pvals(i), h] = ranksum(score(1:cnSbjNum,i),score(cnSbjNum+1:end,i));
+    end
+    [B,I] = sort(pvals);
+    figure; hold on;
+    scatter3(score(1:cnSbjNum,I(1)),score(1:cnSbjNum,I(2)),score(1:cnSbjNum,I(3)),18,'r','filled');
+    scatter3(score(cnSbjNum+1:end,I(1)),score(cnSbjNum+1:end,I(2)),score(cnSbjNum+1:end,I(3)),18,'b','filled');
+    hold off; title(['PCA analysis of AD and HC regional vectors (' algorithm ')']); view(40,35)
+    xlabel('component1'); ylabel('component2'); 
+end
+
 function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDLWs, signals, simDLWs, simSubDLWs, group, type)
     nodeNum = size(signals{1},1);
     sigLen = size(signals{1},2);
