@@ -14,7 +14,7 @@ linear Transfer Entropy, Functional Connectivity (Correlation), Partial Correlat
 </div>
 
 Command line tool could perform EC estimation with several causal analysis algorithms from node signals in csv or mat file,
-then show output causal relational matrix and save data in csv or mat file.
+then show output of causal relational matrix and save data in csv or mat file.
 
 ## Requirements: software
 * MATLAB R2019a or later

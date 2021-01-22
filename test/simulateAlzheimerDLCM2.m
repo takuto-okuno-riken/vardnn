@@ -112,6 +112,8 @@ function simulateAlzheimerDLCM2
     [smcn2DLWs, meanSmcn2DLW, ~, smcn2SubDLWs] = calculateConnectivity(smcn2Signals, roiNames, 'smcn2', 'dlw', 1);
     [smad2DLs, meanSmad2DL, ~] = calculateConnectivity(smad2Signals, roiNames, 'smad2', 'dlcm', 1);
     [smad2DLWs, meanSmad2DLW, ~, smad2SubDLWs] = calculateConnectivity(smad2Signals, roiNames, 'smad2', 'dlw', 1);
+    sigSmcn2DLWs = (smcn2DLWs - nanmean(smcn2DLWs(:))) / nanstd(smcn2DLWs(:),1);
+    sigSmad2DLWs = (smad2DLWs - nanmean(smad2DLWs(:))) / nanstd(smad2DLWs(:),1);
 
 %    [smcn3DLs, meanSmcn3DL, ~] = calculateConnectivity(smcn3Signals, roiNames, 'smcn3', 'dlcm', 1);
 %    [smcn3DLWs, meanSmcn3DLW, ~] = calculateConnectivity(smcn3Signals, roiNames, 'smcn3', 'dlw', 1);
@@ -137,12 +139,16 @@ function simulateAlzheimerDLCM2
     meanSmcn8DLW = nanmean(smcn8DLWs,3);
     meanSmcn7DL = nanmean(smcn7DLs,3);
     meanSmcn8DL = nanmean(smcn8DLs,3);
+    sigSmcn7DLWs = (smcn7DLWs - nanmean(smcn7DLWs(:))) / nanstd(smcn7DLWs(:),1);
+    sigSmcn8DLWs = (smcn8DLWs - nanmean(smcn8DLWs(:))) / nanstd(smcn8DLWs(:),1);
     [smad7DLWs, smad7SubDLWs, smad7Signals, smad7DLs] = checkRelationSubDLWandSignals3(adSignals, adDLWs, adSubDLWs, smadSignals, smadDLWs, smadSubDLWs, smadDLs, 'ad', 1);
     [smad8DLWs, smad8SubDLWs, smad8Signals, smad8DLs] = checkRelationSubDLWandSignals3b(ad2Signals, adDLWs, adSubDLWs, smad2Signals, smad2DLWs, smad2SubDLWs, smad2DLs, 'ad2', 'ad');
     meanSmad7DLW = nanmean(smad7DLWs,3);
     meanSmad8DLW = nanmean(smad8DLWs,3);
     meanSmad7DL = nanmean(smad7DLs,3);
     meanSmad8DL = nanmean(smad8DLs,3);
+    sigSmad7DLWs = (smad7DLWs - nanmean(smad7DLWs(:))) / nanstd(smad7DLWs(:),1);
+    sigSmad8DLWs = (smad8DLWs - nanmean(smad8DLWs(:))) / nanstd(smad8DLWs(:),1);
     % -- type=2 does not perform better than type=1
 %    [smcn11DLWs, smcn11SubDLWs, smcn11Signals, smcn11DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 2);
     % -- type=3 does not perform better than type=1
@@ -209,6 +215,8 @@ function simulateAlzheimerDLCM2
     [smcn7FCs, meanSmcn7FC, ~] = calculateConnectivity(smcn7Signals, roiNames, 'smcn7', 'fc', 1);
     [smcn8FCs, meanSmcn8FC, ~] = calculateConnectivity(smcn8Signals, roiNames, 'smcn8', 'fc', 1);
     [smcn9FCs, meanSmcn9FC, ~] = calculateConnectivity(smcn9Signals, roiNames, 'smcn9', 'fc', 1);
+    [smad7FCs, meanSmad7FC, ~] = calculateConnectivity(smad7Signals, roiNames, 'smad7', 'fc', 1);
+    [smad8FCs, meanSmad8FC, ~] = calculateConnectivity(smad8Signals, roiNames, 'smad8', 'fc', 1);
 %{
     figure; cnsmcnFCr = plotTwoSignalsCorrelation(meanCnFC, meanSmcnFC);
     figure; adsmadFCr = plotTwoSignalsCorrelation(meanAdFC, meanSmadFC);
@@ -220,7 +228,7 @@ function simulateAlzheimerDLCM2
 
     % --------------------------------------------------------------------------------------------------------------
     % plot correlation and cos similarity
-    algNum = 8;
+    algNum = 30;
     cosSim = zeros(algNum,1);
     cosSim(1) = getCosSimilarity(meanCnDLW, meanSmcnDLW);
     cosSim(2) = getCosSimilarity(meanCnDLW, meanSmcn2DLW);
@@ -247,12 +255,18 @@ function simulateAlzheimerDLCM2
     cosSim = zeros(algNum,1);
     cosSim(1) = getCosSimilarity(meanAdDLW, meanSmadDLW);
     cosSim(2) = getCosSimilarity(meanAdDLW, meanSmad2DLW);
-    cosSim(3) = getCosSimilarity(meanAdDL, meanSmadDL);
-    cosSim(4) = getCosSimilarity(meanAdDL, meanSmad2DL);
-    cosSim(5) = getCosSimilarity(meanAdFC, meanSmadFC);
-    cosSim(6) = getCosSimilarity(meanAdFC, meanSmad2FC);
-    X = categorical({'dlec-ad-smad','dlec-ad-smad2','dlgc-ad-smad','dlgc-ad-smad2','fc-ad-smad','fc-ad-smad2','',''});
-    figure; bar(X, cosSim); title('cos similarity between mean AD matrix and SimAD by each algorithm');
+    cosSim(3) = getCosSimilarity(meanAdDLW, meanSmad7DLW);
+    cosSim(4) = getCosSimilarity(meanAdDLW, meanSmad8DLW);
+    cosSim(11) = getCosSimilarity(meanAdDL, meanSmadDL);
+    cosSim(12) = getCosSimilarity(meanAdDL, meanSmad2DL);
+    cosSim(13) = getCosSimilarity(meanAdDL, meanSmad7DL);
+    cosSim(14) = getCosSimilarity(meanAdDL, meanSmad8DL);
+    cosSim(21) = getCosSimilarity(meanAdFC, meanSmadFC);
+    cosSim(22) = getCosSimilarity(meanAdFC, meanSmad2FC);
+    cosSim(23) = getCosSimilarity(meanAdFC, meanSmad7FC);
+    cosSim(24) = getCosSimilarity(meanAdFC, meanSmad8FC);
+%    X = categorical({'dlec-ad-smad','dlec-ad-smad2','dlgc-ad-smad','dlgc-ad-smad2','fc-ad-smad','fc-ad-smad2','',''});
+    figure; bar(cosSim); title('cos similarity between mean AD matrix and SimAD by each algorithm');
 %{
     % plot correlation and cos similarity (all)
     algNum = 24;
@@ -319,25 +333,31 @@ function simulateAlzheimerDLCM2
     [sortCosCnDLW,idxCosCnDLW] = sort(cosSims(:,1),'descend');
     [sortCosCnFC,idxCosCnFC] = sort(cosSims(:,21),'descend');
 
-    cosSims = nan(adSbjNum,9);
+    cosSims = nan(adSbjNum,30);
     for i=1:adSbjNum
         cosSims(i,1) = getCosSimilarity(meanAdDLW, adDLWs(:,:,i));
         cosSims(i,2) = getCosSimilarity(meanAdDLW, smadDLWs(:,:,i));
         cosSims(i,3) = getCosSimilarity(meanAdDLW, smad2DLWs(:,:,i));
-        cosSims(i,4) = getCosSimilarity(meanAdDL, adDLs(:,:,i));
-        cosSims(i,5) = getCosSimilarity(meanAdDL, smadDLs(:,:,i));
-        cosSims(i,6) = getCosSimilarity(meanAdDL, smad2DLs(:,:,i));
-        cosSims(i,7) = getCosSimilarity(meanAdFC, adFCs(:,:,i));
-        cosSims(i,8) = getCosSimilarity(meanAdFC, smadFCs(:,:,i));
-        cosSims(i,9) = getCosSimilarity(meanAdFC, smad2FCs(:,:,i));
+        cosSims(i,4) = getCosSimilarity(meanAdDLW, smad7DLWs(:,:,i));
+        cosSims(i,5) = getCosSimilarity(meanAdDLW, smad8DLWs(:,:,i));
+        cosSims(i,11) = getCosSimilarity(meanAdDL, adDLs(:,:,i));
+        cosSims(i,12) = getCosSimilarity(meanAdDL, smadDLs(:,:,i));
+        cosSims(i,13) = getCosSimilarity(meanAdDL, smad2DLs(:,:,i));
+        cosSims(i,14) = getCosSimilarity(meanAdDL, smad7DLs(:,:,i));
+        cosSims(i,15) = getCosSimilarity(meanAdDL, smad8DLs(:,:,i));
+        cosSims(i,21) = getCosSimilarity(meanAdFC, adFCs(:,:,i));
+        cosSims(i,22) = getCosSimilarity(meanAdFC, smadFCs(:,:,i));
+        cosSims(i,23) = getCosSimilarity(meanAdFC, smad2FCs(:,:,i));
+        cosSims(i,24) = getCosSimilarity(meanAdFC, smad7FCs(:,:,i));
+        cosSims(i,25) = getCosSimilarity(meanAdFC, smad8FCs(:,:,i));
     end
     figure; boxplot(cosSims);
-    [anovaP,tbl,stats] = kruskalwallis(cosSims(:,1:9));
+    [anovaP,tbl,stats] = kruskalwallis(cosSims(:,1:30));
     c = multcompare(stats);
 %    [p1,h1] = ranksum(cosSims(:,1),cosSims(:,2));
 %    [p2,h2] = ranksum(cosSims(:,1),cosSims(:,3));
     [sortCosAdDLW,idxCosAdDLW] = sort(cosSims(:,1),'descend');
-    [sortCosAdFC,idxCosAdFC] = sort(cosSims(:,7),'descend');
+    [sortCosAdFC,idxCosAdFC] = sort(cosSims(:,21),'descend');
 
     % plot correlation between original EC matrix and simulated signals EC matrix
     for i=1:1 %cnSbjNum
@@ -368,14 +388,20 @@ function simulateAlzheimerDLCM2
         cosSims(i,26) = getCosSimilarity(cnFCs(:,:,i), smcn9FCs(:,:,i));
     end
     figure; boxplot(cosSims);
-    cosSims = nan(cnSbjNum,6);
+    cosSims = nan(cnSbjNum,30);
     for i=1:adSbjNum
         cosSims(i,1) = getCosSimilarity(adDLWs(:,:,i), smadDLWs(:,:,i));
         cosSims(i,2) = getCosSimilarity(adDLWs(:,:,i), smad2DLWs(:,:,i));
-        cosSims(i,3) = getCosSimilarity(adDLs(:,:,i), smadDLs(:,:,i));
-        cosSims(i,4) = getCosSimilarity(adDLs(:,:,i), smadDLs(:,:,i));
-        cosSims(i,5) = getCosSimilarity(adFCs(:,:,i), smadFCs(:,:,i));
-        cosSims(i,6) = getCosSimilarity(adFCs(:,:,i), smad2FCs(:,:,i));
+        cosSims(i,3) = getCosSimilarity(adDLWs(:,:,i), smad7DLWs(:,:,i));
+        cosSims(i,4) = getCosSimilarity(adDLWs(:,:,i), smad8DLWs(:,:,i));
+        cosSims(i,11) = getCosSimilarity(adDLs(:,:,i), smadDLs(:,:,i));
+        cosSims(i,12) = getCosSimilarity(adDLs(:,:,i), smad2DLs(:,:,i));
+        cosSims(i,13) = getCosSimilarity(adDLs(:,:,i), smad7DLs(:,:,i));
+        cosSims(i,14) = getCosSimilarity(adDLs(:,:,i), smad8DLs(:,:,i));
+        cosSims(i,21) = getCosSimilarity(adFCs(:,:,i), smadFCs(:,:,i));
+        cosSims(i,22) = getCosSimilarity(adFCs(:,:,i), smad2FCs(:,:,i));
+        cosSims(i,23) = getCosSimilarity(adFCs(:,:,i), smad7FCs(:,:,i));
+        cosSims(i,24) = getCosSimilarity(adFCs(:,:,i), smad8FCs(:,:,i));
     end
     figure; boxplot(cosSims);
     
@@ -405,6 +431,8 @@ function simulateAlzheimerDLCM2
     [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, smcn7DLWs, roiNames, 'cn', 'smcn7', 'dlw');
     [~, ~, ~] = calculateAlzWilcoxonTest(sigCnDLWs, sigSmcnDLWs, roiNames, 'sigcn', 'sigsmcn', 'dlw');
     [~, ~, ~] = calculateAlzWilcoxonTest(sigAdDLWs, sigSmadDLWs, roiNames, 'sigad', 'sigsmad', 'dlw');
+    [~, ~, ~] = calculateAlzWilcoxonTest(sigCnDLWs, sigSmcn7DLWs, roiNames, 'sigcn', 'sigsmcn7', 'dlw');
+    [~, ~, ~] = calculateAlzWilcoxonTest(sigAdDLWs, sigSmad7DLWs, roiNames, 'sigad', 'sigsmad7', 'dlw');
 %    [cnsmrccnDLWsUt, cnsmrccnDLWsUtP, cnsmrccnDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, smrccnDLWs, roiNames, 'cn', 'smrccn', 'dlw');
 %    [adsmrcadDLWsUt, adsmrcadDLWsUtP, adsmrcadDLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, smrcadDLWs, roiNames, 'ad', 'smrcad', 'dlw');
 end
