@@ -227,6 +227,26 @@ function simulateAlzheimerDLCM2
 %}
 
     % --------------------------------------------------------------------------------------------------------------
+    % PCA test -- does not work well. first 3 component describes only 15% of whole variable.
+    sbjDLWRoiVec = nan(cnSbjNum+adSbjNum,nodeNum*nodeNum-nodeNum);
+    for i=1:cnSbjNum
+        cnDLW = cnDLWs(:,:,i);
+        cnDLW(isnan(cnDLW)) = [];
+        sbjDLWRoiVec(i,:) = cnDLW(:);
+    end
+    for i=1:adSbjNum
+        adDLW = adDLWs(:,:,i);
+        adDLW(isnan(adDLW)) = [];
+        sbjDLWRoiVec(cnSbjNum+i,:) = adDLW(:);
+    end
+    [coeff,score,latent,tsquared,explained,mu] = pca(sbjDLWRoiVec);
+    figure; hold on;
+    scatter3(score(1:cnSbjNum,1),score(1:cnSbjNum,2),score(1:cnSbjNum,3),18,'r','filled');
+    scatter3(score(cnSbjNum+1:end,1),score(cnSbjNum+1:end,2),score(cnSbjNum+1:end,3),18,'b','filled');
+    hold off; title('PCA analysis of AD and HC regional vectors'); view(40,35)
+    xlabel('component1'); ylabel('component2'); 
+
+    % --------------------------------------------------------------------------------------------------------------
     % plot correlation and cos similarity
     algNum = 30;
     cosSim = zeros(algNum,1);

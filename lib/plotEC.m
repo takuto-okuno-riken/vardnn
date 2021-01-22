@@ -25,5 +25,7 @@ function plotEC(EC, name, range, rowcut)
     imagesc(EC,clims);
     daspect([1 1 1]);
     title([name ' Effective Connectivity Matrix']);
+    xlabel('Source Nodes');
+    ylabel('Target Nodes');
     colorbar;
 end

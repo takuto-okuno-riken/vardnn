@@ -34,6 +34,8 @@ function [EC] = plotDlcmEC(netDLCM, nodeControl, exControl, range, isFullNode)
     clims = [-range, range];
     imagesc(EC2,clims);
     daspect([1 1 1]);
-    title('DLCM Weight Causality Index');
+    title('DLCM Effective Connectivity');
+    xlabel('Source Nodes');
+    ylabel('Target Nodes');
     colorbar;
 end
