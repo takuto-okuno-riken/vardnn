@@ -13,24 +13,13 @@
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
 function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, exSignal, nodeControl, exControl, lags, alpha, isFullNode)
-    if nargin < 7
-        isFullNode = 0;
-    end
-    if nargin < 6
-        alpha = 0.05;
-    end
-    if nargin < 5
-        lags = 3;
-    end
-    if nargin < 4
-        exControl = [];
-    end
-    if nargin < 3
-        nodeControl = [];
-    end
-    if nargin < 2
-        exSignal = [];
-    end
+    if nargin < 7, isFullNode = 0; end
+    if nargin < 6, alpha = 0.05; end
+    if nargin < 5, lags = 3; end
+    if nargin < 4, exControl = []; end
+    if nargin < 3, nodeControl = []; end
+    if nargin < 2, exSignal = []; end
+
     nodeNum = size(X,1);
     nodeMax = nodeNum + size(exSignal,1);
     

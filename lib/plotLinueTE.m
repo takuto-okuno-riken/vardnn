@@ -14,29 +14,16 @@
 %  alpha        the significance level of F-statistic (default:0.05)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotLinueTE(X, exSignal, nodeControl, exControl, lag, range, alpha, isFullNode)
-    if nargin < 8
-        isFullNode = 0;
-    end
-    if nargin < 7
-        alpha = 0.05;
-    end
-    if nargin < 6
-        range = 10;
-    end
-    if nargin < 5
-        lag = 3;
-    end
-    if nargin < 4
-        exControl = [];
-    end
-    if nargin < 3
-        nodeControl = [];
-    end
-    if nargin < 2
-        exSignal = [];
-    end
-    [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSignal, nodeControl, exControl, lag, alpha, isFullNode);
+function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotLinueTE(X, exSignal, nodeControl, exControl, lags, range, alpha, isFullNode)
+    if nargin < 8, isFullNode = 0; end
+    if nargin < 7, alpha = 0.05; end
+    if nargin < 6, range = 10; end
+    if nargin < 5, lags = 3; end
+    if nargin < 4, exControl = []; end
+    if nargin < 3, nodeControl = []; end
+    if nargin < 2, exSignal = []; end
+
+    [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSignal, nodeControl, exControl, lags, alpha, isFullNode);
     clims = [0, range];
     if range <= 0
         sigma = std(TE(:),1,'omitnan');

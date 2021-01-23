@@ -7,15 +7,10 @@
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
 function [wcI, wcNS] = calcDlcmWCIdm123a(netDLCM, nodeControl, exControl, isFullNode)
-    if nargin < 4
-        isFullNode = 0;
-    end
-    if nargin < 3
-        exControl = [];
-    end
-    if nargin < 2
-        nodeControl = [];
-    end
+    if nargin < 4, isFullNode = 0; end
+    if nargin < 3, exControl = []; end
+    if nargin < 2, nodeControl = []; end
+
     nodeNum = length(netDLCM.nodeNetwork);
     nodeInNum = size(netDLCM.nodeNetwork{1, 1}.Layers(2, 1).Weights, 2);
     if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end

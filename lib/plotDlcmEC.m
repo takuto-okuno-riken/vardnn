@@ -9,18 +9,11 @@
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
 function [EC] = plotDlcmEC(netDLCM, nodeControl, exControl, range, isFullNode)
-    if nargin < 5
-        isFullNode = 0;
-    end
-    if nargin < 4
-        range = 0.5;
-    end
-    if nargin < 3
-        exControl = [];
-    end
-    if nargin < 2
-        nodeControl = [];
-    end
+    if nargin < 5, isFullNode = 0; end
+    if nargin < 4, range = 0.5; end
+    if nargin < 3, exControl = []; end
+    if nargin < 2, nodeControl = []; end
+
     EC = calcDlcmEC(netDLCM, nodeControl, exControl, isFullNode);
     % show DLCM weight causality of predicted node signals
     if range <= 0

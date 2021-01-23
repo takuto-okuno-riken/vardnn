@@ -1,6 +1,6 @@
 %%
-% Caluclate DLCM Granger Causality
-% returns DLCM Granger causality index matrix (gcI), significance (h=1 or 0)
+% Caluclate Pairwised DNN Granger Causality
+% returns Pairwised DNN Granger causality index matrix (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
 % and AIC, BIC (of node vector)
 % input:
@@ -8,29 +8,27 @@
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
-%  netDLCM      trained DLCM network
+%  net          trained Pairwised DNN-GC's network
 %  alpha        the significance level of F-statistic (optional)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, exSignal, nodeControl, exControl, netDLCM, alpha, isFullNode)
-    if nargin < 7, isFullNode = 0; end
-    if nargin < 6, alpha = 0.05; end
-
+function [gcI, h, P, F, cvFd, AIC, BIC] = calcPwDnnGCI(X, exSignal, nodeControl, exControl, net, alpha, isFullNode)
+    if nargin < 7
+        isFullNode = 0;
+    end
+    if nargin < 6
+        alpha = 0.05;
+    end
     nodeNum = size(X,1);
     nodeInNum = nodeNum + size(exSignal,1);
     sigLen = size(X,2);
+    lags = net.lags;
     if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
     
     % set node input
-    if isempty(exSignal)
-        nodeInputOrg = X(:,1:sigLen-1);
-    else
-        nodeInputOrg = [X(:,1:sigLen-1); exSignal(:,1:sigLen-1)];
-    end
+    X = [X; exSignal];
 
-    % calc DLCM granger causality
-    nodeAIC = zeros(nodeNum,1);
-    nodeBIC = zeros(nodeNum,1);
+    % calc Pairwised DNN granger causality
     gcI = nan(nodeNum, nodeMax);
     h = nan(nodeNum,nodeMax);
     P = nan(nodeNum,nodeMax);
@@ -39,39 +37,33 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, exSig
     AIC = nan(nodeNum,nodeMax);
     BIC = nan(nodeNum,nodeMax);
     for i=1:nodeNum
-        nodeInput = nodeInputOrg;
-        if ~isempty(nodeControl)
-            filter = nodeControl(i,:).';
-            nodeInput(1:nodeNum,:) = nodeInput(1:nodeNum,:) .* filter;
-        end
-        if ~isempty(exControl)
-            filter = exControl(i,:).';
-            nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
-        end
-        nodeTeach = X(i,2:end);
-        % predict 
-        Si = predict(netDLCM.nodeNetwork{i}, nodeInput);
-        err = Si - nodeTeach;
-        VarEi = var(err);
-
-        % AIC and BIC of this node (assuming residuals are gausiann distribution)
-        T = sigLen-1;
-        RSS = err*err';
-        k = nodeNum + size(exSignal, 1) + 1; % input + bias
-        %for j=2:2:length(netDLCM.nodeNetwork{i, 1}.Layers)
-        %    k = k + length(netDLCM.nodeNetwork{i, 1}.Layers(j, 1).Bias);   % added hidden neuron number
-        %end
-        nodeAIC(i) = T*log(RSS/T) + 2 * k;
-        nodeBIC(i) = T*log(RSS/T) + k*log(T);
-
-        % imparement node signals
         for j=1:nodeMax
             if i==j, continue; end
-            impInput = nodeInput;
-            impInput(j,:) = 0;
+            if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
+            if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
+
+            nodeInput = nan(2*lags,sigLen-lags);
+            for k=1:lags, nodeInput(k,:) = X(i,k:end-lags+(k-1)); end
+            for k=1:lags, nodeInput(lags+k,:) = X(j,k:end-lags+(k-1)); end
+
+            nodeTeach = X(i,lags+1:end);
 
             % predict 
-            Sj = predict(netDLCM.nodeNetwork{i}, impInput);
+            Si = predict(net.nodeNetwork{i,j}, nodeInput);
+            err = Si - nodeTeach;
+            VarEi = var(err);
+
+            % AIC and BIC of this node (assuming residuals are gausiann distribution)
+            T = sigLen-1;
+            RSS = err*err';
+            k = 2*lags + 1; % input + bias
+
+            % imparement node signals
+            impInput = nodeInput;
+            impInput(lags+1:end,:) = 0;
+
+            % predict 
+            Sj = predict(net.nodeNetwork{i,j}, impInput);
             err = Sj - nodeTeach;
             VarEj = var(err);
             gcI(i,j) = log(VarEj / VarEi);
@@ -79,7 +71,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, exSig
             % AIC and BIC (assuming residuals are gausiann distribution)
             % BIC = n*ln(RSS/n)+k*ln(n)
             RSS1 = err*err';
-            k1 = nodeNum - 1 + size(exSignal, 1) + 1;
+            k1 = 2*lags + 1; % input + bias
             AIC(i,j) = T*log(RSS1/T) + 2 * k1;
             BIC(i,j) = T*log(RSS1/T) + k1*log(T);
 

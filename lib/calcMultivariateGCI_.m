@@ -11,21 +11,12 @@
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
 function [gcI, A, E, vE] = calcMultivariateGCI_(X, exSignal, nodeControl, exControl, lags, isFullNode)
-    if nargin < 6
-        isFullNode = 0;
-    end
-    if nargin < 5
-        lags = 3;
-    end
-    if nargin < 4
-        exControl = [];
-    end
-    if nargin < 3
-        nodeControl = [];
-    end
-    if nargin < 2
-        exSignal = [];
-    end
+    if nargin < 6, isFullNode = 0; end
+    if nargin < 5, lags = 3; end
+    if nargin < 4, exControl = []; end
+    if nargin < 3, nodeControl = []; end
+    if nargin < 2, exSignal = []; end
+
     nodeNum = size(X,1);
     nodeMax = nodeNum + size(exSignal,1);
     

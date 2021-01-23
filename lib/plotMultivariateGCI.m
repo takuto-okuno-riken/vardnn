@@ -14,29 +14,16 @@
 %  alpha        the significance level of F-statistic (default:0.05)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI(X, exSignal, nodeControl, exControl, lag, range, alpha, isFullNode)
-    if nargin < 8
-        isFullNode = 0;
-    end
-    if nargin < 7
-        alpha = 0.05;
-    end
-    if nargin < 6
-        range = 10;
-    end
-    if nargin < 5
-        lag = 3;
-    end
-    if nargin < 4
-        exControl = [];
-    end
-    if nargin < 3
-        nodeControl = [];
-    end
-    if nargin < 2
-        exSignal = [];
-    end
-    [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI(X, exSignal, nodeControl, exControl, lag, alpha, isFullNode);
+function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI(X, exSignal, nodeControl, exControl, lags, range, alpha, isFullNode)
+    if nargin < 8, isFullNode = 0; end
+    if nargin < 7, alpha = 0.05; end
+    if nargin < 6, range = 10; end
+    if nargin < 5, lags = 3; end
+    if nargin < 4, exControl = []; end
+    if nargin < 3, nodeControl = []; end
+    if nargin < 2, exSignal = []; end
+
+    [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI(X, exSignal, nodeControl, exControl, lags, alpha, isFullNode);
     if range <= 0
         sigma = std(gcI(:),1,'omitnan');
         avg = mean(gcI(:),'omitnan');
