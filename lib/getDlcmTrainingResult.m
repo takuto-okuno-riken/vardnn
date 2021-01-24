@@ -4,7 +4,7 @@
 %  netDLCM     trained DLCM network
 
 function [time, loss, rsme] = getDlcmTrainingResult(netDLCM)
-    nodeNum = length(netDLCM.nodeNetwork);
+    nodeNum = netDLCM.nodeNum;
     maxEpochs = length(netDLCM.trainInfo{1, 1}.TrainingLoss);
     a=0; b=0; c=0;
     for k=1:nodeNum

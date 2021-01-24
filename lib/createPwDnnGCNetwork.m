@@ -31,6 +31,8 @@ function net = createPwDnnGCNetwork(nodeNum, exNum, hiddenNums, lags, nodeContro
             nodeLayers{i,j} = createPwDnnGCLayers(2, hiddenNums, lags, initWeightFunc, initWeightParam, initBias);
         end
     end
+    net.nodeNum = nodeNum;
+    net.exNum = exNum;
     net.lags = lags;
     net.nodeLayers = nodeLayers;
     net.nodeNetwork = cell(nodeNum,nodeMax);

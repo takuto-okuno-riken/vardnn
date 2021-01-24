@@ -13,14 +13,11 @@
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
 function [gcI, h, P, F, cvFd, AIC, BIC] = calcPwDnnGCI(X, exSignal, nodeControl, exControl, net, alpha, isFullNode)
-    if nargin < 7
-        isFullNode = 0;
-    end
-    if nargin < 6
-        alpha = 0.05;
-    end
-    nodeNum = size(X,1);
-    nodeInNum = nodeNum + size(exSignal,1);
+    if nargin < 7, isFullNode = 0; end
+    if nargin < 6, alpha = 0.05; end
+
+    nodeNum = net.nodeNum;
+    nodeInNum = nodeNum + net.exNum;
     sigLen = size(X,2);
     lags = net.lags;
     if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end

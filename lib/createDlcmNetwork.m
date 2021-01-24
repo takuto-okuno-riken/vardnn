@@ -27,6 +27,8 @@ function net = createDlcmNetwork(nodeNum, exNum, hiddenNums, nodeControl, exCont
         if ~isempty(exControl), nExControl = exControl(i,:); end
         nodeLayers{i} = createDlcmLayers(nodeNum, exNum, hiddenNums, nNodeControl, nExControl, initWeightFunc, initWeightParam, initBias, i);
     end
+    net.nodeNum = nodeNum;
+    net.exNum = exNum;
     net.nodeLayers = nodeLayers;
     net.nodeNetwork = cell(nodeNum,1);
     net.trainInfo = cell(nodeNum,1);

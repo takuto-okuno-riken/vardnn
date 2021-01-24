@@ -1,6 +1,6 @@
 %%
-% Plotting DLCM Granger causality Index matrix
-% returns DLCM Granger causality index matrix (gcI), significance (h=1 or 0)
+% Plotting Pairwised DNN Granger causality Index matrix
+% returns Pairwised DNN Granger causality index matrix (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
 % and AIC, BIC (of node vector)
 % input:
@@ -8,7 +8,7 @@
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
-%  net          trained DLCM network
+%  net          trained Pairwised DNN-GC's network
 %  range        plotting minimum and maximum range of GCI (default:10)
 %               if range==0, range shows standard deviation [-3 sigma, 3 sigma]
 %  alpha        the significance level of F-statistic (optional)

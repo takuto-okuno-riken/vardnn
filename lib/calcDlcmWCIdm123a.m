@@ -11,8 +11,8 @@ function [wcI, wcNS] = calcDlcmWCIdm123a(netDLCM, nodeControl, exControl, isFull
     if nargin < 3, exControl = []; end
     if nargin < 2, nodeControl = []; end
 
-    nodeNum = length(netDLCM.nodeNetwork);
-    nodeInNum = size(netDLCM.nodeNetwork{1, 1}.Layers(2, 1).Weights, 2);
+    nodeNum = length(netDLCM.nodeNetwork); % old. for compatibility
+    nodeInNum = size(netDLCM.nodeNetwork{1, 1}.Layers(2, 1).Weights, 2); % old. for compatibility
     if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
     wcI = nan(nodeNum,nodeMax);
     wcNS = nan(nodeNum,nodeMax+1);

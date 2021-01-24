@@ -12,8 +12,9 @@ function wcI = calcDlcmWCIm12(netDLCM, nodeControl, exControl)
     if nargin < 2
         nodeControl = [];
     end
-    nodeNum = length(netDLCM.nodeNetwork);
-    nodeInNum = size(netDLCM.nodeNetwork{1, 1}.Layers(2, 1).Weights, 2);
+    nodeNum = netDLCM.nodeNum;
+    nodeInNum = nodeNum + net.exNum;
+
     wcI = nan(nodeNum,nodeNum);
     for i=1:nodeNum
         % get input control

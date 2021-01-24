@@ -4,8 +4,9 @@
 %  netDLCM     trained DLCM network
 
 function gcI = getDlcmDeltaWeightGCI(netDLCM)
-    nodeNum = length(netDLCM.nodeNetwork);
-    nodeInNum = size(netDLCM.nodeNetwork{1, 1}.Layers(2, 1).Weights, 2);
+    nodeNum = netDLCM.nodeNum;
+    nodeInNum = nodeNum + net.exNum;
+
     gcI = nan(nodeNum,nodeInNum);
     for i=1:nodeNum
         weights = netDLCM.nodeNetwork{i, 1}.Layers(2, 1).Weights;

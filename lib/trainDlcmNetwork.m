@@ -10,7 +10,8 @@
 
 function trainedNet = trainDlcmNetwork(X, exSignal, nodeControl, exControl, net, options)
     global dlcmInitWeights;
-    nodeNum = length(net.nodeLayers);
+    nodeNum = size(X,1);
+    exNum = size(exSignal,1);
     trainedNet = net;
 
     % training whole DLCM network
@@ -42,6 +43,8 @@ function trainedNet = trainDlcmNetwork(X, exSignal, nodeControl, exControl, net,
         initWeights{i} = dlcmInitWeights;
     end
     time = toc(ticH);
+    trainedNet.nodeNum = nodeNum; % for compatibility
+    trainedNet.exNum = exNum; % for compatibility
     trainedNet.nodeNetwork = nodeNetwork;
     trainedNet.trainInfo = trainInfo;
     trainedNet.initWeights = initWeights;
