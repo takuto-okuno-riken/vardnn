@@ -1,5 +1,5 @@
 %%
-% Plotting Time Shifted Correlation matrix
+% Plotting Time Shifted Correlation (Abs) matrix
 % returns Functional Connectivity (FC) and p-values (P)
 % input:
 %  X            multivariate time series matrix (node x time series)
@@ -11,7 +11,7 @@
 %               if range==0, range shows standard deviation [-3 sigma, 3 sigma]
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [tscFC, P] = plotTimeShiftedCorrelation(X, exSignal, nodeControl, exControl, lags, range, isFullNode)
+function [tscFC, P] = plotTimeShiftedCorrelationAbs(X, exSignal, nodeControl, exControl, lags, range, isFullNode)
     if nargin < 7, isFullNode = 0; end
     if nargin < 6, range = 1; end
     if nargin < 5, lags = 3; end
@@ -19,7 +19,7 @@ function [tscFC, P] = plotTimeShiftedCorrelation(X, exSignal, nodeControl, exCon
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end
 
-    [tscFC, P] = calcTimeShiftedCorrelation(X, exSignal, nodeControl, exControl, lags, isFullNode);
+    [tscFC, P] = calcTimeShiftedCorrelationAbs(X, exSignal, nodeControl, exControl, lags, isFullNode);
 
     if range <= 0
         sigma = std(tscFC(:),1,'omitnan');
@@ -32,7 +32,7 @@ function [tscFC, P] = plotTimeShiftedCorrelation(X, exSignal, nodeControl, exCon
     clims = [-range, range];
     imagesc(tscFC2,clims);
     daspect([1 1 1]);
-    title('Time Shifted Correlation (FC)');
+    title('Time Shifted Correlation (Abs) (FC)');
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;

@@ -9,10 +9,10 @@ function performanceCheckNodePatternDCM3rnn
     T  = 300;                             % number of observations (scans)
     n  = 8;                               % number of regions or nodes
 
-%    prefix = 'net-pat3-';                 % original weight file prefix (result of *NodePatternDCM3d.m)
-%    Gth = 0;                              % 0 for pat3. 0.2 for pat4.
-    prefix = 'net-pat4-';                  % original weight file prefix (result of *NodePatternDCM3d.m)
-    Gth = 0.2;                             % 0 for pat3. 0.2 for pat4.
+    prefix = 'net-pat3-';                 % original weight file prefix (result of *NodePatternDCM3d.m)
+    Gth = 0;                              % 0 for pat3. 0.2 for pat4.
+%    prefix = 'net-pat4-';                  % original weight file prefix (result of *NodePatternDCM3d.m)
+%    Gth = 0.2;                             % 0 for pat3. 0.2 for pat4.
 
     %% pattern 1 -------------------------------------------------
 %%{
@@ -53,18 +53,27 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     pcsAUC = zeros(1,N);
     cpcAUC = zeros(1,N);
     fgesAUC = zeros(1,N);
+    fcaAUC = zeros(1,N);
+    tsfcAUC = zeros(1,N);
+    tsfcaAUC = zeros(1,N);
     rnnROC = cell(N,2);
     linueROC = cell(N,2);
     nnnueROC = cell(N,2);
     pcsROC = cell(N,2);
     fgesROC = cell(N,2);
     cpcROC = cell(N,2);
+    fcaROC = cell(N,2);
+    tsfcROC = cell(N,2);
+    tsfcaROC = cell(N,2);
     rnnRf = figure;
     linueRf = figure;
     nnnueRf = figure;
     pcsRf = figure;
     cpcRf = figure;
     fgesRf = figure;
+    fcaRf = figure;
+    tsfcRf = figure;
+    tsfcaRf = figure;
     
     origf = figure;
     rnnTrial = 8;
@@ -133,9 +142,24 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
 
         % show ROC curve of FGES result
         figure(fgesRf); hold on; [fgesROC{k,1}, fgesROC{k,2}, fgesAUC(k)] = plotROCcurve(A, pP.A, 100, 1, Gth); hold off;
+
+        % -----------------------------------------------------------------
+        % extra tests (FC abs)
+        fg = figure; FCa = plotFunctionalConnectivityAbs(y2.'); close(fg);
+        figure(fcaRf); hold on; [fcaROC{k,1}, fcaROC{k,2}, fcaAUC(k)] = plotROCcurve(FCa, pP.A, 100, 1, Gth); hold off;
+        title('FCa');
+        % show result of time shifted FC
+        fg = figure; tsFC = plotTimeShiftedCorrelation(y2.', [], [], [], 3); close(fg);
+        figure(tsfcRf); hold on; [tsfcROC{k,1}, tsfcROC{k,2}, tsfcAUC(k)] = plotROCcurve(tsFC, pP.A, 100, 1, Gth); hold off;
+        title('tsFC');
+        % show result of time shifted FC (abs)
+        fg = figure; tsFCa = plotTimeShiftedCorrelationAbs(y2.', [], [], [], 3); close(fg);
+        figure(tsfcaRf); hold on; [tsfcaROC{k,1}, tsfcaROC{k,2}, tsfcaAUC(k)] = plotROCcurve(tsFCa, pP.A, 100, 1, Gth); hold off;
+        title('tsFCa');
     end
     % save result
-    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','dcmAUC','rnnAUC','linueAUC','nnnueAUC','pcsAUC','cpcAUC','fgesAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','dcmROC','rnnROC','linueROC','nnnueROC','pcsROC','cpcROC','fgesROC');
+    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','dcmAUC','rnnAUC','linueAUC','nnnueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC',...
+        'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','dcmROC','rnnROC','linueROC','nnnueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC');
     
     % show average ROC curve of DCM
     figure; 
@@ -172,6 +196,9 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plotAverageROCcurve(pcsROC, N, '-', [0.5,0.5,0.5],0.5);
     plotAverageROCcurve(cpcROC, N, '--', [0.5,0.5,0.5],0.5);
     plotAverageROCcurve(fgesROC, N, '-.', [0.5,0.5,0.5],0.5);
+%    plotAverageROCcurve(fcaROC, N, '-.', [0.8,0.2,0.2],0.5);
+%    plotAverageROCcurve(tsfcROC, N, '-', [0.6,0.2,0.2],1.2);
+%    plotAverageROCcurve(tsfcaROC, N, '-.', [0.6,0.2,0.2],1.2);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);

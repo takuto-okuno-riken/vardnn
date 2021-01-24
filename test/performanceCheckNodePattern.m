@@ -124,6 +124,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 
     % show original signal FC
     figure; FC = plotFunctionalConnectivity(si);
+    figure; FCa = plotFunctionalConnectivityAbs(si); % calc FC (Abs)
     % show original signal PC
     figure; PC = plotPartialCorrelation(si);
     % show original signal mWCS
@@ -131,7 +132,8 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     % show original signal granger causality index (gc-EC)
     figure; gcI = plotMultivariateGCI_(si, [], [], [], 3, 0);
     % show original time shifted correlation (tsc-FC)
-    %tscFC = plotTimeShiftedCorrelation(si);
+    figure; tsCr = plotTimeShiftedCorrelation(si, [], [], [], 2);
+    figure; tsCra = plotTimeShiftedCorrelationAbs(si, [], [], [], 2);
     % show deep-learning effective connectivity
 %    figure; dlEC = plotDlcmECmeanWeight(netDLCM);
 %    figure; dlEC = plotDlcmECmeanAbsWeight(netDLCM);

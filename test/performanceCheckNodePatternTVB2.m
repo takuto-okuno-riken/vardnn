@@ -54,6 +54,9 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     pcsAUC = zeros(1,N);
     cpcAUC = zeros(1,N);
     fgesAUC = zeros(1,N);
+    fcaAUC = zeros(1,N);
+    tsfcAUC = zeros(1,N);
+    tsfcaAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
     wcsROC = cell(N,2);
@@ -66,6 +69,9 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     pcsROC = cell(N,2);
     cpcROC = cell(N,2);
     fgesROC = cell(N,2);
+    fcaROC = cell(N,2);
+    tsfcROC = cell(N,2);
+    tsfcaROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
     wcsRf = figure;
@@ -78,6 +84,9 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     pcsRf = figure;
     cpcRf = figure;
     fgesRf = figure;
+    fcaRf = figure;
+    tsfcRf = figure;
+    tsfcaRf = figure;
 
     origf = figure;
     origSigf = figure;
@@ -220,6 +229,23 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         A = readmatrix(csvFile);
         figure(fgesRf); hold on; [fgesROC{k,1}, fgesROC{k,2}, fgesAUC(k)] = plotROCcurve(A, weights, 100, 1, Gth); hold off;
         title(['ROC curve of CPC (pat=' num2str(i) ')']);
+        
+        % -----------------------------------------------------------------
+        % extra tests
+        % show result of FC abs
+        FCa = calcFunctionalConnectivityAbs(si);
+        figure(fcaRf); hold on; [fcaROC{k,1}, fcaROC{k,2}, fcaAUC(k)] = plotROCcurve(FCa, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of FCa (pat=' num2str(i) ')']);
+
+        % show result of time shifted FC
+        tsFC = calcTimeShiftedCorrelation(si,[],[],[],lag);
+        figure(tsfcRf); hold on; [tsfcROC{k,1}, tsfcROC{k,2}, tsfcAUC(k)] = plotROCcurve(tsFC, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of tsFC (pat=' num2str(i) ')']);
+
+        % show result of time shifted FC abs
+        tsFCa = calcTimeShiftedCorrelationAbs(si,[],[],[],lag);
+        figure(tsfcaRf); hold on; [tsfcaROC{k,1}, tsfcaROC{k,2}, tsfcaAUC(k)] = plotROCcurve(tsFCa, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of tsFCa (pat=' num2str(i) ')']);
     end
     % show result AUC
     disp(['FC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(fcAUC))]);
@@ -235,7 +261,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
     % save result
     fname = ['results/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-result.mat'];
-    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC');
+    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC', ...
+        'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC');
 
     % show average ROC curve of DCM
     figure; 
@@ -272,6 +299,9 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     plotAverageROCcurve(pcsROC, N, '-', [0.5,0.5,0.5],0.5);
     plotAverageROCcurve(cpcROC, N, '--', [0.5,0.5,0.5],0.5);
     plotAverageROCcurve(fgesROC, N, '-.', [0.5,0.5,0.5],0.5);
+%    plotAverageROCcurve(fcaROC, N, '-.', [0.8,0.2,0.2],0.5);
+%    plotAverageROCcurve(tsfcROC, N, '-', [0.6,0.2,0.2],1.2);
+%    plotAverageROCcurve(tsfcaROC, N, '-.', [0.6,0.2,0.2],1.2);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);

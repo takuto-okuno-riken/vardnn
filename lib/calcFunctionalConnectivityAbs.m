@@ -1,36 +1,26 @@
 %%
-% Caluclate time shifted Correlation (Functional Connectivity)
-% cross-correlation type signal processing
+% Caluclate Functional Connectivity (absolute value)
 % returns Functional Connectivity (FC) and p-values (P)
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
-%  lags         number of lags for time shift (default:3)
-%  isFullNode   return both node & exogenous causality matrix (default:0)
+%  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [FC, P] = calcTimeShiftedCorrelation(X, exSignal, nodeControl, exControl, lags, isFullNode)
-    if nargin < 6, isFullNode = 0; end
-    if nargin < 5, lags = 3; end
+function [FC, P] = calcFunctionalConnectivityAbs(X, exSignal, nodeControl, exControl, isFullNode)
+    if nargin < 5, isFullNode = 0; end
     if nargin < 4, exControl = []; end
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end
     nodeNum = size(X,1);
-    m = size(X,2);
-
-    X = [X; exSignal];
     
-    if lags > 0
-        X1 = repmat(X(:,1:m-lags), [1 lags]);
-        X2 = [];
-        for i=1:lags
-            X2 = [X2, X(:,1+i:m-(lags-i))];
-        end
-        [FC, P] = corr(X2.', X1.');
-    else
-        [FC, P] = corr(X.', X.');
+    % set node input
+    if ~isempty(exSignal)
+        X = [X; exSignal];
     end
+    [FC, P] = corr(X.', X.');
+    FC = abs(FC);
 
     % output control
     if ~isempty(exSignal)

@@ -34,6 +34,12 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
             switch(algorithm)
             case 'fc'
                 mat = calcFunctionalConnectivity(signals{i});
+            case 'fca'
+                mat = calcFunctionalConnectivityAbs(signals{i});
+            case 'tsfc'
+                mat = calcTimeShiftedCorrelation(signals{i}, [], [], [], LAG);
+            case 'tsfca'
+                mat = calcTimeShiftedCorrelationAbs(signals{i}, [], [], [], LAG);
             case 'pc'
                 mat = calcPartialCorrelation(signals{i});
             case 'wcs'
@@ -161,6 +167,22 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         clims = [-1,1];
         titleStr = [group ' : Functional Connectivity'];
         sigWeights = meanWeights;
+    case 'fca'
+        clims = [0,1];
+        titleStr = [group ' : Functional Connectivity (Abs)'];
+        sigWeights = meanWeights;
+    case 'tsfc'
+        sigma = std(meanWeights(:),1,'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : Time shifted Functional Connectivity'];
+    case 'tsfca'
+        sigma = std(meanWeights(:),1,'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : Time shifted Functional Connectivity (Abs)'];
     case 'pc'
         clims = [-1,1];
         titleStr = [group ' : Partial Correlation'];

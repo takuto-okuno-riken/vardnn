@@ -1,5 +1,5 @@
 %%
-% Caluclate time shifted Correlation (Functional Connectivity)
+% Caluclate time shifted Correlation (Abs) (Functional Connectivity)
 % cross-correlation type signal processing
 % returns Functional Connectivity (FC) and p-values (P)
 % input:
@@ -10,7 +10,7 @@
 %  lags         number of lags for time shift (default:3)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [FC, P] = calcTimeShiftedCorrelation(X, exSignal, nodeControl, exControl, lags, isFullNode)
+function [FC, P] = calcTimeShiftedCorrelationAbs(X, exSignal, nodeControl, exControl, lags, isFullNode)
     if nargin < 6, isFullNode = 0; end
     if nargin < 5, lags = 3; end
     if nargin < 4, exControl = []; end
@@ -31,6 +31,7 @@ function [FC, P] = calcTimeShiftedCorrelation(X, exSignal, nodeControl, exContro
     else
         [FC, P] = corr(X.', X.');
     end
+    FC = abs(FC);
 
     % output control
     if ~isempty(exSignal)

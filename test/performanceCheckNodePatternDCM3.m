@@ -185,12 +185,15 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         % show result of FC
         fg = figure; FC = plotFunctionalConnectivity(y2.'); close(fg);
         figure(fcRf); hold on; [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = plotROCcurve(FC, pP.A); hold off;
+        title('FC');
         % show result of PC
         fg = figure; PC = plotPartialCorrelation(y2.'); close(fg);
         figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(PC, pP.A); hold off;
+        title('PC');
         % show result of WCS
         fg = figure; WCS = plotWaveletCoherence(y2.'); close(fg);
         figure(wcsRf); hold on; [wcsROC{k,1}, wcsROC{k,2}, wcsAUC(k)] = plotROCcurve(WCS, pP.A); hold off;
+        title('WCS');
         % show result of granger causality index (mvGC)
         fg = figure; gcI = plotMultivariateGCI_(y2.',[],[],[],3,0); close(fg);
         figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, pP.A); hold off;

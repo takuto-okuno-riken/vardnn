@@ -47,7 +47,6 @@ function testPwDnnGC
     % show Pairwised DNN-EC
     figure; dnEC = plotPwDnnEC(netPwDNN, [], exControl);
 
-
     %% test pattern 2
     exNum = 2;
     exSignal = siOrg(nodeNum+1:nodeNum+exNum,1:sigLen);
