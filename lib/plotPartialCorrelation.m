@@ -9,18 +9,11 @@
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
 function [PC, P] = plotPartialCorrelation(X, exSignal, nodeControl, exControl, isFullNode)
-    if nargin < 5
-        isFullNode = 0;
-    end
-    if nargin < 4
-        exControl = [];
-    end
-    if nargin < 3
-        nodeControl = [];
-    end
-    if nargin < 2
-        exSignal = [];
-    end
+    if nargin < 5, isFullNode = 0; end
+    if nargin < 4, exControl = []; end
+    if nargin < 3, nodeControl = []; end
+    if nargin < 2, exSignal = []; end
+
     [PC, P] = calcPartialCorrelation(X, exSignal, nodeControl, exControl, isFullNode);
 
     % show partial correlation
