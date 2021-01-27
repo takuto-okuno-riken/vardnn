@@ -1147,7 +1147,7 @@ function [wtDLWs, wtSubDLWs, wtSignals, wtDLs] = checkWaveletTransformEffect(sig
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 1;
+    NumProcessors = 20;
 
     if NumProcessors > 1
         try
@@ -1196,7 +1196,7 @@ function [wtDLWs, wtSubDLWs, wtSignals, wtDLs] = checkWaveletTransformEffect(sig
         wtSignals{i} = si;
 
         % plot original and modfied
-        figure; plot(si'); figure; si2 = convert2SigmoidSignal(signals{k}); plot(si2');
+        figure; plot(si'); figure; si2 = convert2SigmoidSignal(signals{k}); plot(si2'); title(['subject' num2str(k)]);
 
         % train DLCM network with amplitude expanded signal
         netDLCM = initDlcmNetwork(si, exSignal, [], exControl); 
@@ -1293,7 +1293,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
 %}
             % if you want to use parallel processing, set NumProcessors more than 2
             % and change for loop to parfor loop
-            NumProcessors = 11;
+            NumProcessors = 20;
 
             if NumProcessors > 1
                 try
