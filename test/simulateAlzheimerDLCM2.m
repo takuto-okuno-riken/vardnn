@@ -154,6 +154,10 @@ function simulateAlzheimerDLCM2
     % -- type=3 does not perform better than type=1
 %    [smcn12DLWs, smcn12SubDLWs, smcn12Signals, smcn12DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 3);
 
+    % -- check wavelet transform effect
+    % -- change original cnSignals -(cwt)-> frequency -(icwt)-> Signals -> calc EC
+    [smcn13DLWs, smcn13SubDLWs, smcn13Signals, smcn13DLs] = checkWaveletTransformEffect(cnSignals, cnDLWs, cnSubDLWs, 'cn', 1);
+
     % check relation between Zij vs signal amplitude (change other input signals)
     % -- not working well
 %    checkRelationSubDLWandSignals4(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn');
@@ -1126,6 +1130,87 @@ function checkRelationSubDLWandSignals4(signals, DLWs, subDLWs, smSignals, smDLW
     end
 end
 
+function [wtDLWs, wtSubDLWs, wtSignals, wtDLs] = checkWaveletTransformEffect(signals, DLWs, subDLWs, group, type)
+    nodeNum = size(signals{1},1);
+    sigLen = size(signals{1},2);
+    sbjNum = length(signals);
+    sbjMax = sbjNum;
+
+    typename = '';
+    if type==2, typename='t2'; end
+
+    sfName = ['results/adsim2-checkRelation9' typename '-' group '-all.mat'];
+    if exist(sfName, 'file')
+        load(sfName);
+        return;
+    end
+
+    % if you want to use parallel processing, set NumProcessors more than 2
+    % and change for loop to parfor loop
+    NumProcessors = 1;
+
+    if NumProcessors > 1
+        try
+            disp('Destroing any existance matlab pool session');
+            parpool('close');
+        catch
+            disp('No matlab pool session found');
+        end
+        parpool(NumProcessors);
+    end
+
+    wtDLWs = DLWs;
+    wtSubDLWs = subDLWs;
+    wtSignals = cell(sbjNum,1);
+    wtDLs = nan(nodeNum,nodeNum,sbjNum);
+
+    % training options for DLCM network
+    maxEpochs = 1000;
+    miniBatchSize = ceil(sigLen / 3);
+    options = trainingOptions('adam', ...
+        'ExecutionEnvironment','cpu', ...
+        'MaxEpochs',maxEpochs, ...
+        'MiniBatchSize',miniBatchSize, ...
+        'Shuffle','every-epoch', ...
+        'GradientThreshold',5,...
+        'L2Regularization',0.05, ...
+        'Verbose',false);
+        
+    % checking signal amplitude change effect for Zi, Zij and ECij'
+    for k=1:sbjMax
+        dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+        f = load(dlcmName);
+        if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+        if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
+        exSignal = f.exSignal;
+        exControl = f.exControl;
+
+        % wavelet transform and back
+        siOrg = signals{k};
+        for i=1:nodeNum
+            wt=cwt(siOrg(i,:));
+            siOrg(i,:) = icwt(wt);
+        end
+
+        [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(siOrg);
+        wtSignals{i} = si;
+
+        % plot original and modfied
+        figure; plot(si'); figure; si2 = convert2SigmoidSignal(signals{k}); plot(si2');
+
+        % train DLCM network with amplitude expanded signal
+        netDLCM = initDlcmNetwork(si, exSignal, [], exControl); 
+
+        disp(['sbj' num2str(k) ' training']);
+        netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+
+        % calculate DLCM-EC
+        [wtDLWs(:,:,k), wtSubDLWs(:,:,k)] = calcDlcmEC(netDLCM, [], exControl);
+        wtDLs(:,:,k) = calcDlcmGCI(si, exSignal, [], exControl, netDLCM);
+    end
+    save(sfName, 'wtDLWs', 'wtSubDLWs', 'wtSignals', 'wtDLs');
+end
+
 function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSignals3(signals, DLWs, subDLWs, smSignals, smDLWs, smSubDLWs, smDLs, group, type)
     nodeNum = size(signals{1},1);
     sigLen = size(signals{1},2);
@@ -1135,6 +1220,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
     typename = '';
     if type==2, typename='t2'; end
     if type==3, typename='t3'; end
+    if type==4, typename='t4'; end
     
     sfName = ['results/adsim2-checkRelation6' typename '-' group '-all.mat'];
     if exist(sfName, 'file')
@@ -1153,6 +1239,8 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
         amps = [0.5, 1, 1.5, 2, 2.5];
     elseif type == 3
         amps = [0.5, 1, 1.5];
+    elseif type == 4
+        amps = [1];
     end
     ampsLen = length(amps);
 
@@ -1262,6 +1350,19 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
                     for i=1:nodeNum % target node
                         siOrg(i,:) = (siOrg(i,:)-mvsi(i,:)) * dAmp(i) * amp + mvsi(i,:);
                         siOrg(i,:) = siOrg(i,:) - nanmean(siOrg(i,:));
+                    end
+                elseif type == 4
+                    %{
+                    xDFT = fft(siOrg');
+                    figure; plot(siOrg'); xlabel('Seconds'); ylabel('Amplitude');
+                    sz = size(xDFT,1)/2 + 1;
+                    figure; plot(abs(xDFT(1:sz,:)));
+                    set(gca,'xtick',[4:4:64]);
+                    xlabel('Hz'); ylabel('Magnitude');
+                    %}
+                    for i=1:nodeNum
+                        wt=cwt(siOrg(i,:));
+                        siOrg(i,:) = icwt(wt);
                     end
                 end
                 [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(siOrg);
