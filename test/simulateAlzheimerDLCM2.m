@@ -156,7 +156,9 @@ function simulateAlzheimerDLCM2
 
     % -- check wavelet transform effect
     % -- change original cnSignals -(cwt)-> frequency -(icwt)-> Signals -> calc EC
-    [smcn13DLWs, smcn13SubDLWs, smcn13Signals, smcn13DLs] = checkWaveletTransformEffect(cnSignals, cnDLWs, cnSubDLWs, 'cn', 1);
+    [wtcnDLWs, wtcnSubDLWs, wtcnSignals, wtcnDLs] = checkWaveletTransformEffect(cnSignals, cnDLWs, cnSubDLWs, 'cn', 1);
+    meanWtcnDLW = nanmean(wtcnDLWs,3);
+    meanWtcnDL = nanmean(wtcnDLs,3);
 
     % check relation between Zij vs signal amplitude (change other input signals)
     % -- not working well
@@ -221,6 +223,8 @@ function simulateAlzheimerDLCM2
     [smcn9FCs, meanSmcn9FC, ~] = calculateConnectivity(smcn9Signals, roiNames, 'smcn9', 'fc', 1);
     [smad7FCs, meanSmad7FC, ~] = calculateConnectivity(smad7Signals, roiNames, 'smad7', 'fc', 1);
     [smad8FCs, meanSmad8FC, ~] = calculateConnectivity(smad8Signals, roiNames, 'smad8', 'fc', 1);
+    [wtcnFCs, meanWtcnFC, ~] = calculateConnectivity(wtcnSignals, roiNames, 'wtcn', 'fc', 1);
+    
 %{
     figure; cnsmcnFCr = plotTwoSignalsCorrelation(meanCnFC, meanSmcnFC);
     figure; adsmadFCr = plotTwoSignalsCorrelation(meanAdFC, meanSmadFC);
@@ -248,17 +252,20 @@ function simulateAlzheimerDLCM2
     cosSim(4) = getCosSimilarity(meanCnDLW, meanSmcn7DLW);
     cosSim(5) = getCosSimilarity(meanCnDLW, meanSmcn8DLW);
     cosSim(6) = getCosSimilarity(meanCnDLW, meanSmcn9DLW);
+    cosSim(7) = getCosSimilarity(meanCnDLW, meanWtcnDLW);
     cosSim(11) = getCosSimilarity(meanCnDL, meanSmcnDL);
     cosSim(12) = getCosSimilarity(meanCnDL, meanSmcn2DL);
     cosSim(13) = getCosSimilarity(meanCnDL, meanSmcn7DL);
     cosSim(14) = getCosSimilarity(meanCnDL, meanSmcn8DL);
     cosSim(15) = getCosSimilarity(meanCnDL, meanSmcn9DL);
+    cosSim(16) = getCosSimilarity(meanCnDL, meanWtcnDL);
     cosSim(21) = getCosSimilarity(meanCnFC, meanSmcnFC);
     cosSim(22) = getCosSimilarity(meanCnFC, meanSmcn2FC);
     cosSim(23) = getCosSimilarity(meanCnFC, meanSmcn6FC);
     cosSim(24) = getCosSimilarity(meanCnFC, meanSmcn7FC);
     cosSim(25) = getCosSimilarity(meanCnFC, meanSmcn8FC);
     cosSim(26) = getCosSimilarity(meanCnFC, meanSmcn9FC);
+    cosSim(27) = getCosSimilarity(meanCnFC, meanWtcnFC);
 %    X = categorical({'dlec-cn-smcn','dlec-cn-smcn2','dlec-cn-smcn6','dlec-cn-smcn7',...
 %        'dlgc-cn-smcn','dlgc-cn-smcn2','dlgc-cn-smcn7',...
 %        'fc-cn-smcn','fc-cn-smcn2','fc-cn-smcn6','fc-cn-smcn7'});
@@ -323,12 +330,14 @@ function simulateAlzheimerDLCM2
         cosSims(i,5) = getCosSimilarity(meanCnDLW, smcn7DLWs(:,:,i));
         cosSims(i,6) = getCosSimilarity(meanCnDLW, smcn8DLWs(:,:,i));
         cosSims(i,7) = getCosSimilarity(meanCnDLW, smcn9DLWs(:,:,i));
+        cosSims(i,8) = getCosSimilarity(meanCnDLW, wtcnDLWs(:,:,i));
         cosSims(i,11) = getCosSimilarity(meanCnDL, cnDLs(:,:,i));
         cosSims(i,12) = getCosSimilarity(meanCnDL, smcnDLs(:,:,i));
         cosSims(i,13) = getCosSimilarity(meanCnDL, smcn2DLs(:,:,i));
         cosSims(i,14) = getCosSimilarity(meanCnDL, smcn7DLs(:,:,i));
         cosSims(i,15) = getCosSimilarity(meanCnDL, smcn8DLs(:,:,i));
         cosSims(i,16) = getCosSimilarity(meanCnDL, smcn9DLs(:,:,i));
+        cosSims(i,17) = getCosSimilarity(meanCnDL, wtcnDLs(:,:,i));
         cosSims(i,21) = getCosSimilarity(meanCnFC, cnFCs(:,:,i));
         cosSims(i,22) = getCosSimilarity(meanCnFC, smcnFCs(:,:,i));
         cosSims(i,23) = getCosSimilarity(meanCnFC, smcn2FCs(:,:,i));
@@ -336,6 +345,7 @@ function simulateAlzheimerDLCM2
         cosSims(i,25) = getCosSimilarity(meanCnFC, smcn7FCs(:,:,i));
         cosSims(i,26) = getCosSimilarity(meanCnFC, smcn8FCs(:,:,i));
         cosSims(i,27) = getCosSimilarity(meanCnFC, smcn9FCs(:,:,i));
+        cosSims(i,28) = getCosSimilarity(meanCnFC, wtcnFCs(:,:,i));
     end
     figure; boxplot(cosSims);
     [anovaP,tbl,stats] = kruskalwallis(cosSims(:,1:30));
@@ -387,17 +397,20 @@ function simulateAlzheimerDLCM2
         cosSims(i,4) = getCosSimilarity(cnDLWs(:,:,i), smcn7DLWs(:,:,i));
         cosSims(i,5) = getCosSimilarity(cnDLWs(:,:,i), smcn8DLWs(:,:,i));
         cosSims(i,6) = getCosSimilarity(cnDLWs(:,:,i), smcn9DLWs(:,:,i));
+        cosSims(i,7) = getCosSimilarity(cnDLWs(:,:,i), wtcnDLWs(:,:,i));
         cosSims(i,11) = getCosSimilarity(cnDLs(:,:,i), smcnDLs(:,:,i));
         cosSims(i,12) = getCosSimilarity(cnDLs(:,:,i), smcn2DLs(:,:,i));
         cosSims(i,13) = getCosSimilarity(cnDLs(:,:,i), smcn7DLs(:,:,i));
         cosSims(i,14) = getCosSimilarity(cnDLs(:,:,i), smcn8DLs(:,:,i));
         cosSims(i,15) = getCosSimilarity(cnDLs(:,:,i), smcn9DLs(:,:,i));
+        cosSims(i,16) = getCosSimilarity(cnDLs(:,:,i), wtcnDLs(:,:,i));
         cosSims(i,21) = getCosSimilarity(cnFCs(:,:,i), smcnFCs(:,:,i));
         cosSims(i,22) = getCosSimilarity(cnFCs(:,:,i), smcn2FCs(:,:,i));
         cosSims(i,23) = getCosSimilarity(cnFCs(:,:,i), smcn6FCs(:,:,i));
         cosSims(i,24) = getCosSimilarity(cnFCs(:,:,i), smcn7FCs(:,:,i));
         cosSims(i,25) = getCosSimilarity(cnFCs(:,:,i), smcn8FCs(:,:,i));
         cosSims(i,26) = getCosSimilarity(cnFCs(:,:,i), smcn9FCs(:,:,i));
+        cosSims(i,27) = getCosSimilarity(cnFCs(:,:,i), wtcnFCs(:,:,i));
     end
     figure; boxplot(cosSims);
     cosSims = nan(cnSbjNum,30);
@@ -436,11 +449,13 @@ function simulateAlzheimerDLCM2
     [adsmad2FCsUt, adsmad2FCsUtP, adsmad2FCsUtP2] = calculateAlzWilcoxonTest(adFCs, smad2FCs, roiNames, 'ad', 'smad2', 'fc');
     [cnsmcn6FCsUt, cnsmcn6FCsUtP, cnsmcn6FCsUtP2] = calculateAlzWilcoxonTest(cnFCs, smcn6FCs, roiNames, 'cn', 'smcn6', 'fc');
     [cnsmcn7FCsUt, cnsmcn7FCsUtP, cnsmcn7FCsUtP2] = calculateAlzWilcoxonTest(cnFCs, smcn7FCs, roiNames, 'cn', 'smcn7', 'fc');
+%    [cnsmcnFCsUt, cnsmcnFCsUtP, cnsmcnFCsUtP2] = calculateAlzWilcoxonTest(cnFCs, wtcnFCs, roiNames, 'cn', 'wtcn', 'fc');
     [cnsmcnDLsUt, cnsmcnDLsUtP, cnsmcnDLsUtP2] = calculateAlzWilcoxonTest(cnDLs, smcnDLs, roiNames, 'cn', 'smcn', 'dlcm');
     [adsmadDLsUt, adsmadDLsUtP, adsmadDLsUtP2] = calculateAlzWilcoxonTest(adDLs, smadDLs, roiNames, 'ad', 'smad', 'dlcm');
     [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, smcnDLWs, roiNames, 'cn', 'smcn', 'dlw');
     [adsmadDLWsUt, adsmadDLWsUtP, adsmadDLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, smadDLWs, roiNames, 'ad', 'smad', 'dlw');
     [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, smcn7DLWs, roiNames, 'cn', 'smcn7', 'dlw');
+%    [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, wtcnDLWs, roiNames, 'cn', 'wtcn', 'dlw');
     [~, ~, ~] = calculateAlzWilcoxonTest(sigCnDLWs, sigSmcnDLWs, roiNames, 'sigcn', 'sigsmcn', 'dlw');
     [~, ~, ~] = calculateAlzWilcoxonTest(sigAdDLWs, sigSmadDLWs, roiNames, 'sigad', 'sigsmad', 'dlw');
     [~, ~, ~] = calculateAlzWilcoxonTest(sigCnDLWs, sigSmcn7DLWs, roiNames, 'sigcn', 'sigsmcn7', 'dlw');
@@ -1139,7 +1154,7 @@ function [wtDLWs, wtSubDLWs, wtSignals, wtDLs] = checkWaveletTransformEffect(sig
     typename = '';
     if type==2, typename='t2'; end
 
-    sfName = ['results/adsim2-checkRelation9' typename '-' group '-all.mat'];
+    sfName = ['results/adsim2-checkWavelet' typename '-' group '-all.mat'];
     if exist(sfName, 'file')
         load(sfName);
         return;
@@ -1193,7 +1208,7 @@ function [wtDLWs, wtSubDLWs, wtSignals, wtDLs] = checkWaveletTransformEffect(sig
         end
 
         [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(siOrg);
-        wtSignals{i} = si;
+        wtSignals{k} = si;
 
         % plot original and modfied
         figure; plot(si'); figure; si2 = convert2SigmoidSignal(signals{k}); plot(si2'); title(['subject' num2str(k)]);
