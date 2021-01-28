@@ -153,20 +153,33 @@ function simulateAlzheimerDLCM2
 %    [smcn11DLWs, smcn11SubDLWs, smcn11Signals, smcn11DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 2);
     % -- type=3 does not perform better than type=1
 %    [smcn12DLWs, smcn12SubDLWs, smcn12Signals, smcn12DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 3);
-    % -- type=4 extend amplitudes of high frequency via wavelet transfrom & invert wavelet transfrom
+    % -- type=4 extend amplitudes of high frequency (1:15) via wavelet transfrom & invert wavelet transfrom
+    % -- this does not perform better than type=1
 %    [smcn13DLWs, smcn13SubDLWs, smcn13Signals, smcn13DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 4);
     % -- type=5 extend amplitudes of low frequency via wavelet transfrom & invert wavelet transfrom
     % -- this does not work 
 %    [smcn14DLWs, smcn14SubDLWs, smcn14Signals, smcn14DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 5);
+    % -- type=6 extend amplitudes of high frequency (1:3) via wavelet transfrom & invert wavelet transfrom
+    % -- 
+    [smcn15DLWs, smcn15SubDLWs, smcn15Signals, smcn15DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 6);
 
     % -- check wavelet transform effect
-    % -- change original cnSignals -(cwt)-> frequency -(icwt)-> Signals -> calc EC
+    % -- change original cnSignals -(cwt)-> frequency -(icwt+movemean)-> Signals -> calc EC
     [wtcnDLWs, wtcnSubDLWs, wtcnSignals, wtcnDLs] = checkWaveletTransformEffect(cnSignals, cnDLWs, cnSubDLWs, 'cn', 1);
     meanWtcnDLW = nanmean(wtcnDLWs,3);
     meanWtcnDL = nanmean(wtcnDLs,3);
-    [wtcn2DLWs, wtcn2SubDLWs, wtcn2Signals, wtcn2DLs] = checkWaveletTransformEffect(cnSignals, cnDLWs, cnSubDLWs, 'cn', 2);
-    meanWtcn2DLW = nanmean(wtcn2DLWs,3);
-    meanWtcn2DL = nanmean(wtcn2DLs,3);
+    % -- change original cnSignals -(stft)-> frequency -(istft)-> Signals -> calc EC
+%    [wtcn2DLWs, wtcn2SubDLWs, wtcn2Signals, wtcn2DLs] = checkWaveletTransformEffect(cnSignals, cnDLWs, cnSubDLWs, 'cn', 2);
+%    meanWtcn2DLW = nanmean(wtcn2DLWs,3);
+%    meanWtcn2DL = nanmean(wtcn2DLs,3);
+    % -- change original cnSignals -(cwt)-> frequency(remove high) -(icwt+movemean)-> Signals -> calc EC
+    [wtcn3DLWs, wtcn3SubDLWs, wtcn3Signals, wtcn3DLs] = checkWaveletTransformEffect(cnSignals, cnDLWs, cnSubDLWs, 'cn', 3);
+    meanWtcn3DLW = nanmean(wtcn3DLWs,3);
+    meanWtcn3DL = nanmean(wtcn3DLs,3);
+    % -- change original cnSignals -(cwt)-> frequency -(icwt)-> Signals -> calc EC
+    [wtcn4DLWs, wtcn4SubDLWs, wtcn4Signals, wtcn4DLs] = checkWaveletTransformEffect(cnSignals, cnDLWs, cnSubDLWs, 'cn', 4);
+    meanWtcn4DLW = nanmean(wtcn4DLWs,3);
+    meanWtcn4DL = nanmean(wtcn4DLs,3);
 
     % check relation between Zij vs signal amplitude (change other input signals)
     % -- not working well
@@ -192,8 +205,11 @@ function simulateAlzheimerDLCM2
     % -- parallel shift does not affect EC (both Zi and Zij shifted)
     % -- move mean (range=5) based amplitude expansion does not work well
     % -- change simulated signals -> calc EC
-    [smcn6DLWs, smcn6SubDLWs, smcn6Signals] = shiftAndExpandAmplitude(cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
+    [smcn6DLWs, smcn6SubDLWs, smcn6Signals] = shiftAndExpandAmplitude(cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
     meanSmcn6DLW = nanmean(smcn6DLWs,3);
+    % -- change simulated signals of high frequency (wavelet) -> calc EC
+    [smcn6bDLWs, smcn6bSubDLWs, smcn6bSignals] = shiftAndExpandAmplitude(cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 3);
+    meanSmcn6bDLW = nanmean(smcn6bDLWs,3);
 
 %{
     figure; cnsmcnDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcnDLW);
@@ -232,7 +248,9 @@ function simulateAlzheimerDLCM2
     [smad7FCs, meanSmad7FC, ~] = calculateConnectivity(smad7Signals, roiNames, 'smad7', 'fc', 1);
     [smad8FCs, meanSmad8FC, ~] = calculateConnectivity(smad8Signals, roiNames, 'smad8', 'fc', 1);
     [wtcnFCs, meanWtcnFC, ~] = calculateConnectivity(wtcnSignals, roiNames, 'wtcn', 'fc', 1);
-    [wtcn2FCs, meanWtcn2FC, ~] = calculateConnectivity(wtcn2Signals, roiNames, 'wtcn2', 'fc', 1);
+%    [wtcn2FCs, meanWtcn2FC, ~] = calculateConnectivity(wtcn2Signals, roiNames, 'wtcn2', 'fc', 1);
+    [wtcn3FCs, meanWtcn3FC, ~] = calculateConnectivity(wtcn3Signals, roiNames, 'wtcn3', 'fc', 1);
+    [wtcn4FCs, meanWtcn4FC, ~] = calculateConnectivity(wtcn4Signals, roiNames, 'wtcn4', 'fc', 1);
     
 %{
     figure; cnsmcnFCr = plotTwoSignalsCorrelation(meanCnFC, meanSmcnFC);
@@ -262,14 +280,18 @@ function simulateAlzheimerDLCM2
     cosSim(5) = getCosSimilarity(meanCnDLW, meanSmcn8DLW);
     cosSim(6) = getCosSimilarity(meanCnDLW, meanSmcn9DLW);
     cosSim(7) = getCosSimilarity(meanCnDLW, meanWtcnDLW);
-    cosSim(8) = getCosSimilarity(meanCnDLW, meanWtcn2DLW);
+%    cosSim(8) = getCosSimilarity(meanCnDLW, meanWtcn2DLW);
+    cosSim(8) = getCosSimilarity(meanCnDLW, meanWtcn3DLW);
+    cosSim(9) = getCosSimilarity(meanCnDLW, meanWtcn4DLW);
     cosSim(11) = getCosSimilarity(meanCnDL, meanSmcnDL);
     cosSim(12) = getCosSimilarity(meanCnDL, meanSmcn2DL);
     cosSim(13) = getCosSimilarity(meanCnDL, meanSmcn7DL);
     cosSim(14) = getCosSimilarity(meanCnDL, meanSmcn8DL);
     cosSim(15) = getCosSimilarity(meanCnDL, meanSmcn9DL);
     cosSim(16) = getCosSimilarity(meanCnDL, meanWtcnDL);
-    cosSim(17) = getCosSimilarity(meanCnDL, meanWtcn2DL);
+%    cosSim(17) = getCosSimilarity(meanCnDL, meanWtcn2DL);
+    cosSim(17) = getCosSimilarity(meanCnDL, meanWtcn3DL);
+    cosSim(18) = getCosSimilarity(meanCnDL, meanWtcn4DL);
     cosSim(21) = getCosSimilarity(meanCnFC, meanSmcnFC);
     cosSim(22) = getCosSimilarity(meanCnFC, meanSmcn2FC);
     cosSim(23) = getCosSimilarity(meanCnFC, meanSmcn6FC);
@@ -277,7 +299,9 @@ function simulateAlzheimerDLCM2
     cosSim(25) = getCosSimilarity(meanCnFC, meanSmcn8FC);
     cosSim(26) = getCosSimilarity(meanCnFC, meanSmcn9FC);
     cosSim(27) = getCosSimilarity(meanCnFC, meanWtcnFC);
-    cosSim(28) = getCosSimilarity(meanCnFC, meanWtcn2FC);
+%    cosSim(28) = getCosSimilarity(meanCnFC, meanWtcn2FC);
+    cosSim(28) = getCosSimilarity(meanCnFC, meanWtcn3FC);
+    cosSim(29) = getCosSimilarity(meanCnFC, meanWtcn4FC);
 %    X = categorical({'dlec-cn-smcn','dlec-cn-smcn2','dlec-cn-smcn6','dlec-cn-smcn7',...
 %        'dlgc-cn-smcn','dlgc-cn-smcn2','dlgc-cn-smcn7',...
 %        'fc-cn-smcn','fc-cn-smcn2','fc-cn-smcn6','fc-cn-smcn7'});
@@ -343,7 +367,9 @@ function simulateAlzheimerDLCM2
         cosSims(i,6) = getCosSimilarity(meanCnDLW, smcn8DLWs(:,:,i));
         cosSims(i,7) = getCosSimilarity(meanCnDLW, smcn9DLWs(:,:,i));
         cosSims(i,8) = getCosSimilarity(meanCnDLW, wtcnDLWs(:,:,i));
-        cosSims(i,9) = getCosSimilarity(meanCnDLW, wtcn2DLWs(:,:,i));
+%        cosSims(i,9) = getCosSimilarity(meanCnDLW, wtcn2DLWs(:,:,i));
+        cosSims(i,9) = getCosSimilarity(meanCnDLW, wtcn3DLWs(:,:,i));
+        cosSims(i,10) = getCosSimilarity(meanCnDLW, wtcn4DLWs(:,:,i));
         cosSims(i,11) = getCosSimilarity(meanCnDL, cnDLs(:,:,i));
         cosSims(i,12) = getCosSimilarity(meanCnDL, smcnDLs(:,:,i));
         cosSims(i,13) = getCosSimilarity(meanCnDL, smcn2DLs(:,:,i));
@@ -351,7 +377,9 @@ function simulateAlzheimerDLCM2
         cosSims(i,15) = getCosSimilarity(meanCnDL, smcn8DLs(:,:,i));
         cosSims(i,16) = getCosSimilarity(meanCnDL, smcn9DLs(:,:,i));
         cosSims(i,17) = getCosSimilarity(meanCnDL, wtcnDLs(:,:,i));
-        cosSims(i,18) = getCosSimilarity(meanCnDL, wtcn2DLs(:,:,i));
+%        cosSims(i,18) = getCosSimilarity(meanCnDL, wtcn2DLs(:,:,i));
+        cosSims(i,18) = getCosSimilarity(meanCnDL, wtcn3DLs(:,:,i));
+        cosSims(i,19) = getCosSimilarity(meanCnDL, wtcn4DLs(:,:,i));
         cosSims(i,21) = getCosSimilarity(meanCnFC, cnFCs(:,:,i));
         cosSims(i,22) = getCosSimilarity(meanCnFC, smcnFCs(:,:,i));
         cosSims(i,23) = getCosSimilarity(meanCnFC, smcn2FCs(:,:,i));
@@ -360,7 +388,9 @@ function simulateAlzheimerDLCM2
         cosSims(i,26) = getCosSimilarity(meanCnFC, smcn8FCs(:,:,i));
         cosSims(i,27) = getCosSimilarity(meanCnFC, smcn9FCs(:,:,i));
         cosSims(i,28) = getCosSimilarity(meanCnFC, wtcnFCs(:,:,i));
-        cosSims(i,29) = getCosSimilarity(meanCnFC, wtcn2FCs(:,:,i));
+%        cosSims(i,29) = getCosSimilarity(meanCnFC, wtcn2FCs(:,:,i));
+        cosSims(i,29) = getCosSimilarity(meanCnFC, wtcn3FCs(:,:,i));
+        cosSims(i,30) = getCosSimilarity(meanCnFC, wtcn4FCs(:,:,i));
     end
     figure; boxplot(cosSims);
     [anovaP,tbl,stats] = kruskalwallis(cosSims(:,1:30));
@@ -413,14 +443,18 @@ function simulateAlzheimerDLCM2
         cosSims(i,5) = getCosSimilarity(cnDLWs(:,:,i), smcn8DLWs(:,:,i));
         cosSims(i,6) = getCosSimilarity(cnDLWs(:,:,i), smcn9DLWs(:,:,i));
         cosSims(i,7) = getCosSimilarity(cnDLWs(:,:,i), wtcnDLWs(:,:,i));
-        cosSims(i,8) = getCosSimilarity(cnDLWs(:,:,i), wtcn2DLWs(:,:,i));
+%        cosSims(i,8) = getCosSimilarity(cnDLWs(:,:,i), wtcn2DLWs(:,:,i));
+        cosSims(i,8) = getCosSimilarity(cnDLWs(:,:,i), wtcn3DLWs(:,:,i));
+        cosSims(i,9) = getCosSimilarity(cnDLWs(:,:,i), wtcn4DLWs(:,:,i));
         cosSims(i,11) = getCosSimilarity(cnDLs(:,:,i), smcnDLs(:,:,i));
         cosSims(i,12) = getCosSimilarity(cnDLs(:,:,i), smcn2DLs(:,:,i));
         cosSims(i,13) = getCosSimilarity(cnDLs(:,:,i), smcn7DLs(:,:,i));
         cosSims(i,14) = getCosSimilarity(cnDLs(:,:,i), smcn8DLs(:,:,i));
         cosSims(i,15) = getCosSimilarity(cnDLs(:,:,i), smcn9DLs(:,:,i));
         cosSims(i,16) = getCosSimilarity(cnDLs(:,:,i), wtcnDLs(:,:,i));
-        cosSims(i,17) = getCosSimilarity(cnDLs(:,:,i), wtcn2DLs(:,:,i));
+%        cosSims(i,17) = getCosSimilarity(cnDLs(:,:,i), wtcn2DLs(:,:,i));
+        cosSims(i,17) = getCosSimilarity(cnDLs(:,:,i), wtcn3DLs(:,:,i));
+        cosSims(i,18) = getCosSimilarity(cnDLs(:,:,i), wtcn4DLs(:,:,i));
         cosSims(i,21) = getCosSimilarity(cnFCs(:,:,i), smcnFCs(:,:,i));
         cosSims(i,22) = getCosSimilarity(cnFCs(:,:,i), smcn2FCs(:,:,i));
         cosSims(i,23) = getCosSimilarity(cnFCs(:,:,i), smcn6FCs(:,:,i));
@@ -428,7 +462,9 @@ function simulateAlzheimerDLCM2
         cosSims(i,25) = getCosSimilarity(cnFCs(:,:,i), smcn8FCs(:,:,i));
         cosSims(i,26) = getCosSimilarity(cnFCs(:,:,i), smcn9FCs(:,:,i));
         cosSims(i,27) = getCosSimilarity(cnFCs(:,:,i), wtcnFCs(:,:,i));
-        cosSims(i,28) = getCosSimilarity(cnFCs(:,:,i), wtcn2FCs(:,:,i));
+%        cosSims(i,28) = getCosSimilarity(cnFCs(:,:,i), wtcn2FCs(:,:,i));
+        cosSims(i,28) = getCosSimilarity(cnFCs(:,:,i), wtcn3FCs(:,:,i));
+        cosSims(i,29) = getCosSimilarity(cnFCs(:,:,i), wtcn4FCs(:,:,i));
     end
     figure; boxplot(cosSims);
     cosSims = nan(cnSbjNum,30);
@@ -512,12 +548,12 @@ function [score, explained, pvals] = checkPCAHCvsAD(cnECs, adECs, nodeNum, algor
     xlabel('component1'); ylabel('component2'); 
 end
 
-function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDLWs, signals, simDLWs, simSubDLWs, group, type)
+function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs, subDLWs, signals, simDLWs, simSubDLWs, group, type)
     nodeNum = size(signals{1},1);
     sigLen = size(signals{1},2);
     sbjNum = length(signals);
     R = nodeNum;
-    nMax = 2;
+    nMax = 1;
     sbjMax = sbjNum;
 
     sfName = ['results/adsim2-shiftAmp' num2str(type) '-' group '-all.mat'];
@@ -529,6 +565,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
     shiftDLWs = simDLWs;
     shiftSubDLWs = simSubDLWs;
     shiftSignals = cell(sbjNum,1);
+    cosSim = nan(sbjMax, 1);
 
     % checking signal parallel shift effect for Zi, Zij and ECij'
     for k=1:sbjMax
@@ -564,8 +601,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
                 smSi = smSi(:,:) - dZi * 2 / 3;
                 smSi(smSi>1.2) = 1.2;
                 smSi(smSi<-0.2) = -0.2;
-            end
-            if type == 2
+            elseif type == 2
                 if n==1
                     amp = 2;
                     mvsi = movmean(smSi,65,2);
@@ -578,6 +614,13 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
                     smSi = smSi(:,:) - dZi * 2 / 3;
                     smSi(smSi>1.2) = 1.2;
                     smSi(smSi<-0.2) = -0.2;
+                end
+            elseif type == 3
+                for i=1:nodeNum
+                    wt=cwt(smSi(i,:));
+                    wt(1:3,:) = wt(1:3,:) * 12;
+                    trend = smoothdata(smSi(i,:),'movmean',32);
+                    smSi(i,:) = icwt(wt,'SignalMean',trend);
                 end
             end
             % amplitude expansion of simulating signal
@@ -667,7 +710,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
                 end
 
                 % calcate correlation
-                [corrZi2(n), corrZij2(i,n)] = calcCorrelationZiZij(subEC, sftSubEC, R);
+                [corrZi2(n), corrZij2(:,n)] = calcCorrelationZiZij(subEC, sftSubEC, R);
 
                 save(outfName, 'corrZi', 'corrZi2', 'corrZij', 'corrZij2', 'sftSubECs', 'sftSignals');
             else
@@ -689,6 +732,9 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(subDL
         shiftDLWs(:,:,k) = abs(repmat(sftSubEC(:,1),[1 nodeNum]) - sftSubEC(:,2:end));
         shiftSubDLWs(:,:,k) = sftSubEC;
         shiftSignals{k} = sftSignals{idx};
+
+        % cos similality
+        cosSim(k,1) = getCosSimilarity(DLWs(:,:,k), shiftDLWs(:,:,k));
     end
     save(sfName, 'shiftDLWs', 'shiftSubDLWs', 'shiftSignals');
 end
@@ -1171,6 +1217,8 @@ function [wtDLWs, wtSubDLWs, wtSignals, wtDLs] = checkWaveletTransformEffect(sig
 
     typename = '';
     if type==2, typename='t2'; end
+    if type==3, typename='t3'; end
+    if type==4, typename='t4'; end
 
     sfName = ['results/adsim2-checkWavelet' typename '-' group '-all.mat'];
     if exist(sfName, 'file')
@@ -1229,7 +1277,19 @@ function [wtDLWs, wtSubDLWs, wtSignals, wtDLs] = checkWaveletTransformEffect(sig
         elseif type==2
             for i=1:nodeNum
                 [S,F,T] = stft(siOrg(i,:),'Window',hamming(24,'periodic'),'OverlapLength',16,'FFTLength',64);
-                x = istft(S,'Window',hamming(24,'periodic'),'OverlapLength',16,'FFTLength',64);
+                siOrg(i,:) = istft(S,'Window',hamming(24,'periodic'),'OverlapLength',16,'FFTLength',64);
+            end
+        elseif type==3
+            for i=1:nodeNum
+                wt=cwt(siOrg(i,:));
+                wt(1:15,:) = 0;
+                trend = smoothdata(siOrg(i,:),'movmean',32);
+                siOrg(i,:) = icwt(wt,'SignalMean',trend);
+            end
+        elseif type==4
+            for i=1:nodeNum
+                wt=cwt(siOrg(i,:));
+                siOrg(i,:) = icwt(wt);
             end
         end
         [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(siOrg);
@@ -1267,6 +1327,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
     if type==3, typename='t3'; end
     if type==4, typename='t4'; end
     if type==5, typename='t5'; end
+    if type==6, typename='t6'; end
     
     sfName = ['results/adsim2-checkRelation6' typename '-' group '-all.mat'];
     if exist(sfName, 'file')
@@ -1289,6 +1350,8 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
         amps = [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
     elseif type == 5
         amps = [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+    elseif type == 6
+        amps = [2, 4, 6, 8, 10, 12, 14];
     end
     ampsLen = length(amps);
 
@@ -1418,6 +1481,13 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
                     for i=1:nodeNum
                         wt=cwt(siOrg(i,:));
                         wt(31:end,:)=wt(31:end,:) * amp;
+                        trend = smoothdata(siOrg(i,:),'movmean',32);
+                        siOrg(i,:) = icwt(wt,'SignalMean',trend);
+                    end
+                elseif type == 6
+                    for i=1:nodeNum
+                        wt=cwt(siOrg(i,:));
+                        wt(1:3,:)=wt(1:3,:) * amp;
                         trend = smoothdata(siOrg(i,:),'movmean',32);
                         siOrg(i,:) = icwt(wt,'SignalMean',trend);
                     end
