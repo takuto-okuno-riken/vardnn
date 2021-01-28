@@ -159,6 +159,9 @@ function simulateAlzheimerDLCM2
     [wtcnDLWs, wtcnSubDLWs, wtcnSignals, wtcnDLs] = checkWaveletTransformEffect(cnSignals, cnDLWs, cnSubDLWs, 'cn', 1);
     meanWtcnDLW = nanmean(wtcnDLWs,3);
     meanWtcnDL = nanmean(wtcnDLs,3);
+    [wtcn2DLWs, wtcn2SubDLWs, wtcn2Signals, wtcn2DLs] = checkWaveletTransformEffect(cnSignals, cnDLWs, cnSubDLWs, 'cn', 2);
+    meanWtcn2DLW = nanmean(wtcn2DLWs,3);
+    meanWtcn2DL = nanmean(wtcn2DLs,3);
 
     % check relation between Zij vs signal amplitude (change other input signals)
     % -- not working well
@@ -1162,7 +1165,7 @@ function [wtDLWs, wtSubDLWs, wtSignals, wtDLs] = checkWaveletTransformEffect(sig
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 20;
+    NumProcessors = 11;
 
     if NumProcessors > 1
         try
@@ -1202,11 +1205,18 @@ function [wtDLWs, wtSubDLWs, wtSignals, wtDLs] = checkWaveletTransformEffect(sig
 
         % wavelet transform and back
         siOrg = signals{k};
-        for i=1:nodeNum
-            wt=cwt(siOrg(i,:));
-            siOrg(i,:) = icwt(wt);
+        if type==1
+            for i=1:nodeNum
+                wt=cwt(siOrg(i,:));
+                trend = smoothdata(siOrg(i,:),'movmean',32);
+                siOrg(i,:) = icwt(wt,'SignalMean',trend);
+            end
+        elseif type==2
+            for i=1:nodeNum
+                [S,F,T] = stft(siOrg(i,:),'Window',hamming(32,'periodic'),'OverlapLength',24,'FFTLength',64);
+                x = istft(S,'Window',hamming(32,'periodic'),'OverlapLength',24,'FFTLength',64);
+            end
         end
-
         [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(siOrg);
         wtSignals{k} = si;
 
