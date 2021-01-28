@@ -153,8 +153,11 @@ function simulateAlzheimerDLCM2
 %    [smcn11DLWs, smcn11SubDLWs, smcn11Signals, smcn11DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 2);
     % -- type=3 does not perform better than type=1
 %    [smcn12DLWs, smcn12SubDLWs, smcn12Signals, smcn12DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 3);
-    % -- type=4
-    [smcn13DLWs, smcn13SubDLWs, smcn13Signals, smcn13DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 4);
+    % -- type=4 extend amplitudes of high frequency via wavelet transfrom & invert wavelet transfrom
+%    [smcn13DLWs, smcn13SubDLWs, smcn13Signals, smcn13DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 4);
+    % -- type=5 extend amplitudes of low frequency via wavelet transfrom & invert wavelet transfrom
+    % -- this does not work 
+%    [smcn14DLWs, smcn14SubDLWs, smcn14Signals, smcn14DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 5);
 
     % -- check wavelet transform effect
     % -- change original cnSignals -(cwt)-> frequency -(icwt)-> Signals -> calc EC
@@ -1263,6 +1266,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
     if type==2, typename='t2'; end
     if type==3, typename='t3'; end
     if type==4, typename='t4'; end
+    if type==5, typename='t5'; end
     
     sfName = ['results/adsim2-checkRelation6' typename '-' group '-all.mat'];
     if exist(sfName, 'file')
@@ -1282,6 +1286,8 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
     elseif type == 3
         amps = [0.5, 1, 1.5];
     elseif type == 4
+        amps = [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+    elseif type == 5
         amps = [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
     end
     ampsLen = length(amps);
@@ -1405,7 +1411,13 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
                     for i=1:nodeNum
                         wt=cwt(siOrg(i,:));
                         wt(1:15,:)=wt(1:15,:) * amp;
-%                        wt(31:end,:)=wt(31:end,:) * 0.5;
+                        trend = smoothdata(siOrg(i,:),'movmean',32);
+                        siOrg(i,:) = icwt(wt,'SignalMean',trend);
+                    end
+                elseif type == 5
+                    for i=1:nodeNum
+                        wt=cwt(siOrg(i,:));
+                        wt(31:end,:)=wt(31:end,:) * amp;
                         trend = smoothdata(siOrg(i,:),'movmean',32);
                         siOrg(i,:) = icwt(wt,'SignalMean',trend);
                     end
