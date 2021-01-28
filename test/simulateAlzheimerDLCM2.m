@@ -1223,8 +1223,8 @@ function [wtDLWs, wtSubDLWs, wtSignals, wtDLs] = checkWaveletTransformEffect(sig
             end
         elseif type==2
             for i=1:nodeNum
-                [S,F,T] = stft(siOrg(i,:),'Window',hamming(24,'periodic'),'OverlapLength',16,'FFTLength',96);
-                x = istft(S,'Window',hamming(24,'periodic'),'OverlapLength',16,'FFTLength',96);
+                [S,F,T] = stft(siOrg(i,:),'Window',hamming(24,'periodic'),'OverlapLength',16,'FFTLength',64);
+                x = istft(S,'Window',hamming(24,'periodic'),'OverlapLength',16,'FFTLength',64);
             end
         end
         [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(siOrg);
