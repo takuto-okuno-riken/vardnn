@@ -153,6 +153,8 @@ function simulateAlzheimerDLCM2
 %    [smcn11DLWs, smcn11SubDLWs, smcn11Signals, smcn11DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 2);
     % -- type=3 does not perform better than type=1
 %    [smcn12DLWs, smcn12SubDLWs, smcn12Signals, smcn12DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 3);
+    % -- type=4
+    [smcn13DLWs, smcn13SubDLWs, smcn13Signals, smcn13DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 4);
 
     % -- check wavelet transform effect
     % -- change original cnSignals -(cwt)-> frequency -(icwt)-> Signals -> calc EC
@@ -1280,7 +1282,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
     elseif type == 3
         amps = [0.5, 1, 1.5];
     elseif type == 4
-        amps = [1];
+        amps = [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
     end
     ampsLen = length(amps);
 
@@ -1333,7 +1335,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
 %}
             % if you want to use parallel processing, set NumProcessors more than 2
             % and change for loop to parfor loop
-            NumProcessors = 20;
+            NumProcessors = 11;
 
             if NumProcessors > 1
                 try
@@ -1402,7 +1404,10 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
                     %}
                     for i=1:nodeNum
                         wt=cwt(siOrg(i,:));
-                        siOrg(i,:) = icwt(wt);
+                        wt(1:15,:)=wt(1:15,:) * amp;
+%                        wt(31:end,:)=wt(31:end,:) * 0.5;
+                        trend = smoothdata(siOrg(i,:),'movmean',32);
+                        siOrg(i,:) = icwt(wt,'SignalMean',trend);
                     end
                 end
                 [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(siOrg);
