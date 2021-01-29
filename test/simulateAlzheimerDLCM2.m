@@ -207,9 +207,14 @@ function simulateAlzheimerDLCM2
     % -- change simulated signals -> calc EC
     [smcn6DLWs, smcn6SubDLWs, smcn6Signals] = shiftAndExpandAmplitude(cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
     meanSmcn6DLW = nanmean(smcn6DLWs,3);
-    % -- change simulated signals of high frequency (wavelet) -> calc EC
+    % -- change simulated signals of high frequency (1:3) (wavelet) -> calc EC
+    % -- this works a bit.
     [smcn6bDLWs, smcn6bSubDLWs, smcn6bSignals] = shiftAndExpandAmplitude(cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 3);
     meanSmcn6bDLW = nanmean(smcn6bDLWs,3);
+    % -- change simulated signals of high frequency (1:10) (wavelet) -> calc EC
+    % -- 
+    [smcn6cDLWs, smcn6cSubDLWs, smcn6cSignals] = shiftAndExpandAmplitude(cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 4);
+    meanSmcn6cDLW = nanmean(smcn6cDLWs,3);
 
 %{
     figure; cnsmcnDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcnDLW);
@@ -561,10 +566,10 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
         load(sfName);
         return;
     end
-    
-    amps = [2,4,6,8,10,12,14];
+
     if type == 2, nMax = 2; end
-    if type == 3, nMax = length(amps); end
+    if type == 3, amps = [2,4,6,8,10,12,14]; nMax = length(amps); end
+    if type == 4, amps = [2,3,4,5,6,7,8]; nMax = length(amps); end
 
     shiftDLWs = simDLWs;
     shiftSubDLWs = simSubDLWs;
@@ -596,10 +601,8 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
         [corrZi, corrZij] = calcCorrelationZiZij(subEC, smSubEC, R);
         plotCorrelationZiZij([], subEC, [], smSubEC, R, ['sbj' num2str(k)], 'original', 'simulating');
         % plot original signals
-        figure; hold on;
-        plot(smSi','Color',[0.8, 0.8, 0.8]);
-        plot(smSi(1:R,:)');
-        hold off; title(['sbj' num2str(k) ' simulating signals']);
+%        figure; hold on; plot(smSi','Color',[0.8, 0.8, 0.8]); plot(smSi(1:R,:)');
+%        hold off; title(['sbj' num2str(k) ' simulating signals']);
 
         outfName = ['results/adsim2-shiftAmp' num2str(type) '-' group '-' num2str(k) '.mat'];
         if exist(outfName, 'file')
@@ -637,6 +640,13 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
                 for i=1:nodeNum
                     wt=cwt(smSi(i,:));
                     wt(1:3,:) = wt(1:3,:) * amps(n);
+                    trend = smoothdata(smSi(i,:),'movmean',32);
+                    smSi(i,:) = icwt(wt,'SignalMean',trend);
+                end
+            elseif type == 4
+                for i=1:nodeNum
+                    wt=cwt(smSi(i,:));
+                    wt(1:10,:) = wt(1:10,:) * amps(n);
                     trend = smoothdata(smSi(i,:),'movmean',32);
                     smSi(i,:) = icwt(wt,'SignalMean',trend);
                 end
