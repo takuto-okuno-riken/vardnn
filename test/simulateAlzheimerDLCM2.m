@@ -205,16 +205,18 @@ function simulateAlzheimerDLCM2
     % -- parallel shift does not affect EC (both Zi and Zij shifted)
     % -- move mean (range=5) based amplitude expansion does not work well
     % -- change simulated signals -> calc EC
-    [smcn6DLWs, smcn6SubDLWs, smcn6Signals] = shiftAndExpandAmplitude(cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
+    [smcn6DLWs, smcn6SubDLWs, smcn6Signals] = shiftAndExpandAmplitude(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 1);
     meanSmcn6DLW = nanmean(smcn6DLWs,3);
     % -- change simulated signals of high frequency (1:3) (wavelet) -> calc EC
     % -- this works a bit.
-    [smcn6bDLWs, smcn6bSubDLWs, smcn6bSignals] = shiftAndExpandAmplitude(cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 3);
+    [smcn6bDLWs, smcn6bSubDLWs, smcn6bSignals] = shiftAndExpandAmplitude(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 3);
     meanSmcn6bDLW = nanmean(smcn6bDLWs,3);
     % -- change simulated signals of high frequency (1:10) (wavelet) -> calc EC
     % -- 
-    [smcn6cDLWs, smcn6cSubDLWs, smcn6cSignals] = shiftAndExpandAmplitude(cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 4);
-    meanSmcn6cDLW = nanmean(smcn6cDLWs,3);
+%    [smcn6cDLWs, smcn6cSubDLWs, smcn6cSignals] = shiftAndExpandAmplitude(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 4);
+%    meanSmcn6cDLW = nanmean(smcn6cDLWs,3);
+    % -- 
+    [smcn6dDLWs, smcn6dSubDLWs, smcn6dSignals] = shiftAndExpandAmplitude(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 5);
 
 %{
     figure; cnsmcnDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcnDLW);
@@ -553,10 +555,10 @@ function [score, explained, pvals] = checkPCAHCvsAD(cnECs, adECs, nodeNum, algor
     xlabel('component1'); ylabel('component2'); 
 end
 
-function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs, subDLWs, signals, simDLWs, simSubDLWs, group, type)
-    nodeNum = size(signals{1},1);
-    sigLen = size(signals{1},2);
-    sbjNum = length(signals);
+function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(signals, DLWs, subDLWs, simSignals, simDLWs, simSubDLWs, group, type)
+    nodeNum = size(simSignals{1},1);
+    sigLen = size(simSignals{1},2);
+    sbjNum = length(simSignals);
     R = nodeNum;
     nMax = 1;
     sbjMax = sbjNum;
@@ -570,6 +572,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
     if type == 2, nMax = 2; end
     if type == 3, amps = [2,4,6,8,10,12,14]; nMax = length(amps); end
     if type == 4, amps = [2,3,4,5,6,7,8]; nMax = length(amps); end
+    if type == 5, nMax = 1; end
 
     shiftDLWs = simDLWs;
     shiftSubDLWs = simSubDLWs;
@@ -593,7 +596,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
     % checking signal parallel shift effect for Zi, Zij and ECij'
     for k=1:sbjMax
         subEC = subDLWs(:,:,k);
-        smSi = signals{k};
+        smSi = simSignals{k};
         smSubEC = simSubDLWs(:,:,k);
         sftSubEC = smSubEC;
 
@@ -649,6 +652,20 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
                     wt(1:10,:) = wt(1:10,:) * amps(n);
                     trend = smoothdata(smSi(i,:),'movmean',32);
                     smSi(i,:) = icwt(wt,'SignalMean',trend);
+                end
+            elseif type == 5
+                si = convert2SigmoidSignal(signals{k});
+                for i=1:nodeNum
+                    wtSi=cwt(si(i,:));
+                    wtSm=cwt(smSi(i,:));
+                    swtSi=nanstd(abs(wtSi),1,2);
+                    swtSm=nanstd(abs(wtSm),1,2);
+                    ml = swtSi ./ swtSm;
+                    wtSm = wtSm .* ml;
+                    trend = smoothdata(smSi(i,:),'movmean',32);
+                    smSi(i,:) = icwt(wtSm,'SignalMean',trend);
+%                    figure; cwt(smSi(i,:)'); figure; cwt(si(i,:)');
+%                    figure; plot(smSi(i,:)'); figure; plot(si(i,:)');
                 end
             end
             % amplitude expansion of simulating signal
@@ -736,7 +753,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
         cosSim(k,1) = getCosSimilarity(DLWs(:,:,k), simDLWs(:,:,k));
         [m, idx] = max(cosSim(k,:));
         if idx==1
-            sftSignal = signals{k};
+            sftSignal = simSignals{k};
             sftSubEC = simSubDLWs(:,:,k);
         else
             sftSignal = sftSignals{idx-1};
