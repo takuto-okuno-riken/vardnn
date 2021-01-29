@@ -160,8 +160,8 @@ function simulateAlzheimerDLCM2
     % -- this does not work 
 %    [smcn14DLWs, smcn14SubDLWs, smcn14Signals, smcn14DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 5);
     % -- type=6 extend amplitudes of high frequency (1:3) via wavelet transfrom & invert wavelet transfrom
-    % -- 
-    [smcn15DLWs, smcn15SubDLWs, smcn15Signals, smcn15DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 6);
+    % -- this does not perform better than type=1 and type=4
+%    [smcn15DLWs, smcn15SubDLWs, smcn15Signals, smcn15DLs] = checkRelationSubDLWandSignals3(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, smcnDLs, 'cn', 6);
 
     % -- check wavelet transform effect
     % -- change original cnSignals -(cwt)-> frequency -(icwt+movemean)-> Signals -> calc EC
@@ -562,10 +562,28 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
         return;
     end
     
+    amps = [2,4,6,8,10,12,14];
+    if type == 2, nMax = 2; end
+    if type == 3, nMax = length(amps); end
+
     shiftDLWs = simDLWs;
     shiftSubDLWs = simSubDLWs;
     shiftSignals = cell(sbjNum,1);
-    cosSim = nan(sbjMax, 1);
+    cosSim = nan(sbjMax, nMax+1);
+
+    % if you want to use parallel processing, set NumProcessors more than 2
+    % and change for loop to parfor loop
+    NumProcessors = 11;
+
+    if NumProcessors > 1
+        try
+            disp('Destroing any existance matlab pool session');
+            parpool('close');
+        catch
+            disp('No matlab pool session found');
+        end
+        parpool(NumProcessors);
+    end
 
     % checking signal parallel shift effect for Zi, Zij and ECij'
     for k=1:sbjMax
@@ -573,7 +591,6 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
         smSi = signals{k};
         smSubEC = simSubDLWs(:,:,k);
         sftSubEC = smSubEC;
-        sftSignals = {};
 
         % calc & plot correlation of original Zi vs simulating Zi
         [corrZi, corrZij] = calcCorrelationZiZij(subEC, smSubEC, R);
@@ -589,6 +606,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
             load(outfName);
         else
             sftSubECs = zeros(nodeNum,nodeNum+1,nMax);
+            sftSignals = cell(1,nMax);
             corrZi2 = nan(1,nMax);
             corrZij2 = nan(R,nMax);
         end
@@ -618,7 +636,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
             elseif type == 3
                 for i=1:nodeNum
                     wt=cwt(smSi(i,:));
-                    wt(1:3,:) = wt(1:3,:) * 12;
+                    wt(1:3,:) = wt(1:3,:) * amps(n);
                     trend = smoothdata(smSi(i,:),'movmean',32);
                     smSi(i,:) = icwt(wt,'SignalMean',trend);
                 end
@@ -644,10 +662,8 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
             sftSignals{n} = smSi;
 
             % plot shifted simulating signals
-            figure; hold on;
-            plot(smSi','Color',[0.8, 0.8, 0.8]);
-            plot(smSi(1:R,:)');
-            hold off; title(['sbj' num2str(k) ' shifted simulating signals']);
+%            figure; hold on; plot(smSi','Color',[0.8, 0.8, 0.8]); plot(smSi(1:R,:)');
+%            hold off; title(['sbj' num2str(k) ' shifted simulating signals']);
 
             if isnan(corrZi2(n))
                 % load original signal
@@ -673,20 +689,6 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
                     'L2Regularization',0.05, ...
                     'Verbose',false);
 
-                % if you want to use parallel processing, set NumProcessors more than 2
-                % and change for loop to parfor loop
-                NumProcessors = 11;
-
-                if NumProcessors > 1
-                    try
-                        disp('Destroing any existance matlab pool session');
-                        parpool('close');
-                    catch
-                        disp('No matlab pool session found');
-                    end
-                    parpool(NumProcessors);
-                end
-
     %            for i=1:R
                 parfor i=1:R
                     netDLCM = initDlcmNetwork(smSi, f.exSignal, [], f.exControl); 
@@ -704,11 +706,6 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
                 end
                 sftSubECs(:,:,n) = sftSubEC;
 
-                % shutdown parallel processing
-                if NumProcessors > 1
-                    delete(gcp('nocreate'))
-                end
-
                 % calcate correlation
                 [corrZi2(n), corrZij2(:,n)] = calcCorrelationZiZij(subEC, sftSubEC, R);
 
@@ -719,11 +716,22 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
             
             % plot correlation of original Zi vs shifted simulating Zi
 %            plotCorrelationZiZij([], subEC, [], sftSubEC, R, ['sbj' num2str(k)], 'original', 'shifted sim');
+
+            % cos similality
+            sftEC = abs(repmat(sftSubEC(:,1),[1 nodeNum]) - sftSubEC(:,2:end));
+            cosSim(k,n+1) = getCosSimilarity(DLWs(:,:,k), sftEC);
         end
 
         % find most correlated Zi & Zij signals
-        [m, idx] = max(corrZi2);
-        sftSubEC = sftSubECs(:,:,idx);
+        cosSim(k,1) = getCosSimilarity(DLWs(:,:,k), simDLWs(:,:,k));
+        [m, idx] = max(cosSim(k,:));
+        if idx==1
+            sftSignal = signals{k};
+            sftSubEC = simSubDLWs(:,:,k);
+        else
+            sftSignal = sftSignals{idx-1};
+            sftSubEC = sftSubECs(:,:,idx-1);
+        end
 
         % plot correlation of original Zi vs shifted simulating Zi
 %        plotCorrelationZiZij([], subEC, [], sftSubEC, R, ['sbj' num2str(k)], 'original', 'shifted sim');
@@ -731,12 +739,14 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(DLWs,
         % set output matrix
         shiftDLWs(:,:,k) = abs(repmat(sftSubEC(:,1),[1 nodeNum]) - sftSubEC(:,2:end));
         shiftSubDLWs(:,:,k) = sftSubEC;
-        shiftSignals{k} = sftSignals{idx};
-
-        % cos similality
-        cosSim(k,1) = getCosSimilarity(DLWs(:,:,k), shiftDLWs(:,:,k));
+        shiftSignals{k} = sftSignal;
     end
-    save(sfName, 'shiftDLWs', 'shiftSubDLWs', 'shiftSignals');
+    save(sfName, 'shiftDLWs', 'shiftSubDLWs', 'shiftSignals', 'cosSim');
+
+    % shutdown parallel processing
+    if NumProcessors > 1
+        delete(gcp('nocreate'))
+    end
 end
 
 function checkRelationSubDLWandWeights(signals, subDLWs, smSubDLWs, group, type)
