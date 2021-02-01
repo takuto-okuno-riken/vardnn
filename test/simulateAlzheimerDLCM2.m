@@ -219,8 +219,12 @@ function simulateAlzheimerDLCM2
     % -- does not work
 %    [smcn6dDLWs, smcn6dSubDLWs, smcn6dSignals] = shiftAndExpandAmplitude(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 5);
     % -- change simulated signals of all frequency (wavelet) -> calc EC
-    % -- does not work
+    % -- 
     [smcn6eDLWs, smcn6eSubDLWs, smcn6eSignals] = shiftAndExpandAmplitude(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 6);
+    meanSmcn6bDLW = nanmean(smcn6bDLWs,3);
+    % -- change simulated signals of high frequency (1:20) (wavelet) -> calc EC
+    % -- 
+    [smcn6fDLWs, smcn6fSubDLWs, smcn6fSignals] = shiftAndExpandAmplitude(cnSignals, cnDLWs, cnSubDLWs, smcnSignals, smcnDLWs, smcnSubDLWs, 'smcn', 7);
 
 %{
     figure; cnsmcnDLWr = plotTwoSignalsCorrelation(meanCnDLW, meanSmcnDLW);
@@ -577,7 +581,8 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(signa
     if type == 3, amps = [2,4,6,8,10,12,14]; nMax = length(amps); end
     if type == 4, amps = [2,3,4,5,6,7,8]; nMax = length(amps); end
     if type == 5, nMax = 1; end
-    if type == 6, amps = [1,2,3,4,5,6,7]; nMax = length(amps); end
+    if type == 6, amps = [1,1.5,2,2.5,3,3.5,4,4.5,5]; nMax = length(amps); end
+    if type == 7, amps = [1,1.5,2,2.5,3,3.5,4,4.5,5]; nMax = length(amps); end
 
     shiftDLWs = simDLWs;
     shiftSubDLWs = simSubDLWs;
@@ -586,7 +591,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(signa
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 11;
+    NumProcessors = 20;
 
     if NumProcessors > 1
         try
@@ -676,6 +681,13 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(signa
                 for i=1:nodeNum
                     wt=cwt(smSi(i,:));
                     wt = wt * amps(n);
+                    trend = smoothdata(smSi(i,:),'movmean',32);
+                    smSi(i,:) = icwt(wt,'SignalMean',trend);
+                end
+            elseif type == 7
+                for i=1:nodeNum
+                    wt=cwt(smSi(i,:));
+                    wt(1:20,:) = wt(1:20,:) * amps(n);
                     trend = smoothdata(smSi(i,:),'movmean',32);
                     smSi(i,:) = icwt(wt,'SignalMean',trend);
                 end
@@ -1277,7 +1289,7 @@ function [wtDLWs, wtSubDLWs, wtSignals, wtDLs] = checkWaveletTransformEffect(sig
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 11;
+    NumProcessors = 20;
 
     if NumProcessors > 1
         try
@@ -1453,7 +1465,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
 %}
             % if you want to use parallel processing, set NumProcessors more than 2
             % and change for loop to parfor loop
-            NumProcessors = 11;
+            NumProcessors = 20;
 
             if NumProcessors > 1
                 try
