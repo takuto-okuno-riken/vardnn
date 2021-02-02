@@ -76,6 +76,9 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     mat = calcDirectLiNGAM(signals{i});
                     parsavemat(fName, mat);
                 end
+            case 'larec'
+                netLAR = initLarNetwork(signals{i}, [], [], [], LAG);
+                mat = plotLarEC(netLAR, [], []);
             case 'dlcm'
                 dlcmName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(dlcmName, 'file')
@@ -239,6 +242,12 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : DLCM Weight Causality Index'];
+    case 'larec'
+        sigma = std(meanWeights(:),1,'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : LAR-EC Index'];
     end
     imagesc(sigWeights,clims);
     daspect([1 1 1]);
