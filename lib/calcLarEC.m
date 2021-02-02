@@ -34,7 +34,8 @@ function [EC, ECsub] = calcLarEC(net, nodeControl, exControl, isFullNode)
             [~,exIdx] = find(exControl(i,:)==1);
             exIdx = exIdx + nodeNum;
         end
-        nlen = length(nodeIdx) + length(exIdx);
+        idxList = [nodeIdx, exIdx];
+        nlen = length(idxList);
 
         for j=1:nodeMax
             if i==j, continue; end
@@ -42,8 +43,9 @@ function [EC, ECsub] = calcLarEC(net, nodeControl, exControl, isFullNode)
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
 
             zj = z;
+            bIdx = find(idxList==j);
             for k=1:lags
-                zj = zj - b(j+nlen*(k-1));
+                zj = zj - b(bIdx+nlen*(k-1));
             end
 
             EC(i,j) = abs(z - zj);
