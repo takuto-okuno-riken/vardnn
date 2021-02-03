@@ -151,10 +151,10 @@ function simulateAlzheimerDLCM2
     meanSmmvadDLW = cell(lagMax,2);
     smmvadSubDLWs = cell(lagMax,2);
     for i=1:lagMax
-        [smmvcnDLs{i,1},  meanSmmvcnDL{i,1}, ~] = calculateConnectivity(smmvcnSignals{i,1}, roiNames, 'smmvcn', 'dlcm', 1);
-        [smmvcnDLWs{i,1}, meanSmmvcnDLW{i,1}, ~, smmvcnSubDLWs{i,1}] = calculateConnectivity(smmvcnSignals{i,1}, roiNames, 'smmvcn', 'dlw', 1);
-        [smmvadDLs{i,1},  meanSmmvadDL{i,1}, ~] = calculateConnectivity(smmvadSignals{i,1}, roiNames, 'smmvad', 'dlcm', 1);
-        [smmvadDLWs{i,1}, meanSmmvadDLW{i,1}, ~, smmvadSubDLWs{i,1}] = calculateConnectivity(smmvadSignals{i,1}, roiNames, 'smmvad', 'dlw', 1);
+        [smmvcnDLs{i,1},  meanSmmvcnDL{i,1}, ~] = calculateConnectivity(smmvcnSignals{i,1}, roiNames, ['smmvcn' num2str(i)], 'dlcm', 1);
+        [smmvcnDLWs{i,1}, meanSmmvcnDLW{i,1}, ~, smmvcnSubDLWs{i,1}] = calculateConnectivity(smmvcnSignals{i,1}, roiNames, ['smmvcn' num2str(i)], 'dlw', 1);
+        [smmvadDLs{i,1},  meanSmmvadDL{i,1}, ~] = calculateConnectivity(smmvadSignals{i,1}, roiNames, ['smmvad' num2str(i)], 'dlcm', 1);
+        [smmvadDLWs{i,1}, meanSmmvadDLW{i,1}, ~, smmvadSubDLWs{i,1}] = calculateConnectivity(smmvadSignals{i,1}, roiNames, ['smmvad' num2str(i)], 'dlw', 1);
     end
 
     % check relation between Zi vs signal mean diff, and Zij vs signal amplitude (change teaching signal)
@@ -2762,7 +2762,9 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
     ROINUM = size(signals{1},1);
     sbjNum = length(signals);
 
-    outfName = ['results/adsim2-' algorithm '-' group '-roi' num2str(ROINUM) '.mat'];
+    if strcmp(algorithm, 'mvarec'), algoname = [algorithm num2str(lags)];
+    else, algoname = algorithm; end
+    outfName = ['results/adsim2-' algoname '-' group '-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
         return;
