@@ -51,6 +51,20 @@ function simulateAlzheimerDLCM2
     [~, smcn2Signals] = simulateNodeSignals(cn2Signals, roiNames, 'cn2', 'dlw', 'cn');
     [~, smad2Signals] = simulateNodeSignals(ad2Signals, roiNames, 'ad2', 'dlw', 'ad');
 
+    % simulate by MVAR
+    lagMax = 10;
+    smmvcnSignals = cell(lagMax,2);
+    smmvadSignals = cell(lagMax,2);
+    for i=1:lagMax
+        % simulate by MVAR, CN & AD signals from first frame
+        [~, smmvcnSignals{i,1}] = simulateNodeSignals(cnSignals, roiNames, 'cn', 'mvarec', 'cn', 0, 0, i);
+        [~, smmvadSignals{i,1}] = simulateNodeSignals(adSignals, roiNames, 'ad', 'mvarec', 'ad', 0, 0, i);
+
+        % simulate by MVAR, CN & AD signals from last-1 frame
+        [~, smmvcnSignals{i,2}] = simulateNodeSignals(cn2Signals, roiNames, 'cn2', 'mvarec', 'cn', 0, 0, i);
+        [~, smmvadSignals{i,2}] = simulateNodeSignals(ad2Signals, roiNames, 'ad2', 'mvarec', 'ad', 0, 0, i);
+    end
+
     % expanding amplitude of simulated CN & AD signals from last-1 frame (type1)
     % -- no effect
 %{
@@ -124,6 +138,24 @@ function simulateAlzheimerDLCM2
 %    [smcn4DLWs, meanSmcn4DLW, ~] = calculateConnectivity(smcn4Signals, roiNames, 'smcn4', 'dlw', 1);
 %    [smad4DLs, meanSmad4DL, ~] = calculateConnectivity(smad4Signals, roiNames, 'smad4', 'dlcm', 1);
 %    [smad4DLWs, meanSmad4DLW, ~] = calculateConnectivity(smad4Signals, roiNames, 'smad4', 'dlw', 1);
+
+    % check DLCM-EC and DLCM-GC of simulated CN and AD (by MVAR network)
+    smmvcnDLs     = cell(lagMax,2);
+    meanSmmvcnDL  = cell(lagMax,2);
+    smmvcnDLWs    = cell(lagMax,2);
+    meanSmmvcnDLW = cell(lagMax,2);
+    smmvcnSubDLWs = cell(lagMax,2);
+    smmvadDLs     = cell(lagMax,2);
+    meanSmmvadDL  = cell(lagMax,2);
+    smmvadDLWs    = cell(lagMax,2);
+    meanSmmvadDLW = cell(lagMax,2);
+    smmvadSubDLWs = cell(lagMax,2);
+    for i=1:lagMax
+        [smmvcnDLs{i,1},  meanSmmvcnDL{i,1}, ~] = calculateConnectivity(smmvcnSignals{i,1}, roiNames, 'smmvcn', 'dlcm', 1);
+        [smmvcnDLWs{i,1}, meanSmmvcnDLW{i,1}, ~, smmvcnSubDLWs{i,1}] = calculateConnectivity(smmvcnSignals{i,1}, roiNames, 'smmvcn', 'dlw', 1);
+        [smmvadDLs{i,1},  meanSmmvadDL{i,1}, ~] = calculateConnectivity(smmvadSignals{i,1}, roiNames, 'smmvad', 'dlcm', 1);
+        [smmvadDLWs{i,1}, meanSmmvadDLW{i,1}, ~, smmvadSubDLWs{i,1}] = calculateConnectivity(smmvadSignals{i,1}, roiNames, 'smmvad', 'dlw', 1);
+    end
 
     % check relation between Zi vs signal mean diff, and Zij vs signal amplitude (change teaching signal)
 %    checkRelationSubDLWandSignals(cnSignals, cnDLWs, cnSubDLWs, 'cn', 0);
@@ -2716,7 +2748,10 @@ function out = expandAmplitude2(signals, rate)
     out = d * rate + m;
 end
 
-function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, group, algorithm, orgGroup, isRaw, inSiRange)
+function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, group, algorithm, orgGroup, isRaw, inSiRange, lags)
+    if nargin < 8
+        lags = 1;
+    end
     if nargin < 7
         inSiRange = 0;
     end
@@ -2775,6 +2810,26 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
             end
             [Y, time] = simulateDlcmNetwork(si, exSignal, [], f.exControl, f.netDLCM);
             [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl);
+        case 'mvarec'
+            dlcmName = ['results/ad-dlcm-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            f = load(dlcmName);
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
+            if isRaw
+                si = signals{i};
+                sig=0; c=0; maxsi=0; minsi=0;
+            else
+                [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
+            end
+            if inSiRange > 0
+                exSignal = f.exSignal(:,inSiRange);
+            else
+                exSignal = f.exSignal;
+            end
+            % simulate LAR network with 1st frame & exogenous input signal
+            netMVAR = initMvarNetwork(si, exSignal, [], f.exControl, lags);
+            [Y, time] = simulateMvarNetwork(si, exSignal, [], f.exControl, netMVAR);
+            [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl); % not used this
         end
         ECs(:,:,i) = ec;
         simSignals{i} = Y;
