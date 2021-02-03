@@ -18,7 +18,8 @@ function testMvarEC
     netMVAR = initMvarNetwork(si, exSignal, [], exControl, lags);
     
     % show multivaliate MVAR-EC
-    figure; EC = plotMvarEC(netMVAR, [], exControl, 0);
+    figure; mEC = plotMvarEC(netMVAR, [], exControl, 0);
+    figure; pEC = plotPvarEC(si, exSignal, [], exControl, lags, 0);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0);
 
@@ -33,7 +34,8 @@ function testMvarEC
     netMVAR = initMvarNetwork(si, exSignal, [], exControl, lags);
     
     % show multivaliate MVAR-EC
-    figure; EC = plotMvarEC(netMVAR, [], exControl, 0, 1);
+    figure; mEC = plotMvarEC(netMVAR, [], exControl, 0, 1);
+    figure; pEC = plotPvarEC(si, exSignal, [], exControl, lags, 0, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0, 0, 1);
 end
