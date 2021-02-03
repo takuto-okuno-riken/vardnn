@@ -155,6 +155,11 @@ function simulateAlzheimerDLCM2
         [smmvcnDLWs{i,1}, meanSmmvcnDLW{i,1}, ~, smmvcnSubDLWs{i,1}] = calculateConnectivity(smmvcnSignals{i,1}, roiNames, ['smmvcn' num2str(i)], 'dlw', 1);
         [smmvadDLs{i,1},  meanSmmvadDL{i,1}, ~] = calculateConnectivity(smmvadSignals{i,1}, roiNames, ['smmvad' num2str(i)], 'dlcm', 1);
         [smmvadDLWs{i,1}, meanSmmvadDLW{i,1}, ~, smmvadSubDLWs{i,1}] = calculateConnectivity(smmvadSignals{i,1}, roiNames, ['smmvad' num2str(i)], 'dlw', 1);
+        
+        [smmvcnDLs{i,2},  meanSmmvcnDL{i,2}, ~] = calculateConnectivity(smmvcnSignals{i,2}, roiNames, ['smmvcn2' num2str(i)], 'dlcm', 1);
+        [smmvcnDLWs{i,2}, meanSmmvcnDLW{i,2}, ~, smmvcnSubDLWs{i,2}] = calculateConnectivity(smmvcnSignals{i,2}, roiNames, ['smmvcn2' num2str(i)], 'dlw', 1);
+        [smmvadDLs{i,2},  meanSmmvadDL{i,2}, ~] = calculateConnectivity(smmvadSignals{i,2}, roiNames, ['smmvad2' num2str(i)], 'dlcm', 1);
+        [smmvadDLWs{i,2}, meanSmmvadDLW{i,2}, ~, smmvadSubDLWs{i,2}] = calculateConnectivity(smmvadSignals{i,2}, roiNames, ['smmvad2' num2str(i)], 'dlw', 1);
     end
 
     % check relation between Zi vs signal mean diff, and Zij vs signal amplitude (change teaching signal)
