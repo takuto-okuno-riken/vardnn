@@ -1,5 +1,5 @@
 
-function testLinearAutoRegress
+function testMvarEC
     % load signals
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
@@ -15,10 +15,10 @@ function testLinearAutoRegress
     si(4,2:end) = si(6,1:sigLen-1);
 
     %% test pattern 1 
-    netLAR = initLarNetwork(si, exSignal, [], exControl, lags);
+    netMVAR = initMvarNetwork(si, exSignal, [], exControl, lags);
     
-    % show multivaliate LAR-EC
-    figure; EC = plotLarEC(netLAR, [], exControl, 0);
+    % show multivaliate MVAR-EC
+    figure; EC = plotMvarEC(netMVAR, [], exControl, 0);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0);
 
@@ -29,11 +29,11 @@ function testLinearAutoRegress
     exControl = ones(nodeNum,exNum);
     si(3,2:end) = exSignal(1,1:sigLen-1);
 
-    % do training or load Pairwised DNN-GC's network
-    netLAR = initLarNetwork(si, exSignal, [], exControl, lags);
+    % init MVAR network
+    netMVAR = initMvarNetwork(si, exSignal, [], exControl, lags);
     
-    % show multivaliate LAR-EC
-    figure; EC = plotLarEC(netLAR, [], exControl, 0, 1);
+    % show multivaliate MVAR-EC
+    figure; EC = plotMvarEC(netMVAR, [], exControl, 0, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0, 0, 1);
 end

@@ -57,7 +57,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     fcaAUC = zeros(1,N);
     tsfcAUC = zeros(1,N);
     tsfcaAUC = zeros(1,N);
-    larecAUC = zeros(1,N);
+    mvarecAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
     wcsROC = cell(N,2);
@@ -73,7 +73,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     fcaROC = cell(N,2);
     tsfcROC = cell(N,2);
     tsfcaROC = cell(N,2);
-    larecROC = cell(N,2);
+    mvarecROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
     wcsRf = figure;
@@ -89,7 +89,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     fcaRf = figure;
     tsfcRf = figure;
     tsfcaRf = figure;
-    larecRf = figure;
+    mvarecRf = figure;
 
     origf = figure;
     origSigf = figure;
@@ -251,10 +251,10 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of tsFCa (pat=' num2str(i) ')']);
 
         % show result of linear auto-regression EC
-        netLAR = initLarNetwork(si, [], [], [], lag);
-        larEC = calcLarEC(netLAR, [], []);
-        figure(larecRf); hold on; [larecROC{k,1}, larecROC{k,2}, larecAUC(k)] = plotROCcurve(larEC, weights, 100, 1, Gth); hold off;
-        title(['ROC curve of LAR-EC (pat=' num2str(i) ')']);
+        netMVAR = initMvarNetwork(si, [], [], [], lag);
+        mvarEC = calcMvarEC(netMVAR, [], []);
+        figure(mvarecRf); hold on; [mvarecROC{k,1}, mvarecROC{k,2}, mvarecAUC(k)] = plotROCcurve(mvarEC, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of MVAR-EC (pat=' num2str(i) ')']);
     end
     % show result AUC
     disp(['FC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(fcAUC))]);
@@ -270,8 +270,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
     % save result
     fname = ['results/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-result.mat'];
-    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC','larecAUC', ...
-        'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC','larecROC');
+    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC','mvarecAUC', ...
+        'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC','mvarecROC');
 
     % show average ROC curve of DCM
     figure; 
@@ -311,7 +311,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 %    plotAverageROCcurve(fcaROC, N, '-.', [0.8,0.2,0.2],0.5);
 %    plotAverageROCcurve(tsfcROC, N, '-', [0.6,0.2,0.2],1.2);
 %    plotAverageROCcurve(tsfcaROC, N, '-.', [0.6,0.2,0.2],1.2);
-%    plotAverageROCcurve(larecROC, N, '-', [0.3,0.3,0.3],0.5);
+    plotAverageROCcurve(mvarecROC, N, '-', [0.3,0.3,0.3],0.5);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);

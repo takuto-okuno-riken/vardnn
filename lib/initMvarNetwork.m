@@ -1,5 +1,5 @@
 %%
-% calculate linear auto-regression weight vectors and Create LAR network
+% calculate linear multivariate vector auto-regression weights and Create MVAR network
 % input:
 %  X               multivariate time series matrix (node x time series)
 %  exSignal        multivariate time series matrix (exogenous input x time series) (default:[])
@@ -7,7 +7,7 @@
 %  exControl       exogenous input control matrix for each node (node x exogenous input) (default:[])
 %  lags            number of lags for autoregression (default:3)
 
-function net = initLarNetwork(X, exSignal, nodeControl, exControl, lags)
+function net = initMvarNetwork(X, exSignal, nodeControl, exControl, lags)
     if nargin < 4, exControl = []; end
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end

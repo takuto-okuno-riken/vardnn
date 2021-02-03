@@ -1,5 +1,5 @@
 
-function testSimulationLAR
+function testSimulationMVAR
     % load signals
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
@@ -15,10 +15,10 @@ function testSimulationLAR
     si(4,2:end) = si(6,1:sigLen-1);
 
     %% test pattern 1 
-    netLAR = initLarNetwork(si, exSignal, [], exControl, lags);
+    netMVAR = initMvarNetwork(si, exSignal, [], exControl, lags);
     
     % simulate LAR network with 1st frame & exogenous input signal
-    [S, time] = simulateLarNetwork(si, exSignal, [], exControl, netLAR);
+    [S, time] = simulateMvarNetwork(si, exSignal, [], exControl, netMVAR);
 
     figure; [mae, maeerr] = plotTwoSignals(si, S);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
@@ -29,7 +29,7 @@ function testSimulationLAR
     % show original & simulated signal granger causality index (gc-EC)
     figure; gcI = plotPairwiseGCI(si);
     figure; gcI = plotPairwiseGCI(S);
-    % show multivaliate LAR-EC
-    figure; EC = plotLarEC(netLAR, [], exControl, 0);
+    % show multivaliate MVAR-EC
+    figure; EC = plotMvarEC(netMVAR, [], exControl, 0);
 end
 

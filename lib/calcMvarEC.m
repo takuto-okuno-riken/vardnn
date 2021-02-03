@@ -1,13 +1,13 @@
 %%
-% Caluclate multivaliate LAR(linear auto-regression)-EC
-% returns LAR EC matrix (EC) and impaired node signals (ECsub)
+% Caluclate MVAR (multivaliate vector auto-regression) EC
+% returns MVAR EC matrix (EC) and impaired node signals (ECsub)
 % input:
-%  net          LAR network
+%  net          MVAR network
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [EC, ECsub] = calcLarEC(net, nodeControl, exControl, isFullNode)
+function [EC, ECsub] = calcMvarEC(net, nodeControl, exControl, isFullNode)
     if nargin < 4, isFullNode = 0; end
     if nargin < 3, exControl = []; end
     if nargin < 2, nodeControl = []; end
