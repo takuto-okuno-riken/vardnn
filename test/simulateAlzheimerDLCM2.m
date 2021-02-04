@@ -303,7 +303,17 @@ function simulateAlzheimerDLCM2
 %    [wtcn2FCs, meanWtcn2FC, ~] = calculateConnectivity(wtcn2Signals, roiNames, 'wtcn2', 'fc', 1);
     [wtcn3FCs, meanWtcn3FC, ~] = calculateConnectivity(wtcn3Signals, roiNames, 'wtcn3', 'fc', 1);
     [wtcn4FCs, meanWtcn4FC, ~] = calculateConnectivity(wtcn4Signals, roiNames, 'wtcn4', 'fc', 1);
-    
+    smmvcnFCs     = cell(lagMax,2);
+    meanSmmvcnFC  = cell(lagMax,2);
+    smmvadFCs     = cell(lagMax,2);
+    meanSmmvadFC  = cell(lagMax,2);
+    for i=1:lagMax
+        [smmvcnFCs{i,1},  meanSmmvcnFC{i,1}, ~] = calculateConnectivity(smmvcnSignals{i,1}, roiNames, ['smmvcn' num2str(i)], 'fc', 1);
+        [smmvadFCs{i,1},  meanSmmvadFC{i,1}, ~] = calculateConnectivity(smmvadSignals{i,1}, roiNames, ['smmvad' num2str(i)], 'fc', 1);        
+        [smmvcnFCs{i,2},  meanSmmvcnFC{i,2}, ~] = calculateConnectivity(smmvcnSignals{i,2}, roiNames, ['smmvcn2' num2str(i)], 'fc', 1);
+        [smmvadFCs{i,2},  meanSmmvadFC{i,2}, ~] = calculateConnectivity(smmvadSignals{i,2}, roiNames, ['smmvad2' num2str(i)], 'fc', 1);
+    end
+
 %{
     figure; cnsmcnFCr = plotTwoSignalsCorrelation(meanCnFC, meanSmcnFC);
     figure; adsmadFCr = plotTwoSignalsCorrelation(meanAdFC, meanSmadFC);
@@ -517,6 +527,18 @@ function simulateAlzheimerDLCM2
 %        cosSims(i,28) = getCosSimilarity(cnFCs(:,:,i), wtcn2FCs(:,:,i));
         cosSims(i,28) = getCosSimilarity(cnFCs(:,:,i), wtcn3FCs(:,:,i));
         cosSims(i,29) = getCosSimilarity(cnFCs(:,:,i), wtcn4FCs(:,:,i));
+    end
+    figure; boxplot(cosSims);
+    cosSims = nan(cnSbjNum,60);
+    for i=1:cnSbjNum
+        for j=1:10
+            cosSims(i,j) = getCosSimilarity(cnDLWs(:,:,i), smmvcnDLWs{j,1}(:,:,i));
+            cosSims(i,10+j) = getCosSimilarity(cnDLWs(:,:,i), smmvcnDLWs{j,2}(:,:,i));
+            cosSims(i,20+j) = getCosSimilarity(cnDLs(:,:,i), smmvcnDLs{j,1}(:,:,i));
+            cosSims(i,30+j) = getCosSimilarity(cnDLs(:,:,i), smmvcnDLs{j,2}(:,:,i));
+            cosSims(i,40+j) = getCosSimilarity(cnFCs(:,:,i), smmvcnFCs{j,1}(:,:,i));
+            cosSims(i,50+j) = getCosSimilarity(cnFCs(:,:,i), smmvcnFCs{j,2}(:,:,i));
+        end
     end
     figure; boxplot(cosSims);
     cosSims = nan(cnSbjNum,30);
