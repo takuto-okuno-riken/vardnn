@@ -48,7 +48,7 @@ function [EC, ECsub] = calcMvarEC(net, nodeControl, exControl, isFullNode)
                 zj = zj - b(bIdx+nlen*(k-1));
             end
 
-            EC(i,j) = abs(z - zj);
+            EC(i,j) = abs(z - zj); % actually this is sum of b(bIdx+nlen*(k-1))
             ECsub(i,j+1) = zj;
         end
     end

@@ -32,7 +32,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI(
     p = lags;
     Y = flipud(X.'); % need to flip signal
 
-    % first, calculate multivariate autoregression without target
+    % first, calculate vector auto-regression (VAR) without target
     Yj = zeros(len-p, p*nodeMax);
     for k=1:p
         Yj(:,1+nodeMax*(k-1):nodeMax*k) = Y(1+k:len-p+k,:);
@@ -63,7 +63,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI(
             end
         end
 
-        % multivariate autoregression
+        % vector auto-regression (VAR)
         Xt = Y(1:len-p,i);
         Xti = Yj; %[Yj, ones(len-p,1)]; % might not be good to add bias
         Xti(:,[nodeDel, exDel]) = [];

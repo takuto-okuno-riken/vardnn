@@ -28,7 +28,7 @@ function net = initMvarNetwork(X, exSignal, nodeControl, exControl, lags)
     p = lags;
     Y = flipud(Y.'); % need to flip signal
 
-    % first, calculate multivariate autoregression without target
+    % first, calculate vector auto-regression (VAR) without target
     Yj = zeros(sigLen-p, p*nodeMax);
     for k=1:p
         Yj(:,1+nodeMax*(k-1):nodeMax*k) = Y(1+k:sigLen-p+k,:);
@@ -43,15 +43,14 @@ function net = initMvarNetwork(X, exSignal, nodeControl, exControl, lags)
             [~,exIdx] = find(exControl(i,:)==1);
             exIdx = exIdx + nodeNum;
         end
-
-        % multivariate autoregression
-        Xt = Y(1:sigLen-p,i);
-        X2 = [];
+        idx = [];
         for k=1:p
-            idx = [nodeIdx+nodeMax*(k-1), exIdx+nodeMax*(k-1)];
-            X2 = [X2, Yj(:,idx)];
+            idx = [idx, nodeIdx+nodeMax*(k-1), exIdx+nodeMax*(k-1)];
         end
-        Xti = [X2, ones(sigLen-p,1)]; % might not be good to add bias
+
+        % vector auto-regression (VAR)
+        Xt = Y(1:sigLen-p,i);
+        Xti = [Yj(:,idx), ones(sigLen-p,1)]; % might not be good to add bias
         % apply the regress function
         [b{i},bint{i},r{i},rint{i},stats{i}] = regress(Xt,Xti);
     end

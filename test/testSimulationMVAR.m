@@ -17,7 +17,7 @@ function testSimulationMVAR
     %% test pattern 1 
     netMVAR = initMvarNetwork(si, exSignal, [], exControl, lags);
     
-    % simulate LAR network with 1st frame & exogenous input signal
+    % simulate mVAR network with 1st frame & exogenous input signal
     [S, time] = simulateMvarNetwork(si, exSignal, [], exControl, netMVAR);
 
     figure; [mae, maeerr] = plotTwoSignals(si, S);

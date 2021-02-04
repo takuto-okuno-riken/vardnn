@@ -44,7 +44,7 @@ function [EC, ECsub] = calcPvarEC(X, exSignal, nodeControl, exControl, lags, isF
             [b,bint,Yr] = regress(Yt.',Yti);
             ECsub(i,j,1) = sum(b);
             ECsub(i,j,2) = sum(b(1:p+1));
-            EC(i,j) = abs(ECsub(i,j,1)-ECsub(i,j,2));
+            EC(i,j) = abs(ECsub(i,j,1)-ECsub(i,j,2)); % actually this is sum of b(p+2:end)
         end
     end
 end
