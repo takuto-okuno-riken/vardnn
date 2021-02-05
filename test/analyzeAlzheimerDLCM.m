@@ -217,6 +217,22 @@ function analyzeAlzheimerDLCM
     tsfcROC = cell(N,2);
     tsfcaROC = cell(N,2);
     mvarecROC = cell(N,2);
+    fcACC = cell(N,1);
+    pcACC = cell(N,1);
+    wcsACC = cell(N,1);
+    gcACC = cell(N,1);
+    pgcACC = cell(N,1);
+    dlACC = cell(N,1);
+    dlwACC = cell(N,1);
+    dlgACC = cell(N,1);
+    teACC = cell(N,1);
+    pcsACC = cell(N,1);
+    cpcACC = cell(N,1);
+    fgesACC = cell(N,1);
+    fcaACC = cell(N,1);
+    tsfcACC = cell(N,1);
+    tsfcaACC = cell(N,1);
+    mvarecACC = cell(N,1);
 
     sigCntCN = cell(N,algNum);
     sigCntAD = cell(N,algNum);
@@ -227,112 +243,112 @@ function analyzeAlzheimerDLCM
         [B, I, X] = sortAndPairPValues(control, target, cnadFCsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+        [fcROC{k,1}, fcROC{k,2}, fcAUC(k), fcACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnPCs, adPCs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadPCsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+        [pcROC{k,1}, pcROC{k,2}, pcAUC(k), pcACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnWCSs, adWCSs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadWCSsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [wcsROC{k,1}, wcsROC{k,2}, wcsAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+        [wcsROC{k,1}, wcsROC{k,2}, wcsAUC(k), wcsACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnGCs, adGCs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadGCsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+        [gcROC{k,1}, gcROC{k,2}, gcAUC(k), gcACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnPGCs, adPGCs, k, N);        % replece cn*s, ad*s
         [B, I, X] = sortAndPairPValues(control, target, cnadPGCsUtP, topNum);                                 % replace cnad*sUtP
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [pgcROC{k,1}, pgcROC{k,2}, pgcAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);        % replace *ROC, *AUC
+        [pgcROC{k,1}, pgcROC{k,2}, pgcAUC(k), pgcACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);        % replace *ROC, *AUC
         
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnTEs, adTEs, k, N);        % replece cn*s, ad*s
         [B, I, X] = sortAndPairPValues(control, target, cnadTEsUtP, topNum);                                % replace cnad*sUtP
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [teROC{k,1}, teROC{k,2}, teAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
+        [teROC{k,1}, teROC{k,2}, teAUC(k), teACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDLs, adDLs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadDLsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+        [dlROC{k,1}, dlROC{k,2}, dlAUC(k), dlACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDLWs, adDLWs, k, N);         % replece cn*s, ad*s
         [B, I, X] = sortAndPairPValues(control, target, cnadDLWsUtP, topNum);                                  % replace cnad*sUtP
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
+        [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k), dlwACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDLGs, adDLGs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadDLGsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [dlgROC{k,1}, dlgROC{k,2}, dlgAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+        [dlgROC{k,1}, dlgROC{k,2}, dlgAUC(k), dlgACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
         
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnPCSs, adPCSs, k, N);         % replece cn*s, ad*s
         [B, I, X] = sortAndPairPValues(control, target, cnadPCSsUtP, topNum);                                  % replace cnad*sUtP
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [pcsROC{k,1}, pcsROC{k,2}, pcsAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
+        [pcsROC{k,1}, pcsROC{k,2}, pcsAUC(k), pcsACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
 %{        
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnCPCs, adCPCs, k, N);         % replece cn*s, ad*s
         [B, I, X] = sortAndPairPValues(control, target, cnadCPCsUtP, topNum);                                  % replace cnad*sUtP
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [cpcROC{k,1}, cpcROC{k,2}, cpcAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
+        [cpcROC{k,1}, cpcROC{k,2}, cpcAUC(k), cpfcACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnFGESs, adFGESs, k, N);         % replece cn*s, ad*s
         [B, I, X] = sortAndPairPValues(control, target, cnadFGESsUtP, topNum);                                  % replace cnad*sUtP
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [fgesROC{k,1}, fgesROC{k,2}, fgesAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
+        [fgesROC{k,1}, fgesROC{k,2}, fgesAUC(k), fgesACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
 %}
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnFCAs, adFCAs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadFCAsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [fcaROC{k,1}, fcaROC{k,2}, fcaAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+        [fcaROC{k,1}, fcaROC{k,2}, fcaAUC(k), fcaACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnTSFCs, adTSFCs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadTsFCsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [tsfcROC{k,1}, tsfcROC{k,2}, tsfcAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+        [tsfcROC{k,1}, tsfcROC{k,2}, tsfcAUC(k), tsfcACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnTSFCAs, adTSFCAs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadTsFCAsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [tsfcaROC{k,1}, tsfcaROC{k,2}, tsfcaAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+        [tsfcaROC{k,1}, tsfcaROC{k,2}, tsfcaAUC(k), tsfcaACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnMVARECs, adMVARECs, k, N);
         [B, I, X] = sortAndPairPValues(control, target, cnadMvarECsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-        [mvarecROC{k,1}, mvarecROC{k,2}, mvarecAUC(k)] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+        [mvarecROC{k,1}, mvarecROC{k,2}, mvarecAUC(k), mvarecACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
     end
     figure; boxplot(X);
 
@@ -340,7 +356,9 @@ function analyzeAlzheimerDLCM
     fname = ['results/ad-cn-ad-roi' num2str(132) '-result.mat'];
     save(fname, 'cosSim', 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','teAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC','mvarecAUC', ...
         'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','teROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC','mvarecROC', ...
+        'fcACC','pcACC','wcsACC','gcACC','pgcACC','dlACC','dlwACC','dlgACC','teACC','pcsACC','cpcACC','fgesACC','fcaACC','tsfcACC','tsfcaACC','mvarecACC', ...
         'sigCntCN', 'sigCntAD');
+    disp('AUCs');
     mean(dlAUC) % show result AUC
     mean(dlwAUC) % show result AUC
     mean(fcAUC) % show result AUC
@@ -353,7 +371,21 @@ function analyzeAlzheimerDLCM
     mean(tsfcAUC) % show result AUC
     mean(tsfcaAUC) % show result AUC
     mean(mvarecAUC) % show result AUC
-
+    
+    % show accuracy
+    disp('ACCs');
+    fcMaxACC = nan(N,1);
+    dlMaxACC = nan(N,1);
+    dlwMaxACC = nan(N,1);
+    for k=1:N
+        fcMaxACC(k) = max(fcACC{k});
+        dlMaxACC(k) = max(dlACC{k});
+        dlwMaxACC(k) = max(dlwACC{k});
+    end
+    mean(dlMaxACC) % show result ACC
+    mean(dlwMaxACC) % show result ACC
+    mean(fcMaxACC) % show result ACC
+    
     % plot ROC curve
     figure;
     hold on;
@@ -428,15 +460,18 @@ function [x, y, auc] = invertROCcurve(inx, iny)
     auc = trapz(x, y);
 end
 
-function [x, y, auc] = calcAlzROCcurve(control, target, start)
+function [x, y, auc, accuracy] = calcAlzROCcurve(control, target, start)
     x = [0]; y = [0]; % start from (0,0)
+    accuracy = nan(start+1,1);
     tpmax = length(control);
     fpmax = length(target);
     for i=start:-1:0
         tp = length(find(control>=i));
         fp = length(find(target>=i));
+        tn = fpmax - fp;
         x = [x fp/fpmax];
         y = [y tp/tpmax];
+        accuracy(i+1) = (tp + tn) / (tpmax + fpmax);
     end
     auc = trapz(x, y);
 end
