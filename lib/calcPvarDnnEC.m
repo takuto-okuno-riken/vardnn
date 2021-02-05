@@ -1,13 +1,13 @@
 %%
-% Caluclate Pairwised DNN-EC
-% returns Pairwised DNN EC matrix (EC) and impaired node signals (ECsub)
+% Caluclate Pairwised VAR DNN-EC
+% returns Pairwised VAR DNN EC matrix (EC) and impaired node signals (ECsub)
 % input:
-%  net          trained Pairwised DNN-GC's network
+%  net          trained Pairwised VAR DNN network structure
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [EC, ECsub] = calcPwDnnEC(net, nodeControl, exControl, isFullNode)
+function [EC, ECsub] = calcPvarDnnEC(net, nodeControl, exControl, isFullNode)
     if nargin < 4, isFullNode = 0; end
     if nargin < 3, exControl = []; end
     if nargin < 2, nodeControl = []; end

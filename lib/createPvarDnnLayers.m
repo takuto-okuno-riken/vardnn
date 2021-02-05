@@ -1,13 +1,13 @@
 %%
-% Create Pairwised DNN-GC's neural network layers for single node
+% Create Pairwised VAR DNN layers for single node
 % input:
-%  nodeNum        pairwised DNN-GC's node number
+%  nodeNum        pairwised VAR DNN node number
 %  hiddenNums     hidden layer (next of input) neuron numbers of single unit (vector)
 %  lags           number of lags for autoregression (default:3)
 %  initialWeight  weight initialize matrix of hidden1 layer (optional)
 %  initialBias    bias initialize matrix of hidden1 layer (optional)
 
-function layers = createPwDnnGCLayers(nodeNum, hiddenNums, lags, initWeightFunc, initWeightParam, initBias)
+function layers = createPvarDnnLayers(nodeNum, hiddenNums, lags, initWeightFunc, initWeightParam, initBias)
     if nargin < 5, initWeightFunc = []; initWeightParam = []; initBias = []; end
 
     % init first fully connected layer
@@ -18,10 +18,10 @@ function layers = createPwDnnGCLayers(nodeNum, hiddenNums, lags, initWeightFunc,
     else
         if isempty(initWeightFunc) && isempty(initBias)
             firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
-                'WeightsInitializer', @(sz) weightInitializerPwDnn(sz, initWeightFunc, initWeightParam));
+                'WeightsInitializer', @(sz) weightInitializerPvarDnn(sz, initWeightFunc, initWeightParam));
         else
             firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
-                'WeightsInitializer', @(sz) weightInitializerPwDnn(sz, initWeightFunc, initWeightParam), ...
+                'WeightsInitializer', @(sz) weightInitializerPvarDnn(sz, initWeightFunc, initWeightParam), ...
                 'Bias', initBias);
         end
     end
@@ -64,7 +64,7 @@ end
 %%
 % weight initializer
 % Returns He distribution + user specified weight
-function weights = weightInitializerPwDnn(sz, initWeightFunc, initWeightParam)
+function weights = weightInitializerPvarDnn(sz, initWeightFunc, initWeightParam)
     global dlcmInitWeights;
 
     if ~isempty(initWeightFunc)

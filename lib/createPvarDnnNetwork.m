@@ -1,5 +1,5 @@
 %%
-% Create Pairwised DNN-GC's neural network
+% Create Pairwised VAR DNN network
 % input:
 %  nodeNum         node number
 %  exNum           exogenous input number
@@ -13,7 +13,7 @@
 %             For uniform distribution, bias = 0 and empty initial weight is better
 %             For fMRI BOLD signal, bias = 0.5 and rough initial weight is better
 
-function net = createPwDnnGCNetwork(nodeNum, exNum, hiddenNums, lags, nodeControl, exControl, initWeightFunc, initWeightParam, initBias)
+function net = createPvarDnnNetwork(nodeNum, exNum, hiddenNums, lags, nodeControl, exControl, initWeightFunc, initWeightParam, initBias)
     if nargin < 9, initBias = zeros(hiddenNums(1),1); end
     if nargin < 8, initWeightParam = []; end
     if nargin < 7, initWeightFunc = []; end
@@ -28,7 +28,7 @@ function net = createPwDnnGCNetwork(nodeNum, exNum, hiddenNums, lags, nodeContro
             if i==j, continue; end
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
-            nodeLayers{i,j} = createPwDnnGCLayers(2, hiddenNums, lags, initWeightFunc, initWeightParam, initBias);
+            nodeLayers{i,j} = createPvarDnnLayers(2, hiddenNums, lags, initWeightFunc, initWeightParam, initBias);
         end
     end
     net.nodeNum = nodeNum;

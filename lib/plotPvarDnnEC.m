@@ -1,21 +1,21 @@
 %%
-% Plotting Pairwised DNN-EC matrix
-% returns Pairwised DNN EC matrix (EC) and impaired node signals (ECsub)
+% Plotting Pairwised VAR DNN-EC matrix
+% returns Pairwised VAR DNN EC matrix (EC) and impaired node signals (ECsub)
 % input:
-%  net          trained Pairwised DNN-GC's network
+%  net          trained Pairwised VAR DNN network structure
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  range        plotting minimum and maximum range of GCI (default:10)
 %               if range==0, range shows standard deviation [-3 sigma, 3 sigma]
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [EC, ECsub] = plotPwDnnGCI(net, nodeControl, exControl, range, isFullNode)
+function [EC, ECsub] = plotPvarDnnEC(net, nodeControl, exControl, range, isFullNode)
     if nargin < 5, isFullNode = 0; end
     if nargin < 4, range = 10; end
     if nargin < 3, exControl = []; end
     if nargin < 2, nodeControl = []; end
 
-    [EC, ECsub] = calcPwDnnEC(net, nodeControl, exControl, isFullNode);
+    [EC, ECsub] = calcPvarDnnEC(net, nodeControl, exControl, isFullNode);
     if range <= 0
         sigma = std(EC(:),1,'omitnan');
         avg = mean(EC(:),'omitnan');
@@ -27,7 +27,7 @@ function [EC, ECsub] = plotPwDnnGCI(net, nodeControl, exControl, range, isFullNo
     clims = [-range, range];
     imagesc(EC2,clims);
     daspect([1 1 1]);
-    title('Pairwised DNN Effective Connectivity');
+    title('Pairwised VAR DNN Effective Connectivity');
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;

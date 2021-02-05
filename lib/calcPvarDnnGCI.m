@@ -1,6 +1,6 @@
 %%
-% Caluclate Pairwised DNN Granger Causality
-% returns Pairwised DNN Granger causality index matrix (gcI), significance (h=1 or 0)
+% Caluclate Pairwised VAR DNN Granger Causality
+% returns Pairwised VAR DNN Granger causality index matrix (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
 % and AIC, BIC (of node vector)
 % input:
@@ -8,11 +8,11 @@
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
-%  net          trained Pairwised DNN-GC's network
+%  net          trained Pairwised VAR DNN network structure
 %  alpha        the significance level of F-statistic (optional)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [gcI, h, P, F, cvFd, AIC, BIC] = calcPwDnnGCI(X, exSignal, nodeControl, exControl, net, alpha, isFullNode)
+function [gcI, h, P, F, cvFd, AIC, BIC] = calcPvarDnnGCI(X, exSignal, nodeControl, exControl, net, alpha, isFullNode)
     if nargin < 7, isFullNode = 0; end
     if nargin < 6, alpha = 0.05; end
 
@@ -25,7 +25,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPwDnnGCI(X, exSignal, nodeControl,
     % set node input
     X = [X; exSignal];
 
-    % calc Pairwised DNN granger causality
+    % calc Pairwised VAR DNN granger causality
     gcI = nan(nodeNum, nodeMax);
     h = nan(nodeNum,nodeMax);
     P = nan(nodeNum,nodeMax);

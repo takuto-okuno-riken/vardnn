@@ -1,14 +1,14 @@
 %%
-% Return trained Pairwised DNN-GC network
+% Return trained Pairwised VAR DNN network
 % input :
 %  X             multivariate time series matrix (node x time series)
 %  exSignal      multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl   node control matrix (node x node) (optional)
 %  exControl     exogenous input control matrix for each node (node x exogenous input) (optional)
-%  net           Pairwised DNN-GC network structure
+%  net           Pairwised VAR DNN network structure
 %  options       training options
 
-function trainedNet = trainPwDnnGCNetwork(X, exSignal, nodeControl, exControl, net, options)
+function trainedNet = trainPvarDnnNetwork(X, exSignal, nodeControl, exControl, net, options)
     global dlcmInitWeights;
     nodeNum = size(X,1);
     exNum = size(exSignal,1);
@@ -20,8 +20,8 @@ function trainedNet = trainPwDnnGCNetwork(X, exSignal, nodeControl, exControl, n
     Y = [X; exSignal];
     nodeMax = nodeNum + exNum;
 
-    % training whole Pairwised DNN-GC's network
-    disp('start training whole Pairwised DNN-GCs network');
+    % training whole Pairwised VAR DNN network
+    disp('start training whole Pairwised VAR DNN network');
     ticH = tic;
     nodeLayers = trainedNet.nodeLayers;
     nodeNetwork = cell(nodeNum,nodeMax);
@@ -48,5 +48,5 @@ function trainedNet = trainPwDnnGCNetwork(X, exSignal, nodeControl, exControl, n
     trainedNet.initWeights = initWeights;
     trainedNet.trainTime = time;
     trainedNet.trainOptions = options;
-    disp(['finish training whole Pairwised DNN-GCs network! t = ' num2str(time) 's']);
+    disp(['finish training whole Pairwised VAR DNN network! t = ' num2str(time) 's']);
 end

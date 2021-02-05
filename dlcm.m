@@ -188,7 +188,7 @@ function showUsage()
     disp('  -f, --fc            output Functional Conectivity matrix result (<filename>_fc.csv)');
     disp('  -p, --pc            output Partial Correlation matrix result (<filename>_pc.csv)');
     disp('  -w, --wc            output Wavelet Coherence matrix result (<filename>_wc.csv)');
-    disp('  --mvarec            output LAR (Linear Auto-Regression) Effective Connectivity matrix result (<filename>_mvarec.csv)');
+    disp('  --mvarec            output multivaliate VAR (Vector Auto-Regression) Effective Connectivity matrix result (<filename>_mvarec.csv)');
     disp('  --outpath           output files path (default:"results")');
     disp('  --pval              save P-value matrix of DLCM-GC, mvGC, pwGC, TE, FC and PC (<filename>_*_pval.csv)');
     disp('  --fval alpha        save F-value with <alpha> matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_fval.csv, <filename>_*_fcrit.csv)');

@@ -1,6 +1,6 @@
 %%
-% Plotting Pairwised DNN Granger causality Index matrix
-% returns Pairwised DNN Granger causality index matrix (gcI), significance (h=1 or 0)
+% Plotting Pairwised VAR DNN Granger causality Index matrix
+% returns Pairwised VAR DNN Granger causality index matrix (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
 % and AIC, BIC (of node vector)
 % input:
@@ -8,18 +8,18 @@
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
-%  net          trained Pairwised DNN-GC's network
+%  net          trained Pairwised VAR DNN network structure
 %  range        plotting minimum and maximum range of GCI (default:10)
 %               if range==0, range shows standard deviation [-3 sigma, 3 sigma]
 %  alpha        the significance level of F-statistic (optional)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [gcI, h, P, F, cvFd, AIC, BIC] = plotPwDnnGCI(X, exSignal, nodeControl, exControl, net, range, alpha, isFullNode)
+function [gcI, h, P, F, cvFd, AIC, BIC] = plotPvarDnnGCI(X, exSignal, nodeControl, exControl, net, range, alpha, isFullNode)
     if nargin < 8, isFullNode = 0; end
     if nargin < 7, alpha = 0.05; end
     if nargin < 6, range = 10; end
 
-    [gcI, h, P, F, cvFd, AIC, BIC] = calcPwDnnGCI(X, exSignal, nodeControl, exControl, net, alpha, isFullNode);
+    [gcI, h, P, F, cvFd, AIC, BIC] = calcPvarDnnGCI(X, exSignal, nodeControl, exControl, net, alpha, isFullNode);
     if range <= 0
         sigma = std(gcI(:),1,'omitnan');
         avg = mean(gcI(:),'omitnan');
@@ -31,7 +31,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = plotPwDnnGCI(X, exSignal, nodeControl,
     clims = [-range, range];
     imagesc(gcI2,clims);
     daspect([1 1 1]);
-    title('Pairwised DNN Granger Causality');
+    title('Pairwised VAR DNN Granger Causality');
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;
