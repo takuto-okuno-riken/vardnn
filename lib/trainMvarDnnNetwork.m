@@ -13,7 +13,7 @@ function trainedNet = trainMvarDnnNetwork(X, exSignal, nodeControl, exControl, n
     nodeNum = size(X,1);
     exNum = size(exSignal,1);
     trainedNet = net;
-    lags = net.lags;
+    if isfield(net, 'lags'), lags = net.lags; else lags = 1; end
 
     % training whole multivariate VAR DNN network
     disp('start training whole multivariate VAR DNN network');

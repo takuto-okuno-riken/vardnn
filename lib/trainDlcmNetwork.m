@@ -9,46 +9,5 @@
 %  options       training options
 
 function trainedNet = trainDlcmNetwork(X, exSignal, nodeControl, exControl, net, options)
-    global dlcmInitWeights;
-    nodeNum = size(X,1);
-    exNum = size(exSignal,1);
-    trainedNet = net;
-
-    % training whole DLCM network
-    disp('start training whole DLCM network');
-    ticH = tic;
-    if isempty(exSignal)
-        nodeInputOrg = X(:,1:end-1);
-    else
-        nodeInputOrg = [X(:,1:end-1); exSignal(:,1:end-1)];
-    end
-    nodeLayers = trainedNet.nodeLayers;
-    nodeNetwork = cell(nodeNum,1);
-    trainInfo = cell(nodeNum,1);
-    initWeights = cell(nodeNum,1);
-    for i=1:nodeNum
-%    parfor i=1:nodeNum    % for parallel processing
-        disp(['training node ' num2str(i)]);
-        nodeTeach = X(i,2:end);
-        nodeInput = nodeInputOrg;
-        if ~isempty(nodeControl)
-            filter = repmat(nodeControl(i,:).', 1, size(nodeInput,2));
-            nodeInput(1:nodeNum,:) = nodeInput(1:nodeNum,:) .* filter;
-        end
-        if ~isempty(exControl)
-            filter = repmat(exControl(i,:).', 1, size(nodeInput,2));
-            nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
-        end
-        [nodeNetwork{i}, trainInfo{i}] = trainNetwork(nodeInput, nodeTeach, nodeLayers{i}, options);
-        initWeights{i} = dlcmInitWeights;
-    end
-    time = toc(ticH);
-    trainedNet.nodeNum = nodeNum; % for compatibility
-    trainedNet.exNum = exNum; % for compatibility
-    trainedNet.nodeNetwork = nodeNetwork;
-    trainedNet.trainInfo = trainInfo;
-    trainedNet.initWeights = initWeights;
-    trainedNet.trainTime = time;
-    trainedNet.trainOptions = options;
-    disp(['finish training whole DLCM network! t = ' num2str(time) 's']);
+    trainedNet = trainMvarDnnNetwork(X, exSignal, nodeControl, exControl, net, options);
 end
