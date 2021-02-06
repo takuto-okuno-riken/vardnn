@@ -1,5 +1,5 @@
 %%
-% Create Pairwised VAR DNN layers for single node
+% Create pairwised VAR DNN layers for single node
 % input:
 %  nodeNum        pairwised VAR DNN node number
 %  hiddenNums     hidden layer (next of input) neuron numbers of single unit (vector)

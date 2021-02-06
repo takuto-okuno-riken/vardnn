@@ -42,7 +42,7 @@ function testDlcmGC
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 
         % recoverty training
-        [netDLCM, time] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+        %[netDLCM, time] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
         save(dlcmFile, 'netDLCM');
     end
     
@@ -59,7 +59,8 @@ function testDlcmGC
     figure; gcI = plotPairwiseGCI(si);
     figure; gcI = plotPairwiseGCI(S);
 
-    % show DLCM-GC
-    figure; dlGC = plotDlcmGCI(si, exSignal, [], exControl, netDLCM);
+    % show DLCM-GC, DLCM-EC
+    figure; dlGC = plotDlcmGCI(si, exSignal, [], exControl, netDLCM, 0);
+    figure; dlEC = plotDlcmEC(netDLCM, [], exControl, 0);
 end
 

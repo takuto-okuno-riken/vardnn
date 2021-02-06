@@ -1,18 +1,19 @@
 %%
-% Create DLCM neural network layers for single node
+% Create multivaliate VAR DNN layers for single node
 % input:
-%  nodeNum        DLCM node number
-%  exNum          DLCM exogenous input number
+%  nodeNum        node number
+%  exNum          exogenous input number
 %  hiddenNums     hidden layer (next of input) neuron numbers of single unit (vector)
+%  lags           number of lags for autoregression (default:3)
 %  nNodeControl   node control matrix (1 x node) (optional)
 %  nExControl     exogenous input control (1 x exogenous input) (optional)
 %  initialWeight  weight initialize matrix of hidden1 layer (optional)
 %  initialBias    bias initialize matrix of hidden1 layer (optional)
 
-function layers = createDlcmLayers(nodeNum, exNum, hiddenNums, nNodeControl, nExControl, initWeightFunc, initWeightParam, initBias, currentNode)
-    if nargin < 6, initWeightFunc = []; initWeightParam = []; initBias = []; currentNode = 0; end
-    if nargin < 5, nExControl = []; end
-    if nargin < 4, nNodeControl = []; end
+function layers = createMvarDnnLayers(nodeNum, exNum, hiddenNums, lags, nNodeControl, nExControl, initWeightFunc, initWeightParam, initBias, currentNode)
+    if nargin < 7, initWeightFunc = []; initWeightParam = []; initBias = []; currentNode = 0; end
+    if nargin < 6, nExControl = []; end
+    if nargin < 5, nNodeControl = []; end
 
     % init first fully connected layer
     v = ver('nnet');
@@ -22,10 +23,10 @@ function layers = createDlcmLayers(nodeNum, exNum, hiddenNums, nNodeControl, nEx
     else
         if isempty(initWeightFunc) && isempty(nExControl) && isempty(initBias)
             firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
-                'WeightsInitializer', @(sz) weightInitializer(sz, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode));
+                'WeightsInitializer', @(sz) weightInitializer(sz, lags, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode));
         else
             firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
-                'WeightsInitializer', @(sz) weightInitializer(sz, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode), ...
+                'WeightsInitializer', @(sz) weightInitializer(sz, lags, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode), ...
                 'Bias', initBias);
         end
     end
@@ -33,7 +34,7 @@ function layers = createDlcmLayers(nodeNum, exNum, hiddenNums, nNodeControl, nEx
     %
     inLayers = [
         % input layer
-        sequenceInputLayer(nodeNum+exNum);
+        sequenceInputLayer((nodeNum+exNum)*lags);
         % Add a fully connected layer
         firstFCLayer;
         % Add an ReLU non-linearity.
@@ -65,7 +66,7 @@ end
 %%
 % weight initializer
 % Returns He distribution + user specified weight
-function weights = weightInitializer(sz, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode)
+function weights = weightInitializer(sz, lags, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode)
     global dlcmInitWeights;
 
     if ~isempty(initWeightFunc)

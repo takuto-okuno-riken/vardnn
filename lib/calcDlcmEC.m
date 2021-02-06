@@ -10,5 +10,6 @@ function [EC, ECsub] = calcDlcmEC(netDLCM, nodeControl, exControl, isFullNode)
     if nargin < 4, isFullNode = 0; end
     if nargin < 3, exControl = []; end
     if nargin < 2, nodeControl = []; end
-    [EC, ECsub] = calcDlcmWCIdm123a(netDLCM, nodeControl, exControl, isFullNode);
+%    [EC, ECsub] = calcDlcmWCIdm123a(netDLCM, nodeControl, exControl, isFullNode);
+    [EC, ECsub] = calcMvarDnnEC(netDLCM, nodeControl, exControl, isFullNode);
 end

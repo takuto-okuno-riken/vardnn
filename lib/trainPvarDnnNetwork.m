@@ -1,5 +1,5 @@
 %%
-% Return trained Pairwised VAR DNN network
+% Return trained pairwised VAR DNN network
 % input :
 %  X             multivariate time series matrix (node x time series)
 %  exSignal      multivariate time series matrix (exogenous input x time series) (optional)
@@ -21,7 +21,7 @@ function trainedNet = trainPvarDnnNetwork(X, exSignal, nodeControl, exControl, n
     nodeMax = nodeNum + exNum;
 
     % training whole Pairwised VAR DNN network
-    disp('start training whole Pairwised VAR DNN network');
+    disp('start training whole pairwised VAR DNN network');
     ticH = tic;
     nodeLayers = trainedNet.nodeLayers;
     nodeNetwork = cell(nodeNum,nodeMax);

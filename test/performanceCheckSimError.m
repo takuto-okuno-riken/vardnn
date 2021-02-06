@@ -100,7 +100,7 @@ function checkingPattern(si, exSignal, exControl, winLen, idx, prefix, l2, weigh
             load(dlcmFile);
         else
             % init DLCM network
-            netDLCM = initDlcmNetwork(si, exSignal, [], exControl, weightFunc, weightParam, bias);
+            netDLCM = initDlcmNetwork(si, exSignal, [], exControl, 1, weightFunc, weightParam, bias);
 
             % set training options
             maxEpochs = 1000;

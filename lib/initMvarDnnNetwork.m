@@ -1,5 +1,5 @@
 %%
-% Estimate hidden neurons and initial weight and Create DLCM neural network
+% Estimate hidden neurons and initial weight and create multivariate VAR DNN
 % input:
 %  X               multivariate time series matrix (node x time series)
 %  exSignal        multivariate time series matrix (exogenous input x time series) (default:[])
@@ -12,7 +12,7 @@
 %             For uniform distribution, bias = 0 and empty initial weight is better
 %             For fMRI BOLD signal, bias = 0.5 and rough initial weight is better
 
-function net = initDlcmNetwork(X, exSignal, nodeControl, exControl, lags, initWeightFunc, initWeightParam, initBias)
+function net = initMvarDnnNetwork(X, exSignal, nodeControl, exControl, lags, initWeightFunc, initWeightParam, initBias)
     if nargin < 8, initBias = 0; end
     if nargin < 7, initWeightParam = []; end
     if nargin < 6, initWeightFunc = []; end
@@ -20,5 +20,16 @@ function net = initDlcmNetwork(X, exSignal, nodeControl, exControl, lags, initWe
     if nargin < 4, exControl = []; end
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end
-    net = initMvarDnnNetwork(X, exSignal, nodeControl, exControl, lags, initWeightFunc, initWeightParam, initBias);
+    nodeNum = size(X,1);
+    sigLen = size(X,2);
+    exNum = size(exSignal,1);
+
+    % estimate neuron number of hidden layers
+    hiddenNums = estimateHiddenNeurons((nodeNum+exNum)*lags, sigLen);
+    
+    % set initial bias for each neuron
+    biasMat = ones(hiddenNums(1),1) * initBias;
+
+    % layer parameters
+    net = createMvarDnnNetwork(nodeNum, exNum, hiddenNums, lags, nodeControl, exControl, initWeightFunc, initWeightParam, biasMat);
 end

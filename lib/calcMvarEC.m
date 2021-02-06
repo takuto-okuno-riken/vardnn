@@ -17,7 +17,7 @@ function [EC, ECsub] = calcMvarEC(net, nodeControl, exControl, isFullNode)
     lags = net.lags;
     if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
     
-    % calc LAR EC
+    % calc mVAR EC
     EC = nan(nodeNum,nodeMax);
     ECsub = nan(nodeNum,nodeMax+1);
     for i=1:nodeNum
