@@ -4,14 +4,17 @@
 %  nodeNum        node number
 %  exNum          exogenous input number
 %  hiddenNums     hidden layer (next of input) neuron numbers of single unit (vector)
-%  lags           number of lags for autoregression (default:3)
+%  lags           number of lags for autoregression
 %  nNodeControl   node control matrix (1 x node) (optional)
 %  nExControl     exogenous input control (1 x exogenous input) (optional)
+%  activateFunc    activation function for each layer (default:@reluLayer)
+%  activateFunc   activation function for each layer (optional)
 %  initialWeight  weight initialize matrix of hidden1 layer (optional)
 %  initialBias    bias initialize matrix of hidden1 layer (optional)
 
-function layers = createMvarDnnLayers(nodeNum, exNum, hiddenNums, lags, nNodeControl, nExControl, initWeightFunc, initWeightParam, initBias, currentNode)
-    if nargin < 7, initWeightFunc = []; initWeightParam = []; initBias = []; currentNode = 0; end
+function layers = createMvarDnnLayers(nodeNum, exNum, hiddenNums, lags, nNodeControl, nExControl, activateFunc, initWeightFunc, initWeightParam, initBias, currentNode)
+    if nargin < 8, initWeightFunc = []; initWeightParam = []; initBias = []; currentNode = 0; end
+    if nargin < 7, activateFunc = @reluLayer; end
     if nargin < 6, nExControl = []; end
     if nargin < 5, nNodeControl = []; end
 
@@ -38,7 +41,7 @@ function layers = createMvarDnnLayers(nodeNum, exNum, hiddenNums, lags, nNodeCon
         % Add a fully connected layer
         firstFCLayer;
         % Add an ReLU non-linearity.
-        reluLayer();
+        activateFunc();
         ];
 
     hdLayers = [];
@@ -48,7 +51,7 @@ function layers = createMvarDnnLayers(nodeNum, exNum, hiddenNums, lags, nNodeCon
             % Add a fully connected layer
             fullyConnectedLayer(hiddenNums(i));
             % Add an ReLU non-linearity.
-            reluLayer();
+            activateFunc();
         ];
     end
 

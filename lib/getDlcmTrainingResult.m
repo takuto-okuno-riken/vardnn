@@ -1,16 +1,16 @@
 %%
 % get DLCM training result (mean value of each nodes)
 % input:
-%  netDLCM     trained DLCM network
+%  net         trained DLCM network
 
-function [time, loss, rsme] = getDlcmTrainingResult(netDLCM)
-    nodeNum = netDLCM.nodeNum;
-    maxEpochs = length(netDLCM.trainInfo{1, 1}.TrainingLoss);
+function [time, loss, rsme] = getDlcmTrainingResult(net)
+    if isfield(net, 'nodeNum'), nodeNum = net.nodeNum; else nodeNum = length(net.nodeNetwork); end % for compatibility
+    maxEpochs = length(net.trainInfo{1, 1}.TrainingLoss);
     a=0; b=0; c=0;
     for k=1:nodeNum
-        a = a + netDLCM.trainTime;
-        b = b + netDLCM.trainInfo{k, 1}.TrainingLoss(1,maxEpochs);
-        c = c + netDLCM.trainInfo{k, 1}.TrainingRMSE(1,maxEpochs);
+        a = a + net.trainTime;
+        b = b + net.trainInfo{k, 1}.TrainingLoss(1,maxEpochs);
+        c = c + net.trainInfo{k, 1}.TrainingRMSE(1,maxEpochs);
     end
     time = a / nodeNum;
     loss = b / nodeNum;
