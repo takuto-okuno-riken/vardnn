@@ -17,13 +17,13 @@ function simulateAlzheimerDLCM2
     nodeNum = size(cnSignals{1},1);
     
     % get DLCM-GC from original CN and AD (normal and recovery training)
-    [cnDLs, meanCnDL, stdCnDL] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 1);
-    [adDLs, meanAdDL, stdAdDL] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 1);
+    [cnDLs, meanCnDL, stdCnDL] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 1, 1, 1);
+    [adDLs, meanAdDL, stdAdDL] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 1, 1, 1);
     sigCnDLs = (cnDLs - nanmean(cnDLs(:))) / nanstd(cnDLs(:),1);
     sigAdDLs = (adDLs - nanmean(adDLs(:))) / nanstd(adDLs(:),1);
 
-    [rccnDLs, meanRcCnDL, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcmrc', 1); % do recovery training
-    [rcadDLs, meanRcAdDL, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcmrc', 1); % do recovery training
+    [rccnDLs, meanRcCnDL, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcmrc', 1, 1, 1); % do recovery training
+    [rcadDLs, meanRcAdDL, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcmrc', 1, 1, 1); % do recovery training
 
     % simulate CN & AD signals from first frame
     [cnDLWs, smcnSignals, cnSubDLWs] = simulateNodeSignals(cnSignals, roiNames, 'cn', 'dlw', 'cn');
@@ -105,27 +105,27 @@ function simulateAlzheimerDLCM2
 
     % --------------------------------------------------------------------------------------------------------------
     % check DLCM-EC and DLCM-GC of simulated CN and AD
-    [smcnDLs, meanSmcnDL, ~] = calculateConnectivity(smcnSignals, roiNames, 'smcn', 'dlcm', 1);
-    [smcnDLWs, meanSmcnDLW, ~, smcnSubDLWs] = calculateConnectivity(smcnSignals, roiNames, 'smcn', 'dlw', 1);
-    [smadDLs, meanSmadDL, ~] = calculateConnectivity(smadSignals, roiNames, 'smad', 'dlcm', 1);
-    [smadDLWs, meanSmadDLW, ~, smadSubDLWs] = calculateConnectivity(smadSignals, roiNames, 'smad', 'dlw', 1);
+    [smcnDLs, meanSmcnDL, ~] = calculateConnectivity(smcnSignals, roiNames, 'smcn', 'dlcm', 1, 1, 1);
+    [smcnDLWs, meanSmcnDLW, ~, smcnSubDLWs] = calculateConnectivity(smcnSignals, roiNames, 'smcn', 'dlw', 1, 1, 1);
+    [smadDLs, meanSmadDL, ~] = calculateConnectivity(smadSignals, roiNames, 'smad', 'dlcm', 1, 1, 1);
+    [smadDLWs, meanSmadDLW, ~, smadSubDLWs] = calculateConnectivity(smadSignals, roiNames, 'smad', 'dlw', 1, 1, 1);
     sigSmcnDLWs = (smcnDLWs - nanmean(smcnDLWs(:))) / nanstd(smcnDLWs(:),1);
     sigSmadDLWs = (smadDLWs - nanmean(smadDLWs(:))) / nanstd(smadDLWs(:),1);
 
-    [smrccnDLs, meanSmrccnDL, ~] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlcm', 1);
-    [smrccnDLWs, meanSmrccnDLW, ~, smrccnSubDLWs] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlw', 1);
-    [smrcadDLs, meanSmrcadDL, ~] = calculateConnectivity(smrcadSignals, roiNames, 'smrcad', 'dlcm', 1);
-    [smrcadDLWs, meanSmrcadDLW, ~, smrcadSubDLWs] = calculateConnectivity(smrcadSignals, roiNames, 'smrcad', 'dlw', 1);
+    [smrccnDLs, meanSmrccnDL, ~] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlcm', 1, 1, 1);
+    [smrccnDLWs, meanSmrccnDLW, ~, smrccnSubDLWs] = calculateConnectivity(smrccnSignals, roiNames, 'smrccn', 'dlw', 1, 1, 1);
+    [smrcadDLs, meanSmrcadDL, ~] = calculateConnectivity(smrcadSignals, roiNames, 'smrcad', 'dlcm', 1, 1, 1);
+    [smrcadDLWs, meanSmrcadDLW, ~, smrcadSubDLWs] = calculateConnectivity(smrcadSignals, roiNames, 'smrcad', 'dlw', 1, 1, 1);
 %{
     for i=1:cnSbjNum
         plotCorrelationZiZij([], cnSubDLWs(:,:,i), [], smcnSubDLWs(:,:,i), nodeNum, ['sbj' num2str(i)], 'original', 'smcn');
         plotCorrelationZiZij([], cnSubDLWs(:,:,i), [], smrccnSubDLWs(:,:,i), nodeNum, ['sbj' num2str(i)], 'original', 'smrccn');
     end
 %}
-    [smcn2DLs, meanSmcn2DL, ~] = calculateConnectivity(smcn2Signals, roiNames, 'smcn2', 'dlcm', 1);
-    [smcn2DLWs, meanSmcn2DLW, ~, smcn2SubDLWs] = calculateConnectivity(smcn2Signals, roiNames, 'smcn2', 'dlw', 1);
-    [smad2DLs, meanSmad2DL, ~] = calculateConnectivity(smad2Signals, roiNames, 'smad2', 'dlcm', 1);
-    [smad2DLWs, meanSmad2DLW, ~, smad2SubDLWs] = calculateConnectivity(smad2Signals, roiNames, 'smad2', 'dlw', 1);
+    [smcn2DLs, meanSmcn2DL, ~] = calculateConnectivity(smcn2Signals, roiNames, 'smcn2', 'dlcm', 1, 1, 1);
+    [smcn2DLWs, meanSmcn2DLW, ~, smcn2SubDLWs] = calculateConnectivity(smcn2Signals, roiNames, 'smcn2', 'dlw', 1, 1, 1);
+    [smad2DLs, meanSmad2DL, ~] = calculateConnectivity(smad2Signals, roiNames, 'smad2', 'dlcm', 1, 1, 1);
+    [smad2DLWs, meanSmad2DLW, ~, smad2SubDLWs] = calculateConnectivity(smad2Signals, roiNames, 'smad2', 'dlw', 1, 1, 1);
     sigSmcn2DLWs = (smcn2DLWs - nanmean(smcn2DLWs(:))) / nanstd(smcn2DLWs(:),1);
     sigSmad2DLWs = (smad2DLWs - nanmean(smad2DLWs(:))) / nanstd(smad2DLWs(:),1);
 
@@ -151,15 +151,15 @@ function simulateAlzheimerDLCM2
     meanSmmvadDLW = cell(lagMax,2);
     smmvadSubDLWs = cell(lagMax,2);
     for i=1:lagMax
-        [smmvcnDLs{i,1},  meanSmmvcnDL{i,1}, ~] = calculateConnectivity(smmvcnSignals{i,1}, roiNames, ['smmvcn' num2str(i)], 'dlcm', 1);
-        [smmvcnDLWs{i,1}, meanSmmvcnDLW{i,1}, ~, smmvcnSubDLWs{i,1}] = calculateConnectivity(smmvcnSignals{i,1}, roiNames, ['smmvcn' num2str(i)], 'dlw', 1);
-        [smmvadDLs{i,1},  meanSmmvadDL{i,1}, ~] = calculateConnectivity(smmvadSignals{i,1}, roiNames, ['smmvad' num2str(i)], 'dlcm', 1);
-        [smmvadDLWs{i,1}, meanSmmvadDLW{i,1}, ~, smmvadSubDLWs{i,1}] = calculateConnectivity(smmvadSignals{i,1}, roiNames, ['smmvad' num2str(i)], 'dlw', 1);
+        [smmvcnDLs{i,1},  meanSmmvcnDL{i,1}, ~] = calculateConnectivity(smmvcnSignals{i,1}, roiNames, ['smmvcn' num2str(i)], 'dlcm', 1, 1, 1);
+        [smmvcnDLWs{i,1}, meanSmmvcnDLW{i,1}, ~, smmvcnSubDLWs{i,1}] = calculateConnectivity(smmvcnSignals{i,1}, roiNames, ['smmvcn' num2str(i)], 'dlw', 1, 1, 1);
+        [smmvadDLs{i,1},  meanSmmvadDL{i,1}, ~] = calculateConnectivity(smmvadSignals{i,1}, roiNames, ['smmvad' num2str(i)], 'dlcm', 1, 1, 1);
+        [smmvadDLWs{i,1}, meanSmmvadDLW{i,1}, ~, smmvadSubDLWs{i,1}] = calculateConnectivity(smmvadSignals{i,1}, roiNames, ['smmvad' num2str(i)], 'dlw', 1, 1, 1);
         
-        [smmvcnDLs{i,2},  meanSmmvcnDL{i,2}, ~] = calculateConnectivity(smmvcnSignals{i,2}, roiNames, ['smmvcn2' num2str(i)], 'dlcm', 1);
-        [smmvcnDLWs{i,2}, meanSmmvcnDLW{i,2}, ~, smmvcnSubDLWs{i,2}] = calculateConnectivity(smmvcnSignals{i,2}, roiNames, ['smmvcn2' num2str(i)], 'dlw', 1);
-        [smmvadDLs{i,2},  meanSmmvadDL{i,2}, ~] = calculateConnectivity(smmvadSignals{i,2}, roiNames, ['smmvad2' num2str(i)], 'dlcm', 1);
-        [smmvadDLWs{i,2}, meanSmmvadDLW{i,2}, ~, smmvadSubDLWs{i,2}] = calculateConnectivity(smmvadSignals{i,2}, roiNames, ['smmvad2' num2str(i)], 'dlw', 1);
+        [smmvcnDLs{i,2},  meanSmmvcnDL{i,2}, ~] = calculateConnectivity(smmvcnSignals{i,2}, roiNames, ['smmvcn2' num2str(i)], 'dlcm', 1, 1, 1);
+        [smmvcnDLWs{i,2}, meanSmmvcnDLW{i,2}, ~, smmvcnSubDLWs{i,2}] = calculateConnectivity(smmvcnSignals{i,2}, roiNames, ['smmvcn2' num2str(i)], 'dlw', 1, 1, 1);
+        [smmvadDLs{i,2},  meanSmmvadDL{i,2}, ~] = calculateConnectivity(smmvadSignals{i,2}, roiNames, ['smmvad2' num2str(i)], 'dlcm', 1, 1, 1);
+        [smmvadDLWs{i,2}, meanSmmvadDLW{i,2}, ~, smmvadSubDLWs{i,2}] = calculateConnectivity(smmvadSignals{i,2}, roiNames, ['smmvad2' num2str(i)], 'dlw', 1, 1, 1);
     end
 
     % check relation between Zi vs signal mean diff, and Zij vs signal amplitude (change teaching signal)

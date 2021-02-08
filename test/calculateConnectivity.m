@@ -1,21 +1,27 @@
 % this function is only for ADNI2 alzheimer analysis
 
-function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(signals, roiNames, group, algorithm, isRaw)
-    if nargin < 5
-        isRaw = 0;
-    end
+function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(signals, roiNames, group, algorithm, isRaw, lags, isAutoExo, activateFunc)
+    if nargin < 8, activateFunc = @reluLayer; end
+    if nargin < 7, isAutoExo = 0; end
+    if nargin < 6, lags = 3; end
+    if nargin < 5, isRaw = 0; end
+
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
     NumProcessors = 11;
 
     % constant value
     ROINUM = size(signals{1},1);
-    LAG = 3;
+    sigLen = size(signals{1},2);
 
     weights = zeros(ROINUM, ROINUM, length(signals));
     subweights = zeros(ROINUM, ROINUM+1, length(signals));
 
-    outfName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '.mat'];
+    lagpat = ["gc","pgc","te","tsfc","tsfca","mvarec","dlcm","dlw"];
+    if lags>1 && contains(algorithm,lagpat), lagStr=num2str(lags); else lagStr=''; end
+    if isAutoExo>0, exoStr='_ex'; else exoStr=''; end
+    if isempty(activateFunc), linStr='_lin'; else linStr=''; end
+    outfName = ['results/ad-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
     else
@@ -29,17 +35,24 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
             parpool(NumProcessors);
         end
 
-        parfor i=1:length(signals)    % for parallel processing
-%        for i=1:length(signals)
+%        parfor i=1:length(signals)    % for parallel processing
+        for i=1:length(signals)
+            if isAutoExo > 0
+                exSignal = rand(ROINUM, sigLen);
+                exControl = eye(ROINUM);
+            else
+                exSignal = [];
+                exControl = [];
+            end
             switch(algorithm)
             case 'fc'
                 mat = calcFunctionalConnectivity(signals{i});
             case 'fca'
                 mat = calcFunctionalConnectivityAbs(signals{i});
             case 'tsfc'
-                mat = calcTimeShiftedCorrelation(signals{i}, [], [], [], LAG);
+                mat = calcTimeShiftedCorrelation(signals{i}, exSignal, [], exControl, lags);
             case 'tsfca'
-                mat = calcTimeShiftedCorrelationAbs(signals{i}, [], [], [], LAG);
+                mat = calcTimeShiftedCorrelationAbs(signals{i}, exSignal, [], exControl, lags);
             case 'pc'
                 mat = calcPartialCorrelation(signals{i});
             case 'wcs'
@@ -52,12 +65,12 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     parsavemat(fName, mat);
                 end
             case 'gc'
-                mat = calcMultivariateGCI_(signals{i}, [], [], [], LAG);
-                %mat = calcMultivariateGCI(signals{i}, [], [], [], LAG);
+                mat = calcMultivariateGCI_(signals{i}, exSignal, [], exControl, lags);
+                %mat = calcMultivariateGCI(signals{i}, exSignal, [], exControl, lags);
             case 'pgc'
-                mat = calcPairwiseGCI(signals{i}, [], [], [], LAG);
+                mat = calcPairwiseGCI(signals{i}, exSignal, [], exControl, lags);
             case 'te'
-                mat = calcLinueTE(signals{i}, [], [], [], LAG);
+                mat = calcLinueTE(signals{i}, exSignal, [], exControl, lags);
             case 'pcs'
                 csvFile = ['results/tetrad/pcs-ad-signal-' group '-roi' num2str(ROINUM) '-' num2str(i) '.csv'];
                 mat = readmatrix(csvFile);
@@ -77,10 +90,10 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     parsavemat(fName, mat);
                 end
             case 'mvarec'
-                netMVAR = initMvarNetwork(signals{i}, [], [], [], LAG);
+                netMVAR = initMvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 mat = plotMvarEC(netMVAR, [], []);
             case 'dlcm'
-                dlcmName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                dlcmName = ['results/ad-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(dlcmName, 'file')
                     f = load(dlcmName);
                     mat = f.mat;
@@ -92,10 +105,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                         [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
                     end
                     % si = signals{i} - nanmin(signals{i}, [], 'all'); % simple linear transform
-                    sigLen = size(si,2);
-                    exSignal = rand(ROINUM, sigLen);
-                    exControl = eye(ROINUM);
-                    netDLCM = initDlcmNetwork(si, exSignal, [], exControl); 
+                    netDLCM = initDlcmNetwork(si, exSignal, [], exControl, lags, activateFunc); 
                     % training DLCM network
                     maxEpochs = 1000;
                     miniBatchSize = ceil(sigLen / 3);
@@ -144,7 +154,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 end
             case {'dlw','dlwrc'} % should be called after dlcm
                 if strcmp(algorithm, 'dlw')
-                    dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                    dlcmName = ['results/ad-dlcm' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 else
                     dlcmName = ['results/ad-dlcmrc-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 end
