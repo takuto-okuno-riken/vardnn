@@ -15,6 +15,10 @@ function performanceCheckNodePatternTVB3
 end
 
 function checkingPattern(node_num, num_scan, hz, Gth, N, idx)
+    % if you want to use parallel processing, set NumProcessors more than 2
+    % and change for loop to parfor loop
+    NumProcessors = 12;
+
     maxLag = 5;
     fname = ['results/tvb-wongwang3-' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(idx) '-' num2str(hz) 'hz-result.mat'];
     if exist(fname, 'file')
@@ -62,6 +66,16 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, idx)
 
         origf = figure;
         origSigf = figure;
+
+        if NumProcessors > 1
+            try
+                disp('Destroing any existance matlab pool session');
+                parpool('close');
+            catch
+                disp('No matlab pool session found');
+            end
+            parpool(NumProcessors);
+        end
 
         for k=1:N
             tvbFile = ['data/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(idx) '-' num2str(hz) 'hz-' num2str(k) '.mat'];
@@ -195,6 +209,11 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, idx)
         save(fname, 'gcAUC',  'gcROC', 'mvarecAUC',  'mvarecROC', 'gc2AUC',  'gc2ROC', 'mvarec2AUC',  'mvarec2ROC', ...
             'dlAUC', 'dlwAUC', 'dlROC', 'dlwROC', 'dl2AUC', 'dlw2AUC', 'dl2ROC', 'dlw2ROC', ...
             'dl3AUC', 'dlw3AUC', 'dl3ROC', 'dlw3ROC', 'dl4AUC', 'dlw4AUC', 'dl4ROC', 'dlw4ROC');
+
+        % shutdown parallel processing
+        if NumProcessors > 1
+            delete(gcp('nocreate'))
+        end
     end
 
     % show box plot
