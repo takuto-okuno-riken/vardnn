@@ -162,12 +162,12 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         fg = figure; tsFCa = plotTimeShiftedCorrelationAbs(y2.', [], [], [], 3); close(fg);
         figure(tsfcaRf); hold on; [tsfcaROC{k,1}, tsfcaROC{k,2}, tsfcaAUC(k)] = plotROCcurve(tsFCa, pP.A, 100, 1, Gth); hold off;
         title('tsFCa');
-        % extra tests (multivaliate vector Auto-Regression EC)
+        % extra tests (multivaliate Vector Auto-Regression EC)
         netMVAR = initMvarNetwork(y2.', [], [], [], 5);
         fg = figure; mvarEC = plotMvarEC(netMVAR, [], []); close(fg);
         figure(mvarecRf); hold on; [mvarecROC{k,1}, mvarecROC{k,2}, mvarecAUC(k)] = plotROCcurve(mvarEC, pP.A, 100, 1, Gth); hold off;
         title('MVAR-EC');
-        % extra tests (pairwised vector Auto-Regression EC)
+        % extra tests (pairwised Vector Auto-Regression EC)
         fg = figure; pvarEC = plotPvarEC(y2.', [], [], [], 5); close(fg);
         figure(pvarecRf); hold on; [pvarecROC{k,1}, pvarecROC{k,2}, pvarecAUC(k)] = plotROCcurve(pvarEC, pP.A, 100, 1, Gth); hold off;
         title('PVAR-EC');

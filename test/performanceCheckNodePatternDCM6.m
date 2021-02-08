@@ -130,7 +130,7 @@ function A = addPatternD(A,n)
 end
 
 %% 
-function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
+function [dlGC] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     % show original connection
     figure; plotDcmEC(pP.A);
     maxLag = 5;
@@ -139,19 +139,43 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     if exist(fname, 'file')
         load(fname);
     else
+        gcAUC = zeros(maxLag,N);
+        mvarecAUC = zeros(maxLag,N);
+        gc2AUC = zeros(maxLag,N);
+        mvarec2AUC = zeros(maxLag,N);
         dlAUC = zeros(maxLag,N);
         dlwAUC = zeros(maxLag,N);
         dl2AUC = zeros(maxLag,N);
         dlw2AUC = zeros(maxLag,N);
+        dl3AUC = zeros(maxLag,N);
+        dlw3AUC = zeros(maxLag,N);
+        dl4AUC = zeros(maxLag,N);
+        dlw4AUC = zeros(maxLag,N);
         for lags=1:maxLag
+            gcROC{lags} = cell(N,2);
+            mvarecROC{lags} = cell(N,2);
+            gc2ROC{lags} = cell(N,2);
+            mvarec2ROC{lags} = cell(N,2);
             dlROC{lags} = cell(N,2);
             dlwROC{lags} = cell(N,2);
             dl2ROC{lags} = cell(N,2);
             dlw2ROC{lags} = cell(N,2);
+            dl3ROC{lags} = cell(N,2);
+            dlw3ROC{lags} = cell(N,2);
+            dl4ROC{lags} = cell(N,2);
+            dlw4ROC{lags} = cell(N,2);
+            gcRf{lags} = figure;
+            mvarecRf{lags} = figure;
+            gc2Rf{lags} = figure;
+            mvarec2Rf{lags} = figure;
             dlRf{lags} = figure;
             dlwRf{lags} = figure;
             dl2Rf{lags} = figure;
             dlw2Rf{lags} = figure;
+            dl3Rf{lags} = figure;
+            dlw3Rf{lags} = figure;
+            dl4Rf{lags} = figure;
+            dlw4Rf{lags} = figure;
         end
 
         % calc input signal and node BOLD signals
@@ -164,6 +188,8 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
             dlcmFile = ['results/net-pat6-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
             netDLCM = cell(maxLag,1);
             netDLCM2 = cell(maxLag,1);
+            netDLCM3 = cell(maxLag,1);
+            netDLCM4 = cell(maxLag,1);
             if exist(dlcmFile, 'file')
                 load(dlcmFile);
             end
@@ -193,14 +219,48 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
                     % train DLCM with normal activation function (ReLU)
                     netDLCM{lags} = initDlcmNetwork(si, exSignal, [], exControl, lags);
                     netDLCM{lags} = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM{lags}, options);
-                    save(dlcmFile, 'netDLCM', 'netDLCM2', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
+                    save(dlcmFile, 'netDLCM', 'netDLCM2', 'netDLCM3', 'netDLCM4', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
                 end
                 if isempty(netDLCM2{lags})
                     % train DLCM without activation function (ReLU) (linear case)
                     netDLCM2{lags} = initDlcmNetwork(si, exSignal, [], exControl, lags, []);
                     netDLCM2{lags} = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM2{lags}, options);
-                    save(dlcmFile, 'netDLCM', 'netDLCM2', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
+                    save(dlcmFile, 'netDLCM', 'netDLCM2', 'netDLCM3', 'netDLCM4', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
                 end
+                if isempty(netDLCM3{lags})
+                    % train DLCM with normal activation function (ReLU) without exogenous signals
+                    netDLCM3{lags} = initDlcmNetwork(si, [], [], [], lags);
+                    netDLCM3{lags} = trainDlcmNetwork(si, [], [], [], netDLCM3{lags}, options);
+                    save(dlcmFile, 'netDLCM', 'netDLCM2', 'netDLCM3', 'netDLCM4', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
+                end
+                if isempty(netDLCM4{lags})
+                    % train DLCM without activation function (ReLU) (linear case) without exogenous signals
+                    netDLCM4{lags} = initDlcmNetwork(si, [], [], [], lags, []);
+                    netDLCM4{lags} = trainDlcmNetwork(si, [], [], [], netDLCM4{lags}, options);
+                    save(dlcmFile, 'netDLCM', 'netDLCM2', 'netDLCM3', 'netDLCM4', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
+                end
+
+                % show result of granger causality index (mvGC)
+                gcI = calcMultivariateGCI_(y2.', exSignal, [], exControl, lags);
+                figure(gcRf{lags}); hold on; [gcROC{lags}{k,1}, gcROC{lags}{k,2}, gcAUC(lags,k)] = plotROCcurve(gcI, pP.A, 100, 1, 0.2); hold off;
+                title(['mvGC(' num2str(lags) ')']);
+
+                % show result of granger causality index (mvGC) without exogenous signals
+                gcI = calcMultivariateGCI_(y2.', [], [], [], lags);
+                figure(gc2Rf{lags}); hold on; [gc2ROC{lags}{k,1}, gc2ROC{lags}{k,2}, gc2AUC(lags,k)] = plotROCcurve(gcI, pP.A, 100, 1, 0.2); hold off;
+                title(['mvGC(' num2str(lags) ') (without exogenous)']);
+
+                % extra tests (multivaliate Vector Auto-Regression EC)
+                netMVAR = initMvarNetwork(y2.', exSignal, [], exControl, lags);
+                mvarEC = calcMvarEC(netMVAR, [], exControl);
+                figure(mvarecRf{lags}); hold on; [mvarecROC{lags}{k,1}, mvarecROC{lags}{k,2}, mvarecAUC(lags,k)] = plotROCcurve(mvarEC, pP.A, 100, 1, 0.2); hold off;
+                title(['MVAR(' num2str(lags) ')-EC']);
+
+                % extra tests (multivaliate Vector Auto-Regression EC) without exogenous signals
+                netMVAR = initMvarNetwork(y2.', [], [], [], lags);
+                mvarEC = calcMvarEC(netMVAR, [], []);
+                figure(mvarec2Rf{lags}); hold on; [mvarec2ROC{lags}{k,1}, mvarec2ROC{lags}{k,2}, mvarec2AUC(lags,k)] = plotROCcurve(mvarEC, pP.A, 100, 1, 0.2); hold off;
+                title(['MVAR(' num2str(lags) ')-EC (without exogenous)']);
 
                 % show result of DLCM-GC
                 dlGC = calcDlcmGCI(si, exSignal, [], exControl, netDLCM{lags}, 0);
@@ -208,8 +268,8 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
                 title(['DLCM(' num2str(lags) ')-GC']);
 
                 % show result of DLCM-EC
-                dlwGC = calcDlcmEC(netDLCM{lags}, [], exControl, 0);
-                figure(dlwRf{lags}); hold on; [dlwROC{lags}{k,1}, dlwROC{lags}{k,2}, dlwAUC(lags,k)] = plotROCcurve(dlwGC, pP.A, 100, 1, 0.2); hold off;
+                dlwEC = calcDlcmEC(netDLCM{lags}, [], exControl, 0);
+                figure(dlwRf{lags}); hold on; [dlwROC{lags}{k,1}, dlwROC{lags}{k,2}, dlwAUC(lags,k)] = plotROCcurve(dlwEC, pP.A, 100, 1, 0.2); hold off;
                 title(['DLCM(' num2str(lags) ')-EC']);
 
                 % show result of linear DLCM-GC
@@ -218,13 +278,53 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
                 title(['linear DLCM(' num2str(lags) ')-GC']);
 
                 % show result of linear DLCM EC 
-                dlw2GC = calcDlcmEC(netDLCM2{lags}, [], exControl, 0);
-                figure(dlw2Rf{lags}); hold on; [dlw2ROC{lags}{k,1}, dlw2ROC{lags}{k,2}, dlw2AUC(lags,k)] = plotROCcurve(dlw2GC, pP.A, 100, 1, 0.2); hold off;
-                title(['linear DLCM(' num2str(lags) ')-EC']);            
+                dlw2EC = calcDlcmEC(netDLCM2{lags}, [], exControl, 0);
+                figure(dlw2Rf{lags}); hold on; [dlw2ROC{lags}{k,1}, dlw2ROC{lags}{k,2}, dlw2AUC(lags,k)] = plotROCcurve(dlw2EC, pP.A, 100, 1, 0.2); hold off;
+                title(['linear DLCM(' num2str(lags) ')-EC']);
+
+                % show result of DLCM-GC (without exogenous)
+                dl3GC = calcDlcmGCI(si, [], [], [], netDLCM3{lags}, 0);
+                figure(dl3Rf{lags}); hold on; [dl3ROC{lags}{k,1}, dl3ROC{lags}{k,2}, dl3AUC(lags,k)] = plotROCcurve(dl3GC, pP.A, 100, 1, 0.2); hold off;
+                title(['DLCM(' num2str(lags) ')-GC (without exogenous)']);
+
+                % show result of DLCM EC (without exogenous)
+                dlw3EC = calcDlcmEC(netDLCM3{lags}, [], [], 0);
+                figure(dlw3Rf{lags}); hold on; [dlw3ROC{lags}{k,1}, dlw3ROC{lags}{k,2}, dlw3AUC(lags,k)] = plotROCcurve(dlw3EC, pP.A, 100, 1, 0.2); hold off;
+                title(['DLCM(' num2str(lags) ')-EC (without exogenous)']);
+                
+                % show result of linear DLCM-GC (without exogenous)
+                dl4GC = calcDlcmGCI(si, [], [], [], netDLCM4{lags}, 0);
+                figure(dl4Rf{lags}); hold on; [dl4ROC{lags}{k,1}, dl4ROC{lags}{k,2}, dl4AUC(lags,k)] = plotROCcurve(dl4GC, pP.A, 100, 1, 0.2); hold off;
+                title(['linear DLCM(' num2str(lags) ')-GC (without exogenous)']);
+
+                % show result of linear DLCM EC (without exogenous)
+                dlw4EC = calcDlcmEC(netDLCM4{lags}, [], [], 0);
+                figure(dlw4Rf{lags}); hold on; [dlw4ROC{lags}{k,1}, dlw4ROC{lags}{k,2}, dlw4AUC(lags,k)] = plotROCcurve(dlw4EC, pP.A, 100, 1, 0.2); hold off;
+                title(['linear DLCM(' num2str(lags) ')-EC (without exogenous)']);
             end
         end
-        save(fname, 'dlAUC', 'dlwAUC', 'dlROC', 'dlwROC', 'dl2AUC', 'dlw2AUC', 'dl2ROC', 'dlw2ROC');
+        save(fname, 'gcAUC',  'gcROC', 'mvarecAUC',  'mvarecROC', 'gc2AUC',  'gc2ROC', 'mvarec2AUC',  'mvarec2ROC', ...
+            'dlAUC', 'dlwAUC', 'dlROC', 'dlwROC', 'dl2AUC', 'dlw2AUC', 'dl2ROC', 'dlw2ROC', ...
+            'dl3AUC', 'dlw3AUC', 'dl3ROC', 'dlw3ROC', 'dl4AUC', 'dlw4AUC', 'dl4ROC', 'dlw4ROC');
     end
+
+    % show box plot
+    AUCs = nan(N,60);
+    r = [1:5];
+    AUCs(:,r) = gcAUC.'; r=r+5;
+    AUCs(:,r) = gc2AUC.'; r=r+5;
+    AUCs(:,r) = mvarecAUC.'; r=r+5;
+    AUCs(:,r) = mvarec2AUC.'; r=r+5;
+    AUCs(:,r) = dl2AUC.'; r=r+5;
+    AUCs(:,r) = dl4AUC.'; r=r+5;
+    AUCs(:,r) = dlw2AUC.'; r=r+5;
+    AUCs(:,r) = dlw4AUC.'; r=r+5;
+    AUCs(:,r) = dlAUC.'; r=r+5;
+    AUCs(:,r) = dl3AUC.'; r=r+5;
+    AUCs(:,r) = dlwAUC.'; r=r+5;
+    AUCs(:,r) = dlw3AUC.'; r=r+5;
+    figure; boxplot(AUCs);
+    title(['AUC box plot idx' num2str(idx)]);
 
     % show average ROC curve of DCM
     figure; 
