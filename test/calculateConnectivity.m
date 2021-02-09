@@ -91,7 +91,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 end
             case 'mvarec'
                 netMVAR = initMvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                mat = plotMvarEC(netMVAR, [], []);
+                mat = plotMvarEC(netMVAR, [], exControl);
             case 'dlcm'
                 dlcmName = ['results/ad-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(dlcmName, 'file')
