@@ -5,7 +5,7 @@
 %  exSignal      multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl   node control matrix (node x node) (optional)
 %  exControl     exogenous input control matrix for each node (node x exogenous input) (optional)
-%  net           DLCM network structure
+%  net           mVAR DNN network structure
 %  options       training options
 
 function trainedNet = trainMvarDnnNetwork(X, exSignal, nodeControl, exControl, net, options)
