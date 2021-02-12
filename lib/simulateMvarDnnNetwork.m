@@ -22,7 +22,9 @@ function [S, time] = simulateMvarDnnNetwork(X, exSignal, nodeControl, exControl,
         if mod(t,10)==0, disp(['step : ' num2str(t)]); end
         nodeInputOrg = [];
         for i=1:lags, nodeInputOrg = [nodeInputOrg; S(:,t-lags+i)]; end
-        for i=1:lags, nodeInputOrg = [nodeInputOrg; exSignal(:,t-lags+i)]; end
+        if ~isempty(exSignal)
+            for i=1:lags, nodeInputOrg = [nodeInputOrg; exSignal(:,t-lags+i)]; end
+        end
         for i=1:nodeNum
             nodeInput = nodeInputOrg;
             if ~isempty(nodeControl)

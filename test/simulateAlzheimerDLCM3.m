@@ -443,7 +443,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 1;
+    NumProcessors = 11;
 
     if NumProcessors > 1
         try
@@ -458,12 +458,14 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
     ECs = zeros(ROINUM, ROINUM, sbjNum);
     subECs = zeros(ROINUM, ROINUM+1, sbjNum);
     simSignals = cell(1, sbjNum);
-%    parfor i=1:sbjNum    % for parallel processing
-    for i=1:sbjNum
+    parfor i=1:sbjNum    % for parallel processing
+%    for i=1:sbjNum
         switch(algorithm)
         case 'dlw'
             dlcmName = ['results/ad-dlcm' lagStr exoStr linStr '-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             f = load(dlcmName);
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
             if isRaw
                 si = signals{i};
                 sig=0; c=0; maxsi=0; minsi=0;
@@ -480,6 +482,8 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
         case 'mvarec'
             dlcmName = ['results/ad-dlcm' lagStr exoStr linStr '-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             f = load(dlcmName);
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
             if isRaw
                 si = signals{i};
                 sig=0; c=0; maxsi=0; minsi=0;
