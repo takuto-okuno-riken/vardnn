@@ -153,7 +153,6 @@ function analyzeAlzheimerDLCM2
             [dlwROC{j}{k,1}, dlwROC{j}{k,2}, dlwAUC(j,k), dlwACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
         end
     end
-    figure; boxplot(X);
 
     % save result
     fname = ['results/ad-cn-ad-roi' num2str(132) '-result.mat'];
@@ -178,17 +177,40 @@ function analyzeAlzheimerDLCM2
     figure; 
     hold on;
     for lags=1:maxLag
-        plotAverageROCcurve(dlROC{lags}, N, '--', [0.2,0.2,0.2]+(lags*0.1),1.0);
+        plotAverageROCcurve(gcROC{lags}, N, '--', [0.2,0.5,0.2]+(lags*0.1),1.0);
+        plotAverageROCcurve(mvarecROC{lags}, N, '-', [0.5,0.2,0.2]+(lags*0.1),1.0);
+        plotAverageROCcurve(dlROC{lags}, N, '-', [0.2,0.2,0.4]+(lags*0.1),1.0);
+        plotAverageROCcurve(dl2ROC{lags}, N, '--', [0.2,0.2,0.4]+(lags*0.1),0.4); % linear
         plotAverageROCcurve(dlwROC{lags}, N, '-', [0.2,0.2,0.2]+(lags*0.1),1.0);
-        plotAverageROCcurve(dl2ROC{lags}, N, '--', [0.2,0.2,0.3]+(lags*0.1),0.4);
-        plotAverageROCcurve(dlw2ROC{lags}, N, '-', [0.2,0.2,0.3]+(lags*0.1),0.4);
+        plotAverageROCcurve(dlw2ROC{lags}, N, '--', [0.2,0.2,0.2]+(lags*0.1),0.4); % linear
     end
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);
     xlim([0 1]);
     daspect([1 1 1]);
-    title(['averaged ROC curve']);
+    title(['averaged ROC curve (without exogenous)']);
+    xlabel('False Positive Rate')
+    ylabel('True Positive Rate')
+
+    % show average ROC curve of DCM
+    figure; 
+    hold on;
+    for lags=1:maxLag
+        k = lags+5;
+        plotAverageROCcurve(gcROC{k}, N, '--', [0.2,0.5,0.2]+(lags*0.1),1.0);
+        plotAverageROCcurve(mvarecROC{k}, N, '-', [0.5,0.2,0.2]+(lags*0.1),1.0);
+        plotAverageROCcurve(dlROC{k}, N, '-', [0.2,0.2,0.4]+(lags*0.1),1.0);
+        plotAverageROCcurve(dl2ROC{k}, N, '--', [0.2,0.2,0.4]+(lags*0.1),0.4); % linear
+        plotAverageROCcurve(dlwROC{k}, N, '-', [0.2,0.2,0.2]+(lags*0.1),1.0);
+        plotAverageROCcurve(dlw2ROC{k}, N, '--', [0.2,0.2,0.2]+(lags*0.1),0.4); % linear
+    end
+    plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
+    hold off;
+    ylim([0 1]);
+    xlim([0 1]);
+    daspect([1 1 1]);
+    title(['averaged ROC curve (with exogenous)']);
     xlabel('False Positive Rate')
     ylabel('True Positive Rate')
 end
