@@ -17,13 +17,13 @@ function simulateAlzheimerDLCM2
     nodeNum = size(cnSignals{1},1);
     
     % get DLCM-GC from original CN and AD (normal and recovery training)
-    [cnDLs, meanCnDL, stdCnDL] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 1, 1, 1);
-    [adDLs, meanAdDL, stdAdDL] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 1, 1, 1);
+    [cnDLs, meanCnDL, stdCnDL] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 0, 1, 1);
+    [adDLs, meanAdDL, stdAdDL] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 0, 1, 1);
     sigCnDLs = (cnDLs - nanmean(cnDLs(:))) / nanstd(cnDLs(:),1);
     sigAdDLs = (adDLs - nanmean(adDLs(:))) / nanstd(adDLs(:),1);
 
-    [rccnDLs, meanRcCnDL, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcmrc', 1, 1, 1); % do recovery training
-    [rcadDLs, meanRcAdDL, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcmrc', 1, 1, 1); % do recovery training
+    [rccnDLs, meanRcCnDL, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcmrc', 0, 1, 1); % do recovery training
+    [rcadDLs, meanRcAdDL, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcmrc', 0, 1, 1); % do recovery training
 
     % simulate CN & AD signals from first frame
     [cnDLWs, smcnSignals, cnSubDLWs] = simulateNodeSignals(cnSignals, roiNames, 'cn', 'dlw', 'cn');

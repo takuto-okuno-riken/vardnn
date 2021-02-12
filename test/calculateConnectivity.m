@@ -189,13 +189,13 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : Time shifted Functional Connectivity'];
+        titleStr = [group ' : Time shifted Functional Connectivity (' num2str(lags) ')'];
     case 'tsfca'
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : Time shifted Functional Connectivity (Abs)'];
+        titleStr = [group ' : Time shifted Functional Connectivity (Abs) (' num2str(lags) ')'];
     case 'pc'
         clims = [-1,1];
         titleStr = [group ' : Partial Correlation'];
@@ -209,19 +209,19 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : multivariate Granger Causality Index'];
+        titleStr = [group ' : multivariate Granger Causality(' num2str(lags) ') Index'];
     case 'pgc'
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : pairwise Granger Causality Index'];
+        titleStr = [group ' : pairwise Granger Causality(' num2str(lags) ') Index'];
     case 'te'
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : Transfer Entropy (LINER)'];
+        titleStr = [group ' : Transfer Entropy (LINER) (' num2str(lags) ')'];
     case 'pcs'
         clims = [-1,1];
         titleStr = [group ' : PC-stable-max'];
@@ -245,19 +245,19 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : DLCM Granger Causality Index'];
+        titleStr = [group ' : DLCM(' num2str(lags) ') Granger Causality Index'];
     case {'dlw','dlwrc'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : DLCM Weight Causality Index'];
+        titleStr = [group ' : DLCM(' num2str(lags) ') Weight Causality Index'];
     case 'mvarec'
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : MVAR-EC Index'];
+        titleStr = [group ' : MVAR(' num2str(lags) ')-EC Index'];
     end
     imagesc(sigWeights,clims);
     daspect([1 1 1]);
