@@ -36,7 +36,7 @@ function [S, time] = simulateMvarDnnNetwork(X, exSignal, nodeControl, exControl,
                 nodeInput(nodeNum*lags+1:end,:) = nodeInput(nodeNum*lags+1:end,:) .* filter;
             end
             % predict next time step
-            S(i,t+1) = predict(net.nodeNetwork{i}, nodeInput);
+            S(i,t+1) = predict(net.nodeNetwork{i}, nodeInput, 'ExecutionEnvironment', 'cpu');
         end
         % fixed over shoot values
         idx = find(S(:,t+1) > 1.2);

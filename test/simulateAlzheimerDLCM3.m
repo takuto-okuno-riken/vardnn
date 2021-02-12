@@ -305,7 +305,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 11;
+    NumProcessors = 20;
 
     if NumProcessors > 1
         try

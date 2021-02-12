@@ -29,7 +29,7 @@ function [EC, ECsub] = calcMvarDnnEC(net, nodeControl, exControl, isFullNode)
             nodeInput(nodeNum*lags+1:end,:) = nodeInput(nodeNum*lags+1:end,:) .* filter;
         end
         % predict 
-        ECsub(i,1)  = predict(net.nodeNetwork{i}, nodeInput);
+        ECsub(i,1)  = predict(net.nodeNetwork{i}, nodeInput, 'ExecutionEnvironment', 'cpu');
 
         % imparement node signals
         for j=1:nodeMax
@@ -45,7 +45,7 @@ function [EC, ECsub] = calcMvarDnnEC(net, nodeControl, exControl, isFullNode)
             end
 
             % predict 
-            ECsub(i,j+1) = predict(net.nodeNetwork{i}, impInput);
+            ECsub(i,j+1) = predict(net.nodeNetwork{i}, impInput, 'ExecutionEnvironment', 'cpu');
             EC(i,j) = abs(ECsub(i,1) - ECsub(i,j+1));
         end
     end
