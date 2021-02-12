@@ -1028,7 +1028,7 @@ function [vadSignals, vadDLWs, vadDLWnss] = calculateVirtualADSignals4(cnSignals
         minsi = nan(cnNum);
         for k=1:adNum
             disp(['generate virtual ad signals (type 4) : ' num2str(k)]);
-            origName = ['results/ad-dlcm-ad-roi' num2str(ROWNUM) '-net' num2str(k) '.mat'];
+            origName = ['results/ad-dlcm_ex-ad-roi' num2str(ROWNUM) '-net' num2str(k) '.mat'];
             load(origName);
             for i=1:cnNum
                 [allCnSignals(:,:,i), sig(i), c(i), maxsi(i), minsi(i)] = convert2SigmoidSignal(cnSignals{i});

@@ -129,12 +129,12 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     parsavedlsm(dlcmName, netDLCM, si, exSignal, exControl, mat, sig, c, maxsi, minsi);
                 end
             case 'dlcmrc' % should be called after dlcm
-                outName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                outName = ['results/ad-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(outName, 'file')
                     f = load(outName);
                     mat = f.mat;
                 else
-                    dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                    dlcmName = ['results/ad-dlcm' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                     f = load(dlcmName);
                     if isfield(f,'c'), c=f.c; else c=f.m; end % for compatibility
                     if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
@@ -156,7 +156,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 if strcmp(algorithm, 'dlw')
                     dlcmName = ['results/ad-dlcm' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 else
-                    dlcmName = ['results/ad-dlcmrc-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                    dlcmName = ['results/ad-dlcmrc' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 end
                 f = load(dlcmName);
                 if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility

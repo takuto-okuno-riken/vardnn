@@ -1,5 +1,5 @@
 % load healthy control analysis result of DLCM-GC
-load('results/ad-dlcm-cn-roi132.mat');
+load('results/ad-dlcm_ex-cn-roi132.mat');
 load('data/roiNames.mat');
 
 % invert weight 

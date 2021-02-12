@@ -1,6 +1,6 @@
 
 function connROIs
-    scFilename = 'results/ad-dlcm-cn-roi132.mat';
+    scFilename = 'results/ad-dlcm_ex-cn-roi132.mat';
     roiFilename = '../conn/rois/atlas.nii';
     scf = load(scFilename); % read tractography structure data
     info = niftiinfo(roiFilename);

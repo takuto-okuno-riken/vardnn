@@ -777,7 +777,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(signa
 
             if isnan(corrZi2(n))
                 % load original signal
-                dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+                dlcmName = ['results/ad-dlcm_ex-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
                 f = load(dlcmName);
                 if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
                 if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -879,7 +879,7 @@ function checkRelationSubDLWandWeights(signals, subDLWs, smSubDLWs, group, type)
         if exist(outfName, 'file')
             load(outfName);
         else
-            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            dlcmName = ['results/ad-dlcm_ex-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -1002,7 +1002,7 @@ function [weDLWs, weSubDLWs, weSignals, weDLs] = checkRelationSubDLWandWeights2(
                 westart = 1;
             end
 
-            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            dlcmName = ['results/ad-dlcm_ex-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -1222,7 +1222,7 @@ function checkRelationSubDLWandSignals4(signals, DLWs, subDLWs, smSignals, smDLW
                 hold off; daspect([1 1 1]); title(['sbj' num2str(k) ' Zij-Zi corr : original vs simulated']);
             end
 
-            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            dlcmName = ['results/ad-dlcm_ex-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -1379,7 +1379,7 @@ function [wtDLWs, wtSubDLWs, wtSignals, wtDLs] = checkWaveletTransformEffect(sig
         
     % checking signal amplitude change effect for Zi, Zij and ECij'
     for k=1:sbjMax
-        dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+        dlcmName = ['results/ad-dlcm_ex-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
         f = load(dlcmName);
         if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
         if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -1536,7 +1536,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
                 parpool(NumProcessors);
             end
             
-            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            dlcmName = ['results/ad-dlcm_ex-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -1725,7 +1725,7 @@ function [ampDLWs, ampSubDLWs, ampSignals, ampDLs] = checkRelationSubDLWandSigna
             ampfName = ['results/adsim2-checkRelation6-' orgGroup '-' num2str(k) '.mat'];
             af=load(ampfName);        
 
-            dlcmName = ['results/ad-dlcm-' orgGroup '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            dlcmName = ['results/ad-dlcm_ex-' orgGroup '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -1896,7 +1896,7 @@ function checkRelationSubDLWandSignals2(signals, DLWs, subDLWs, smDLWs, smSubDLW
                 parpool(NumProcessors);
             end
             
-            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            dlcmName = ['results/ad-dlcm_ex-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -2013,7 +2013,7 @@ function checkRelationSubDLWandSignals2(signals, DLWs, subDLWs, smDLWs, smSubDLW
                 parpool(NumProcessors);
             end
             
-            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            dlcmName = ['results/ad-dlcm_ex-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -2157,7 +2157,7 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
                 Zij2 = zeros(R, nMax, 17, nodeNum);
                 rstart = 1;
             end
-            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            dlcmName = ['results/ad-dlcm_ex-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -2285,7 +2285,7 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
             X = zeros(R, nMax, ampsLen);
             Zij2 = zeros(R, nMax, ampsLen, nodeNum);
             
-            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            dlcmName = ['results/ad-dlcm_ex-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -2430,7 +2430,7 @@ function checkRelationSubDLWandSignals(signals, DLWs, subDLWs, group, isRaw)
                 rstart = 1;
             end
             
-            dlcmName = ['results/ad-dlcm-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
+            dlcmName = ['results/ad-dlcm_ex-' group '-roi' num2str(nodeNum) '-net' num2str(k) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -2698,7 +2698,7 @@ function [weights, meanWeights, stdWeights, subweights] = retrainDLCMAndEC(teach
 
 %    for i=1:sbjNum
     parfor i=1:sbjNum
-        dlcmName = ['results/ad-dlcm-' group '-roi' num2str(ROWNUM) '-net' num2str(i) '.mat'];
+        dlcmName = ['results/ad-dlcm_ex-' group '-roi' num2str(ROWNUM) '-net' num2str(i) '.mat'];
         if exist(dlcmName, 'file')
             f=load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
@@ -2819,9 +2819,9 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
         switch(algorithm)
         case {'dlw','dlwrc'}
             if strcmp(algorithm, 'dlw')
-                dlcmName = ['results/ad-dlcm-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                dlcmName = ['results/ad-dlcm_ex-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             else
-                dlcmName = ['results/ad-dlcmrc-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                dlcmName = ['results/ad-dlcmrc_ex-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             end
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
@@ -2840,7 +2840,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
             [Y, time] = simulateDlcmNetwork(si, exSignal, [], f.exControl, f.netDLCM);
             [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl);
         case 'mvarec'
-            dlcmName = ['results/ad-dlcm-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            dlcmName = ['results/ad-dlcm_ex-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
