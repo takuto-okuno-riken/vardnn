@@ -93,8 +93,8 @@ function simulateAlzheimerDLCM3
         [sm2cnDLs{j}, meanSm2cnDL{j}, ~] = calculateConnectivity(sm2cnSignals{j}, roiNames, 'smcn', 'dlcm', 1, j, 0, []);
         [sm2cnDLWs{j}, meanSm2cnDLW{j}, ~, sm2cnSubDLWs{j}] = calculateConnectivity(sm2cnSignals{j}, roiNames, 'smcn', 'dlw', 1, j, 0, []);
         % mvar(j) no exogenous 
-        [smcnDL2s{j}, meanSmcnDL2{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smcn', 'dlcm', 1, j, 0);
-        [smcnDLW2s{j}, meanSmcnDLW2{j}, ~, smcnSubDLW2s{j}] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smcn', 'dlw', 1, j, 0);
+        [smmvcnDLs{j}, meanSmmvcnDL{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smcn', 'dlcm', 1, j, 0);
+        [smmvcnDLWs{j}, meanSmmvcnDLW{j}, ~, smcnSubDLW2s{j}] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smcn', 'dlw', 1, j, 0);
     end
     for i=1:maxLag
         j = i+maxLag;
@@ -105,8 +105,8 @@ function simulateAlzheimerDLCM3
         [sm2cnDLs{j}, meanSm2cnDL{j}, ~] = calculateConnectivity(sm2cnSignals{j}, roiNames, 'smcn', 'dlcm', 1, i, 1, []);
         [sm2cnDLWs{j}, meanSm2cnDLW{j}, ~, sm2cnSubDLWs{j}] = calculateConnectivity(sm2cnSignals{j}, roiNames, 'smcn', 'dlw', 1, i, 1, []);
         % mvar(j) auto exogenous 
-        [smcnDL2s{j}, meanSmcnDL2{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smcn', 'dlcm', 1, i, 1);
-        [smcnDLW2s{j}, meanSmcnDLW2{j}, ~, smcnSubDLW2s{j}] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smcn', 'dlw', 1, i, 1);
+        [smmvcnDLs{j}, meanSmmvcnDL{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smcn', 'dlcm', 1, i, 1);
+        [smmvcnDLWs{j}, meanSmmvcnDLW{j}, ~, smcnSubDLW2s{j}] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smcn', 'dlw', 1, i, 1);
     end
 
     % check FC of simulated CN and AD
@@ -136,117 +136,91 @@ function simulateAlzheimerDLCM3
 
     % --------------------------------------------------------------------------------------------------------------
     % plot correlation and cos similarity
-    cosSim = zeros(60,1);
-    cosSim(1) = getCosSimilarity(meanCnDLW, meanSmcnDLW);
-    cosSim(2) = getCosSimilarity(meanCnDLW, meanSmcn2DLW);
-    cosSim(11) = getCosSimilarity(meanCnDL, meanSmcnDL);
-    cosSim(12) = getCosSimilarity(meanCnDL, meanSmcn2DL);
-    cosSim(21) = getCosSimilarity(meanCnFC, meanSmcnFC);
-    cosSim(22) = getCosSimilarity(meanCnFC, meanSmcn2FC);
+    cosSim = zeros(90,1);
+    for i=1:maxLag*2
+        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmcnDLW{i});
+        cosSim(10+i) = getCosSimilarity(meanCnDLW{1}, meanSm2cnDLW{i});
+        cosSim(20+i) = getCosSimilarity(meanCnDLW{1}, meanSmmvcnDLW{i});
+        cosSim(30+i) = getCosSimilarity(meanCnDL{1}, meanSmcnDL{i});
+        cosSim(40+i) = getCosSimilarity(meanCnDL{1}, meanSm2cnDL{i});
+        cosSim(50+i) = getCosSimilarity(meanCnDL{1}, meanSmmvcnDL{i});
+        cosSim(60+i) = getCosSimilarity(meanCnFC{1}, meanSmcnFC{i});
+        cosSim(70+i) = getCosSimilarity(meanCnFC{1}, meanSm2cnFC{i});
+        cosSim(80+i) = getCosSimilarity(meanCnFC{1}, meanSmmvcnFC{i});
+    end
     figure; bar(cosSim); title('cos similarity between mean CN matrix and SimCN by each algorithm');
-
-    cosSim = zeros(algNum,1);
-    cosSim(1) = getCosSimilarity(meanAdDLW, meanSmadDLW);
-    cosSim(2) = getCosSimilarity(meanAdDLW, meanSmad2DLW);
-    cosSim(11) = getCosSimilarity(meanAdDL, meanSmadDL);
-    cosSim(12) = getCosSimilarity(meanAdDL, meanSmad2DL);
-    cosSim(21) = getCosSimilarity(meanAdFC, meanSmadFC);
-    cosSim(22) = getCosSimilarity(meanAdFC, meanSmad2FC);
-    figure; bar(cosSim); title('cos similarity between mean AD matrix and SimAD by each algorithm');
 %{
-    % plot correlation and cos similarity (all)
-    algNum = 24;
     cosSim = zeros(algNum,1);
-    cosSim(1) = getCosSimilarity(meanCnDLW, meanSmcnDLW);
-    cosSim(2) = getCosSimilarity(meanAdDLW, meanSmadDLW);
-    cosSim(3) = getCosSimilarity(meanAdDLW, meanSmcnDLW);
-    cosSim(4) = getCosSimilarity(meanCnDLW, meanSmadDLW);
-    cosSim(5) = getCosSimilarity(meanCnDL, meanSmcnDL);
-    cosSim(6) = getCosSimilarity(meanAdDL, meanSmadDL);
-    cosSim(7) = getCosSimilarity(meanAdDL, meanSmcnDL);
-    cosSim(8) = getCosSimilarity(meanCnDL, meanSmadDL);
-    cosSim(9) = getCosSimilarity(meanCnFC, meanSmcnFC);
-    cosSim(10) = getCosSimilarity(meanAdFC, meanSmadFC);
-    cosSim(11) = getCosSimilarity(meanAdFC, meanSmcnFC);
-    cosSim(12) = getCosSimilarity(meanCnFC, meanSmadFC);
-    cosSim(21) = getCosSimilarity(meanCnDLW, meanSmcn2DLW);
-    cosSim(22) = getCosSimilarity(meanAdDLW, meanSmad2DLW);
-    cosSim(23) = getCosSimilarity(meanAdDLW, meanSmcn2DLW);
-    cosSim(24) = getCosSimilarity(meanCnDLW, meanSmad2DLW);
-    X = categorical({'cn-smcn','ad-smad','ad-smcn','cn-smad','cn-smcn-dlgc','ad-smad-dlgc','ad-smcn-dlgc','cn-smad-dlgc',...
-        'cn-smcn-fc','ad-smad-fc','ad-smcn-fc','cn-smad-fc','cn-smrccn','ad-smrcad','ad-smrccn','cn-smrcad',...
-        'cn-smrccn-fc','ad-smrcad-fc','ad-smrccn-fc','cn-smrcad-fc','cn-smcn2','ad-smad2','ad-smcn2','cn-smad2',});
-    figure; bar(X, cosSim);
-    title('cos similarity between CN and SimCN by each algorithm');
-%}
+    figure; bar(cosSim); title('cos similarity between mean AD matrix and SimAD by each algorithm');
+%}  
     % plot box-and-whisker plot of cos similarity between mean ec matrix and each subject ec
-    cosSims = nan(cnSbjNum,30);
-    for i=1:cnSbjNum
-        cosSims(i,1) = getCosSimilarity(meanCnDLW, cnDLWs(:,:,i));
-        cosSims(i,2) = getCosSimilarity(meanCnDLW, smcnDLWs(:,:,i));
-        cosSims(i,11) = getCosSimilarity(meanCnDL, cnDLs(:,:,i));
-        cosSims(i,12) = getCosSimilarity(meanCnDL, smcnDLs(:,:,i));
-        cosSims(i,21) = getCosSimilarity(meanCnFC, cnFCs(:,:,i));
-        cosSims(i,22) = getCosSimilarity(meanCnFC, smcnFCs(:,:,i));
+    cosSims = nan(cnSbjNum,90);
+    for j=1:cnSbjNum
+        for i=1:maxLag*2
+            cosSim(j,i) = getCosSimilarity(meanCnDLW{1}, smcnDLWs{i}(:,:,j));
+            cosSim(j,10+i) = getCosSimilarity(meanCnDLW{1}, sm2cnDLWs{i}(:,:,j));
+            cosSim(j,20+i) = getCosSimilarity(meanCnDLW{1}, smmvcnDLWs{i}(:,:,j));
+            cosSim(j,30+i) = getCosSimilarity(meanCnDL{1}, smcnDLs{i}(:,:,j));
+            cosSim(j,40+i) = getCosSimilarity(meanCnDL{1}, sm2cnDLs{i}(:,:,j));
+            cosSim(j,50+i) = getCosSimilarity(meanCnDL{1}, smmvcnDLs{i}(:,:,j));
+            cosSim(j,60+i) = getCosSimilarity(meanCnFC{1}, smcnFCs{i}(:,:,j));
+            cosSim(j,70+i) = getCosSimilarity(meanCnFC{1}, sm2cnFCs{i}(:,:,j));
+            cosSim(j,80+i) = getCosSimilarity(meanCnFC{1}, smmvcnFCs{i}(:,:,j));
+        end
+%        cosSims(j,1) = getCosSimilarity(meanCnDLW, cnDLWs(:,:,i));
+%        cosSims(i,11) = getCosSimilarity(meanCnDL, cnDLs(:,:,i));
+%        cosSims(i,21) = getCosSimilarity(meanCnFC, cnFCs(:,:,i));
     end
-    figure; boxplot(cosSims);
-    [anovaP,tbl,stats] = kruskalwallis(cosSims(:,1:30));
-    c = multcompare(stats);
+    figure; boxplot(cosSims); title('cos similarity between mean CN matrix and each subject EC by each algorithm');
+%    [anovaP,tbl,stats] = kruskalwallis(cosSims(:,1:30));
+%    c = multcompare(stats);
 %    [p1,h1] = ranksum(cosSims(:,1),cosSims(:,2));
 %    [p2,h2] = ranksum(cosSims(:,1),cosSims(:,3));
-    [sortCosCnDLW,idxCosCnDLW] = sort(cosSims(:,1),'descend');
-    [sortCosCnFC,idxCosCnFC] = sort(cosSims(:,21),'descend');
+%    [sortCosCnDLW,idxCosCnDLW] = sort(cosSims(:,1),'descend');
+%    [sortCosCnFC,idxCosCnFC] = sort(cosSims(:,21),'descend');
 
-    cosSims = nan(adSbjNum,30);
-    for i=1:adSbjNum
-        cosSims(i,1) = getCosSimilarity(meanAdDLW, adDLWs(:,:,i));
-        cosSims(i,11) = getCosSimilarity(meanAdDL, adDLs(:,:,i));
-        cosSims(i,21) = getCosSimilarity(meanAdFC, adFCs(:,:,i));
-        cosSims(i,22) = getCosSimilarity(meanAdFC, smadFCs(:,:,i));
+    cosSims = nan(adSbjNum,90);
+    for j=1:adSbjNum
+        for i=1:maxLag*2
+        end
     end
-    figure; boxplot(cosSims);
-    [anovaP,tbl,stats] = kruskalwallis(cosSims(:,1:30));
-    c = multcompare(stats);
-%    [p1,h1] = ranksum(cosSims(:,1),cosSims(:,2));
-%    [p2,h2] = ranksum(cosSims(:,1),cosSims(:,3));
-    [sortCosAdDLW,idxCosAdDLW] = sort(cosSims(:,1),'descend');
-    [sortCosAdFC,idxCosAdFC] = sort(cosSims(:,21),'descend');
+%    figure; boxplot(cosSims);
 
     % plot correlation between original EC matrix and simulated signals EC matrix
+%{
     for i=1:1 %cnSbjNum
         % calc & plot correlation of original Zi vs simulating Zi
         [corrZi, corrZij] = calcCorrelationZiZij(cnSubDLWs(:,:,i), smcnSubDLWs(:,:,i), nodeNum);
         plotCorrelationZiZij(cnDLWs(:,:,i), cnSubDLWs(:,:,i), smcnDLWs(:,:,i), smcnSubDLWs(:,:,i), nodeNum, ['sbj' num2str(i)], 'original', 'simulating');
     end
-
+%}
     % plot box-and-whisker plot of cos similarity between original ec matrix and simulated signals ec matrix
-    cosSims = nan(cnSbjNum,30);
-    for i=1:cnSbjNum
-        cosSims(i,1) = getCosSimilarity(cnDLWs(:,:,i), smcnDLWs(:,:,i));
-        cosSims(i,11) = getCosSimilarity(cnDLs(:,:,i), smcnDLs(:,:,i));
-        cosSims(i,21) = getCosSimilarity(cnFCs(:,:,i), smcnFCs(:,:,i));
+    cosSims = nan(cnSbjNum,90);
+    for j=1:cnSbjNum
+        for i=1:maxLag*2
+            cosSim(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smcnDLWs{i}(:,:,j));
+            cosSim(j,10+i) = getCosSimilarity(cnDLWs{1}(:,:,j), sm2cnDLWs{i}(:,:,j));
+            cosSim(j,20+i) = getCosSimilarity(cnDLWs{1}(:,:,j), smmvcnDLWs{i}(:,:,j));
+            cosSim(j,30+i) = getCosSimilarity(cnDLs{1}(:,:,j), smcnDLs{i}(:,:,j));
+            cosSim(j,40+i) = getCosSimilarity(cnDLs{1}(:,:,j), sm2cnDLs{i}(:,:,j));
+            cosSim(j,50+i) = getCosSimilarity(cnDLs{1}(:,:,j), smmvcnDLs{i}(:,:,j));
+            cosSim(j,60+i) = getCosSimilarity(cnFCs{1}(:,:,j), smcnFCs{i}(:,:,j));
+            cosSim(j,70+i) = getCosSimilarity(cnFCs{1}(:,:,j), sm2cnFCs{i}(:,:,j));
+            cosSim(j,80+i) = getCosSimilarity(cnFCs{1}(:,:,j), smmvcnFCs{i}(:,:,j));
+        end
     end
-    figure; boxplot(cosSims);
-    cosSims = nan(cnSbjNum,60);
-    for i=1:cnSbjNum
-        for j=1:10
-            cosSims(i,j) = getCosSimilarity(cnDLWs(:,:,i), smmvcnDLWs{j,1}(:,:,i));
-            cosSims(i,10+j) = getCosSimilarity(cnDLWs(:,:,i), smmvcnDLWs{j,2}(:,:,i));
-            cosSims(i,20+j) = getCosSimilarity(cnDLs(:,:,i), smmvcnDLs{j,1}(:,:,i));
-            cosSims(i,30+j) = getCosSimilarity(cnDLs(:,:,i), smmvcnDLs{j,2}(:,:,i));
-            cosSims(i,40+j) = getCosSimilarity(cnFCs(:,:,i), smmvcnFCs{j,1}(:,:,i));
-            cosSims(i,50+j) = getCosSimilarity(cnFCs(:,:,i), smmvcnFCs{j,2}(:,:,i));
+    figure; boxplot(cosSims); title('cos similarity between mean CN matrix and each subject EC by each algorithm');
+%{
+    cosSims = nan(cnSbjNum,30);
+    for j=1:adSbjNum
+        for i=1:maxLag*2
+            cosSims(i,1) = getCosSimilarity(adDLWs(:,:,i), smadDLWs(:,:,i));
+            cosSims(i,11) = getCosSimilarity(adDLs(:,:,i), smadDLs(:,:,i));
+            cosSims(i,21) = getCosSimilarity(adFCs(:,:,i), smadFCs(:,:,i));
         end
     end
     figure; boxplot(cosSims);
-    cosSims = nan(cnSbjNum,30);
-    for i=1:adSbjNum
-        cosSims(i,1) = getCosSimilarity(adDLWs(:,:,i), smadDLWs(:,:,i));
-        cosSims(i,11) = getCosSimilarity(adDLs(:,:,i), smadDLs(:,:,i));
-        cosSims(i,21) = getCosSimilarity(adFCs(:,:,i), smadFCs(:,:,i));
-    end
-    figure; boxplot(cosSims);
-    
+%}
     % change Z score
 %{
     cnDLWs = calcZScores(cnDLWs);
@@ -258,12 +232,20 @@ function simulateAlzheimerDLCM3
     cnDLWsNt = calculateAlzNormalityTest(cnDLWs, roiNames, 'cnec', 'dlw');
 %}
     % compalizon test (Wilcoxon, Mann?Whitney U test)
-    [cnsmcnFCsUt, cnsmcnFCsUtP, cnsmcnFCsUtP2] = calculateAlzWilcoxonTest(cnFCs, smcnFCs, roiNames, 'cn', 'smcn', 'fc');
-    [adsmadFCsUt, adsmadFCsUtP, adsmadFCsUtP2] = calculateAlzWilcoxonTest(adFCs, smadFCs, roiNames, 'ad', 'smad', 'fc');
-    [cnsmcnDLsUt, cnsmcnDLsUtP, cnsmcnDLsUtP2] = calculateAlzWilcoxonTest(cnDLs, smcnDLs, roiNames, 'cn', 'smcn', 'dlcm');
-    [adsmadDLsUt, adsmadDLsUtP, adsmadDLsUtP2] = calculateAlzWilcoxonTest(adDLs, smadDLs, roiNames, 'ad', 'smad', 'dlcm');
-    [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs, smcnDLWs, roiNames, 'cn', 'smcn', 'dlw');
-    [adsmadDLWsUt, adsmadDLWsUtP, adsmadDLWsUtP2] = calculateAlzWilcoxonTest(adDLWs, smadDLWs, roiNames, 'ad', 'smad', 'dlw');
+    for i=1:3 %maxLag*2
+        [cnsmcnFCsUt, cnsmcnFCsUtP, cnsmcnFCsUtP2] = calculateAlzWilcoxonTest(cnFCs{1}, smcnFCs{i}, roiNames, 'cn', ['sm' num2str(i) 'cn'], 'fc');
+        [cnsmcnFCsUt, cnsmcnFCsUtP, cnsmcnFCsUtP2] = calculateAlzWilcoxonTest(cnFCs{1}, sm2cnFCs{i}, roiNames, 'cn', ['smlin' num2str(i) 'cn'], 'fc');
+        [cnsmcnFCsUt, cnsmcnFCsUtP, cnsmcnFCsUtP2] = calculateAlzWilcoxonTest(cnFCs{1}, smmvcnFCs{i}, roiNames, 'cn', ['smmv' num2str(i) 'cn'], 'fc');
+%        [adsmadFCsUt, adsmadFCsUtP, adsmadFCsUtP2] = calculateAlzWilcoxonTest(adFCs{1}, smadFCs{i}, roiNames, 'ad', ['sm' num2str(i) 'ad'], 'fc');
+        [cnsmcnDLsUt, cnsmcnDLsUtP, cnsmcnDLsUtP2] = calculateAlzWilcoxonTest(cnDLs{1}, smcnDLs{i}, roiNames, 'cn', ['sm' num2str(i) 'cn'], 'dlcm');
+        [cnsmcnDLsUt, cnsmcnDLsUtP, cnsmcnDLsUtP2] = calculateAlzWilcoxonTest(cnDLs{1}, sm2cnDLs{i}, roiNames, 'cn', ['smlin' num2str(i) 'cn'], 'dlcm');
+        [cnsmcnDLsUt, cnsmcnDLsUtP, cnsmcnDLsUtP2] = calculateAlzWilcoxonTest(cnDLs{1}, smmvcnDLs{i}, roiNames, 'cn', ['smmv' num2str(i) 'cn'], 'dlcm');
+%        [adsmadDLsUt, adsmadDLsUtP, adsmadDLsUtP2] = calculateAlzWilcoxonTest(adDLs{1}, smadDLs{i}, roiNames, 'ad', ['sm' num2str(i) 'ad'], 'dlcm');
+        [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs{1}, smcnDLWs{i}, roiNames, 'cn', ['sm' num2str(i) 'cn'], 'dlw');
+        [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs{1}, sm2cnDLWs{i}, roiNames, 'cn', ['smlin' num2str(i) 'cn'], 'dlw');
+        [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(cnDLWs{1}, smmvcnDLWs{i}, roiNames, 'cn', ['smmv' num2str(i) 'cn'], 'dlw');
+%        [adsmadDLWsUt, adsmadDLWsUtP, adsmadDLWsUtP2] = calculateAlzWilcoxonTest(adDLWs{1}, smadDLWs{i}, roiNames, 'ad', ['sm' num2str(i) 'ad'], 'dlw');
+    end
 end
 
 % ==================================================================================================================
