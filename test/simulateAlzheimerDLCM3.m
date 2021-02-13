@@ -93,8 +93,8 @@ function simulateAlzheimerDLCM3
         [sm2cnDLs{j}, meanSm2cnDL{j}, ~] = calculateConnectivity(sm2cnSignals{j}, roiNames, 'smcn', 'dlcm', 1, j, 0, []);
         [sm2cnDLWs{j}, meanSm2cnDLW{j}, ~, sm2cnSubDLWs{j}] = calculateConnectivity(sm2cnSignals{j}, roiNames, 'smcn', 'dlw', 1, j, 0, []);
         % mvar(j) no exogenous 
-        [smmvcnDLs{j}, meanSmmvcnDL{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smcn', 'dlcm', 1, j, 0);
-        [smmvcnDLWs{j}, meanSmmvcnDLW{j}, ~, smcnSubDLW2s{j}] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smcn', 'dlw', 1, j, 0);
+        [smmvcnDLs{j}, meanSmmvcnDL{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smmvcn', 'dlcm', 1, j, 0);
+        [smmvcnDLWs{j}, meanSmmvcnDLW{j}, ~, smcnSubDLW2s{j}] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smmvcn', 'dlw', 1, j, 0);
     end
     for i=1:maxLag
         j = i+maxLag;
@@ -105,8 +105,8 @@ function simulateAlzheimerDLCM3
         [sm2cnDLs{j}, meanSm2cnDL{j}, ~] = calculateConnectivity(sm2cnSignals{j}, roiNames, 'smcn', 'dlcm', 1, i, 1, []);
         [sm2cnDLWs{j}, meanSm2cnDLW{j}, ~, sm2cnSubDLWs{j}] = calculateConnectivity(sm2cnSignals{j}, roiNames, 'smcn', 'dlw', 1, i, 1, []);
         % mvar(j) auto exogenous 
-        [smmvcnDLs{j}, meanSmmvcnDL{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smcn', 'dlcm', 1, i, 1);
-        [smmvcnDLWs{j}, meanSmmvcnDLW{j}, ~, smcnSubDLW2s{j}] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smcn', 'dlw', 1, i, 1);
+        [smmvcnDLs{j}, meanSmmvcnDL{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smmvcn', 'dlcm', 1, i, 1);
+        [smmvcnDLWs{j}, meanSmmvcnDLW{j}, ~, smcnSubDLW2s{j}] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smmvcn', 'dlw', 1, i, 1);
     end
 
     % check FC of simulated CN and AD
@@ -118,8 +118,8 @@ function simulateAlzheimerDLCM3
         [sm2cnFCs{j}, meanSm2cnFC{j}, ~] = calculateConnectivity(sm2cnSignals{j}, roiNames, 'smcn', 'fc', 1, j, 0, []);
         [sm2adFCs{j}, meanSm2adFC{j}, ~] = calculateConnectivity(sm2adSignals{j}, roiNames, 'smad', 'fc', 1, j, 0, []);
         % mvar(j) auto exogenous 
-        [smmvcnFCs{j}, meanSmmvcnFC{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smcn', 'fc', 1, j, 0);
-        [smmvadFCs{j}, meanSmmvadFC{j}, ~] = calculateConnectivity(smmvadSignals{j}, roiNames, 'smad', 'fc', 1, j, 0);
+        [smmvcnFCs{j}, meanSmmvcnFC{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smmvcn', 'fc', 1, j, 0);
+        [smmvadFCs{j}, meanSmmvadFC{j}, ~] = calculateConnectivity(smmvadSignals{j}, roiNames, 'smmvad', 'fc', 1, j, 0);
     end
     for i=1:maxLag
         j = i+maxLag;
@@ -130,17 +130,17 @@ function simulateAlzheimerDLCM3
         [sm2cnFCs{j}, meanSm2cnFC{j}, ~] = calculateConnectivity(sm2cnSignals{j}, roiNames, 'smcn', 'fc', 1, i, 1, []);
         [sm2adFCs{j}, meanSm2adFC{j}, ~] = calculateConnectivity(sm2adSignals{j}, roiNames, 'smad', 'fc', 1, i, 1, []);
         % mvar(j) auto exogenous 
-        [smmvcnFCs{j}, meanSmmvcnFC{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smcn', 'fc', 1, i, 1);
-        [smmvadFCs{j}, meanSmmvadFC{j}, ~] = calculateConnectivity(smmvadSignals{j}, roiNames, 'smad', 'fc', 1, i, 1);
+        [smmvcnFCs{j}, meanSmmvcnFC{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smmvcn', 'fc', 1, i, 1);
+        [smmvadFCs{j}, meanSmmvadFC{j}, ~] = calculateConnectivity(smmvadSignals{j}, roiNames, 'smmvad', 'fc', 1, i, 1);
     end
 
     % --------------------------------------------------------------------------------------------------------------
     % plot correlation and cos similarity
     cosSim = zeros(90,1);
     for i=1:maxLag*2
-        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmcnDLW{i});
-        cosSim(10+i) = getCosSimilarity(meanCnDLW{1}, meanSm2cnDLW{i});
-        cosSim(20+i) = getCosSimilarity(meanCnDLW{1}, meanSmmvcnDLW{i});
+        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmcnDLW{i}); % non linear (no ex, ex)
+        cosSim(10+i) = getCosSimilarity(meanCnDLW{1}, meanSm2cnDLW{i}); % linear (no ex, ex)
+        cosSim(20+i) = getCosSimilarity(meanCnDLW{1}, meanSmmvcnDLW{i}); % mvar linear (no ex, ex)
         cosSim(30+i) = getCosSimilarity(meanCnDL{1}, meanSmcnDL{i});
         cosSim(40+i) = getCosSimilarity(meanCnDL{1}, meanSm2cnDL{i});
         cosSim(50+i) = getCosSimilarity(meanCnDL{1}, meanSmmvcnDL{i});
@@ -157,15 +157,15 @@ function simulateAlzheimerDLCM3
     cosSims = nan(cnSbjNum,90);
     for j=1:cnSbjNum
         for i=1:maxLag*2
-            cosSim(j,i) = getCosSimilarity(meanCnDLW{1}, smcnDLWs{i}(:,:,j));
-            cosSim(j,10+i) = getCosSimilarity(meanCnDLW{1}, sm2cnDLWs{i}(:,:,j));
-            cosSim(j,20+i) = getCosSimilarity(meanCnDLW{1}, smmvcnDLWs{i}(:,:,j));
-            cosSim(j,30+i) = getCosSimilarity(meanCnDL{1}, smcnDLs{i}(:,:,j));
-            cosSim(j,40+i) = getCosSimilarity(meanCnDL{1}, sm2cnDLs{i}(:,:,j));
-            cosSim(j,50+i) = getCosSimilarity(meanCnDL{1}, smmvcnDLs{i}(:,:,j));
-            cosSim(j,60+i) = getCosSimilarity(meanCnFC{1}, smcnFCs{i}(:,:,j));
-            cosSim(j,70+i) = getCosSimilarity(meanCnFC{1}, sm2cnFCs{i}(:,:,j));
-            cosSim(j,80+i) = getCosSimilarity(meanCnFC{1}, smmvcnFCs{i}(:,:,j));
+            cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, smcnDLWs{i}(:,:,j)); % non linear (no ex, ex)
+            cosSims(j,10+i) = getCosSimilarity(meanCnDLW{1}, sm2cnDLWs{i}(:,:,j)); % linear (no ex, ex)
+            cosSims(j,20+i) = getCosSimilarity(meanCnDLW{1}, smmvcnDLWs{i}(:,:,j)); % mvar linear (no ex, ex)
+            cosSims(j,30+i) = getCosSimilarity(meanCnDL{1}, smcnDLs{i}(:,:,j));
+            cosSims(j,40+i) = getCosSimilarity(meanCnDL{1}, sm2cnDLs{i}(:,:,j));
+            cosSims(j,50+i) = getCosSimilarity(meanCnDL{1}, smmvcnDLs{i}(:,:,j));
+            cosSims(j,60+i) = getCosSimilarity(meanCnFC{1}, smcnFCs{i}(:,:,j));
+            cosSims(j,70+i) = getCosSimilarity(meanCnFC{1}, sm2cnFCs{i}(:,:,j));
+            cosSims(j,80+i) = getCosSimilarity(meanCnFC{1}, smmvcnFCs{i}(:,:,j));
         end
 %        cosSims(j,1) = getCosSimilarity(meanCnDLW, cnDLWs(:,:,i));
 %        cosSims(i,11) = getCosSimilarity(meanCnDL, cnDLs(:,:,i));
@@ -198,15 +198,15 @@ function simulateAlzheimerDLCM3
     cosSims = nan(cnSbjNum,90);
     for j=1:cnSbjNum
         for i=1:maxLag*2
-            cosSim(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smcnDLWs{i}(:,:,j));
-            cosSim(j,10+i) = getCosSimilarity(cnDLWs{1}(:,:,j), sm2cnDLWs{i}(:,:,j));
-            cosSim(j,20+i) = getCosSimilarity(cnDLWs{1}(:,:,j), smmvcnDLWs{i}(:,:,j));
-            cosSim(j,30+i) = getCosSimilarity(cnDLs{1}(:,:,j), smcnDLs{i}(:,:,j));
-            cosSim(j,40+i) = getCosSimilarity(cnDLs{1}(:,:,j), sm2cnDLs{i}(:,:,j));
-            cosSim(j,50+i) = getCosSimilarity(cnDLs{1}(:,:,j), smmvcnDLs{i}(:,:,j));
-            cosSim(j,60+i) = getCosSimilarity(cnFCs{1}(:,:,j), smcnFCs{i}(:,:,j));
-            cosSim(j,70+i) = getCosSimilarity(cnFCs{1}(:,:,j), sm2cnFCs{i}(:,:,j));
-            cosSim(j,80+i) = getCosSimilarity(cnFCs{1}(:,:,j), smmvcnFCs{i}(:,:,j));
+            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smcnDLWs{i}(:,:,j)); % non linear (no ex, ex)
+            cosSims(j,10+i) = getCosSimilarity(cnDLWs{1}(:,:,j), sm2cnDLWs{i}(:,:,j)); % linear (no ex, ex)
+            cosSims(j,20+i) = getCosSimilarity(cnDLWs{1}(:,:,j), smmvcnDLWs{i}(:,:,j)); % mvar linear (no ex, ex)
+            cosSims(j,30+i) = getCosSimilarity(cnDLs{1}(:,:,j), smcnDLs{i}(:,:,j));
+            cosSims(j,40+i) = getCosSimilarity(cnDLs{1}(:,:,j), sm2cnDLs{i}(:,:,j));
+            cosSims(j,50+i) = getCosSimilarity(cnDLs{1}(:,:,j), smmvcnDLs{i}(:,:,j));
+            cosSims(j,60+i) = getCosSimilarity(cnFCs{1}(:,:,j), smcnFCs{i}(:,:,j));
+            cosSims(j,70+i) = getCosSimilarity(cnFCs{1}(:,:,j), sm2cnFCs{i}(:,:,j));
+            cosSims(j,80+i) = getCosSimilarity(cnFCs{1}(:,:,j), smmvcnFCs{i}(:,:,j));
         end
     end
     figure; boxplot(cosSims); title('cos similarity between mean CN matrix and each subject EC by each algorithm');

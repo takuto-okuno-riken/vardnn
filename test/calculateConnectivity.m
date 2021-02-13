@@ -8,7 +8,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 11;
+    NumProcessors = 20;
 
     % constant value
     ROINUM = size(signals{1},1);
@@ -17,8 +17,9 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
     weights = zeros(ROINUM, ROINUM, length(signals));
     subweights = zeros(ROINUM, ROINUM+1, length(signals));
 
-    lagpat = ["gc","pgc","te","tsfc","tsfca","mvarec","dlcm","dlw"];
-    if lags>1 && contains(algorithm,lagpat), lagStr=num2str(lags); else lagStr=''; end
+%    lagpat = ["gc","pgc","te","tsfc","tsfca","mvarec","dlcm","dlw"];
+%    if lags>1 && contains(algorithm,lagpat), lagStr=num2str(lags); else lagStr=''; end
+    if lags>1, lagStr=num2str(lags); else lagStr=''; end
     if isAutoExo>0, exoStr='_ex'; else exoStr=''; end
     if isempty(activateFunc), linStr='_lin'; else linStr=''; end
     outfName = ['results/ad-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '.mat'];
