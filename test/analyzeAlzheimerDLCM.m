@@ -32,17 +32,17 @@ function analyzeAlzheimerDLCM
     [adWCSs, meanADWCS, stdADWCS] = calculateConnectivity(adSignals, roiNames, 'ad', 'wcs');
     [mciWCSs, meanMCIWCS, stdMCIWCS] = calculateConnectivity(mciSignals, roiNames, 'mci', 'wcs');
 
-    [cnGCs, meanCNGC, stdCNGC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'gc');
-    [adGCs, meanADGC, stdADGC] = calculateConnectivity(adSignals, roiNames, 'ad', 'gc');
-    [mciGCs, meanMCIGC, stdMCIGC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'gc');
+    [cnGCs, meanCNGC, stdCNGC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'gc', 0, 3);
+    [adGCs, meanADGC, stdADGC] = calculateConnectivity(adSignals, roiNames, 'ad', 'gc', 0, 3);
+    [mciGCs, meanMCIGC, stdMCIGC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'gc', 0, 3);
 
-    [cnPGCs, meanCNPGC, stdCNPGC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'pgc');
-    [adPGCs, meanADPGC, stdADPGC] = calculateConnectivity(adSignals, roiNames, 'ad', 'pgc');
-    [mciPGCs, meanMCIPGC, stdMCIPGC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'pgc');
+    [cnPGCs, meanCNPGC, stdCNPGC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'pgc', 0, 3);
+    [adPGCs, meanADPGC, stdADPGC] = calculateConnectivity(adSignals, roiNames, 'ad', 'pgc', 0, 3);
+    [mciPGCs, meanMCIPGC, stdMCIPGC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'pgc', 0, 3);
 
-    [cnTEs, meanCNTE, stdCNTE] = calculateConnectivity(cnSignals, roiNames, 'cn', 'te');
-    [adTEs, meanADTE, stdADTE] = calculateConnectivity(adSignals, roiNames, 'ad', 'te');
-    [mciTEs, meanMCITE, stdMCITE] = calculateConnectivity(mciSignals, roiNames, 'mci', 'te');
+    [cnTEs, meanCNTE, stdCNTE] = calculateConnectivity(cnSignals, roiNames, 'cn', 'te', 0, 3);
+    [adTEs, meanADTE, stdADTE] = calculateConnectivity(adSignals, roiNames, 'ad', 'te', 0, 3);
+    [mciTEs, meanMCITE, stdMCITE] = calculateConnectivity(mciSignals, roiNames, 'mci', 'te', 0, 3);
 
     [cnDLs, meanCNDL, stdCNDL] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 0, 1, 1);
     [adDLs, meanADDL, stdADDL] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 0, 1, 1);
@@ -72,17 +72,17 @@ function analyzeAlzheimerDLCM
     [adFCAs, meanADFCA, stdADFCA] = calculateConnectivity(adSignals, roiNames, 'ad', 'fca');
     [mciFCAs, meanMCIFCA, stdMCIFCA] = calculateConnectivity(mciSignals, roiNames, 'mci', 'fca');
 
-    [cnTSFCs, meanCNTSFC, stdCNTSFC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'tsfc');
-    [adTSFCs, meanADTSFC, stdADTSFC] = calculateConnectivity(adSignals, roiNames, 'ad', 'tsfc');
-    [mciTSFCs, meanMCITSFC, stdMCITSFC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'tsfc');
+    [cnTSFCs, meanCNTSFC, stdCNTSFC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'tsfc', 0, 3);
+    [adTSFCs, meanADTSFC, stdADTSFC] = calculateConnectivity(adSignals, roiNames, 'ad', 'tsfc', 0, 3);
+    [mciTSFCs, meanMCITSFC, stdMCITSFC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'tsfc', 0, 3);
 
-    [cnTSFCAs, meanCNTSFCA, stdCNTSFCA] = calculateConnectivity(cnSignals, roiNames, 'cn', 'tsfca');
-    [adTSFCAs, meanADTSFCA, stdADTSFCA] = calculateConnectivity(adSignals, roiNames, 'ad', 'tsfca');
-    [mciTSFCAs, meanMCITSFCA, stdMCITSFCA] = calculateConnectivity(mciSignals, roiNames, 'mci', 'tsfca');
+    [cnTSFCAs, meanCNTSFCA, stdCNTSFCA] = calculateConnectivity(cnSignals, roiNames, 'cn', 'tsfca', 0, 3);
+    [adTSFCAs, meanADTSFCA, stdADTSFCA] = calculateConnectivity(adSignals, roiNames, 'ad', 'tsfca', 0, 3);
+    [mciTSFCAs, meanMCITSFCA, stdMCITSFCA] = calculateConnectivity(mciSignals, roiNames, 'mci', 'tsfca', 0, 3);
 
-    [cnMVARECs, meanCNMVAREC, stdCNMVAREC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mvarec');
-    [adMVARECs, meanADMVAREC, stdADMVAREC] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvarec');
-    [mciMVARECs, meanMCIMVAREC, stdMCIMVAREC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'mvarec');
+    [cnMVARECs, meanCNMVAREC, stdCNMVAREC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mvarec', 0, 3);
+    [adMVARECs, meanADMVAREC, stdADMVAREC] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvarec', 0, 3);
+    [mciMVARECs, meanMCIMVAREC, stdMCIMVAREC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'mvarec', 0, 3);
 
     % plot correlation and cos similarity
     nanx = eye(size(meanADFC,1),size(meanADFC,2));

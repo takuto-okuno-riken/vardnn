@@ -3,7 +3,7 @@
 function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(signals, roiNames, group, algorithm, isRaw, lags, isAutoExo, activateFunc)
     if nargin < 8, activateFunc = @reluLayer; end
     if nargin < 7, isAutoExo = 0; end
-    if nargin < 6, lags = 3; end
+    if nargin < 6, lags = 1; end
     if nargin < 5, isRaw = 0; end
 
     % if you want to use parallel processing, set NumProcessors more than 2
