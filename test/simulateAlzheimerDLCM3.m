@@ -135,6 +135,19 @@ function simulateAlzheimerDLCM3
     end
 
     % --------------------------------------------------------------------------------------------------------------
+    % box plot of signal MAEs 
+    maes = nan(cnSbjNum,30);
+    for j=1:cnSbjNum
+        si = convert2SigmoidSignal(cnSignals{j});
+        for i=1:maxLag*2
+            maes(j,i) = getTwoSignalsError(si, smcnSignals{i}{j}); % non linear (no ex, ex)
+            maes(j,10+i) = getTwoSignalsError(si, sm2cnSignals{i}{j}); % linear (no ex, ex)
+            maes(j,20+i) = getTwoSignalsError(si, smmvcnSignals{i}{j}); % linear (no ex, ex)
+            
+        end
+    end
+    figure; boxplot(maes); title('MAEs between mean cnSignals and each algorithm signals');
+
     % plot correlation and cos similarity
     cosSim = zeros(90,1);
     for i=1:maxLag*2
