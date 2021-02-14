@@ -1,4 +1,4 @@
-# Deep-Learning based Causal Model (DLCM) toolbox
+# Deep-Learning based Causal Modeling (DLCM) toolbox
 
 ## Introduction
 DLCM is a powerful tool of data-driven analysis and simulation technique to estimate Effective Connectivity (EC).
@@ -7,7 +7,7 @@ Based on DLCM framework, two types of EC are defined, such as DLCM-EC and DLCM-G
 <img src="data/figure1.jpg">
 </div>
 
-This toolbox includes several causal analysis algorithms, such as DLCM-EC, DLCM-GC, multivariate Granger Causality, pair-wised Granger Causality,
+This toolbox includes several causal analysis algorithms, such as DLCM-EC, DLCM-GC, multivariate Granger Causality, pairwise Granger Causality,
 linear Transfer Entropy, Functional Connectivity (Correlation), Partial Correlation and Wavelet Coherence to estimate EC from multiple node signals.
 <div align="center">
 <img src="data/figure3b.jpg">
