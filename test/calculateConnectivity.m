@@ -92,7 +92,11 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 end
             case 'mvarec'
                 netMVAR = initMvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                mat = plotMvarEC(netMVAR, [], exControl);
+                mat = calcMvarEC(netMVAR, [], exControl); % |Zi-Zi\j| version
+            case 'mvar'
+                netMVAR = initMvarNetwork(signals{i}, exSignal, [], exControl, lags);
+                [mat, sub] = calcMvarEC(netMVAR, [], exControl); % |Zi-Zi\j| version
+                mat = repmat(sub(:,1), [1 size(mat,2)]) - sub(:,2:end); % subtract Zi-Zi\j version
             case 'dlcm'
                 dlcmName = ['results/ad-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(dlcmName, 'file')
@@ -258,7 +262,13 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : MVAR(' num2str(lags) ')-EC Index'];
+        titleStr = [group ' : mVAR(' num2str(lags) ')-EC Index'];
+    case 'mvar'
+        sigma = std(meanWeights(:),1,'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : mVAR(' num2str(lags) ') Index'];
     end
     imagesc(sigWeights,clims);
     daspect([1 1 1]);
