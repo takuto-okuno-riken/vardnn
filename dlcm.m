@@ -41,6 +41,7 @@ function dlcm(varargin)
     handles.pc = 0;
     handles.wc = 0;
     handles.mvarec = 0;
+    handles.dllag = 1;
     handles.lag = 3;
     handles.pval = 0;
     handles.fval = 0;
@@ -83,7 +84,7 @@ function dlcm(varargin)
                 handles.pc = 1;
             case {'-w','--wc'}
                 handles.wc = 1;
-            case {'--mvarec'}
+            case {'-v','--mvarec'}
                 handles.mvarec = 1;
             case {'--outpath'}
                 handles.outpath = varargin{i+1};
@@ -183,22 +184,22 @@ function showUsage()
     disp('  -e, --dlec          output DLCM Effective Connectivity matrix result (<filename>_dlec.csv)');
     disp('  -d, --dlgc          output DLCM Granger Causality matrix result (<filename>_dlgc.csv)');
     disp('  -m, --mvgc          output multivaliate Granger Causality matrix result (<filename>_mvgc.csv)');
-    disp('  -g, --pwgc          output pair-wised Granger Causality matrix result (<filename>_pwgc.csv)');
+    disp('  -g, --pwgc          output pairwise Granger Causality matrix result (<filename>_pwgc.csv)');
     disp('  -t, --te            output (LINUE) Transfer Entropy matrix result (<filename>_te.csv)');
     disp('  -f, --fc            output Functional Conectivity matrix result (<filename>_fc.csv)');
     disp('  -p, --pc            output Partial Correlation matrix result (<filename>_pc.csv)');
     disp('  -w, --wc            output Wavelet Coherence matrix result (<filename>_wc.csv)');
-    disp('  --mvarec            output multivaliate VAR (Vector Auto-Regression) Effective Connectivity matrix result (<filename>_mvarec.csv)');
+    disp('  -v, --mvarec        output multivaliate VAR (Vector Auto-Regression) Effective Connectivity matrix result (<filename>_mvarec.csv)');
     disp('  --outpath           output files path (default:"results")');
     disp('  --pval              save P-value matrix of DLCM-GC, mvGC, pwGC, TE, FC and PC (<filename>_*_pval.csv)');
     disp('  --fval alpha        save F-value with <alpha> matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_fval.csv, <filename>_*_fcrit.csv)');
     disp('  --aic               save AIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_aic.csv)');
     disp('  --bic               save BIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_bic.csv)');
     disp('  --format type       save file format <type> 0:csv, 1:mat(each), 2:mat(all) (default:0)');
-    disp('  --groundtruth files calculate ROC curve and save AUC of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC (<filename>_*_auc.csv)');
+    disp('  --groundtruth files calculate ROC curve and save AUC of DLCM-EC, DLCM-GC, mVAR-EC, mvGC, pwGC, TE, FC, PC and WC (<filename>_*_auc.csv)');
     disp('  --transform type    input signal transform <type> 0:raw, 1:sigmoid (default:0)');
     disp('  --transopt num      signal transform option <num> (for type 1:centroid value)');
-    disp('  --lag num           time lag <num> for mvGC, pwGC and TE (default:3)');
+    disp('  --lag num           time lag <num> for mvGC, pwGC, TE and mVAR-EC (default:3)');
     disp('  --ex files          DLCM exogenouse input signal <files> (file1.csv[:file2.csv:...])');
     disp('  --nctrl files       DLCM node status control <files> (file1.csv[:file2.csv:...])');
     disp('  --ectrl files       DLCM exogenous input control <files> (file1.csv[:file2.csv:...])');
@@ -207,9 +208,9 @@ function showUsage()
     disp('  --roiname files     ROI names <files> (file1.csv[:file2.csv:...])');
     disp('  --showsig           show node status signals of <filename>.csv');
     disp('  --showex            show exogenous input signals of <file1>.csv');
-    disp('  --showmat           show result matrix of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC');
-    disp('  --showcg            show circle graph of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC');
-    disp('  --showroc           show ROC curve (by GroundTruth) of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC');
+    disp('  --showmat           show result matrix of DLCM-EC, DLCM-GC, mVAR-EC, mvGC, pwGC, TE, FC, PC and WC');
+    disp('  --showcg            show circle graph of DLCM-EC, DLCM-GC, mVAR-EC, mvGC, pwGC, TE, FC, PC and WC');
+    disp('  --showroc           show ROC curve (by GroundTruth) of DLCM-EC, DLCM-GC, mVAR-EC, mvGC, pwGC, TE, FC, PC and WC');
     disp('  --nocache           do not use cache file for DLCM training');
     disp('  -v, --version       show version number');
     disp('  -h, --help          show command line help');
@@ -394,7 +395,7 @@ function processInputFiles(handles)
                 load(dlcmFile);
             else
                 % layer parameters
-                netDLCM = initDlcmNetwork(X, exSignal, nodeControl, exControl);
+                netDLCM = initDlcmNetwork(X, exSignal, nodeControl, exControl, handles.dllag);
                 % training DLCM network
                 miniBatchSize = ceil(sigLen / 3);
                 options = trainingOptions('adam', ...
@@ -427,20 +428,20 @@ function processInputFiles(handles)
             % show DLCM-EC matrix
             if handles.showMat > 0
                 figure; dlEC = plotDlcmEC(netDLCM, nodeControl, exControl, 0, isFullNode);
-                title(['DLCM Effective Connectivity : ' name]);
+                title(['DLCM(' num2str(handles.dllag) ') Effective Connectivity : ' name]);
             else
                 dlEC = calcDlcmEC(netDLCM, nodeControl, exControl, isFullNode);
             end
             
             if handles.showCG > 0
-                figure; plotCircleGraph(dlEC, ['DLCM Effective Connectivity : ' name], roiNames, 1, 5, 1);
+                figure; plotCircleGraph(dlEC, ['DLCM(' num2str(handles.dllag) ') Effective Connectivity : ' name], roiNames, 1, 5, 1);
             end
             
             % show ROC curve 
             if ~isempty(groundTruth)
                 if handles.showROC > 0
                     figure(dleRf); hold on; [dleROC{i,1}, dleROC{i,2}, auc] = plotROCcurve(dlEC, groundTruth, 100, 1, handles.Gth); hold off;
-                    title('ROC curve of DLCM Effective Connectivity');
+                    title(['ROC curve of DLCM(' num2str(handles.dllag) ') Effective Connectivity']);
                 else
                     [dleROC{i,1}, dleROC{i,2}, auc] = calcROCcurve(dlEC, groundTruth, 100, 1, handles.Gth);
                 end
@@ -455,20 +456,20 @@ function processInputFiles(handles)
             % show DLCM-GC matrix
             if handles.showMat > 0
                 figure; [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, exSignal, nodeControl, exControl, netDLCM, 0, handles.alpha, isFullNode);
-                title(['DLCM Granger Causality Index : ' name]);
+                title(['DLCM(' num2str(handles.dllag) ') Granger Causality Index : ' name]);
             else
                 [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, exSignal, nodeControl, exControl, netDLCM, handles.alpha, isFullNode);
             end
             
             if handles.showCG > 0
-                figure; plotCircleGraph(dlGC, ['DLCM Granger Causality Index : ' name], roiNames, 1, 5, 1);
+                figure; plotCircleGraph(dlGC, ['DLCM(' num2str(handles.dllag) ') Granger Causality Index : ' name], roiNames, 1, 5, 1);
             end
             
             % show ROC curve 
             if ~isempty(groundTruth)
                 if handles.showROC > 0
                     figure(dlRf); hold on; [dlROC{i,1}, dlROC{i,2}, auc] = plotROCcurve(dlGC, groundTruth, 100, 1, handles.Gth); hold off;
-                    title('ROC curve of DLCM Granger Causality');
+                    title(['ROC curve of DLCM(' num2str(handles.dllag) ') Granger Causality']);
                 else
                     [dlROC{i,1}, dlROC{i,2}, auc] = calcROCcurve(dlGC, groundTruth, 100, 1, handles.Gth);
                 end
@@ -483,7 +484,7 @@ function processInputFiles(handles)
             % show mvGC matrix
             if handles.showMat > 0
                 figure; [mvGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMultivariateGCI(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, isFullNode);
-                title(['multivariate Granger Causality Index : ' name]);
+                title(['multivariate Granger Causality(' num2str(handles.lag) ') Index : ' name]);
             else
 %                mvGCa = calcMultivariateGCI_(X, exSignal, nodeControl, exControl, handles.lag, isFullNode);
 %                mvGCb = calcMultivariateGCI__(X, exSignal, nodeControl, exControl, handles.lag, isFullNode);
@@ -491,14 +492,14 @@ function processInputFiles(handles)
             end
             
             if handles.showCG > 0
-                figure; plotCircleGraph(mvGC, ['multivariate Granger Causality Index : ' name], roiNames, 1, 5, 1);
+                figure; plotCircleGraph(mvGC, ['multivariate Granger Causality(' num2str(handles.lag) ') Index : ' name], roiNames, 1, 5, 1);
             end
             
             % show ROC curve 
             if ~isempty(groundTruth)
                 if handles.showROC > 0
                     figure(gcRf); hold on; [gcROC{i,1}, gcROC{i,2}, auc] = plotROCcurve(mvGC, groundTruth, 100, 1, handles.Gth); hold off;
-                    title('ROC curve of multivariate Granger Causality');
+                    title(['ROC curve of multivariate Granger Causality(' num2str(handles.lag) ')']);
                 else
                     [gcROC{i,1}, gcROC{i,2}, auc] = calcROCcurve(mvGC, groundTruth, 100, 1, handles.Gth);
                 end
@@ -513,20 +514,20 @@ function processInputFiles(handles)
             % show pwGC matrix
             if handles.showMat > 0
                 figure; [pwGC, h, P, F, cvFd, AIC, BIC] = plotPairwiseGCI(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, isFullNode);
-                title(['pairwised Granger Causality Index : ' name]);
+                title(['pairwised Granger Causality(' num2str(handles.lag) ') Index : ' name]);
             else
                 [pwGC, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, exSignal, nodeControl, exControl, handles.lag, handles.alpha, isFullNode);
             end
             
             if handles.showCG > 0
-                figure; plotCircleGraph(pwGC, ['pairwised Granger Causality Index : ' name], roiNames, 1, 5, 1);
+                figure; plotCircleGraph(pwGC, ['pairwised Granger Causality(' num2str(handles.lag) ') Index : ' name], roiNames, 1, 5, 1);
             end
 
             % show ROC curve 
             if ~isempty(groundTruth)
                 if handles.showROC > 0
                     figure(pwRf); hold on; [pwROC{i,1}, pwROC{i,2}, auc] = plotROCcurve(pwGC, groundTruth, 100, 1, handles.Gth); hold off;
-                    title('ROC curve of pairwised Granger Causality');
+                    title(['ROC curve of pairwised Granger Causality(' num2str(handles.lag) ')']);
                 else
                     [pwROC{i,1}, pwROC{i,2}, auc] = calcROCcurve(pwGC, groundTruth, 100, 1, handles.Gth);
                 end
@@ -541,20 +542,20 @@ function processInputFiles(handles)
             % show TE matrix
             if handles.showMat > 0
                 figure; [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotLinueTE(X, exSignal, nodeControl, exControl, handles.lag, 0, handles.alpha, isFullNode);
-                title(['Transfer Entropy (LINUE) : ' name]);
+                title(['Transfer Entropy(' num2str(handles.lag) ') (LINUE) : ' name]);
             else
                 [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSignal, nodeControl, exControl, handles.lag, handles.alpha, isFullNode);
             end
             
             if handles.showCG > 0
-                figure; plotCircleGraph(TE, ['Transfer Entropy (LINUE) : ' name], roiNames, 1, 5, 1);
+                figure; plotCircleGraph(TE, ['Transfer Entropy(' num2str(handles.lag) ') (LINUE) : ' name], roiNames, 1, 5, 1);
             end
 
             % show ROC curve 
             if ~isempty(groundTruth)
                 if handles.showROC > 0
                     figure(teRf); hold on; [teROC{i,1}, teROC{i,2}, auc] = plotROCcurve(TE, groundTruth, 100, 1, handles.Gth); hold off;
-                    title('ROC curve of Transfer Entropy (LINUE)');
+                    title(['ROC curve of Transfer Entropy(' num2str(handles.lag) ') (LINUE)']);
                 else
                     [teROC{i,1}, teROC{i,2}, auc] = calcROCcurve(TE, groundTruth, 100, 1, handles.Gth);
                 end
@@ -654,20 +655,20 @@ function processInputFiles(handles)
             % show MVAR-EC matrix
             if handles.showMat > 0
                 figure; mvarEC = plotMvarEC(netMVAR, nodeControl, exControl, 0, isFullNode);
-                title(['MVAR Effective Connectivity : ' name]);
+                title(['MVAR(' num2str(handles.lag) ') Effective Connectivity : ' name]);
             else
                 mvarEC = calcMvarEC(netMVAR, nodeControl, exControl, isFullNode);
             end
             
             if handles.showCG > 0
-                figure; plotCircleGraph(mvarEC, ['MVAR Effective Connectivity : ' name], roiNames, 1, 5, 1);
+                figure; plotCircleGraph(mvarEC, ['MVAR(' num2str(handles.lag) ') Effective Connectivity : ' name], roiNames, 1, 5, 1);
             end
             
             % show ROC curve 
             if ~isempty(groundTruth)
                 if handles.showROC > 0
                     figure(mvarecRf); hold on; [mvarecROC{i,1}, mvarecROC{i,2}, auc] = plotROCcurve(mvarEC, groundTruth, 100, 1, handles.Gth); hold off;
-                    title('ROC curve of MVAR Effective Connectivity');
+                    title(['ROC curve of MVAR(' num2str(handles.lag) ') Effective Connectivity']);
                 else
                     [mvarecROC{i,1}, mvarecROC{i,2}, auc] = calcROCcurve(mvarEC, groundTruth, 100, 1, handles.Gth);
                 end

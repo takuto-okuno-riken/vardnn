@@ -26,8 +26,8 @@ function trainedNet = trainMvarDnnNetwork(X, exSignal, nodeControl, exControl, n
     nodeNetwork = cell(nodeNum,1);
     trainInfo = cell(nodeNum,1);
     initWeights = cell(nodeNum,1);
-%    for i=1:nodeNum
-    parfor i=1:nodeNum    % for parallel processing
+    for i=1:nodeNum
+%    parfor i=1:nodeNum    % for parallel processing
         disp(['training node ' num2str(i)]);
         nodeTeach = X(i,1+lags:end);
         nodeInput = nodeInputOrg;

@@ -27,21 +27,22 @@ usage: dlcm [options] filename.csv ...
   -e, --dlec          output DLCM Effective Connectivity matrix result (<filename>_dlec.csv)
   -d, --dlgc          output DLCM Granger Causality matrix result (<filename>_dlgc.csv)
   -m, --mvgc          output multivaliate Granger Causality matrix result (<filename>_mvgc.csv)
-  -g, --pwgc          output pair-wised Granger Causality matrix result (<filename>_pwgc.csv)
+  -g, --pwgc          output pairwise Granger Causality matrix result (<filename>_pwgc.csv)
   -t, --te            output (LINUE) Transfer Entropy matrix result (<filename>_te.csv)
   -f, --fc            output Functional Conectivity matrix result (<filename>_fc.csv)
   -p, --pc            output Partial Correlation matrix result (<filename>_pc.csv)
   -w, --wc            output Wavelet Coherence matrix result (<filename>_wc.csv)
+  -v, --mvarec        output multivaliate VAR (Vector Auto-Regression) Effective Connectivity matrix result (<filename>_mvarec.csv)
   --outpath           output files path (default:"results")
   --pval              save P-value matrix of DLCM-GC, mvGC, pwGC, TE, FC and PC (<filename>_*_pval.csv)
   --fval alpha        save F-value with <alpha> matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_fval.csv, <filename>_*_fcrit.csv)
   --aic               save AIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_aic.csv)
   --bic               save BIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_bic.csv)
   --format type       save file format <type> 0:csv, 1:mat(each), 2:mat(all) (default:0)
-  --groundtruth files calculate ROC curve and save AUC of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC (<filename>_*_auc.csv)
+  --groundtruth files calculate ROC curve and save AUC of DLCM-EC, DLCM-GC, mVAR-EC, mvGC, pwGC, TE, FC, PC and WC (<filename>_*_auc.csv)
   --transform type    input signal transform <type> 0:raw, 1:sigmoid (default:0)
   --transopt num      signal transform option <num> (for type 1:centroid value)
-  --lag num           time lag <num> for mvGC, pwGC and TE (default:3)
+  --lag num           time lag <num> for mvGC, pwGC, TE and mVAR-EC (default:3)
   --ex files          DLCM exogenouse input signal <files> (file1.csv[:file2.csv:...])
   --nctrl files       DLCM node status control <files> (file1.csv[:file2.csv:...])
   --ectrl files       DLCM exogenous input control <files> (file1.csv[:file2.csv:...])
@@ -50,9 +51,9 @@ usage: dlcm [options] filename.csv ...
   --roiname files     ROI names <files> (file1.csv[:file2.csv:...])
   --showsig           show node status signals of <filename>.csv
   --showex            show exogenous input signals of <file1>.csv
-  --showmat           show result matrix of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC
-  --showcg            show circle graph of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC
-  --showroc           show ROC curve (by GroundTruth) of DLCM-EC, DLCM-GC, mvGC, pwGC, TE, FC, PC and WC
+  --showmat           show result matrix of DLCM-EC, DLCM-GC, mVAR-EC, mvGC, pwGC, TE, FC, PC and WC
+  --showcg            show circle graph of DLCM-EC, DLCM-GC, mVAR-EC, mvGC, pwGC, TE, FC, PC and WC
+  --showroc           show ROC curve (by GroundTruth) of DLCM-EC, DLCM-GC, mVAR-EC, mvGC, pwGC, TE, FC, PC and WC
   --nocache           do not use cache file for DLCM training
   -v, --version       show version number
   -h, --help          show command line help
