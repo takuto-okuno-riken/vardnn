@@ -49,7 +49,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMvarDnnGCI(X, ex
         end
         nodeTeach = X(i,1+lags:end);
         % predict 
-        Si = predict(net.nodeNetwork{i}, nodeInput);
+        Si = predict(net.nodeNetwork{i}, nodeInput, 'ExecutionEnvironment', 'cpu');
         err = Si - nodeTeach;
         VarEi = var(err);
 
@@ -70,7 +70,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMvarDnnGCI(X, ex
             for p=1:lags, impInput(j+nodeNum*(p-1),:) = 0; end
 
             % predict 
-            Sj = predict(net.nodeNetwork{i}, impInput);
+            Sj = predict(net.nodeNetwork{i}, impInput, 'ExecutionEnvironment', 'cpu');
             err = Sj - nodeTeach;
             VarEj = var(err);
             gcI(i,j) = log(VarEj / VarEi);
