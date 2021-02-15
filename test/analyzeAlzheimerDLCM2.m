@@ -51,8 +51,8 @@ function analyzeAlzheimerDLCM2
         [cnMVARs{j}, meanCNMVAR{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mvar', 1, i, 1);
         [adMVARs{j}, meanADMVAR{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvar', 1, i, 1);
         % mpcvarEC(i) auto exogenous 
-        [cnMPCVARECs{j}, meanCNMPCVAREC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mpcvarec', 1, j, 1);
-        [adMPCVARECs{j}, meanADMPCVAREC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mpcvarec', 1, j, 1);
+        [cnMPCVARECs{j}, meanCNMPCVAREC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mpcvarec', 1, i, 1);
+        [adMPCVARECs{j}, meanADMPCVAREC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mpcvarec', 1, i, 1);
         % DLCM(i)-GC linear auto exogenous
         [cnDL2s{j}, meanCNDL2{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 0, i, 1, []);
         [adDL2s{j}, meanADDL2{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 0, i, 1, []);
