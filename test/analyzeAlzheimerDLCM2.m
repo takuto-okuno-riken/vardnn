@@ -23,6 +23,9 @@ function analyzeAlzheimerDLCM2
         [adMVARECs{j}, meanADMVAREC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvarec', 1, j, 0);
         [cnMVARs{j}, meanCNMVAR{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mvar', 1, j, 0);
         [adMVARs{j}, meanADMVAR{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvar', 1, j, 0);
+        % mpcvarEC(i) no exogenous 
+        [cnMPCVARECs{j}, meanCNMPCVAREC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mpcvarec', 1, j, 0);
+        [adMPCVARECs{j}, meanADMPCVAREC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mpcvarec', 1, j, 0);
         % DLCM(i)-GC linear no exogenous
         [cnDL2s{j}, meanCNDL2{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 0, j, 0, []);
         [adDL2s{j}, meanADDL2{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 0, j, 0, []);
@@ -47,6 +50,9 @@ function analyzeAlzheimerDLCM2
         [adMVARECs{j}, meanADMVAREC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvarec', 1, i, 1);
         [cnMVARs{j}, meanCNMVAR{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mvar', 1, i, 1);
         [adMVARs{j}, meanADMVAR{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvar', 1, i, 1);
+        % mpcvarEC(i) auto exogenous 
+        [cnMPCVARECs{j}, meanCNMPCVAREC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mpcvarec', 1, j, 1);
+        [adMPCVARECs{j}, meanADMPCVAREC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mpcvarec', 1, j, 1);
         % DLCM(i)-GC linear auto exogenous
         [cnDL2s{j}, meanCNDL2{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 0, i, 1, []);
         [adDL2s{j}, meanADDL2{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 0, i, 1, []);
@@ -78,6 +84,7 @@ function analyzeAlzheimerDLCM2
         [~, cnadGCsUtP{j}, ~] = calculateAlzWilcoxonTest(cnGCs{j}, adGCs{j}, roiNames, 'cn', 'ad', ['gc' num2str(j)]);
         [~, cnadMvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMVARECs{j}, adMVARECs{j}, roiNames, 'cn', 'ad', ['mvarec' num2str(j)]);
         [~, cnadMvarsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMVARs{j}, adMVARs{j}, roiNames, 'cn', 'ad', ['mvar' num2str(j)]);
+        [~, cnadMpcvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMPCVARECs{j}, adMPCVARECs{j}, roiNames, 'cn', 'ad', ['mpcvarec' num2str(j)]);
         [~, cnadDL2sUtP{j}, ~] = calculateAlzWilcoxonTest(cnDL2s{j}, adDL2s{j}, roiNames, 'cn', 'ad', ['dlcm_lin' num2str(j)]);
         [~, cnadDLW2sUtP{j}, ~] = calculateAlzWilcoxonTest(cnDLW2s{j}, adDLW2s{j}, roiNames, 'cn', 'ad', ['dlw_lin' num2str(j)]);
         [~, cnadDLsUtP{j}, ~] = calculateAlzWilcoxonTest(cnDLs{j}, adDLs{j}, roiNames, 'cn', 'ad', ['dlcm' num2str(j)]);
@@ -92,6 +99,7 @@ function analyzeAlzheimerDLCM2
     gcAUC = zeros(maxLag*2,N);
     mvarecAUC = zeros(maxLag*2,N);
     mvarAUC = zeros(maxLag*2,N);
+    mpcvarecAUC = zeros(maxLag*2,N);
     dlAUC = zeros(maxLag*2,N);
     dlwAUC = zeros(maxLag*2,N);
     dl2AUC = zeros(maxLag*2,N);
@@ -100,6 +108,7 @@ function analyzeAlzheimerDLCM2
         gcROC{lags} = cell(N,2);
         mvarecROC{lags} = cell(N,2);
         mvarROC{lags} = cell(N,2);
+        mpcvarecROC{lags} = cell(N,2);
         dlROC{lags} = cell(N,2);
         dlwROC{lags} = cell(N,2);
         dl2ROC{lags} = cell(N,2);
@@ -107,6 +116,7 @@ function analyzeAlzheimerDLCM2
         gcACC{lags} = cell(N,1);
         mvarecACC{lags} = cell(N,1);
         mvarACC{lags} = cell(N,1);
+        mpcvarecACC{lags} = cell(N,1);
         dlACC{lags} = cell(N,1);
         dlwACC{lags} = cell(N,1);
         dl2ACC{lags} = cell(N,1);
@@ -140,6 +150,13 @@ function analyzeAlzheimerDLCM2
             [mvarROC{j}{k,1}, mvarROC{j}{k,2}, mvarAUC(j,k), mvarACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
             i = i + 1;
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnMPCVARECs{j}, adMPCVARECs{j}, k, N);
+            [B, I, X] = sortAndPairPValues(control, target, cnadMpcvarECsUtP{j}, topNum);
+            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [mpcvarecROC{j}{k,1}, mpcvarecROC{j}{k,2}, mpcvarecAUC(j,k), mpcvarecACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+
+            i = i + 1;
             [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDL2s{j}, adDL2s{j}, k, N);
             [B, I, X] = sortAndPairPValues(control, target, cnadDL2sUtP{j}, topNum);
             sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
@@ -171,17 +188,18 @@ function analyzeAlzheimerDLCM2
 
     % save result
     fname = ['results/ad-cn-ad-roi' num2str(132) '-result.mat'];
-    save(fname, 'cosSim', 'gcAUC','mvarecAUC','mvarAUC','dlAUC','dlwAUC','dl2AUC','dlw2AUC', ...
-        'gcROC','mvarecROC','mvarROC','dlROC','dlwROC','dl2ROC','dlw2ROC', ...
-        'gcACC','mvarecACC','mvarACC','dlACC','dlwACC','dl2ACC','dlw2ACC', ...
+    save(fname, 'cosSim', 'gcAUC','mvarecAUC','mvarAUC','mpcvarecAUC','dlAUC','dlwAUC','dl2AUC','dlw2AUC', ...
+        'gcROC','mvarecROC','mvarROC','mpcvarecROC','dlROC','dlwROC','dl2ROC','dlw2ROC', ...
+        'gcACC','mvarecACC','mvarACC','mpcvarecACC','dlACC','dlwACC','dl2ACC','dlw2ACC', ...
         'sigCntCN', 'sigCntAD');
 
     % show box plot
-    AUCs = nan(N,70);
+    AUCs = nan(N,80);
     r = [1:10];
     AUCs(:,r) = gcAUC.'; r=r+10;
     AUCs(:,r) = mvarecAUC.'; r=r+10;
     AUCs(:,r) = mvarAUC.'; r=r+10;
+    AUCs(:,r) = mpcvarecAUC.'; r=r+10;
     AUCs(:,r) = dl2AUC.'; r=r+10;
     AUCs(:,r) = dlw2AUC.'; r=r+10;
     AUCs(:,r) = dlAUC.'; r=r+10;
@@ -196,6 +214,7 @@ function analyzeAlzheimerDLCM2
         plotAverageROCcurve(gcROC{lags}, N, '-', [0.2,0.5,0.2]+(lags*0.1),1.0);
         plotAverageROCcurve(mvarecROC{lags}, N, '-', [0.5,0.2,0.2]+(lags*0.1),1.0);
         plotAverageROCcurve(mvarROC{lags}, N, '--', [0.5,0.2,0.2]+(lags*0.1),1.0);
+        plotAverageROCcurve(mpcvarecROC{lags}, N, '-.', [0.5,0.2,0.2]+(lags*0.1),1.0);
         plotAverageROCcurve(dlROC{lags}, N, '-', [0.2,0.2,0.4]+(lags*0.1),1.0);
         plotAverageROCcurve(dl2ROC{lags}, N, '--', [0.2,0.2,0.4]+(lags*0.1),0.4); % linear
         plotAverageROCcurve(dlwROC{lags}, N, '-', [0.2,0.2,0.2]+(lags*0.1),1.0);
@@ -218,6 +237,7 @@ function analyzeAlzheimerDLCM2
         plotAverageROCcurve(gcROC{k}, N, '-', [0.2,0.5,0.2]+(lags*0.1),1.0);
         plotAverageROCcurve(mvarecROC{k}, N, '-', [0.5,0.2,0.2]+(lags*0.1),1.0);
         plotAverageROCcurve(mvarROC{k}, N, '--', [0.5,0.2,0.2]+(lags*0.1),1.0);
+        plotAverageROCcurve(mpcvarecROC{k}, N, '-.', [0.5,0.2,0.2]+(lags*0.1),1.0);
         plotAverageROCcurve(dlROC{k}, N, '-', [0.2,0.2,0.4]+(lags*0.1),1.0);
         plotAverageROCcurve(dl2ROC{k}, N, '--', [0.2,0.2,0.4]+(lags*0.1),0.4); % linear
         plotAverageROCcurve(dlwROC{k}, N, '-', [0.2,0.2,0.2]+(lags*0.1),1.0);
