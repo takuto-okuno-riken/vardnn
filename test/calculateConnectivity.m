@@ -8,7 +8,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 20;
+    NumProcessors = 11;
 
     % constant value
     ROINUM = size(signals{1},1);
@@ -97,6 +97,9 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 netMVAR = initMvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 [mat, sub] = calcMvarEC(netMVAR, [], exControl); % |Zi-Zi\j| version
                 mat = repmat(sub(:,1), [1 size(mat,2)]) - sub(:,2:end); % subtract Zi-Zi\j version
+            case 'mpcvarec'
+                netMPCVAR = initMpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
+                mat = calcMpcvarEC(netMPCVAR, [], exControl);
             case 'dlcm'
                 dlcmName = ['results/ad-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(dlcmName, 'file')
@@ -269,6 +272,12 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : mVAR(' num2str(lags) ') Index'];
+    case 'mpcvarec'
+        sigma = std(meanWeights(:),1,'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : mPCVAR(' num2str(lags) ')-EC Index'];
     end
     imagesc(sigWeights,clims);
     daspect([1 1 1]);

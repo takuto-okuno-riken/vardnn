@@ -24,7 +24,6 @@ function net = initMpcvarNetwork(X, exSignal, nodeControl, exControl, lags, expl
     nodeMax = nodeNum + exNum;
     
     coeff = cell(nodeNum,1);
-    invcoeff = cell(nodeNum,1);
     score = cell(nodeNum,1);
     latent = cell(nodeNum,1);
     explained = cell(nodeNum,1);
@@ -65,7 +64,6 @@ function net = initMpcvarNetwork(X, exSignal, nodeControl, exControl, lags, expl
 
         % apply the Principal Component Regress function
         [coeff{i},score{i},latent{i},~,explained{i},mu{i}] = pca(Xti); % relation : Xti == score{i} * coeff{i}.' + repmat(mu{i},size(score{i},1),1);
-        invcoeff{i} = inv(coeff{i}); % this does full size inversion of matrix. might not be good.
 
         % find 99% component range
         expTotal = 0;
@@ -83,7 +81,6 @@ function net = initMpcvarNetwork(X, exSignal, nodeControl, exControl, lags, expl
     net.exNum = exNum;
     net.lags = lags;
     net.coeff = coeff;
-    net.invcoeff = invcoeff;
     net.score = score;
     net.latent = latent;
     net.explained = explained;

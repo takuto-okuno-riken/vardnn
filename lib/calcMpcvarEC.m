@@ -39,11 +39,10 @@ function [EC, ECsub] = calcMpcvarEC(net, nodeControl, exControl, isFullNode)
 
         % relation : Xti == score{i} * coeff{i}.' + repmat(mu{i},size(score{i},1),1);
         mc = net.maxComp{i};
-        invcoeff = net.invcoeff{i};
         mu = net.mu{i};
 
         Xti = ones(1,length(idx));
-        score = (Xti - mu) * invcoeff.';
+        score = (Xti - mu) / net.coeff{i}.';
         subScore = [score(:,1:mc), 1];
         z = subScore * net.bvec{i};
         ECsub(i,1) = z;
@@ -58,7 +57,7 @@ function [EC, ECsub] = calcMpcvarEC(net, nodeControl, exControl, isFullNode)
             for k=1:lags
                 Xtj(bIdx+nlen*(k-1)) = 0;
             end
-            scorej = (Xtj - mu) * invcoeff.';
+            scorej = (Xtj - mu) / net.coeff{i}.';
             subScorej = [scorej(:,1:mc), 1];
             zj = subScorej * net.bvec{i};
 
