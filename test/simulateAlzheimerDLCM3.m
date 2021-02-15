@@ -54,6 +54,14 @@ function simulateAlzheimerDLCM3
         sigAdMVARECs{j} = (adMVARECs{j} - nanmean(adMVARECs{j}(:))) / nanstd(adMVARECs{j}(:),1);
         meanCnMVAREC{j} = nanmean(cnMVARECs{j},3);
         meanAdMVAREC{j} = nanmean(adMVARECs{j},3);
+
+        % mpcvar(j) no exogenous 
+        [cnMPCVARECs{j}, smmpvcnSignals{j}, cnSubMPCVARECs{j}] = simulateNodeSignals(cnSignals, roiNames, 'cn', 'mpcvarec', 'cn', 0, 0, j, 0);
+        [adMPCVARECs{j}, smmpvadSignals{j}, adSubMPCVARECs{j}] = simulateNodeSignals(adSignals, roiNames, 'ad', 'mpcvarec', 'ad', 0, 0, j, 0);
+        sigCnMPCVARECs{j} = (cnMPCVARECs{j} - nanmean(cnMPCVARECs{j}(:))) / nanstd(cnMPCVARECs{j}(:),1);
+        sigAdMPCVARECs{j} = (adMPCVARECs{j} - nanmean(adMPCVARECs{j}(:))) / nanstd(adMPCVARECs{j}(:),1);
+        meanCnMPCVAREC{j} = nanmean(cnMPCVARECs{j},3);
+        meanAdMPCVAREC{j} = nanmean(adMPCVARECs{j},3);
     end
 
     for i=1:maxLag
@@ -81,6 +89,14 @@ function simulateAlzheimerDLCM3
         sigAdDLWs{j} = (adMVARECs{j} - nanmean(adMVARECs{j}(:))) / nanstd(adMVARECs{j}(:),1);
         meanCnDLW{j} = nanmean(cnMVARECs{j},3);
         meanAdDLW{j} = nanmean(adMVARECs{j},3);
+
+        % mpcvar(j) auto exogenous 
+        [cnMPCVARECs{j}, smmpvcnSignals{j}, cnSubMPCVARECs{j}] = simulateNodeSignals(cnSignals, roiNames, 'cn', 'mpcvarec', 'cn', 0, 0, i, 1);
+        [adMPCVARECs{j}, smmpvadSignals{j}, adSubMPCVARECs{j}] = simulateNodeSignals(adSignals, roiNames, 'ad', 'mpcvarec', 'ad', 0, 0, i, 1);
+        sigCnMPCVARECs{j} = (cnMPCVARECs{j} - nanmean(cnMPCVARECs{j}(:))) / nanstd(cnMPCVARECs{j}(:),1);
+        sigAdMPCVARECs{j} = (adMPCVARECs{j} - nanmean(adMPCVARECs{j}(:))) / nanstd(adMPCVARECs{j}(:),1);
+        meanCnMPCVAREC{j} = nanmean(cnMPCVARECs{j},3);
+        meanAdMPCVAREC{j} = nanmean(adMPCVARECs{j},3);
     end
 
     % --------------------------------------------------------------------------------------------------------------
@@ -94,7 +110,10 @@ function simulateAlzheimerDLCM3
         [sm2cnDLWs{j}, meanSm2cnDLW{j}, ~, sm2cnSubDLWs{j}] = calculateConnectivity(sm2cnSignals{j}, roiNames, 'smcn', 'dlw', 1, j, 0, []);
         % mvar(j) no exogenous 
         [smmvcnDLs{j}, meanSmmvcnDL{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smmvcn', 'dlcm', 1, j, 0);
-        [smmvcnDLWs{j}, meanSmmvcnDLW{j}, ~, smcnSubDLW2s{j}] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smmvcn', 'dlw', 1, j, 0);
+        [smmvcnDLWs{j}, meanSmmvcnDLW{j}, ~, smmvcnSubDLW2s{j}] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smmvcn', 'dlw', 1, j, 0);
+        % mvar(j) no exogenous 
+        [smmpvcnDLs{j}, meanSmmpvcnDL{j}, ~] = calculateConnectivity(smmpvcnSignals{j}, roiNames, 'smmpvcn', 'dlcm', 1, j, 0);
+        [smmpvcnDLWs{j}, meanSmmpvcnDLW{j}, ~, smmpvcnSubDLW2s{j}] = calculateConnectivity(smmpvcnSignals{j}, roiNames, 'smmpvcn', 'dlw', 1, j, 0);
     end
     for i=1:maxLag
         j = i+maxLag;
@@ -107,19 +126,25 @@ function simulateAlzheimerDLCM3
         % mvar(j) auto exogenous 
         [smmvcnDLs{j}, meanSmmvcnDL{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smmvcn', 'dlcm', 1, i, 1);
         [smmvcnDLWs{j}, meanSmmvcnDLW{j}, ~, smcnSubDLW2s{j}] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smmvcn', 'dlw', 1, i, 1);
+        % mvar(j) auto exogenous 
+        [smmpvcnDLs{j}, meanSmmpvcnDL{j}, ~] = calculateConnectivity(smmpvcnSignals{j}, roiNames, 'smmpvcn', 'dlcm', 1, i, 1);
+        [smmpvcnDLWs{j}, meanSmmpvcnDLW{j}, ~, smmpvcnSubDLW2s{j}] = calculateConnectivity(smmpvcnSignals{j}, roiNames, 'smmpvcn', 'dlw', 1, i, 1);
     end
 
     % check FC of simulated CN and AD
     for j=1:maxLag
-        % DLCM(j) auto exogenous 
+        % DLCM(j) no exogenous 
         [smcnFCs{j}, meanSmcnFC{j}, ~] = calculateConnectivity(smcnSignals{j}, roiNames, 'smcn', 'fc', 1, j, 0);
         [smadFCs{j}, meanSmadFC{j}, ~] = calculateConnectivity(smadSignals{j}, roiNames, 'smad', 'fc', 1, j, 0);
-        % DLCM(j) auto exogenous 
+        % DLCM(j) no exogenous 
         [sm2cnFCs{j}, meanSm2cnFC{j}, ~] = calculateConnectivity(sm2cnSignals{j}, roiNames, 'smcn', 'fc', 1, j, 0, []);
         [sm2adFCs{j}, meanSm2adFC{j}, ~] = calculateConnectivity(sm2adSignals{j}, roiNames, 'smad', 'fc', 1, j, 0, []);
-        % mvar(j) auto exogenous 
+        % mvar(j) no exogenous 
         [smmvcnFCs{j}, meanSmmvcnFC{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smmvcn', 'fc', 1, j, 0);
         [smmvadFCs{j}, meanSmmvadFC{j}, ~] = calculateConnectivity(smmvadSignals{j}, roiNames, 'smmvad', 'fc', 1, j, 0);
+        % mpcvar(j) no exogenous 
+        [smmpvcnFCs{j}, meanSmmpvcnFC{j}, ~] = calculateConnectivity(smmpvcnSignals{j}, roiNames, 'smmpvcn', 'fc', 1, j, 0);
+        [smmpvadFCs{j}, meanSmmpvadFC{j}, ~] = calculateConnectivity(smmpvadSignals{j}, roiNames, 'smmpvad', 'fc', 1, j, 0);
     end
     for i=1:maxLag
         j = i+maxLag;
@@ -132,18 +157,21 @@ function simulateAlzheimerDLCM3
         % mvar(j) auto exogenous 
         [smmvcnFCs{j}, meanSmmvcnFC{j}, ~] = calculateConnectivity(smmvcnSignals{j}, roiNames, 'smmvcn', 'fc', 1, i, 1);
         [smmvadFCs{j}, meanSmmvadFC{j}, ~] = calculateConnectivity(smmvadSignals{j}, roiNames, 'smmvad', 'fc', 1, i, 1);
+        % mpcvar(j) auto exogenous 
+        [smmpvcnFCs{j}, meanSmmpvcnFC{j}, ~] = calculateConnectivity(smmpvcnSignals{j}, roiNames, 'smmpvcn', 'fc', 1, i, 1);
+        [smmpvadFCs{j}, meanSmmpvadFC{j}, ~] = calculateConnectivity(smmpvadSignals{j}, roiNames, 'smmpvad', 'fc', 1, i, 1);
     end
 
     % --------------------------------------------------------------------------------------------------------------
     % box plot of signal MAEs 
-    maes = nan(cnSbjNum,30);
+    maes = nan(cnSbjNum,40);
     for j=1:cnSbjNum
         si = convert2SigmoidSignal(cnSignals{j});
         for i=1:maxLag*2
             maes(j,i) = getTwoSignalsError(si, smcnSignals{i}{j}); % non linear (no ex, ex)
             maes(j,10+i) = getTwoSignalsError(si, sm2cnSignals{i}{j}); % linear (no ex, ex)
             maes(j,20+i) = getTwoSignalsError(si, smmvcnSignals{i}{j}); % linear (no ex, ex)
-            
+            maes(j,30+i) = getTwoSignalsError(si, smmpvcnSignals{i}{j}); % linear (no ex, ex)
         end
     end
     figure; boxplot(maes); title('MAEs between mean cnSignals and each algorithm signals');
@@ -152,14 +180,17 @@ function simulateAlzheimerDLCM3
     cosSim = zeros(90,1);
     for i=1:maxLag*2
         cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmcnDLW{i}); % non linear (no ex, ex)
-        cosSim(10+i) = getCosSimilarity(meanCnDLW{1}, meanSm2cnDLW{i}); % linear (no ex, ex)
-        cosSim(20+i) = getCosSimilarity(meanCnDLW{1}, meanSmmvcnDLW{i}); % mvar linear (no ex, ex)
-        cosSim(30+i) = getCosSimilarity(meanCnDL{1}, meanSmcnDL{i});
-        cosSim(40+i) = getCosSimilarity(meanCnDL{1}, meanSm2cnDL{i});
-        cosSim(50+i) = getCosSimilarity(meanCnDL{1}, meanSmmvcnDL{i});
-        cosSim(60+i) = getCosSimilarity(meanCnFC{1}, meanSmcnFC{i});
-        cosSim(70+i) = getCosSimilarity(meanCnFC{1}, meanSm2cnFC{i});
-        cosSim(80+i) = getCosSimilarity(meanCnFC{1}, meanSmmvcnFC{i});
+        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSm2cnDLW{i}); i=i+10; % linear (no ex, ex)
+        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmmvcnDLW{i}); i=i+10; % mvar linear (no ex, ex)
+        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmmpvcnDLW{i}); i=i+10; % mpcvar linear (no ex, ex)
+        cosSim(i) = getCosSimilarity(meanCnDL{1}, meanSmcnDL{i}); i=i+10;
+        cosSim(i) = getCosSimilarity(meanCnDL{1}, meanSm2cnDL{i}); i=i+10;
+        cosSim(i) = getCosSimilarity(meanCnDL{1}, meanSmmvcnDL{i}); i=i+10;
+        cosSim(i) = getCosSimilarity(meanCnDL{1}, meanSmmpvcnDL{i}); i=i+10;
+        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSmcnFC{i}); i=i+10;
+        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSm2cnFC{i}); i=i+10;
+        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSmmvcnFC{i}); i=i+10;
+        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSmmpvcnFC{i}); i=i+10;
     end
     figure; bar(cosSim); title('cos similarity between mean CN matrix and SimCN by each algorithm');
 %{
@@ -171,14 +202,17 @@ function simulateAlzheimerDLCM3
     for j=1:cnSbjNum
         for i=1:maxLag*2
             cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, smcnDLWs{i}(:,:,j)); % non linear (no ex, ex)
-            cosSims(j,10+i) = getCosSimilarity(meanCnDLW{1}, sm2cnDLWs{i}(:,:,j)); % linear (no ex, ex)
-            cosSims(j,20+i) = getCosSimilarity(meanCnDLW{1}, smmvcnDLWs{i}(:,:,j)); % mvar linear (no ex, ex)
-            cosSims(j,30+i) = getCosSimilarity(meanCnDL{1}, smcnDLs{i}(:,:,j));
-            cosSims(j,40+i) = getCosSimilarity(meanCnDL{1}, sm2cnDLs{i}(:,:,j));
-            cosSims(j,50+i) = getCosSimilarity(meanCnDL{1}, smmvcnDLs{i}(:,:,j));
-            cosSims(j,60+i) = getCosSimilarity(meanCnFC{1}, smcnFCs{i}(:,:,j));
-            cosSims(j,70+i) = getCosSimilarity(meanCnFC{1}, sm2cnFCs{i}(:,:,j));
-            cosSims(j,80+i) = getCosSimilarity(meanCnFC{1}, smmvcnFCs{i}(:,:,j));
+            cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, sm2cnDLWs{i}(:,:,j)); i=i+10; % linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, smmvcnDLWs{i}(:,:,j)); i=i+10; % mvar linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, smmpvcnDLWs{i}(:,:,j)); i=i+10; % mpcvar linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(meanCnDL{1}, smcnDLs{i}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(meanCnDL{1}, sm2cnDLs{i}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(meanCnDL{1}, smmvcnDLs{i}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(meanCnDL{1}, smmpvcnDLs{i}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(meanCnFC{1}, smcnFCs{i}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(meanCnFC{1}, sm2cnFCs{i}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(meanCnFC{1}, smmvcnFCs{i}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(meanCnFC{1}, smmpvcnFCs{i}(:,:,j)); i=i+10;
         end
 %        cosSims(j,1) = getCosSimilarity(meanCnDLW, cnDLWs(:,:,i));
 %        cosSims(i,11) = getCosSimilarity(meanCnDL, cnDLs(:,:,i));
@@ -212,14 +246,17 @@ function simulateAlzheimerDLCM3
     for j=1:cnSbjNum
         for i=1:maxLag*2
             cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smcnDLWs{i}(:,:,j)); % non linear (no ex, ex)
-            cosSims(j,10+i) = getCosSimilarity(cnDLWs{1}(:,:,j), sm2cnDLWs{i}(:,:,j)); % linear (no ex, ex)
-            cosSims(j,20+i) = getCosSimilarity(cnDLWs{1}(:,:,j), smmvcnDLWs{i}(:,:,j)); % mvar linear (no ex, ex)
-            cosSims(j,30+i) = getCosSimilarity(cnDLs{1}(:,:,j), smcnDLs{i}(:,:,j));
-            cosSims(j,40+i) = getCosSimilarity(cnDLs{1}(:,:,j), sm2cnDLs{i}(:,:,j));
-            cosSims(j,50+i) = getCosSimilarity(cnDLs{1}(:,:,j), smmvcnDLs{i}(:,:,j));
-            cosSims(j,60+i) = getCosSimilarity(cnFCs{1}(:,:,j), smcnFCs{i}(:,:,j));
-            cosSims(j,70+i) = getCosSimilarity(cnFCs{1}(:,:,j), sm2cnFCs{i}(:,:,j));
-            cosSims(j,80+i) = getCosSimilarity(cnFCs{1}(:,:,j), smmvcnFCs{i}(:,:,j));
+            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), sm2cnDLWs{i}(:,:,j)); i=i+10; % linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smmvcnDLWs{i}(:,:,j)); i=i+10; % mvar linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smmpvcnDLWs{i}(:,:,j)); i=i+10; % mpcvar linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(cnDLs{1}(:,:,j), smcnDLs{i}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(cnDLs{1}(:,:,j), sm2cnDLs{i}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(cnDLs{1}(:,:,j), smmvcnDLs{i}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(cnDLs{1}(:,:,j), smmpvcnDLs{i}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), smcnFCs{i}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), sm2cnFCs{i}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), smmvcnFCs{i}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), smmpvcnFCs{i}(:,:,j)); i=i+10;
         end
     end
     figure; boxplot(cosSims); title('cos similarity between mean CN matrix and each subject EC by each algorithm');
@@ -306,8 +343,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
     ROINUM = size(signals{1},1);
     sbjNum = length(signals);
 
-    lagpat = ["gc","pgc","te","tsfc","tsfca","mvarec","dlcm","dlw"];
-    if lags>1 && contains(algorithm,lagpat), lagStr=num2str(lags); else lagStr=''; end
+    if lags>1, lagStr=num2str(lags); else lagStr=''; end
     if isAutoExo>0, exoStr='_ex'; else exoStr=''; end
     if isempty(activateFunc), linStr='_lin'; else linStr=''; end
     outfName = ['results/adsim3-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '.mat'];
@@ -370,9 +406,29 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
             else
                 exSignal = f.exSignal;
             end
-            % simulate LAR network with 1st frame & exogenous input signal
+            % simulate mVAR network with 1st frame & exogenous input signal
             netMVAR = initMvarNetwork(si, exSignal, [], f.exControl, lags);
             [Y, time] = simulateMvarNetwork(si, exSignal, [], f.exControl, netMVAR);
+            [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl); % not used this
+        case 'mpcvarec'
+            dlcmName = ['results/ad-dlcm' lagStr exoStr linStr '-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            f = load(dlcmName);
+            if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+            if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
+            if isRaw
+                si = signals{i};
+                sig=0; c=0; maxsi=0; minsi=0;
+            else
+                [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
+            end
+            if inSiRange > 0
+                exSignal = f.exSignal(:,inSiRange);
+            else
+                exSignal = f.exSignal;
+            end
+            % simulate mPCVAR network with 1st frame & exogenous input signal
+            netMVAR = initMpcvarNetwork(si, exSignal, [], f.exControl, lags);
+            [Y, time] = simulateMpcvarNetwork(si, exSignal, [], f.exControl, netMVAR);
             [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl); % not used this
         end
         ECs(:,:,i) = ec;

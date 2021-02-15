@@ -1,5 +1,5 @@
 
-function testSimulationMvar
+function testSimulationMpcvar
     % load signals
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
@@ -15,10 +15,10 @@ function testSimulationMvar
     si(4,2:end) = si(6,1:sigLen-1);
 
     %% test pattern 1 
-    netMVAR = initMvarNetwork(si, exSignal, [], exControl, lags);
+    netMVAR = initMpcvarNetwork(si, exSignal, [], exControl, lags);
     
-    % simulate mVAR network with 1st frame & exogenous input signal
-    [S, time] = simulateMvarNetwork(si, exSignal, [], exControl, netMVAR);
+    % simulate mPCVAR network with 1st frame & exogenous input signal
+    [S, time] = simulateMpcvarNetwork(si, exSignal, [], exControl, netMVAR);
 
     figure; [mae, maeerr] = plotTwoSignals(si, S);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
@@ -30,6 +30,6 @@ function testSimulationMvar
     figure; gcI = plotPairwiseGCI(si);
     figure; gcI = plotPairwiseGCI(S);
     % show multivaliate MVAR-EC
-    figure; EC = plotMvarEC(netMVAR, [], exControl, 0);
+    figure; EC = plotMpcvarEC(netMVAR, [], exControl, 0);
 end
 

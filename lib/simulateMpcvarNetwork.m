@@ -1,13 +1,13 @@
 %%
-% Simulate node signals by VAR (Vector Auto-Regression) and exogenous input
+% Simulate node signals by PCVAR (Principal Component Vector Auto-Regression) and exogenous input
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
-%  net          mVAR network
+%  net          mPCVAR network
 
-function [S, time] = simulateMvarNetwork(X, exSignal, nodeControl, exControl, net)
+function [S, time] = simulateMpcvarNetwork(X, exSignal, nodeControl, exControl, net)
     nodeNum = size(X,1);
     sigLen = size(X,2); % TODO:
     p = net.lags;
@@ -15,7 +15,7 @@ function [S, time] = simulateMvarNetwork(X, exSignal, nodeControl, exControl, ne
     % set node input
     S = [X; exSignal];
 
-    disp('start simulation whole mVAR network');
+    disp('start simulation whole mPCVAR network');
     ticH = tic;
     for t=p:sigLen-1
         if mod(t,10)==0, disp(['step : ' num2str(t)]); end
@@ -33,10 +33,15 @@ function [S, time] = simulateMvarNetwork(X, exSignal, nodeControl, exControl, ne
             for k=1:p
                 S2 = [S2; S([nodeIdx, exIdx],t-(k-1))];
             end
-            S2 = [S2; 1]; % might not be good to add bias
+
+            % relation : Xti == score{i} * coeff{i}.' + repmat(mu{i},size(score{i},1),1);
+            mc = net.maxComp{i};
+            mu = net.mu{i};
 
             % predict next time step
-            S(i,t+1) = S2.' * net.bvec{i};
+            score = (S2.' - mu) / net.coeff{i}.';
+            subScore = [score(:,1:mc), 1];
+            S(i,t+1) = subScore * net.bvec{i};
         end
         % fixed over shoot values
         idx = find(S(:,t+1) > 1.2);
@@ -46,5 +51,5 @@ function [S, time] = simulateMvarNetwork(X, exSignal, nodeControl, exControl, ne
     end
     S = S(1:nodeNum,:);
     time = toc(ticH);
-    disp(['finish simulation whole mVAR network! t = ' num2str(time) 's']);
+    disp(['finish simulation whole mPCVAR network! t = ' num2str(time) 's']);
 end
