@@ -27,8 +27,10 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, idx)
         % init
         gcAUC = zeros(maxLag,N);
         mvarecAUC = zeros(maxLag,N);
+        mpcvarecAUC = zeros(maxLag,N);
         gc2AUC = zeros(maxLag,N);
         mvarec2AUC = zeros(maxLag,N);
+        mpcvarec2AUC = zeros(maxLag,N);
         dlAUC = zeros(maxLag,N);
         dlwAUC = zeros(maxLag,N);
         dl2AUC = zeros(maxLag,N);
@@ -40,8 +42,10 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, idx)
         for lags=1:maxLag
             gcROC{lags} = cell(N,2);
             mvarecROC{lags} = cell(N,2);
+            mpcvarecROC{lags} = cell(N,2);
             gc2ROC{lags} = cell(N,2);
             mvarec2ROC{lags} = cell(N,2);
+            mpcvarec2ROC{lags} = cell(N,2);
             dlROC{lags} = cell(N,2);
             dlwROC{lags} = cell(N,2);
             dl2ROC{lags} = cell(N,2);
@@ -52,8 +56,10 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, idx)
             dlw4ROC{lags} = cell(N,2);
             gcRf{lags} = figure;
             mvarecRf{lags} = figure;
+            mpcvarecRf{lags} = figure;
             gc2Rf{lags} = figure;
             mvarec2Rf{lags} = figure;
+            mpcvarec2Rf{lags} = figure;
             dlRf{lags} = figure;
             dlwRf{lags} = figure;
             dl2Rf{lags} = figure;
@@ -156,13 +162,25 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, idx)
                 netMVAR = initMvarNetwork(si, exSignal, [], exControl, lags);
                 mvarEC = calcMvarEC(netMVAR, [], exControl);
                 figure(mvarecRf{lags}); hold on; [mvarecROC{lags}{k,1}, mvarecROC{lags}{k,2}, mvarecAUC(lags,k)] = plotROCcurve(mvarEC, weights, 100, 1, Gth); hold off;
-                title(['MVAR(' num2str(lags) ')-EC']);
+                title(['mVAR(' num2str(lags) ')-EC']);
 
                 % extra tests (multivaliate Vector Auto-Regression EC) without exogenous signals
                 netMVAR = initMvarNetwork(si, [], [], [], lags);
                 mvarEC = calcMvarEC(netMVAR, [], []);
                 figure(mvarec2Rf{lags}); hold on; [mvarec2ROC{lags}{k,1}, mvarec2ROC{lags}{k,2}, mvarec2AUC(lags,k)] = plotROCcurve(mvarEC, weights, 100, 1, Gth); hold off;
-                title(['MVAR(' num2str(lags) ')-EC (without exogenous)']);
+                title(['mVAR(' num2str(lags) ')-EC (without exogenous)']);
+
+                % extra tests (multivaliate Principal Component Vector Auto-Regression EC)
+                netMVAR = initMpcvarNetwork(si, exSignal, [], exControl, lags);
+                mvarEC = calcMpcvarEC(netMVAR, [], exControl);
+                figure(mpcvarecRf{lags}); hold on; [mpcvarecROC{lags}{k,1}, mpcvarecROC{lags}{k,2}, mpcvarecAUC(lags,k)] = plotROCcurve(mvarEC, weights, 100, 1, Gth); hold off;
+                title(['mPCVAR(' num2str(lags) ')-EC']);
+
+                % extra tests (multivaliate Principal Component Vector Auto-Regression EC) without exogenous signals
+                netMVAR = initMpcvarNetwork(si, [], [], [], lags);
+                mvarEC = calcMpcvarEC(netMVAR, [], []);
+                figure(mpcvarec2Rf{lags}); hold on; [mpcvarec2ROC{lags}{k,1}, mpcvarec2ROC{lags}{k,2}, mpcvarec2AUC(lags,k)] = plotROCcurve(mvarEC, weights, 100, 1, Gth); hold off;
+                title(['mPCVAR(' num2str(lags) ')-EC (without exogenous)']);
 
                 % show result of DLCM-GC
                 dlGC = calcDlcmGCI(Y, exSignal, [], exControl, netDLCM{lags}, 0);
@@ -207,6 +225,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, idx)
         end
         % save result
         save(fname, 'gcAUC',  'gcROC', 'mvarecAUC',  'mvarecROC', 'gc2AUC',  'gc2ROC', 'mvarec2AUC',  'mvarec2ROC', ...
+            'mpcvarecAUC', 'mpcvarecROC', 'mpcvarec2AUC', 'mpcvarec2ROC', ...
             'dlAUC', 'dlwAUC', 'dlROC', 'dlwROC', 'dl2AUC', 'dlw2AUC', 'dl2ROC', 'dlw2ROC', ...
             'dl3AUC', 'dlw3AUC', 'dl3ROC', 'dlw3ROC', 'dl4AUC', 'dlw4AUC', 'dl4ROC', 'dlw4ROC');
 
@@ -217,12 +236,14 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, idx)
     end
 
     % show box plot
-    AUCs = nan(N,60);
+    AUCs = nan(N,70);
     r = [1:5];
     AUCs(:,r) = gcAUC.'; r=r+5;
-    AUCs(:,r) = gc2AUC.'; r=r+5;
+    AUCs(:,r) = gc2AUC.'; r=r+5; % no exogenous
     AUCs(:,r) = mvarecAUC.'; r=r+5;
-    AUCs(:,r) = mvarec2AUC.'; r=r+5;
+    AUCs(:,r) = mvarec2AUC.'; r=r+5; % no exogenous
+    AUCs(:,r) = mpcvarecAUC.'; r=r+5;
+    AUCs(:,r) = mpcvarec2AUC.'; r=r+5; % no exogenous
     AUCs(:,r) = dl2AUC.'; r=r+5;
     AUCs(:,r) = dl4AUC.'; r=r+5;
     AUCs(:,r) = dlw2AUC.'; r=r+5;
