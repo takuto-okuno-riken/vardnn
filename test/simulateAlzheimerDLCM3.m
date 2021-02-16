@@ -177,10 +177,10 @@ function simulateAlzheimerDLCM3
     figure; boxplot(maes); title('MAEs between mean cnSignals and each algorithm signals');
 
     % plot correlation and cos similarity
-    cosSim = zeros(90,1);
+    cosSim = zeros(120,1);
     for k=1:maxLag*2
         i=k;
-        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmcnDLW{k}); % non linear (no ex, ex)
+        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmcnDLW{k}); i=i+10; % non linear (no ex, ex)
         cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSm2cnDLW{k}); i=i+10; % linear (no ex, ex)
         cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmmvcnDLW{k}); i=i+10; % mvar linear (no ex, ex)
         cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmmpvcnDLW{k}); i=i+10; % mpcvar linear (no ex, ex)
@@ -199,11 +199,11 @@ function simulateAlzheimerDLCM3
     figure; bar(cosSim); title('cos similarity between mean AD matrix and SimAD by each algorithm');
 %}  
     % plot box-and-whisker plot of cos similarity between mean ec matrix and each subject ec
-    cosSims = nan(cnSbjNum,90);
+    cosSims = nan(cnSbjNum,120);
     for j=1:cnSbjNum
         for k=1:maxLag*2
             i=k;
-            cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, smcnDLWs{k}(:,:,j)); % non linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, smcnDLWs{k}(:,:,j)); i=i+10; % non linear (no ex, ex)
             cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, sm2cnDLWs{k}(:,:,j)); i=i+10; % linear (no ex, ex)
             cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, smmvcnDLWs{k}(:,:,j)); i=i+10; % mvar linear (no ex, ex)
             cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, smmpvcnDLWs{k}(:,:,j)); i=i+10; % mpcvar linear (no ex, ex)
@@ -244,11 +244,11 @@ function simulateAlzheimerDLCM3
     end
 %}
     % plot box-and-whisker plot of cos similarity between original ec matrix and simulated signals ec matrix
-    cosSims = nan(cnSbjNum,90);
+    cosSims = nan(cnSbjNum,120);
     for j=1:cnSbjNum
         for k=1:maxLag*2
             i=k;
-            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smcnDLWs{k}(:,:,j)); % non linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smcnDLWs{k}(:,:,j)); i=i+10; % non linear (no ex, ex)
             cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), sm2cnDLWs{k}(:,:,j)); i=i+10; % linear (no ex, ex)
             cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smmvcnDLWs{k}(:,:,j)); i=i+10; % mvar linear (no ex, ex)
             cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smmpvcnDLWs{k}(:,:,j)); i=i+10; % mpcvar linear (no ex, ex)
