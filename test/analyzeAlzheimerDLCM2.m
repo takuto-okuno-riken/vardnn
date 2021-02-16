@@ -397,7 +397,7 @@ function [utestH, utestP, utestP2] = calculateAlzWilcoxonTest(control, target, r
     % constant value
     ROINUM = size(control,1);
 
-    outfName = ['results/ad-' algorithm '-' controlGroup '_' targetGroup '-roi' num2str(ROINUM) '-utest.mat'];
+    outfName = ['results/alz2/ad-' algorithm '-' controlGroup '_' targetGroup '-roi' num2str(ROINUM) '-utest.mat'];
     if exist(outfName, 'file')
         load(outfName);
     else
