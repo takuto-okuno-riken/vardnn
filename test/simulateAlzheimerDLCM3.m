@@ -178,19 +178,20 @@ function simulateAlzheimerDLCM3
 
     % plot correlation and cos similarity
     cosSim = zeros(90,1);
-    for i=1:maxLag*2
-        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmcnDLW{i}); % non linear (no ex, ex)
-        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSm2cnDLW{i}); i=i+10; % linear (no ex, ex)
-        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmmvcnDLW{i}); i=i+10; % mvar linear (no ex, ex)
-        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmmpvcnDLW{i}); i=i+10; % mpcvar linear (no ex, ex)
-        cosSim(i) = getCosSimilarity(meanCnDL{1}, meanSmcnDL{i}); i=i+10;
-        cosSim(i) = getCosSimilarity(meanCnDL{1}, meanSm2cnDL{i}); i=i+10;
-        cosSim(i) = getCosSimilarity(meanCnDL{1}, meanSmmvcnDL{i}); i=i+10;
-        cosSim(i) = getCosSimilarity(meanCnDL{1}, meanSmmpvcnDL{i}); i=i+10;
-        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSmcnFC{i}); i=i+10;
-        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSm2cnFC{i}); i=i+10;
-        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSmmvcnFC{i}); i=i+10;
-        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSmmpvcnFC{i}); i=i+10;
+    for k=1:maxLag*2
+        i=k;
+        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmcnDLW{k}); % non linear (no ex, ex)
+        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSm2cnDLW{k}); i=i+10; % linear (no ex, ex)
+        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmmvcnDLW{k}); i=i+10; % mvar linear (no ex, ex)
+        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmmpvcnDLW{k}); i=i+10; % mpcvar linear (no ex, ex)
+        cosSim(i) = getCosSimilarity(meanCnDL{1}, meanSmcnDL{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(meanCnDL{1}, meanSm2cnDL{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(meanCnDL{1}, meanSmmvcnDL{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(meanCnDL{1}, meanSmmpvcnDL{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSmcnFC{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSm2cnFC{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSmmvcnFC{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSmmpvcnFC{k}); i=i+10;
     end
     figure; bar(cosSim); title('cos similarity between mean CN matrix and SimCN by each algorithm');
 %{
@@ -200,19 +201,20 @@ function simulateAlzheimerDLCM3
     % plot box-and-whisker plot of cos similarity between mean ec matrix and each subject ec
     cosSims = nan(cnSbjNum,90);
     for j=1:cnSbjNum
-        for i=1:maxLag*2
-            cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, smcnDLWs{i}(:,:,j)); % non linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, sm2cnDLWs{i}(:,:,j)); i=i+10; % linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, smmvcnDLWs{i}(:,:,j)); i=i+10; % mvar linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, smmpvcnDLWs{i}(:,:,j)); i=i+10; % mpcvar linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(meanCnDL{1}, smcnDLs{i}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(meanCnDL{1}, sm2cnDLs{i}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(meanCnDL{1}, smmvcnDLs{i}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(meanCnDL{1}, smmpvcnDLs{i}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(meanCnFC{1}, smcnFCs{i}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(meanCnFC{1}, sm2cnFCs{i}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(meanCnFC{1}, smmvcnFCs{i}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(meanCnFC{1}, smmpvcnFCs{i}(:,:,j)); i=i+10;
+        for k=1:maxLag*2
+            i=k;
+            cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, smcnDLWs{k}(:,:,j)); % non linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, sm2cnDLWs{k}(:,:,j)); i=i+10; % linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, smmvcnDLWs{k}(:,:,j)); i=i+10; % mvar linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(meanCnDLW{1}, smmpvcnDLWs{k}(:,:,j)); i=i+10; % mpcvar linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(meanCnDL{1}, smcnDLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(meanCnDL{1}, sm2cnDLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(meanCnDL{1}, smmvcnDLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(meanCnDL{1}, smmpvcnDLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(meanCnFC{1}, smcnFCs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(meanCnFC{1}, sm2cnFCs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(meanCnFC{1}, smmvcnFCs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(meanCnFC{1}, smmpvcnFCs{k}(:,:,j)); i=i+10;
         end
 %        cosSims(j,1) = getCosSimilarity(meanCnDLW, cnDLWs(:,:,i));
 %        cosSims(i,11) = getCosSimilarity(meanCnDL, cnDLs(:,:,i));
@@ -244,19 +246,20 @@ function simulateAlzheimerDLCM3
     % plot box-and-whisker plot of cos similarity between original ec matrix and simulated signals ec matrix
     cosSims = nan(cnSbjNum,90);
     for j=1:cnSbjNum
-        for i=1:maxLag*2
-            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smcnDLWs{i}(:,:,j)); % non linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), sm2cnDLWs{i}(:,:,j)); i=i+10; % linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smmvcnDLWs{i}(:,:,j)); i=i+10; % mvar linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smmpvcnDLWs{i}(:,:,j)); i=i+10; % mpcvar linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(cnDLs{1}(:,:,j), smcnDLs{i}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(cnDLs{1}(:,:,j), sm2cnDLs{i}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(cnDLs{1}(:,:,j), smmvcnDLs{i}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(cnDLs{1}(:,:,j), smmpvcnDLs{i}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), smcnFCs{i}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), sm2cnFCs{i}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), smmvcnFCs{i}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), smmpvcnFCs{i}(:,:,j)); i=i+10;
+        for k=1:maxLag*2
+            i=k;
+            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smcnDLWs{k}(:,:,j)); % non linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), sm2cnDLWs{k}(:,:,j)); i=i+10; % linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smmvcnDLWs{k}(:,:,j)); i=i+10; % mvar linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smmpvcnDLWs{k}(:,:,j)); i=i+10; % mpcvar linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(cnDLs{1}(:,:,j), smcnDLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(cnDLs{1}(:,:,j), sm2cnDLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(cnDLs{1}(:,:,j), smmvcnDLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(cnDLs{1}(:,:,j), smmpvcnDLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), smcnFCs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), sm2cnFCs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), smmvcnFCs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), smmpvcnFCs{k}(:,:,j)); i=i+10;
         end
     end
     figure; boxplot(cosSims); title('cos similarity between mean CN matrix and each subject EC by each algorithm');
