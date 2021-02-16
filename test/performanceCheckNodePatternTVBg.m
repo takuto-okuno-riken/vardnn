@@ -1,16 +1,17 @@
-function performanceCheckNodePatternTVB2
+function performanceCheckNodePatternTVBg
     num_scan = 55;
     if num_scan == 55  % oh's mouse 98 node. density 0.15. weight add.
         Gvals = {'0.25', '0.5', '1.0', '1.5', '2.0'};
         node_nums = [16,98];
         GTths = [1, 1];
+        pat = [1, 6];
     end
     % test sparse and full density
     hz = 64;
     N = 8;
     for k=1:length(Gvals)
         for i=1:length(node_nums)
-            checkingPattern(Gvals{k}, node_nums(i), num_scan, hz, GTths(i), N, i);
+            checkingPattern(Gvals{k}, node_nums(i), num_scan, hz, GTths(i), N, pat(i));
         end
     end
 end

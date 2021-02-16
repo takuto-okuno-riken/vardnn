@@ -349,7 +349,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
     if lags>1, lagStr=num2str(lags); else lagStr=''; end
     if isAutoExo>0, exoStr='_ex'; else exoStr=''; end
     if isempty(activateFunc), linStr='_lin'; else linStr=''; end
-    outfName = ['results/adsim3-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '.mat'];
+    outfName = ['results/adsim3/adsim3-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
         return;
@@ -460,7 +460,7 @@ function [utestH, utestP, utestP2] = calculateAlzWilcoxonTest(control, target, r
     ROWNUM = size(control,1);
     COLNUM = size(control,2);
 
-    outfName = ['results/adsim-' algorithm '-' controlGroup '_' targetGroup '-roi' num2str(ROWNUM) '-utest.mat'];
+    outfName = ['results/adsim3/adsim-' algorithm '-' controlGroup '_' targetGroup '-roi' num2str(ROWNUM) '-utest.mat'];
     if exist(outfName, 'file') && force == 0
         load(outfName);
     else

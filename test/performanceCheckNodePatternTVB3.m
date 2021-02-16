@@ -20,7 +20,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, idx)
     NumProcessors = 12;
 
     maxLag = 5;
-    fname = ['results/tvb-wongwang3-' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(idx) '-' num2str(hz) 'hz-result.mat'];
+    fname = ['results/rww3/tvb-wongwang3-' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(idx) '-' num2str(hz) 'hz-result.mat'];
     if exist(fname, 'file')
         load(fname);
     else
@@ -94,7 +94,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, idx)
             figure(origSigf); plot(t, si);
 
             % check saved data
-            dlcmFile = ['results/net-patrww3-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(idx) '-' num2str(k) '.mat'];
+            dlcmFile = ['results/rww3/net-patrww3-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(idx) '-' num2str(k) '.mat'];
             netDLCM = cell(maxLag,1);
             netDLCM2 = cell(maxLag,1);
             netDLCM3 = cell(maxLag,1);
