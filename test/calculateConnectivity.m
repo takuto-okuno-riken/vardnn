@@ -12,7 +12,6 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
 
     % constant value
     ROINUM = size(signals{1},1);
-    sigLen = size(signals{1},2);
 
     weights = zeros(ROINUM, ROINUM, length(signals));
     subweights = zeros(ROINUM, ROINUM+1, length(signals));
@@ -40,6 +39,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
 
         parfor i=1:length(signals)    % for parallel processing
 %        for i=1:length(signals)
+            sigLen = size(signals{i},2);
             if isAutoExo > 0
                 exSignal = rand(ROINUM, sigLen);
                 exControl = eye(ROINUM);

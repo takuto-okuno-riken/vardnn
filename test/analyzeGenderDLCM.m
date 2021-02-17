@@ -23,26 +23,34 @@ function analyzeGenderDLCM
         % mvGC(i) no exogenous 
         [tr25GCs{j}, meanTR25GC{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'gc', 1, j, 0);
         [tr14GCs{j}, meanTR14GC{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'gc', 1, j, 0);
+        [tr6GCs{j}, meanTR6GC{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'gc', 1, j, 0);
         % mvarEC(i) no exogenous 
         [tr25MVARECs{j}, meanTR25MVAREC{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'mvarec', 1, j, 0);
         [tr14MVARECs{j}, meanTR14MVAREC{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'mvarec', 1, j, 0);
+        [tr6MVARECs{j}, meanTR6MVAREC{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'mvarec', 1, j, 0);
         [tr25MVARs{j}, meanTR25MVAR{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'mvar', 1, j, 0);
         [tr14MVARs{j}, meanTR14MVAR{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'mvar', 1, j, 0);
+        [tr6MVARs{j}, meanTR6MVAR{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'mvar', 1, j, 0);
         % mpcvarEC(i) no exogenous 
         [tr25MPCVARECs{j}, meanTR25MPCVAREC{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'mpcvarec', 1, j, 0);
         [tr14MPCVARECs{j}, meanTR14MPCVAREC{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'mpcvarec', 1, j, 0);
+        [tr6MPCVARECs{j}, meanTR6MPCVAREC{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'mpcvarec', 1, j, 0);
         % DLCM(i)-GC linear no exogenous
         [tr25DL2s{j}, meanTR25DL2{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlcm', 0, j, 0, []);
         [tr14DL2s{j}, meanTR14DL2{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlcm', 0, j, 0, []);
+        [tr6DL2s{j}, meanTR6DL2{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'dlcm', 0, j, 0, []);
         % DLCM(i)-EC linear no exogenous
         [tr25DLW2s{j}, meanTR25DLW2{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlw', 0, j, 0, []);
         [tr14DLW2s{j}, meanTR14DLW2{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlw', 0, j, 0, []);
+        [tr6DLW2s{j}, meanTR6DLW2{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'dlw', 0, j, 0, []);
         % DLCM(i)-GC no exogenous
         [tr25DLs{j}, meanTR25DL{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlcm', 0, j, 0);
         [tr14DLs{j}, meanTR14DL{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlcm', 0, j, 0);
+        [tr6DLs{j}, meanTR6DL{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'dlcm', 0, j, 0);
         % DLCM(i)-EC no exogenous
         [tr25DLWs{j}, meanTR25DLW{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlw', 0, j, 0);
         [tr14DLWs{j}, meanTR14DLW{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlw', 0, j, 0);
+        [tr6DLWs{j}, meanTR6DLW{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'dlw', 0, j, 0);
     end
 
     for i=1:maxLag
@@ -50,26 +58,34 @@ function analyzeGenderDLCM
         % mvGC(i) auto exogenous 
         [tr25GCs{j}, meanTR25GC{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'gc', 1, i, 1);
         [tr14GCs{j}, meanTR14GC{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'gc', 1, i, 1);
+        [tr6GCs{j}, meanTR6GC{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'gc', 1, i, 1);
         % mvarEC(i) auto exogenous 
         [tr25MVARECs{j}, meanTR25MVAREC{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'mvarec', 1, i, 1);
         [tr14MVARECs{j}, meanTR14MVAREC{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'mvarec', 1, i, 1);
+        [tr6MVARECs{j}, meanTR6MVAREC{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'mvarec', 1, i, 1);
         [tr25MVARs{j}, meanTR25MVAR{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'mvar', 1, i, 1);
         [tr14MVARs{j}, meanTR14MVAR{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'mvar', 1, i, 1);
+        [tr6MVARs{j}, meanTR6MVAR{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'mvar', 1, i, 1);
         % mpcvarEC(i) auto exogenous 
         [tr25MPCVARECs{j}, meanTR25MPCVAREC{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'mpcvarec', 1, i, 1);
         [tr14MPCVARECs{j}, meanTR14MPCVAREC{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'mpcvarec', 1, i, 1);
+        [tr6MPCVARECs{j}, meanTR6MPCVAREC{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'mpcvarec', 1, i, 1);
         % DLCM(i)-GC linear auto exogenous
         [tr25DL2s{j}, meanTR25DL2{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlcm', 0, i, 1, []);
         [tr14DL2s{j}, meanTR14DL2{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlcm', 0, i, 1, []);
+        [tr6DL2s{j}, meanTR6DL2{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'dlcm', 0, i, 1, []);
         % DLCM(i)-EC linear auto exogenous
         [tr25DLW2s{j}, meanTR25DLW2{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlw', 0, i, 1, []);
         [tr14DLW2s{j}, meanTR14DLW2{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlw', 0, i, 1, []);
+        [tr6DLW2s{j}, meanTR6DLW2{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'dlw', 0, i, 1, []);
         % DLCM(i)-GC auto exogenous
         [tr25DLs{j}, meanTR25DL{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlcm', 0, i, 1);
         [tr14DLs{j}, meanTR14DL{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlcm', 0, i, 1);
+        [tr6DLs{j}, meanTR6DL{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'dlcm', 0, i, 1);
         % DLCM(i)-EC auto exogenous
         [tr25DLWs{j}, meanTR25DLW{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlw', 0, i, 1);
         [tr14DLWs{j}, meanTR14DLW{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlw', 0, i, 1);
+        [tr6DLWs{j}, meanTR6DLW{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'dlw', 0, i, 1);
     end
     
     % plot correlation and cos similarity
