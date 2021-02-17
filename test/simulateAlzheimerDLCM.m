@@ -292,7 +292,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     meanAdDLWs = mean(adDLWs,3);
     stdAdDLWs = nanstd(adDLWs,1,3);
 
-    outfName = ['results/adsim-dlw-vad7ns-roi' num2str(ROINUM) '.mat'];
+    outfName = ['results/adsim/adsim-dlw-vad7ns-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
     else
@@ -628,7 +628,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     figure; boxplot(X);
 
     % save result
-    fname = ['results/adsim-cn-ad-roi' num2str(132) '-result.mat'];
+    fname = ['results/adsim/adsim-cn-ad-roi' num2str(132) '-result.mat'];
     save(fname, 'cosSim', 'dlwAUC','dlwvAUC','dlwROC','dlwvROC', 'sigCntCN', 'sigCntAD');
     mean(dlwAUC) % show result AUC
     mean(dlwvAUC) % show result AUC
@@ -899,7 +899,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
     sbjNum = size(teachSignals,3);
     weights = zeros(ROWNUM, ROWNUM, sbjNum);
 
-    outfName = ['results/adsim-retrain-' group '-roi' num2str(ROWNUM) '.mat'];
+    outfName = ['results/adsim/adsim-retrain-' group '-roi' num2str(ROWNUM) '.mat'];
     if exist(outfName, 'file')
         f=load(outfName);
         weights = f.weights;
@@ -928,7 +928,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
 
 %    for i=1:sbjNum
     parfor i=1:sbjNum
-        dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROWNUM) '-net' num2str(i) '.mat'];
+        dlcmName = ['results/adsim/adsim-dlcm-' group '-roi' num2str(ROWNUM) '-net' num2str(i) '.mat'];
         if exist(dlcmName, 'file')
             f=load(dlcmName);
             netDLCM = f.netDLCM;
@@ -996,7 +996,7 @@ function vadSignals = calculateVirtualADSignals3(signals, roiNames, cnECs, adECs
     ROINUM = size(signals{1},1);
     vadSignals = {};
     
-    outfName = ['results/adsim-signal-vad-roi' num2str(ROINUM) '-' algorithm '.mat'];
+    outfName = ['results/adsim/adsim-signal-vad-roi' num2str(ROINUM) '-' algorithm '.mat'];
     if exist(outfName, 'file')
         load(outfName);
         return;
@@ -1021,7 +1021,10 @@ function [vadSignals, vadDLWs, vadDLWnss] = calculateVirtualADSignals4(cnSignals
     sigLen = size(cnSignals{1},2);
     cnNum = length(cnSignals);
     adNum = length(adSignals);
-    outfName = ['results/adsim-all-' group '-roi' num2str(ROWNUM) '.mat'];
+
+    global resultsPath;
+    global resultsPrefix;
+    outfName = [resultsPath 'sim/' resultsPrefix 'sim-all-' group '-roi' num2str(ROWNUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
     else
@@ -1033,7 +1036,7 @@ function [vadSignals, vadDLWs, vadDLWnss] = calculateVirtualADSignals4(cnSignals
         minsi = nan(cnNum);
         for k=1:adNum
             disp(['generate virtual ad signals (type 4) : ' num2str(k)]);
-            origName = ['results/ad-dlcm_ex-ad-roi' num2str(ROWNUM) '-net' num2str(k) '.mat'];
+            origName = [resultsPath '/' resultsPrefix '-dlcm_ex-ad-roi' num2str(ROWNUM) '-net' num2str(k) '.mat'];
             load(origName);
             for i=1:cnNum
                 [allCnSignals(:,:,i), sig(i), c(i), maxsi(i), minsi(i)] = convert2SigmoidSignal(cnSignals{i});
@@ -1061,7 +1064,7 @@ function [ECs, nodeSignals] = calculateNodeSignals(signals, S2, IS2, roiNames, g
     ROINUM = size(signals{1},1);
     sbjNum = length(signals);
 
-    outfName = ['results/adsim-' algorithm '-' group '_ns-roi' num2str(ROINUM) '.mat'];
+    outfName = ['results/adsim/adsim-' algorithm '-' group '_ns-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
         return;
@@ -1094,7 +1097,7 @@ function [ECs, nodeSignals] = calculateNodeSignals(signals, S2, IS2, roiNames, g
         end
         switch(algorithm)
         case 'dlw'
-            dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            dlcmName = ['results/adsim/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             f=load(dlcmName);
             [Y, time] = predictDlcmNetwork(si, exSignal, [], f.exControl, f.netDLCM);
             ec = calcDlcmEC(f.netDLCM, [], f.exControl);
@@ -1115,7 +1118,7 @@ function [ECs, nodeSignals, exSignals, exControls] = calculateNodeSignals2(signa
     ROINUM = size(signals{1},1);
     sbjNum = length(signals);
 
-    outfName = ['results/adsim-' algorithm '-' group '_ns-roi' num2str(ROINUM) '.mat'];
+    outfName = ['results/adsim/adsim-' algorithm '-' group '_ns-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
         if exist('inSignals','var'), exSignals=inSignals; end % for compatibility
@@ -1152,7 +1155,7 @@ function [nodeSignals] = calculateNodeSignals3(signals, exSignals, exControls, r
     ROINUM = size(signals{1},1);
     sbjNum = length(signals);
 
-    outfName = ['results/adsim-' algorithm '-' group '_ns3-roi' num2str(ROINUM) '.mat'];
+    outfName = ['results/adsim/adsim-' algorithm '-' group '_ns3-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
         return;
@@ -1162,7 +1165,7 @@ function [nodeSignals] = calculateNodeSignals3(signals, exSignals, exControls, r
     for i=1:sbjNum
         switch(algorithm)
         case 'dlw'
-            dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            dlcmName = ['results/adsim/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             load(dlcmName);
             [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
             [Y, time] = predictDlcmNetwork(si, exSignals(:,:,i), [], exControls(:,:,i), netDLCM);
@@ -1178,7 +1181,7 @@ function [nodeSignals] = calculateNodeSignals4(signals, exSignals, exControls, r
     ROINUM = size(signals{1},1);
     sbjNum = length(signals);
 
-    outfName = ['results/adsim-' algorithm '-' group '_ns4-roi' num2str(ROINUM) '.mat'];
+    outfName = ['results/adsim/adsim-' algorithm '-' group '_ns4-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
         return;
@@ -1188,7 +1191,7 @@ function [nodeSignals] = calculateNodeSignals4(signals, exSignals, exControls, r
     for i=1:sbjNum
         switch(algorithm)
         case 'dlw'
-            dlcmName = ['results/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            dlcmName = ['results/adsim/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             load(dlcmName);
             [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
             [Y, time] = simulateDlcmNetwork(si, exSignals(:,:,i), [], exControls(:,:,i), netDLCM);
@@ -1204,8 +1207,10 @@ function [nodeSignals] = calculateNodeSignals5(signals, exSignals, nodeControls,
     nodeNum = size(signals{1},1);
     sigLen = size(signals{1},2);
     sbjNum = length(signals);
-    
-    outfName = ['results/adsim-' algorithm '-' group '_ns5-roi' num2str(nodeNum) '.mat'];
+
+    global resultsPath;
+    global resultsPrefix;
+    outfName = [resultsPath 'sim/' resultsPrefix 'sim-' algorithm '-' group '_ns5-roi' num2str(nodeNum) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
         return;
@@ -1239,7 +1244,7 @@ function [nodeSignals] = calculateNodeSignals5(signals, exSignals, nodeControls,
     netDLCMs = cell(sbjNum,1);
     % load dlcm files
     for i=1:sbjNum
-        dlcmName = ['results/' prefix '-dlcm-' orgGroup '-roi' num2str(nodeNum) '-net' num2str(i) '.mat'];
+        dlcmName = [resultsPath '/' resultsPrefix '-dlcm-' orgGroup '-roi' num2str(nodeNum) '-net' num2str(i) '.mat'];
         f = load(dlcmName);
         netDLCMs{i} = f.netDLCM;
     end
@@ -1453,7 +1458,7 @@ function [normalities, normalitiesP] = calculateAlzNormalityTest(ECs, roiNames, 
 
     global resultsPath;
     global resultsPrefix;
-    outfName = ['results/adsim-' algorithm '-' group '-roi' num2str(ROWNUM) '-normality.mat'];
+    outfName = [resultsPath 'sim/' resultsPrefix 'sim-' algorithm '-' group '-roi' num2str(ROWNUM) '-normality.mat'];
     if exist(outfName, 'file')
         load(outfName);
     else
@@ -1508,7 +1513,7 @@ function [utestH, utestP, utestP2] = calculateAlzWilcoxonTest(control, target, r
 
     global resultsPath;
     global resultsPrefix;
-    outfName = ['results/adsim-' algorithm '-' controlGroup '_' targetGroup '-roi' num2str(ROWNUM) '-utest.mat'];
+    outfName = [resultsPath 'sim/' resultsPrefix 'sim-' algorithm '-' controlGroup '_' targetGroup '-roi' num2str(ROWNUM) '-utest.mat'];
     if exist(outfName, 'file') && force == 0
         load(outfName);
     else
