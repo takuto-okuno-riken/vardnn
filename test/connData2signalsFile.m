@@ -1,6 +1,6 @@
-% this function is only for ADNI2 alzheimer analysis
+% extract ROI BOLD signals from CONN data
 
-function [signals, roiNames] = connData2signalsFile(base, pathes, group)
+function [signals, roiNames] = connData2signalsFile(base, pathes, group, cachePath, prefix)
     % constant value
     ROINUM = 132;
     START = 4;
@@ -11,7 +11,7 @@ function [signals, roiNames] = connData2signalsFile(base, pathes, group)
     roiNames2 = cell(1,ROINUM);
     idx = 0;
     
-    outfName = ['data/ad-signal-' group '-roi' num2str(ROINUM) '.mat'];
+    outfName = [cachePath '/' prefix '-signal-' group '-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
         return;

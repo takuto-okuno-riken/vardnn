@@ -9,8 +9,13 @@ function simulateAlzheimerDLCM
     pathesAD = {'ADNI2_65-75_F_AD_nii', 'ADNI2_65-75_M_AD_nii'};
 
     % load each type signals
-    [cnSignals, roiNames] = connData2signalsFile(base, pathesCN, 'cn');
-    [adSignals] = connData2signalsFile(base, pathesAD, 'ad');
+    [cnSignals, roiNames] = connData2signalsFile(base, pathesCN, 'cn', 'data/ad', 'ad');
+    [adSignals] = connData2signalsFile(base, pathesAD, 'ad', 'data/ad', 'ad');
+
+    global resultsPath;
+    global resultsPrefix;
+    resultsPath = 'results/ad';
+    resultsPrefix = 'ad';
 
     % calculate node-signals from (1,...,1), (0,1...1)->(1...1,0),
     % (0,...,0), (1,0...0)->(0...0,1), (0.5,0...0)->(0...0,0.5)
@@ -1446,6 +1451,8 @@ function [normalities, normalitiesP] = calculateAlzNormalityTest(ECs, roiNames, 
     ROWNUM = size(ECs,1);
     COLNUM = size(ECs,2);
 
+    global resultsPath;
+    global resultsPrefix;
     outfName = ['results/adsim-' algorithm '-' group '-roi' num2str(ROWNUM) '-normality.mat'];
     if exist(outfName, 'file')
         load(outfName);
@@ -1499,6 +1506,8 @@ function [utestH, utestP, utestP2] = calculateAlzWilcoxonTest(control, target, r
     ROWNUM = size(control,1);
     COLNUM = size(control,2);
 
+    global resultsPath;
+    global resultsPrefix;
     outfName = ['results/adsim-' algorithm '-' controlGroup '_' targetGroup '-roi' num2str(ROWNUM) '-utest.mat'];
     if exist(outfName, 'file') && force == 0
         load(outfName);

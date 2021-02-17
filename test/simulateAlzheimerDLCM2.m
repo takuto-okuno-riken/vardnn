@@ -9,8 +9,13 @@ function simulateAlzheimerDLCM2
     pathesAD = {'ADNI2_65-75_F_AD_nii', 'ADNI2_65-75_M_AD_nii'};
 
     % load each type signals
-    [cnSignals, roiNames] = connData2signalsFile(base, pathesCN, 'cn');
-    [adSignals] = connData2signalsFile(base, pathesAD, 'ad');
+    [cnSignals, roiNames] = connData2signalsFile(base, pathesCN, 'cn', 'data/ad', 'ad');
+    [adSignals] = connData2signalsFile(base, pathesAD, 'ad', 'data/ad', 'ad');
+
+    global resultsPath;
+    global resultsPrefix;
+    resultsPath = 'results/ad';
+    resultsPrefix = 'ad';
 
     cnSbjNum = length(cnSignals);
     adSbjNum = length(adSignals);
@@ -2668,7 +2673,9 @@ function [weights, meanWeights, stdWeights, subweights] = retrainDLCMAndEC(teach
     sbjNum = size(teachSignals,3);
     weights = zeros(ROWNUM, ROWNUM, sbjNum);
 
-    outfName = ['results/adsim2-retrain-' group '-roi' num2str(ROWNUM) '.mat'];
+    global resultsPath;
+    global resultsPrefix;
+    outfName = [resultsPath '/' resultsPrefix 'sim2-retrain-' group '-roi' num2str(ROWNUM) '.mat'];
     if exist(outfName, 'file')
         f=load(outfName);
         weights = f.weights;
@@ -2698,7 +2705,7 @@ function [weights, meanWeights, stdWeights, subweights] = retrainDLCMAndEC(teach
 
 %    for i=1:sbjNum
     parfor i=1:sbjNum
-        dlcmName = ['results/ad-dlcm_ex-' group '-roi' num2str(ROWNUM) '-net' num2str(i) '.mat'];
+        dlcmName = [resultsPath '/' resultsPrefix '-dlcm_ex-' group '-roi' num2str(ROWNUM) '-net' num2str(i) '.mat'];
         if exist(dlcmName, 'file')
             f=load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
@@ -2789,9 +2796,11 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
     ROINUM = size(signals{1},1);
     sbjNum = length(signals);
 
+    global resultsPath;
+    global resultsPrefix;
     if strcmp(algorithm, 'mvarec'), algoname = [algorithm num2str(lags)];
     else, algoname = algorithm; end
-    outfName = ['results/adsim2-' algoname '-' group '-roi' num2str(ROINUM) '.mat'];
+    outfName = [resultsPath '/' resultsPrefix 'sim2-' algoname '-' group '-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
         return;
@@ -2819,9 +2828,9 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
         switch(algorithm)
         case {'dlw','dlwrc'}
             if strcmp(algorithm, 'dlw')
-                dlcmName = ['results/ad-dlcm_ex-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                dlcmName = [resultsPath '/' resultsPrefix '-dlcm_ex-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             else
-                dlcmName = ['results/ad-dlcmrc_ex-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                dlcmName = [resultsPath '/' resultsPrefix '-dlcmrc_ex-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             end
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
@@ -2840,7 +2849,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
             [Y, time] = simulateDlcmNetwork(si, exSignal, [], f.exControl, f.netDLCM);
             [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl);
         case 'mvarec'
-            dlcmName = ['results/ad-dlcm_ex-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            dlcmName = [resultsPath '/' resultsPrefix '-dlcm_ex-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -2886,6 +2895,8 @@ function [utestH, utestP, utestP2] = calculateAlzWilcoxonTest(control, target, r
     ROWNUM = size(control,1);
     COLNUM = size(control,2);
 
+    global resultsPath;
+    global resultsPrefix;
     outfName = ['results/adsim-' algorithm '-' controlGroup '_' targetGroup '-roi' num2str(ROWNUM) '-utest.mat'];
     if exist(outfName, 'file') && force == 0
         load(outfName);

@@ -26,10 +26,6 @@ function checkingPattern(Gval, node_num, num_scan, hz, GTth, N, i)
     gcROC = cell(N,2);
     dlROC = cell(N,2);
     dlwROC = cell(N,2);
-    fcRf = figure;
-    gcRf = figure;
-    dlRf = figure;
-    dlwRf = figure;
 
     origf = figure;
     origSigf = figure;
@@ -49,13 +45,11 @@ function checkingPattern(Gval, node_num, num_scan, hz, GTth, N, i)
 
         % show result of FC
         FC = calcFunctionalConnectivity(si);
-        figure(fcRf); hold on; [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = plotROCcurve(FC, weights, 100, 1, GTth); hold off;
-        title(['ROC curve of FC (pat=' num2str(i) ')']);
+        [fcROC{k,1}, fcROC{k,2}, fcAUC(k)] = calcROCcurve(FC, weights, 100, 1, GTth);
 
         % show result of granger causality index (mvGC)
         gcI = calcMultivariateGCI_(si,[],[],[],lag);
-        figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, weights, 100, 1, GTth); hold off;
-        title(['ROC curve of mvGC (pat=' num2str(i) ')']);
+        [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = calcROCcurve(gcI, weights, 100, 1, GTth);
 %%{
         [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(si);
         [uu, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
@@ -99,13 +93,11 @@ function checkingPattern(Gval, node_num, num_scan, hz, GTth, N, i)
         end
         
         % calc ROC curve
-        figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, weights, 100, 1, GTth); hold off;
-        title(['ROC curve of DLCM-GC (pat=' num2str(i) ')']);
+        [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = calcROCcurve(dlGC, weights, 100, 1, GTth);
 
         % show result of DLCM weight causality index (DLCM-wci) as DLCM-EC
-        fg = figure; dlwGC = plotDlcmEC(netDLCM, [], exControl); close(fg);
-        figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, weights, 100, 1, GTth); hold off;
-        title(['ROC curve of DLCM-WCI (pat=' num2str(i) ')']);
+        dlwGC = calcDlcmEC(netDLCM, [], exControl);
+       [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = calcROCcurve(dlwGC, weights, 100, 1, GTth);
 %%}
     end
     % show result AUC
@@ -121,11 +113,11 @@ function checkingPattern(Gval, node_num, num_scan, hz, GTth, N, i)
     % show average ROC curve of DCM
     figure; 
     hold on;
-    plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
+%    plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
     plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
     plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
     plotErrorROCcurve(dlwROC, N, [0.2,0.2,0.2]); % TODO:
-    plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
+%    plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
     plotAverageROCcurve(dlwROC, N, '-', [0.2,0.2,0.2],1.2);
     plotAverageROCcurve(dlROC, N, '--', [0.2,0.2,0.2],0.7); % TODO:

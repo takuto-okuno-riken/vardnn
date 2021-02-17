@@ -14,9 +14,14 @@ function analyzeAlzheimerDLCM
     pathesMCI = {'ADNI2_65-75_F_MCI_nii', 'ADNI2_65-75_M_MCI_nii'};
 
     % load each type signals
-    [cnSignals, roiNames] = connData2signalsFile(base, pathesCN, 'cn');
-    [adSignals] = connData2signalsFile(base, pathesAD, 'ad');
-    [mciSignals] = connData2signalsFile(base, pathesMCI, 'mci');
+    [cnSignals, roiNames] = connData2signalsFile(base, pathesCN, 'cn', 'data/ad', 'ad');
+    [adSignals] = connData2signalsFile(base, pathesAD, 'ad', 'data/ad', 'ad');
+    [mciSignals] = connData2signalsFile(base, pathesMCI, 'mci', 'data/ad', 'ad');
+
+    global resultsPath;
+    global resultsPrefix;
+    resultsPath = 'results/ad';
+    resultsPrefix = 'ad';
 
     % calculate connectivity
     algNum = 17;
@@ -369,7 +374,7 @@ function analyzeAlzheimerDLCM
     figure; boxplot(X);
 
     % save result
-    fname = ['results/ad-cn-ad-roi' num2str(132) '-result.mat'];
+    fname = [resultsPath '/' resultsPrefix '-cn-ad-roi' num2str(132) '-result.mat'];
     save(fname, 'cosSim', 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','teAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC','mvarecAUC','mpcvarecAUC', ...
         'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','teROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC','mvarecROC','mpcvarecROC', ...
         'fcACC','pcACC','wcsACC','gcACC','pgcACC','dlACC','dlwACC','dlgACC','teACC','pcsACC','cpcACC','fgesACC','fcaACC','tsfcACC','tsfcaACC','mvarecACC','mpcvarecACC', ...
@@ -554,7 +559,9 @@ function [normalities, normalitiesP] = calculateAlzNormalityTest(weights, roiNam
     % constant value
     ROINUM = size(weights,1);
 
-    outfName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-normality.mat'];
+    global resultsPath;
+    global resultsPrefix;
+    outfName = [resultsPath '/' resultsPrefix '-' algorithm '-' group '-roi' num2str(ROINUM) '-normality.mat'];
     if exist(outfName, 'file')
         load(outfName);
     else
@@ -597,7 +604,9 @@ function [utestH, utestP, utestP2] = calculateAlzWilcoxonTest(control, target, r
     % constant value
     ROINUM = size(control,1);
 
-    outfName = ['results/ad-' algorithm '-' controlGroup '_' targetGroup '-roi' num2str(ROINUM) '-utest.mat'];
+    global resultsPath;
+    global resultsPrefix;
+    outfName = [resultsPath '/' resultsPrefix '-' algorithm '-' controlGroup '_' targetGroup '-roi' num2str(ROINUM) '-utest.mat'];
     if exist(outfName, 'file')
         load(outfName);
     else

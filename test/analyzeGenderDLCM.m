@@ -1,99 +1,99 @@
-function analyzeAlzheimerDLCM2
+function analyzeGenderDLCM
     % CONN fmri data base path :
-    base = '../fmri/';
+    base = '../../1000func/';
 
     % CONN output path
-    pathesCN = {'ADNI2_65-78_F_CN_nii', 'ADNI2_65-78_M_CN_nii'};
-    pathesAD = {'ADNI2_65-75_F_AD_nii', 'ADNI2_65-75_M_AD_nii'};
-    pathesMCI = {'ADNI2_65-75_F_MCI_nii', 'ADNI2_65-75_M_MCI_nii'};
+    pathesTR25 = {'nki23-35/2500', 'nki36-45/2500'};
+    pathesTR14 = {'nki23-35/1400', 'nki36-45/1400'};
+    pathesTR6 = {'nki23-35/645', 'nki36-45/645'};
 
     % load each type signals
-    [cnSignals, roiNames] = connData2signalsFile(base, pathesCN, 'cn', 'data/ad', 'ad');
-    [adSignals] = connData2signalsFile(base, pathesAD, 'ad', 'data/ad', 'ad');
-    [mciSignals] = connData2signalsFile(base, pathesMCI, 'mci', 'data/ad', 'ad');
+    [tr25Signals, roiNames] = connData2signalsFile(base, pathesTR25, 'tr25', 'data/indi', 'id');
+    [tr14Signals] = connData2signalsFile(base, pathesTR14, 'tr14', 'data/indi', 'id');
+    [tr6Signals] = connData2signalsFile(base, pathesTR6, 'tr6', 'data/indi', 'id');
 
     global resultsPath;
     global resultsPrefix;
-    resultsPath = 'results/ad';
-    resultsPrefix = 'ad';
+    resultsPath = 'results/indi';
+    resultsPrefix = 'id';
 
     maxLag = 5;
     % calculate connectivity
     for j=1:maxLag
         % mvGC(i) no exogenous 
-        [cnGCs{j}, meanCNGC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'gc', 1, j, 0);
-        [adGCs{j}, meanADGC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'gc', 1, j, 0);
+        [tr25GCs{j}, meanTR25GC{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'gc', 1, j, 0);
+        [tr14GCs{j}, meanTR14GC{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'gc', 1, j, 0);
         % mvarEC(i) no exogenous 
-        [cnMVARECs{j}, meanCNMVAREC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mvarec', 1, j, 0);
-        [adMVARECs{j}, meanADMVAREC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvarec', 1, j, 0);
-        [cnMVARs{j}, meanCNMVAR{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mvar', 1, j, 0);
-        [adMVARs{j}, meanADMVAR{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvar', 1, j, 0);
+        [tr25MVARECs{j}, meanTR25MVAREC{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'mvarec', 1, j, 0);
+        [tr14MVARECs{j}, meanTR14MVAREC{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'mvarec', 1, j, 0);
+        [tr25MVARs{j}, meanTR25MVAR{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'mvar', 1, j, 0);
+        [tr14MVARs{j}, meanTR14MVAR{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'mvar', 1, j, 0);
         % mpcvarEC(i) no exogenous 
-        [cnMPCVARECs{j}, meanCNMPCVAREC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mpcvarec', 1, j, 0);
-        [adMPCVARECs{j}, meanADMPCVAREC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mpcvarec', 1, j, 0);
+        [tr25MPCVARECs{j}, meanTR25MPCVAREC{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'mpcvarec', 1, j, 0);
+        [tr14MPCVARECs{j}, meanTR14MPCVAREC{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'mpcvarec', 1, j, 0);
         % DLCM(i)-GC linear no exogenous
-        [cnDL2s{j}, meanCNDL2{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 0, j, 0, []);
-        [adDL2s{j}, meanADDL2{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 0, j, 0, []);
+        [tr25DL2s{j}, meanTR25DL2{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlcm', 0, j, 0, []);
+        [tr14DL2s{j}, meanTR14DL2{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlcm', 0, j, 0, []);
         % DLCM(i)-EC linear no exogenous
-        [cnDLW2s{j}, meanCNDLW2{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlw', 0, j, 0, []);
-        [adDLW2s{j}, meanADDLW2{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlw', 0, j, 0, []);
+        [tr25DLW2s{j}, meanTR25DLW2{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlw', 0, j, 0, []);
+        [tr14DLW2s{j}, meanTR14DLW2{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlw', 0, j, 0, []);
         % DLCM(i)-GC no exogenous
-        [cnDLs{j}, meanCNDL{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 0, j, 0);
-        [adDLs{j}, meanADDL{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 0, j, 0);
+        [tr25DLs{j}, meanTR25DL{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlcm', 0, j, 0);
+        [tr14DLs{j}, meanTR14DL{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlcm', 0, j, 0);
         % DLCM(i)-EC no exogenous
-        [cnDLWs{j}, meanCNDLW{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlw', 0, j, 0);
-        [adDLWs{j}, meanADDLW{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlw', 0, j, 0);
+        [tr25DLWs{j}, meanTR25DLW{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlw', 0, j, 0);
+        [tr14DLWs{j}, meanTR14DLW{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlw', 0, j, 0);
     end
 
     for i=1:maxLag
         j = i+maxLag;
         % mvGC(i) auto exogenous 
-        [cnGCs{j}, meanCNGC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'gc', 1, i, 1);
-        [adGCs{j}, meanADGC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'gc', 1, i, 1);
+        [tr25GCs{j}, meanTR25GC{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'gc', 1, i, 1);
+        [tr14GCs{j}, meanTR14GC{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'gc', 1, i, 1);
         % mvarEC(i) auto exogenous 
-        [cnMVARECs{j}, meanCNMVAREC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mvarec', 1, i, 1);
-        [adMVARECs{j}, meanADMVAREC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvarec', 1, i, 1);
-        [cnMVARs{j}, meanCNMVAR{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mvar', 1, i, 1);
-        [adMVARs{j}, meanADMVAR{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvar', 1, i, 1);
+        [tr25MVARECs{j}, meanTR25MVAREC{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'mvarec', 1, i, 1);
+        [tr14MVARECs{j}, meanTR14MVAREC{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'mvarec', 1, i, 1);
+        [tr25MVARs{j}, meanTR25MVAR{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'mvar', 1, i, 1);
+        [tr14MVARs{j}, meanTR14MVAR{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'mvar', 1, i, 1);
         % mpcvarEC(i) auto exogenous 
-        [cnMPCVARECs{j}, meanCNMPCVAREC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mpcvarec', 1, i, 1);
-        [adMPCVARECs{j}, meanADMPCVAREC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mpcvarec', 1, i, 1);
+        [tr25MPCVARECs{j}, meanTR25MPCVAREC{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'mpcvarec', 1, i, 1);
+        [tr14MPCVARECs{j}, meanTR14MPCVAREC{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'mpcvarec', 1, i, 1);
         % DLCM(i)-GC linear auto exogenous
-        [cnDL2s{j}, meanCNDL2{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 0, i, 1, []);
-        [adDL2s{j}, meanADDL2{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 0, i, 1, []);
+        [tr25DL2s{j}, meanTR25DL2{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlcm', 0, i, 1, []);
+        [tr14DL2s{j}, meanTR14DL2{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlcm', 0, i, 1, []);
         % DLCM(i)-EC linear auto exogenous
-        [cnDLW2s{j}, meanCNDLW2{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlw', 0, i, 1, []);
-        [adDLW2s{j}, meanADDLW2{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlw', 0, i, 1, []);
+        [tr25DLW2s{j}, meanTR25DLW2{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlw', 0, i, 1, []);
+        [tr14DLW2s{j}, meanTR14DLW2{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlw', 0, i, 1, []);
         % DLCM(i)-GC auto exogenous
-        [cnDLs{j}, meanCNDL{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 0, i, 1);
-        [adDLs{j}, meanADDL{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 0, i, 1);
+        [tr25DLs{j}, meanTR25DL{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlcm', 0, i, 1);
+        [tr14DLs{j}, meanTR14DL{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlcm', 0, i, 1);
         % DLCM(i)-EC auto exogenous
-        [cnDLWs{j}, meanCNDLW{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlw', 0, i, 1);
-        [adDLWs{j}, meanADDLW{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlw', 0, i, 1);
+        [tr25DLWs{j}, meanTR25DLW{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlw', 0, i, 1);
+        [tr14DLWs{j}, meanTR14DLW{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlw', 0, i, 1);
     end
     
     % plot correlation and cos similarity
-    nanx = eye(size(meanCNGC{1},1),size(meanCNGC{1},2));
+    nanx = eye(size(meanTR25GC{1},1),size(meanTR25GC{1},2));
     nanx(nanx==1) = NaN;
     cosSim = zeros(maxLag*6*2,1);
     figure; bar(cosSim);
-    title('cos similarity between CN and AD by each algorithm');
+    title('cos similarity between TR25 and TR14 by each algorithm');
 
     % normality test
-%    cnDLWsNt = calculateAlzNormalityTest(cnDLWs{j}, roiNames, 'cn', 'dlw');
-%    adDLWsNt = calculateAlzNormalityTest(adDLWs{j}, roiNames, 'ad', 'dlw');
+%    tr25DLWsNt = calculateAlzNormalityTest(tr25DLWs{j}, roiNames, 'tr25', 'dlw');
+%    tr14DLWsNt = calculateAlzNormalityTest(tr14DLWs{j}, roiNames, 'tr14', 'dlw');
 %    mciDLWsNt = calculateAlzNormalityTest(mciDLWs{j}, roiNames, 'mci', 'dlw');
 
     % compalizon test (Wilcoxon, Mann?Whitney U test)
     for j=1:maxLag*2
-        [~, cnadGCsUtP{j}, ~] = calculateAlzWilcoxonTest(cnGCs{j}, adGCs{j}, roiNames, 'cn', 'ad', ['gc' num2str(j)]);
-        [~, cnadMvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMVARECs{j}, adMVARECs{j}, roiNames, 'cn', 'ad', ['mvarec' num2str(j)]);
-        [~, cnadMvarsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMVARs{j}, adMVARs{j}, roiNames, 'cn', 'ad', ['mvar' num2str(j)]);
-        [~, cnadMpcvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMPCVARECs{j}, adMPCVARECs{j}, roiNames, 'cn', 'ad', ['mpcvarec' num2str(j)]);
-        [~, cnadDL2sUtP{j}, ~] = calculateAlzWilcoxonTest(cnDL2s{j}, adDL2s{j}, roiNames, 'cn', 'ad', ['dlcm_lin' num2str(j)]);
-        [~, cnadDLW2sUtP{j}, ~] = calculateAlzWilcoxonTest(cnDLW2s{j}, adDLW2s{j}, roiNames, 'cn', 'ad', ['dlw_lin' num2str(j)]);
-        [~, cnadDLsUtP{j}, ~] = calculateAlzWilcoxonTest(cnDLs{j}, adDLs{j}, roiNames, 'cn', 'ad', ['dlcm' num2str(j)]);
-        [~, cnadDLWsUtP{j}, ~] = calculateAlzWilcoxonTest(cnDLWs{j}, adDLWs{j}, roiNames, 'cn', 'ad', ['dlw' num2str(j)]);
+        [~, cnadGCsUtP{j}, ~] = calculateAlzWilcoxonTest(cnGCs{j}, adGCs{j}, roiNames, 'tr25', 'tr14', ['gc' num2str(j)]);
+        [~, cnadMvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMVARECs{j}, adMVARECs{j}, roiNames, 'tr25', 'tr14', ['mvarec' num2str(j)]);
+        [~, cnadMvarsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMVARs{j}, adMVARs{j}, roiNames, 'tr25', 'tr14', ['mvar' num2str(j)]);
+        [~, cnadMpcvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMPCVARECs{j}, adMPCVARECs{j}, roiNames, 'tr25', 'tr14', ['mpcvarec' num2str(j)]);
+        [~, cnadDL2sUtP{j}, ~] = calculateAlzWilcoxonTest(cnDL2s{j}, adDL2s{j}, roiNames, 'tr25', 'tr14', ['dlcm_lin' num2str(j)]);
+        [~, cnadDLW2sUtP{j}, ~] = calculateAlzWilcoxonTest(cnDLW2s{j}, adDLW2s{j}, roiNames, 'tr25', 'tr14', ['dlw_lin' num2str(j)]);
+        [~, cnadDLsUtP{j}, ~] = calculateAlzWilcoxonTest(cnDLs{j}, adDLs{j}, roiNames, 'tr25', 'tr14', ['dlcm' num2str(j)]);
+        [~, cnadDLWsUtP{j}, ~] = calculateAlzWilcoxonTest(cnDLWs{j}, adDLWs{j}, roiNames, 'tr25', 'tr14', ['dlw' num2str(j)]);
     end
 
     % using minimum 100 p-value relations. perform 5-fold cross validation.

@@ -9,8 +9,13 @@ function simulateAlzheimerDLCM3
     pathesAD = {'ADNI2_65-75_F_AD_nii', 'ADNI2_65-75_M_AD_nii'};
 
     % load each type signals
-    [cnSignals, roiNames] = connData2signalsFile(base, pathesCN, 'cn');
-    [adSignals] = connData2signalsFile(base, pathesAD, 'ad');
+    [cnSignals, roiNames] = connData2signalsFile(base, pathesCN, 'cn', 'data/ad', 'ad');
+    [adSignals] = connData2signalsFile(base, pathesAD, 'ad', 'data/ad', 'ad');
+
+    global resultsPath;
+    global resultsPrefix;
+    resultsPath = 'results/ad';
+    resultsPrefix = 'ad';
 
     cnSbjNum = length(cnSignals);
     adSbjNum = length(adSignals);
@@ -346,10 +351,12 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
     ROINUM = size(signals{1},1);
     sbjNum = length(signals);
 
+    global resultsPath;
+    global resultsPrefix;
     if lags>1, lagStr=num2str(lags); else lagStr=''; end
     if isAutoExo>0, exoStr='_ex'; else exoStr=''; end
     if isempty(activateFunc), linStr='_lin'; else linStr=''; end
-    outfName = ['results/adsim3/adsim3-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '.mat'];
+    outfName = [resultsPath 'sim3/' resultsPrefix 'sim3-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
         return;
@@ -376,7 +383,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
 %    for i=1:sbjNum
         switch(algorithm)
         case 'dlw'
-            dlcmName = ['results/ad-dlcm' lagStr exoStr linStr '-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            dlcmName = [resultsPath '/' resultsPrefix '-dlcm' lagStr exoStr linStr '-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -394,7 +401,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
             [Y, time] = simulateDlcmNetwork(si, exSignal, [], f.exControl, f.netDLCM);
             [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl);
         case 'mvarec'
-            dlcmName = ['results/ad-dlcm' lagStr exoStr linStr '-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            dlcmName = [resultsPath '/' resultsPrefix '-dlcm' lagStr exoStr linStr '-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -414,7 +421,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
             [Y, time] = simulateMvarNetwork(si, exSignal, [], f.exControl, netMVAR);
             [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl); % not used this
         case 'mpcvarec'
-            dlcmName = ['results/ad-dlcm' lagStr exoStr linStr '-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+            dlcmName = [resultsPath '/' resultsPrefix '-dlcm' lagStr exoStr linStr '-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             f = load(dlcmName);
             if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
             if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -460,7 +467,9 @@ function [utestH, utestP, utestP2] = calculateAlzWilcoxonTest(control, target, r
     ROWNUM = size(control,1);
     COLNUM = size(control,2);
 
-    outfName = ['results/adsim3/adsim-' algorithm '-' controlGroup '_' targetGroup '-roi' num2str(ROWNUM) '-utest.mat'];
+    global resultsPath;
+    global resultsPrefix;
+    outfName = [resultsPath 'sim3/' resultsPrefix 'sim-' algorithm '-' controlGroup '_' targetGroup '-roi' num2str(ROWNUM) '-utest.mat'];
     if exist(outfName, 'file') && force == 0
         load(outfName);
     else

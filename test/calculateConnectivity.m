@@ -17,12 +17,14 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
     weights = zeros(ROINUM, ROINUM, length(signals));
     subweights = zeros(ROINUM, ROINUM+1, length(signals));
 
+    global resultsPath;
+    global resultsPrefix;
 %    lagpat = ["gc","pgc","te","tsfc","tsfca","mvarec","dlcm","dlw"];
 %    if lags>1 && contains(algorithm,lagpat), lagStr=num2str(lags); else lagStr=''; end
     if lags>1, lagStr=num2str(lags); else lagStr=''; end
     if isAutoExo>0, exoStr='_ex'; else exoStr=''; end
     if isempty(activateFunc), linStr='_lin'; else linStr=''; end
-    outfName = ['results/ad-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '.mat'];
+    outfName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '.mat'];
     if exist(outfName, 'file')
         load(outfName);
     else
@@ -36,8 +38,8 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
             parpool(NumProcessors);
         end
 
-%        parfor i=1:length(signals)    % for parallel processing
-        for i=1:length(signals)
+        parfor i=1:length(signals)    % for parallel processing
+%        for i=1:length(signals)
             if isAutoExo > 0
                 exSignal = rand(ROINUM, sigLen);
                 exControl = eye(ROINUM);
@@ -73,16 +75,16 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
             case 'te'
                 mat = calcLinueTE(signals{i}, exSignal, [], exControl, lags);
             case 'pcs'
-                csvFile = ['results/tetrad/pcs-ad-signal-' group '-roi' num2str(ROINUM) '-' num2str(i) '.csv'];
+                csvFile = [resultsPath '/tetrad/pcs-ad-signal-' group '-roi' num2str(ROINUM) '-' num2str(i) '.csv'];
                 mat = readmatrix(csvFile);
             case 'cpc'
-                csvFile = ['results/tetrad/cpc-ad-signal-' group '-roi' num2str(ROINUM) '-' num2str(i) '.csv'];
+                csvFile = [resultsPath '/tetrad/cpc-ad-signal-' group '-roi' num2str(ROINUM) '-' num2str(i) '.csv'];
                 mat = readmatrix(csvFile);
             case 'fges'
-                csvFile = ['results/tetrad/fges-ad-signal-' group '-roi' num2str(ROINUM) '-' num2str(i) '.csv'];
+                csvFile = [resultsPath '/tetrad/fges-ad-signal-' group '-roi' num2str(ROINUM) '-' num2str(i) '.csv'];
                 mat = readmatrix(csvFile);
             case 'dlg'
-                fName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                fName = [resultsPath '/' resultsPrefix '-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(fName, 'file')
                     f = load(fName);
                     mat = f.mat;
@@ -101,7 +103,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 netMPCVAR = initMpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 mat = calcMpcvarEC(netMPCVAR, [], exControl);
             case 'dlcm'
-                dlcmName = ['results/ad-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                dlcmName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(dlcmName, 'file')
                     f = load(dlcmName);
                     mat = f.mat;
@@ -137,12 +139,12 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     parsavedlsm(dlcmName, netDLCM, si, exSignal, exControl, mat, sig, c, maxsi, minsi);
                 end
             case 'dlcmrc' % should be called after dlcm
-                outName = ['results/ad-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                outName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(outName, 'file')
                     f = load(outName);
                     mat = f.mat;
                 else
-                    dlcmName = ['results/ad-dlcm' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                    dlcmName = [resultsPath '/' resultsPrefix '-dlcm' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                     f = load(dlcmName);
                     if isfield(f,'c'), c=f.c; else c=f.m; end % for compatibility
                     if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
@@ -162,9 +164,9 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 end
             case {'dlw','dlwrc'} % should be called after dlcm
                 if strcmp(algorithm, 'dlw')
-                    dlcmName = ['results/ad-dlcm' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                    dlcmName = [resultsPath '/' resultsPrefix '-dlcm' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 else
-                    dlcmName = ['results/ad-dlcmrc' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                    dlcmName = [resultsPath '/' resultsPrefix '-dlcmrc' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 end
                 f = load(dlcmName);
                 if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
