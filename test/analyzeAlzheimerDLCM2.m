@@ -212,7 +212,7 @@ function analyzeAlzheimerDLCM2
     figure; boxplot(AUCs);
     title('AUC box plot idx');
 
-    % show average ROC curve of DCM
+    % show average ROC curves
     figure; 
     hold on;
     for lags=1:maxLag
@@ -234,7 +234,7 @@ function analyzeAlzheimerDLCM2
     xlabel('False Positive Rate')
     ylabel('True Positive Rate')
 
-    % show average ROC curve of DCM
+    % show average ROC curves
     figure; 
     hold on;
     for lags=1:maxLag
