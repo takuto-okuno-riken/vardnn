@@ -23,229 +23,215 @@ function simulateGenderDLCM
     resultsPath = 'results/indi';
     resultsPrefix = 'id';
 
-    tr25SbjNum = length(tr25Signals);
-    tr14SbjNum = length(tr14Signals);
-    nodeNum = size(tr25Signals{1},1);
     maxLag = 5;
 
     % get DLCM-EC, DLCM-GC & FC from original CN and AD (normal and recovery training)
-    for j=1:1
-        % DLCM(i)-GC auto exogenous
-        [tr25DLs{j}, meanTr25DL{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'dlcm', 0, j, 1);
-        [tr14DLs{j}, meanTr14DL{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlcm', 0, j, 1);
-        [tr6DLs{j}, meanTr6DL{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'dlcm', 0, j, 1);
-        % FC no exogenous (pairwise, then exogenous does not have meaning)
-        [tr25FCs{j}, meanTr25FC{j}, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'fc', 1);
-        [tr14FCs{j}, meanTr14FC{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'fc', 1);
-        [tr6FCs{j}, meanTr6FC{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'fc', 1);
-    end
+    tr25 = getDLCM_EC_GC_FC(tr25Signals, roiNames, 'tr25');
+    tr14 = getDLCM_EC_GC_FC(tr14Signals, roiNames, 'tr14');
+    tr6 = getDLCM_EC_GC_FC(tr6Signals, roiNames, 'tr6');
 
     % --------------------------------------------------------------------------------------------------------------
     % simulate by algorithms
-    for j=1:maxLag
-        % DLCM(j) no exogenous 
-        [tr25DLWs{j}, smtr25Signals{j}, tr25SubDLWs{j}] = simulateNodeSignals(tr25Signals, roiNames, 'tr25', 'dlw', 'tr25', 0, 0, j, 0);
-        [tr14DLWs{j}, smtr14Signals{j}, tr14SubDLWs{j}] = simulateNodeSignals(tr14Signals, roiNames, 'tr14', 'dlw', 'tr14', 0, 0, j, 0);
-        sigTr25DLWs{j} = (tr25DLWs{j} - nanmean(tr25DLWs{j}(:))) / nanstd(tr25DLWs{j}(:),1);
-        sigTr14DLWs{j} = (tr14DLWs{j} - nanmean(tr14DLWs{j}(:))) / nanstd(tr14DLWs{j}(:),1);
-        meanTr25DLW{j} = nanmean(tr25DLWs{j},3);
-        meanTr14DLW{j} = nanmean(tr14DLWs{j},3);
-
-        % DLCM(j) linear no exogenous 
-        [tr25DLW2s{j}, sm2tr25Signals{j}, tr25SubDLW2s{j}] = simulateNodeSignals(tr25Signals, roiNames, 'tr25', 'dlw', 'tr25', 0, 0, j, 0, []);
-        [tr14DLW2s{j}, sm2tr14Signals{j}, tr14SubDLW2s{j}] = simulateNodeSignals(tr14Signals, roiNames, 'tr14', 'dlw', 'tr14', 0, 0, j, 0, []);
-        sigTr25DLW2s{j} = (tr25DLW2s{j} - nanmean(tr25DLW2s{j}(:))) / nanstd(tr25DLW2s{j}(:),1);
-        sigTr14DLW2s{j} = (tr14DLW2s{j} - nanmean(tr14DLW2s{j}(:))) / nanstd(tr14DLW2s{j}(:),1);
-        meanTr25DLW2{j} = nanmean(tr25DLW2s{j},3);
-        meanTr14DLW2{j} = nanmean(tr14DLW2s{j},3);
-
-        % mvar(j) no exogenous 
-        [tr25MVARECs{j}, smmvtr25Signals{j}, tr25SubMVARECs{j}] = simulateNodeSignals(tr25Signals, roiNames, 'tr25', 'mvarec', 'tr25', 0, 0, j, 0);
-        [tr14MVARECs{j}, smmvtr14Signals{j}, tr14SubMVARECs{j}] = simulateNodeSignals(tr14Signals, roiNames, 'tr14', 'mvarec', 'tr14', 0, 0, j, 0);
-        sigTr25MVARECs{j} = (tr25MVARECs{j} - nanmean(tr25MVARECs{j}(:))) / nanstd(tr25MVARECs{j}(:),1);
-        sigTr14MVARECs{j} = (tr14MVARECs{j} - nanmean(tr14MVARECs{j}(:))) / nanstd(tr14MVARECs{j}(:),1);
-        meanTr25MVAREC{j} = nanmean(tr25MVARECs{j},3);
-        meanTr14MVAREC{j} = nanmean(tr14MVARECs{j},3);
-
-        % mpcvar(j) no exogenous 
-        [tr25MPCVARECs{j}, smmpvtr25Signals{j}, tr25SubMPCVARECs{j}] = simulateNodeSignals(tr25Signals, roiNames, 'tr25', 'mpcvarec', 'tr25', 0, 0, j, 0);
-        [tr14MPCVARECs{j}, smmpvtr25Signals{j}, tr14SubMPCVARECs{j}] = simulateNodeSignals(tr14Signals, roiNames, 'tr14', 'mpcvarec', 'tr14', 0, 0, j, 0);
-        sigTr25MPCVARECs{j} = (tr25MPCVARECs{j} - nanmean(tr25MPCVARECs{j}(:))) / nanstd(tr25MPCVARECs{j}(:),1);
-        sigTr14MPCVARECs{j} = (tr14MPCVARECs{j} - nanmean(tr14MPCVARECs{j}(:))) / nanstd(tr14MPCVARECs{j}(:),1);
-        meanTr25MPCVAREC{j} = nanmean(tr25MPCVARECs{j},3);
-        meanTr14MPCVAREC{j} = nanmean(tr14MPCVARECs{j},3);
-    end
-
-    for i=1:maxLag
-        j = i+maxLag;
-        % DLCM(j) auto exogenous 
-        [tr25DLWs{j}, smtr25Signals{j}, tr25SubDLWs{j}] = simulateNodeSignals(tr25Signals, roiNames, 'tr25', 'dlw', 'tr25', 0, 0, i, 1);
-        [tr14DLWs{j}, smtr14Signals{j}, tr14SubDLWs{j}] = simulateNodeSignals(tr14Signals, roiNames, 'tr14', 'dlw', 'tr14', 0, 0, i, 1);
-        sigTr25DLWs{j} = (tr25DLWs{j} - nanmean(tr25DLWs{j}(:))) / nanstd(tr25DLWs{j}(:),1);
-        sigTr14DLWs{j} = (tr14DLWs{j} - nanmean(tr14DLWs{j}(:))) / nanstd(tr14DLWs{j}(:),1);
-        meanTr25DLW{j} = nanmean(tr25DLWs{j},3);
-        meanTr14DLW{j} = nanmean(tr14DLWs{j},3);
-
-        % DLCM(j) linear auto exogenous 
-        [tr25DLW2s{j}, sm2tr25Signals{j}, tr25SubDLW2s{j}] = simulateNodeSignals(tr25Signals, roiNames, 'tr25', 'dlw', 'tr25', 0, 0, i, 1, []);
-        [tr14DLW2s{j}, sm2tr14Signals{j}, tr14SubDLW2s{j}] = simulateNodeSignals(tr14Signals, roiNames, 'tr14', 'dlw', 'tr14', 0, 0, i, 1, []);
-        sigTr25DLW2s{j} = (tr25DLW2s{j} - nanmean(tr25DLW2s{j}(:))) / nanstd(tr25DLW2s{j}(:),1);
-        sigTr14DLW2s{j} = (tr14DLW2s{j} - nanmean(tr14DLW2s{j}(:))) / nanstd(tr14DLW2s{j}(:),1);
-        meanTr25DLW2{j} = nanmean(tr25DLW2s{j},3);
-        meanTr14DLW2{j} = nanmean(tr14DLW2s{j},3);
-
-        % mvar(j) auto exogenous 
-        [tr25MVARECs{j}, smmvtr25Signals{j}, tr25SubMVARECs{j}] = simulateNodeSignals(tr25Signals, roiNames, 'tr25', 'mvarec', 'tr25', 0, 0, i, 1);
-        [tr14MVARECs{j}, smmvtr14Signals{j}, tr14SubMVARECs{j}] = simulateNodeSignals(tr14Signals, roiNames, 'tr14', 'mvarec', 'tr14', 0, 0, i, 1);
-        sigTr25DLWs{j} = (tr25MVARECs{j} - nanmean(tr25MVARECs{j}(:))) / nanstd(tr25MVARECs{j}(:),1);
-        sigTr14DLWs{j} = (tr14MVARECs{j} - nanmean(tr14MVARECs{j}(:))) / nanstd(tr14MVARECs{j}(:),1);
-        meanTr25DLW{j} = nanmean(tr25MVARECs{j},3);
-        meanTr14DLW{j} = nanmean(tr14MVARECs{j},3);
-
-        % mpcvar(j) auto exogenous 
-        [tr25MPCVARECs{j}, smmpvtr25Signals{j}, tr25SubMPCVARECs{j}] = simulateNodeSignals(tr25Signals, roiNames, 'tr25', 'mpcvarec', 'tr25', 0, 0, i, 1);
-        [tr14MPCVARECs{j}, smmpvtr14Signals{j}, tr14SubMPCVARECs{j}] = simulateNodeSignals(tr14Signals, roiNames, 'tr14', 'mpcvarec', 'tr14', 0, 0, i, 1);
-        sigTr25MPCVARECs{j} = (tr25MPCVARECs{j} - nanmean(tr25MPCVARECs{j}(:))) / nanstd(tr25MPCVARECs{j}(:),1);
-        sigTr14MPCVARECs{j} = (tr14MPCVARECs{j} - nanmean(tr14MPCVARECs{j}(:))) / nanstd(tr14MPCVARECs{j}(:),1);
-        meanTr25MPCVAREC{j} = nanmean(tr25MPCVARECs{j},3);
-        meanTr14MPCVAREC{j} = nanmean(tr14MPCVARECs{j},3);
-    end
+    tr25 = simulateGroupByAlgorithms(tr25, tr25Signals, 'tr25', maxLag);
+    tr14 = simulateGroupByAlgorithms(tr14, tr14Signals, 'tr14', maxLag);
+    tr6  = simulateGroupByAlgorithms(tr6, tr6Signals, 'tr6', maxLag);
 
     % --------------------------------------------------------------------------------------------------------------
-    % check DLCM-EC and DLCM-GC of simulated CN and AD
-    for j=1:maxLag
-        % DLCM(j) no exogenous 
-        [smtr25DLs{j}, meanSmtr25DL{j}, ~] = calculateConnectivity(smtr25Signals{j}, roiNames, 'smtr25', 'dlcm', 1, j, 0);
-        [smtr25DLWs{j}, meanSmtr25DLW{j}, ~, smtr25SubDLWs{j}] = calculateConnectivity(smtr25Signals{j}, roiNames, 'smtr25', 'dlw', 1, j, 0);
-        % DLCM(j) linear no exogenous 
-        [sm2tr25DLs{j}, meanSm2tr25DL{j}, ~] = calculateConnectivity(sm2tr25Signals{j}, roiNames, 'smtr25', 'dlcm', 1, j, 0, []);
-        [sm2tr25DLWs{j}, meanSm2tr25DLW{j}, ~, sm2tr25SubDLWs{j}] = calculateConnectivity(sm2tr25Signals{j}, roiNames, 'smtr25', 'dlw', 1, j, 0, []);
-        % mvar(j) no exogenous 
-        [smmvtr25DLs{j}, meanSmmvtr25DL{j}, ~] = calculateConnectivity(smmvtr25Signals{j}, roiNames, 'smmvtr25', 'dlcm', 1, j, 0);
-        [smmvtr25DLWs{j}, meanSmmvtr25DLW{j}, ~, smmvtr25SubDLW2s{j}] = calculateConnectivity(smmvtr25Signals{j}, roiNames, 'smmvtr25', 'dlw', 1, j, 0);
-        % mvar(j) no exogenous 
-        [smmpvtr25DLs{j}, meanSmmpvtr25DL{j}, ~] = calculateConnectivity(smmpvtr25Signals{j}, roiNames, 'smmpvtr25', 'dlcm', 1, j, 0);
-        [smmpvtr25DLWs{j}, meanSmmpvtr25DLW{j}, ~, smmpvtr25SubDLW2s{j}] = calculateConnectivity(smmpvtr25Signals{j}, roiNames, 'smmpvtr25', 'dlw', 1, j, 0);
-    end
-    for i=1:maxLag
-        j = i+maxLag;
-        % DLCM(j) auto exogenous 
-        [smtr25DLs{j}, meanSmtr25DL{j}, ~] = calculateConnectivity(smtr25Signals{j}, roiNames, 'smtr25', 'dlcm', 1, i, 1);
-        [smtr25DLWs{j}, meanSmtr25DLW{j}, ~, smtr25SubDLWs{j}] = calculateConnectivity(smtr25Signals{j}, roiNames, 'smtr25', 'dlw', 1, i, 1);
-        % DLCM(j) linear auto exogenous 
-        [sm2tr25DLs{j}, meanSm2tr25DL{j}, ~] = calculateConnectivity(sm2tr25Signals{j}, roiNames, 'smtr25', 'dlcm', 1, i, 1, []);
-        [sm2tr25DLWs{j}, meanSm2tr25DLW{j}, ~, sm2tr25SubDLWs{j}] = calculateConnectivity(sm2tr25Signals{j}, roiNames, 'smtr25', 'dlw', 1, i, 1, []);
-        % mvar(j) auto exogenous 
-        [smmvtr25DLs{j}, meanSmmvtr25DL{j}, ~] = calculateConnectivity(smmvtr25Signals{j}, roiNames, 'smmvtr25', 'dlcm', 1, i, 1);
-        [smmvtr25DLWs{j}, meanSmmvtr25DLW{j}, ~, smtr25SubDLW2s{j}] = calculateConnectivity(smmvtr25Signals{j}, roiNames, 'smmvtr25', 'dlw', 1, i, 1);
-        % mvar(j) auto exogenous 
-        [smmpvtr25DLs{j}, meanSmmpvtr25DL{j}, ~] = calculateConnectivity(smmpvtr25Signals{j}, roiNames, 'smmpvtr25', 'dlcm', 1, i, 1);
-        [smmpvtr25DLWs{j}, meanSmmpvtr25DLW{j}, ~, smmpvtr25SubDLW2s{j}] = calculateConnectivity(smmpvtr25Signals{j}, roiNames, 'smmpvtr25', 'dlw', 1, i, 1);
-    end
+    % check DLCM-EC and DLCM-GC of simulated TR25, TR14, TR6
+    tr25 = checkSimSignalsByDLCM_EC_GC(tr25, tr25Signals, 'tr25', maxLag);
+    tr14 = checkSimSignalsByDLCM_EC_GC(tr14, tr14Signals, 'tr14', maxLag);
+    tr6  = checkSimSignalsByDLCM_EC_GC(tr6, tr6Signals, 'tr6', maxLag);
 
-    % check FC of simulated CN and AD
-    for j=1:maxLag
-        % DLCM(j) no exogenous 
-        [smtr25FCs{j}, meanSmtr25FC{j}, ~] = calculateConnectivity(smtr25Signals{j}, roiNames, 'smtr25', 'fc', 1, j, 0);
-        [smtr14FCs{j}, meanSmtr14FC{j}, ~] = calculateConnectivity(smtr14Signals{j}, roiNames, 'smtr14', 'fc', 1, j, 0);
-        % DLCM(j) no exogenous 
-        [sm2tr25FCs{j}, meanSm2tr25FC{j}, ~] = calculateConnectivity(sm2tr25Signals{j}, roiNames, 'smtr25', 'fc', 1, j, 0, []);
-        [sm2tr14FCs{j}, meanSm2tr14FC{j}, ~] = calculateConnectivity(sm2tr14Signals{j}, roiNames, 'smtr14', 'fc', 1, j, 0, []);
-        % mvar(j) no exogenous 
-        [smmvtr25FCs{j}, meanSmmvtr25FC{j}, ~] = calculateConnectivity(smmvtr25Signals{j}, roiNames, 'smmvtr25', 'fc', 1, j, 0);
-        [smmvtr14FCs{j}, meanSmmvtr14FC{j}, ~] = calculateConnectivity(smmvtr14Signals{j}, roiNames, 'smmvtr14', 'fc', 1, j, 0);
-        % mpcvar(j) no exogenous 
-        [smmpvtr25FCs{j}, meanSmmpvtr25FC{j}, ~] = calculateConnectivity(smmpvtr25Signals{j}, roiNames, 'smmpvtr25', 'fc', 1, j, 0);
-        [smmpvtr14FCs{j}, meanSmmpvtr14FC{j}, ~] = calculateConnectivity(smmpvtr14Signals{j}, roiNames, 'smmpvtr14', 'fc', 1, j, 0);
-    end
-    for i=1:maxLag
-        j = i+maxLag;
-        % DLCM(j) auto exogenous 
-        [smtr25FCs{j}, meanSmtr25FC{j}, ~] = calculateConnectivity(smtr25Signals{j}, roiNames, 'smtr25', 'fc', 1, i, 1);
-        [smtr14FCs{j}, meanSmtr14FC{j}, ~] = calculateConnectivity(smtr14Signals{j}, roiNames, 'smtr14', 'fc', 1, i, 1);
-        % DLCM(j) auto exogenous 
-        [sm2tr25FCs{j}, meanSm2tr25FC{j}, ~] = calculateConnectivity(sm2tr25Signals{j}, roiNames, 'smtr25', 'fc', 1, i, 1, []);
-        [sm2tr14FCs{j}, meanSm2tr14FC{j}, ~] = calculateConnectivity(sm2tr14Signals{j}, roiNames, 'smtr14', 'fc', 1, i, 1, []);
-        % mvar(j) auto exogenous 
-        [smmvtr25FCs{j}, meanSmmvtr25FC{j}, ~] = calculateConnectivity(smmvtr25Signals{j}, roiNames, 'smmvtr25', 'fc', 1, i, 1);
-        [smmvtr14FCs{j}, meanSmmvtr14FC{j}, ~] = calculateConnectivity(smmvtr14Signals{j}, roiNames, 'smmvtr14', 'fc', 1, i, 1);
-        % mpcvar(j) auto exogenous 
-        [smmpvtr25FCs{j}, meanSmmpvtr25FC{j}, ~] = calculateConnectivity(smmpvtr25Signals{j}, roiNames, 'smmpvtr25', 'fc', 1, i, 1);
-        [smmpvtr14FCs{j}, meanSmmpvtr14FC{j}, ~] = calculateConnectivity(smmpvtr14Signals{j}, roiNames, 'smmpvtr14', 'fc', 1, i, 1);
-    end
+    % check FC of simulated TR25, TR14, TR6
+    tr25 = checkSimSignalsByFC(tr25, tr25Signals, 'tr25', maxLag);
+    tr14 = checkSimSignalsByFC(tr14, tr14Signals, 'tr14', maxLag);
+    tr6  = checkSimSignalsByFC(tr6, tr6Signals, 'tr6', maxLag);
 
     % --------------------------------------------------------------------------------------------------------------
     % box plot of signal MAEs 
-    maes = nan(tr25SbjNum,40);
-    for j=1:tr25SbjNum
-        si = convert2SigmoidSignal(tr25Signals{j});
+    tr25 = plotSimSignalsResults(tr25, tr25Signals, 'tr25', maxLag);
+
+end
+
+% ==================================================================================================================
+
+function group = getDLCM_EC_GC_FC(signals, roiNames, groupName)
+    group.sbjNum = length(signals);
+    for j=1:1
+        % DLCM(i)-GC auto exogenous
+        [group.DLs{j}, group.meanDL{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlcm', 0, j, 1);
+        % FC no exogenous (pairwise, then exogenous does not have meaning)
+        [group.FCs{j}, group.meanFC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'fc', 1);
+    end
+end
+
+function g = simulateGroupByAlgorithms(g, signals, groupName, maxLag)
+    for j=1:maxLag
+        % DLCM(j) no exogenous 
+        [g.DLWs{j}, g.smSignals{j}, g.SubDLWs{j}] = simulateNodeSignals(signals, roiNames, groupName, 'dlw', groupName, 0, 0, j, 0);
+        g.sigDLWs{j} = (g.DLWs{j} - nanmean(g.DLWs{j}(:))) / nanstd(g.DLWs{j}(:),1);
+        g.meanDLW{j} = nanmean(g.DLWs{j},3);
+
+        % DLCM(j) linear no exogenous 
+        [g.DLW2s{j}, g.sm2Signals{j}, g.SubDLW2s{j}] = simulateNodeSignals(signals, roiNames, groupName, 'dlw', groupName, 0, 0, j, 0, []);
+        g.sigDLW2s{j} = (g.DLW2s{j} - nanmean(g.DLW2s{j}(:))) / nanstd(g.DLW2s{j}(:),1);
+        g.meanDLW2{j} = nanmean(g.DLW2s{j},3);
+
+        % mvar(j) no exogenous 
+        [g.MVARECs{j}, g.smmvSignals{j}, g.SubMVARECs{j}] = simulateNodeSignals(signals, roiNames, groupName, 'mvarec', groupName, 0, 0, j, 0);
+        g.sigMVARECs{j} = (g.MVARECs{j} - nanmean(g.MVARECs{j}(:))) / nanstd(g.MVARECs{j}(:),1);
+        g.meanMVAREC{j} = nanmean(g.MVARECs{j},3);
+
+        % mpcvar(j) no exogenous 
+        [g.MPCVARECs{j}, g.smmpvSignals{j}, g.SubMPCVARECs{j}] = simulateNodeSignals(signals, roiNames, groupName, 'mpcvarec', groupName, 0, 0, j, 0);
+        g.sigMPCVARECs{j} = (g.MPCVARECs{j} - nanmean(g.MPCVARECs{j}(:))) / nanstd(g.MPCVARECs{j}(:),1);
+        g.meanMPCVAREC{j} = nanmean(g.MPCVARECs{j},3);
+    end
+
+    for i=1:maxLag
+        j = i+maxLag;
+        % DLCM(j) auto exogenous 
+        [g.DLWs{j}, g.smSignals{j}, g.SubDLWs{j}] = simulateNodeSignals(signals, roiNames, groupName, 'dlw', groupName, 0, 0, i, 1);
+        g.sigDLWs{j} = (g.DLWs{j} - nanmean(g.DLWs{j}(:))) / nanstd(g.DLWs{j}(:),1);
+        g.meanDLW{j} = nanmean(g.DLWs{j},3);
+
+        % DLCM(j) linear auto exogenous 
+        [g.DLW2s{j}, g.sm2Signals{j}, g.SubDLW2s{j}] = simulateNodeSignals(signals, roiNames, groupName, 'dlw', groupName, 0, 0, i, 1, []);
+        g.sigDLW2s{j} = (g.DLW2s{j} - nanmean(g.DLW2s{j}(:))) / nanstd(g.DLW2s{j}(:),1);
+        g.meanDLW2{j} = nanmean(g.DLW2s{j},3);
+
+        % mvar(j) auto exogenous 
+        [g.MVARECs{j}, g.smmvSignals{j}, g.SubMVARECs{j}] = simulateNodeSignals(signals, roiNames, groupName, 'mvarec', groupName, 0, 0, i, 1);
+        sigDLWs{j} = (g.MVARECs{j} - nanmean(g.MVARECs{j}(:))) / nanstd(g.MVARECs{j}(:),1);
+        meanDLW{j} = nanmean(g.MVARECs{j},3);
+
+        % mpcvar(j) auto exogenous 
+        [g.MPCVARECs{j}, g.smmpvSignals{j}, g.SubMPCVARECs{j}] = simulateNodeSignals(signals, roiNames, groupName, 'mpcvarec', groupName, 0, 0, i, 1);
+        g.sigMPCVARECs{j} = (g.MPCVARECs{j} - nanmean(g.MPCVARECs{j}(:))) / nanstd(g.MPCVARECs{j}(:),1);
+        g.meanMPCVAREC{j} = nanmean(g.MPCVARECs{j},3);
+    end
+end
+
+function g = checkSimSignalsByDLCM_EC_GC(g, signals, groupName, maxLag)
+    for j=1:maxLag
+        % DLCM(j) no exogenous 
+        [g.smDLs{j}, g.meanSmDL{j}, ~] = calculateConnectivity(g.smSignals{j}, roiNames, ['sm' groupName], 'dlcm', 1, j, 0);
+        [g.smDLWs{j}, g.meanSmDLW{j}, ~, g.smSubDLWs{j}] = calculateConnectivity(g.smSignals{j}, roiNames, ['sm' groupName], 'dlw', 1, j, 0);
+        % DLCM(j) linear no exogenous 
+        [g.sm2DLs{j}, g.meanSm2DL{j}, ~] = calculateConnectivity(g.sm2Signals{j}, roiNames, ['sm' groupName], 'dlcm', 1, j, 0, []);
+        [g.sm2DLWs{j}, g.meanSm2DLW{j}, ~, g.sm2SubDLWs{j}] = calculateConnectivity(g.sm2Signals{j}, roiNames, ['sm' groupName], 'dlw', 1, j, 0, []);
+        % mvar(j) no exogenous 
+        [g.smmvDLs{j}, g.meanSmmvDL{j}, ~] = calculateConnectivity(g.smmvSignals{j}, roiNames, ['smmv' groupName], 'dlcm', 1, j, 0);
+        [g.smmvDLWs{j}, g.meanSmmvDLW{j}, ~, g.smmvSubDLW2s{j}] = calculateConnectivity(g.smmvSignals{j}, roiNames, ['smmv' groupName], 'dlw', 1, j, 0);
+        % mvar(j) no exogenous 
+        [g.smmpvDLs{j}, g.meanSmmpvDL{j}, ~] = calculateConnectivity(g.smmpvSignals{j}, roiNames, ['smmpv' groupName], 'dlcm', 1, j, 0);
+        [g.smmpvDLWs{j}, g.meanSmmpvDLW{j}, ~, g.smmpvSubDLW2s{j}] = calculateConnectivity(g.smmpvSignals{j}, roiNames, ['smmpv' groupName], 'dlw', 1, j, 0);
+    end
+    for i=1:maxLag
+        j = i+maxLag;
+        % DLCM(j) auto exogenous 
+        [g.smDLs{j}, g.meanSmDL{j}, ~] = calculateConnectivity(g.smSignals{j}, roiNames, ['sm' groupName], 'dlcm', 1, i, 1);
+        [g.smDLWs{j}, g.meanSmDLW{j}, ~, g.smSubDLWs{j}] = calculateConnectivity(g.smSignals{j}, roiNames, ['sm' groupName], 'dlw', 1, i, 1);
+        % DLCM(j) linear auto exogenous 
+        [g.sm2DLs{j}, g.meanSm2DL{j}, ~] = calculateConnectivity(g.sm2Signals{j}, roiNames, ['sm' groupName], 'dlcm', 1, i, 1, []);
+        [g.sm2DLWs{j}, g.meanSm2DLW{j}, ~, g.sm2SubDLWs{j}] = calculateConnectivity(g.sm2Signals{j}, roiNames, ['sm' groupName], 'dlw', 1, i, 1, []);
+        % mvar(j) auto exogenous 
+        [g.smmvDLs{j}, g.meanSmmvDL{j}, ~] = calculateConnectivity(g.smmvSignals{j}, roiNames, ['smmv' groupName], 'dlcm', 1, i, 1);
+        [g.smmvDLWs{j}, g.meanSmmvDLW{j}, ~, g.smSubDLW2s{j}] = calculateConnectivity(g.smmvSignals{j}, roiNames, ['smmv' groupName], 'dlw', 1, i, 1);
+        % mvar(j) auto exogenous 
+        [g.smmpvDLs{j}, g.meanSmmpvDL{j}, ~] = calculateConnectivity(g.smmpvSignals{j}, roiNames, ['smmpv' groupName], 'dlcm', 1, i, 1);
+        [g.smmpvDLWs{j}, g.meanSmmpvDLW{j}, ~, g.smmpvSubDLW2s{j}] = calculateConnectivity(g.smmpvSignals{j}, roiNames, ['smmpv' groupName], 'dlw', 1, i, 1);
+    end
+end
+
+function g = checkSimSignalsByFC(g, signals, groupName, maxLag)
+    for j=1:maxLag
+        % DLCM(j) no exogenous 
+        [g.smFCs{j}, g.meanSmFC{j}, ~] = calculateConnectivity(g.smSignals{j}, roiNames, ['sm' groupName], 'fc', 1, j, 0);
+        % DLCM(j) no exogenous 
+        [g.sm2FCs{j}, g.meanSm2FC{j}, ~] = calculateConnectivity(g.sm2Signals{j}, roiNames, ['sm' groupName], 'fc', 1, j, 0, []);
+        % mvar(j) no exogenous 
+        [g.smmvFCs{j}, g.meanSmmvFC{j}, ~] = calculateConnectivity(g.smmvSignals{j}, roiNames, ['smmv' groupName], 'fc', 1, j, 0);
+        % mpcvar(j) no exogenous 
+        [g.smmpvFCs{j}, g.meanSmmpvFC{j}, ~] = calculateConnectivity(g.smmpvSignals{j}, roiNames, ['smmpv' groupName], 'fc', 1, j, 0);
+    end
+    for i=1:maxLag
+        j = i+maxLag;
+        % DLCM(j) auto exogenous 
+        [g.smFCs{j}, g.meanSmFC{j}, ~] = calculateConnectivity(g.smSignals{j}, roiNames, ['sm' groupName], 'fc', 1, i, 1);
+        % DLCM(j) auto exogenous 
+        [g.sm2FCs{j}, g.meanSm2FC{j}, ~] = calculateConnectivity(g.sm2Signals{j}, roiNames, ['sm' groupName], 'fc', 1, i, 1, []);
+        % mvar(j) auto exogenous 
+        [g.smmvFCs{j}, g.meanSmmvFC{j}, ~] = calculateConnectivity(g.smmvSignals{j}, roiNames, ['smmv' groupName], 'fc', 1, i, 1);
+        % mpcvar(j) auto exogenous 
+        [g.smmpvFCs{j}, g.meanSmmpvFC{j}, ~] = calculateConnectivity(g.smmpvSignals{j}, roiNames, ['smmpv' groupName], 'fc', 1, i, 1);
+    end
+end
+
+function g = plotSimSignalsResults(g, signals, groupName, maxLag)
+    maes = nan(g.sbjNum,40);
+    for j=1:g.sbjNum
+        si = convert2SigmoidSignal(signals{j});
         for i=1:maxLag*2
-            maes(j,i) = getTwoSignalsError(si, smtr25Signals{i}{j}); % non linear (no ex, ex)
-            maes(j,10+i) = getTwoSignalsError(si, sm2tr25Signals{i}{j}); % linear (no ex, ex)
-            maes(j,20+i) = getTwoSignalsError(si, smmvtr25Signals{i}{j}); % linear (no ex, ex)
-            maes(j,30+i) = getTwoSignalsError(si, smmpvtr25Signals{i}{j}); % linear (no ex, ex)
+            maes(j,i) = getTwoSignalsError(si, g.smSignals{i}{j}); % non linear (no ex, ex)
+            maes(j,10+i) = getTwoSignalsError(si, g.sm2Signals{i}{j}); % linear (no ex, ex)
+            maes(j,20+i) = getTwoSignalsError(si, g.smmvSignals{i}{j}); % linear (no ex, ex)
+            maes(j,30+i) = getTwoSignalsError(si, g.smmpvSignals{i}{j}); % linear (no ex, ex)
         end
     end
-    figure; boxplot(maes); title('MAEs between mean cnSignals and each algorithm signals');
+    figure; boxplot(maes); title(['MAEs between mean cnSignals and each algorithm signals : ' groupName]);
 
     % plot correlation and cos similarity
     cosSim = zeros(120,1);
     for k=1:maxLag*2
         i=k;
-        cosSim(i) = getCosSimilarity(meanTr25DLW{1}, meanSmtr25DLW{k}); i=i+10; % non linear (no ex, ex)
-        cosSim(i) = getCosSimilarity(meanTr25DLW{1}, meanSm2tr25DLW{k}); i=i+10; % linear (no ex, ex)
-        cosSim(i) = getCosSimilarity(meanTr25DLW{1}, meanSmmvtr25DLW{k}); i=i+10; % mvar linear (no ex, ex)
-        cosSim(i) = getCosSimilarity(meanTr25DLW{1}, meanSmmpvtr25DLW{k}); i=i+10; % mpcvar linear (no ex, ex)
-        cosSim(i) = getCosSimilarity(meanTr25DL{1}, meanSmtr25DL{k}); i=i+10;
-        cosSim(i) = getCosSimilarity(meanTr25DL{1}, meanSm2tr25DL{k}); i=i+10;
-        cosSim(i) = getCosSimilarity(meanTr25DL{1}, meanSmmvtr25DL{k}); i=i+10;
-        cosSim(i) = getCosSimilarity(meanTr25DL{1}, meanSmmpvtr25DL{k}); i=i+10;
-        cosSim(i) = getCosSimilarity(meanTr25FC{1}, meanSmtr25FC{k}); i=i+10;
-        cosSim(i) = getCosSimilarity(meanTr25FC{1}, meanSm2tr25FC{k}); i=i+10;
-        cosSim(i) = getCosSimilarity(meanTr25FC{1}, meanSmmvtr25FC{k}); i=i+10;
-        cosSim(i) = getCosSimilarity(meanTr25FC{1}, meanSmmpvtr25FC{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(g.meanDLW{1}, g.meanSmDLW{k}); i=i+10; % non linear (no ex, ex)
+        cosSim(i) = getCosSimilarity(g.meanDLW{1}, g.meanSm2DLW{k}); i=i+10; % linear (no ex, ex)
+        cosSim(i) = getCosSimilarity(g.meanDLW{1}, g.meanSmmvDLW{k}); i=i+10; % mvar linear (no ex, ex)
+        cosSim(i) = getCosSimilarity(g.meanDLW{1}, g.meanSmmpvDLW{k}); i=i+10; % mpcvar linear (no ex, ex)
+        cosSim(i) = getCosSimilarity(g.meanDL{1}, g.meanSmDL{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(g.meanDL{1}, g.meanSm2DL{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(g.meanDL{1}, g.meanSmmvDL{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(g.meanDL{1}, g.meanSmmpvDL{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(g.meanFC{1}, g.meanSmFC{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(g.meanFC{1}, g.meanSm2FC{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(g.meanFC{1}, g.meanSmmvFC{k}); i=i+10;
+        cosSim(i) = getCosSimilarity(g.meanFC{1}, g.meanSmmpvFC{k}); i=i+10;
     end
-    figure; bar(cosSim); title('cos similarity between mean CN matrix and SimCN by each algorithm');
+    figure; bar(cosSim); title(['cos similarity between mean CN matrix and SimCN by each algorithm : ' groupName]);
 %{
     cosSim = zeros(algNum,1);
     figure; bar(cosSim); title('cos similarity between mean AD matrix and SimAD by each algorithm');
 %}  
     % plot box-and-whisker plot of cos similarity between mean ec matrix and each subject ec
-    cosSims = nan(tr25SbjNum,120);
-    for j=1:tr25SbjNum
+    cosSims = nan(g.sbjNum,120);
+    for j=1:g.sbjNum
         for k=1:maxLag*2
             i=k;
-            cosSims(j,i) = getCosSimilarity(meanTr25DLW{1}, smtr25DLWs{k}(:,:,j)); i=i+10; % non linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(meanTr25DLW{1}, sm2tr25DLWs{k}(:,:,j)); i=i+10; % linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(meanTr25DLW{1}, smmvtr25DLWs{k}(:,:,j)); i=i+10; % mvar linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(meanTr25DLW{1}, smmpvtr25DLWs{k}(:,:,j)); i=i+10; % mpcvar linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(meanTr25DL{1}, smtr25DLs{k}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(meanTr25DL{1}, sm2tr25DLs{k}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(meanTr25DL{1}, smmvtr25DLs{k}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(meanTr25DL{1}, smmpvtr25DLs{k}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(meanTr25FC{1}, smtr25FCs{k}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(meanTr25FC{1}, sm2tr25FCs{k}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(meanTr25FC{1}, smmvtr25FCs{k}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(meanTr25FC{1}, smmpvtr25FCs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.meanDLW{1}, g.smDLWs{k}(:,:,j)); i=i+10; % non linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(g.meanDLW{1}, g.sm2DLWs{k}(:,:,j)); i=i+10; % linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(g.meanDLW{1}, g.smmvDLWs{k}(:,:,j)); i=i+10; % mvar linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(g.meanDLW{1}, g.smmpvDLWs{k}(:,:,j)); i=i+10; % mpcvar linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(g.meanDL{1}, g.smDLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.meanDL{1}, g.sm2DLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.meanDL{1}, g.smmvDLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.meanDL{1}, g.smmpvDLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.meanFC{1}, g.smFCs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.meanFC{1}, g.sm2FCs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.meanFC{1}, g.smmvFCs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.meanFC{1}, g.smmpvFCs{k}(:,:,j)); i=i+10;
         end
 %        cosSims(j,1) = getCosSimilarity(meanCnDLW, cnDLWs(:,:,i));
 %        cosSims(i,11) = getCosSimilarity(meanCnDL, cnDLs(:,:,i));
 %        cosSims(i,21) = getCosSimilarity(meanCnFC, cnFCs(:,:,i));
     end
-    figure; boxplot(cosSims); title('cos similarity between mean CN matrix and each subject EC by each algorithm');
+    figure; boxplot(cosSims); title(['cos similarity between mean CN matrix and each subject EC by each algorithm : ' groupName]);
 %    [anovaP,tbl,stats] = kruskalwallis(cosSims(:,1:30));
 %    c = multcompare(stats);
 %    [p1,h1] = ranksum(cosSims(:,1),cosSims(:,2));
 %    [p2,h2] = ranksum(cosSims(:,1),cosSims(:,3));
 %    [sortCosCnDLW,idxCosCnDLW] = sort(cosSims(:,1),'descend');
 %    [sortCosCnFC,idxCosCnFC] = sort(cosSims(:,21),'descend');
-
-    cosSims = nan(tr14SbjNum,90);
-    for j=1:tr14SbjNum
-        for i=1:maxLag*2
-        end
-    end
-%    figure; boxplot(cosSims);
 
     % plot correlation between original EC matrix and simulated signals EC matrix
 %{
@@ -256,36 +242,26 @@ function simulateGenderDLCM
     end
 %}
     % plot box-and-whisker plot of cos similarity between original ec matrix and simulated signals ec matrix
-    cosSims = nan(tr25SbjNum,120);
-    for j=1:tr25SbjNum
+    cosSims = nan(g.sbjNum,120);
+    for j=1:g.sbjNum
         for k=1:maxLag*2
             i=k;
-            cosSims(j,i) = getCosSimilarity(tr25DLWs{1}(:,:,j), smtr25DLWs{k}(:,:,j)); i=i+10; % non linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(tr25DLWs{1}(:,:,j), sm2tr25DLWs{k}(:,:,j)); i=i+10; % linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(tr25DLWs{1}(:,:,j), smmvtr25DLWs{k}(:,:,j)); i=i+10; % mvar linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(tr25DLWs{1}(:,:,j), smmpvtr25DLWs{k}(:,:,j)); i=i+10; % mpcvar linear (no ex, ex)
-            cosSims(j,i) = getCosSimilarity(tr25DLs{1}(:,:,j), smtr25DLs{k}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(tr25DLs{1}(:,:,j), sm2tr25DLs{k}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(tr25DLs{1}(:,:,j), smmvtr25DLs{k}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(tr25DLs{1}(:,:,j), smmpvtr25DLs{k}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(tr25FCs{1}(:,:,j), smtr25FCs{k}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(tr25FCs{1}(:,:,j), sm2tr25FCs{k}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(tr25FCs{1}(:,:,j), smmvtr25FCs{k}(:,:,j)); i=i+10;
-            cosSims(j,i) = getCosSimilarity(tr25FCs{1}(:,:,j), smmpvtr25FCs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.DLWs{1}(:,:,j), g.smDLWs{k}(:,:,j)); i=i+10; % non linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(g.DLWs{1}(:,:,j), g.sm2DLWs{k}(:,:,j)); i=i+10; % linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(g.DLWs{1}(:,:,j), g.smmvDLWs{k}(:,:,j)); i=i+10; % mvar linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(g.DLWs{1}(:,:,j), g.smmpvDLWs{k}(:,:,j)); i=i+10; % mpcvar linear (no ex, ex)
+            cosSims(j,i) = getCosSimilarity(g.DLs{1}(:,:,j), g.smDLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.DLs{1}(:,:,j), g.sm2DLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.DLs{1}(:,:,j), g.smmvDLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.DLs{1}(:,:,j), g.smmpvDLs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.FCs{1}(:,:,j), g.smFCs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.FCs{1}(:,:,j), g.sm2FCs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.FCs{1}(:,:,j), g.smmvFCs{k}(:,:,j)); i=i+10;
+            cosSims(j,i) = getCosSimilarity(g.FCs{1}(:,:,j), g.smmpvFCs{k}(:,:,j)); i=i+10;
         end
     end
-    figure; boxplot(cosSims); title('cos similarity between mean CN matrix and each subject EC by each algorithm');
-%{
-    cosSims = nan(cnSbjNum,30);
-    for j=1:adSbjNum
-        for i=1:maxLag*2
-            cosSims(i,1) = getCosSimilarity(adDLWs(:,:,i), smadDLWs(:,:,i));
-            cosSims(i,11) = getCosSimilarity(adDLs(:,:,i), smadDLs(:,:,i));
-            cosSims(i,21) = getCosSimilarity(adFCs(:,:,i), smadFCs(:,:,i));
-        end
-    end
-    figure; boxplot(cosSims);
-%}
+    figure; boxplot(cosSims); title(['cos similarity between mean CN matrix and each subject EC by each algorithm : ' groupName]);
+
     % change Z score
 %{
     cnDLWs = calcZScores(cnDLWs);
@@ -298,22 +274,19 @@ function simulateGenderDLCM
 %}
     % compalizon test (Wilcoxon, Mann?Whitney U test)
     for i=1:3 %maxLag*2
-        [cnsmcnFCsUt, cnsmcnFCsUtP, cnsmcnFCsUtP2] = calculateAlzWilcoxonTest(tr25FCs{1}, smtr25FCs{i}, roiNames, 'tr25', ['sm' num2str(i) 'tr25'], 'fc');
-        [cnsmcnFCsUt, cnsmcnFCsUtP, cnsmcnFCsUtP2] = calculateAlzWilcoxonTest(tr25FCs{1}, sm2tr25FCs{i}, roiNames, 'tr25', ['smlin' num2str(i) 'tr25'], 'fc');
-        [cnsmcnFCsUt, cnsmcnFCsUtP, cnsmcnFCsUtP2] = calculateAlzWilcoxonTest(tr25FCs{1}, smmvtr25FCs{i}, roiNames, 'tr25', ['smmv' num2str(i) 'tr25'], 'fc');
-%        [adsmadFCsUt, adsmadFCsUtP, adsmadFCsUtP2] = calculateAlzWilcoxonTest(adFCs{1}, smadFCs{i}, roiNames, 'tr14', ['sm' num2str(i) 'tr14'], 'fc');
-        [cnsmcnDLsUt, cnsmcnDLsUtP, cnsmcnDLsUtP2] = calculateAlzWilcoxonTest(tr25DLs{1}, smtr25DLs{i}, roiNames, 'tr25', ['sm' num2str(i) 'tr25'], 'dlcm');
-        [cnsmcnDLsUt, cnsmcnDLsUtP, cnsmcnDLsUtP2] = calculateAlzWilcoxonTest(tr25DLs{1}, sm2tr25DLs{i}, roiNames, 'tr25', ['smlin' num2str(i) 'tr25'], 'dlcm');
-        [cnsmcnDLsUt, cnsmcnDLsUtP, cnsmcnDLsUtP2] = calculateAlzWilcoxonTest(tr25DLs{1}, smmvtr25DLs{i}, roiNames, 'tr25', ['smmv' num2str(i) 'tr25'], 'dlcm');
-%        [adsmadDLsUt, adsmadDLsUtP, adsmadDLsUtP2] = calculateAlzWilcoxonTest(adDLs{1}, smadDLs{i}, roiNames, 'tr14', ['sm' num2str(i) 'tr14'], 'dlcm');
-        [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(tr25DLWs{1}, smtr25DLWs{i}, roiNames, 'tr25', ['sm' num2str(i) 'tr25'], 'dlw');
-        [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(tr25DLWs{1}, sm2tr25DLWs{i}, roiNames, 'tr25', ['smlin' num2str(i) 'tr25'], 'dlw');
-        [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(tr25DLWs{1}, smmvtr25DLWs{i}, roiNames, 'tr25', ['smmv' num2str(i) 'tr25'], 'dlw');
-%        [adsmadDLWsUt, adsmadDLWsUtP, adsmadDLWsUtP2] = calculateAlzWilcoxonTest(adDLWs{1}, smadDLWs{i}, roiNames, 'tr14', ['sm' num2str(i) 'tr14'], 'dlw');
+        [cnsmcnFCsUt, cnsmcnFCsUtP, cnsmcnFCsUtP2] = calculateAlzWilcoxonTest(g.FCs{1}, g.smFCs{i}, roiNames, groupName, ['sm' num2str(i) groupName], 'fc');
+        [cnsmcnFCsUt, cnsmcnFCsUtP, cnsmcnFCsUtP2] = calculateAlzWilcoxonTest(g.FCs{1}, g.sm2FCs{i}, roiNames, groupName, ['smlin' num2str(i) groupName], 'fc');
+        [cnsmcnFCsUt, cnsmcnFCsUtP, cnsmcnFCsUtP2] = calculateAlzWilcoxonTest(g.FCs{1}, g.smmvFCs{i}, roiNames, groupName, ['smmv' num2str(i) groupName], 'fc');
+        [cnsmcnDLsUt, cnsmcnDLsUtP, cnsmcnDLsUtP2] = calculateAlzWilcoxonTest(g.DLs{1}, g.smDLs{i}, roiNames, groupName, ['sm' num2str(i) groupName], 'dlcm');
+        [cnsmcnDLsUt, cnsmcnDLsUtP, cnsmcnDLsUtP2] = calculateAlzWilcoxonTest(g.DLs{1}, g.sm2DLs{i}, roiNames, groupName, ['smlin' num2str(i) groupName], 'dlcm');
+        [cnsmcnDLsUt, cnsmcnDLsUtP, cnsmcnDLsUtP2] = calculateAlzWilcoxonTest(g.DLs{1}, g.smmvDLs{i}, roiNames, groupName, ['smmv' num2str(i) groupName], 'dlcm');
+        [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(g.DLWs{1}, g.smDLWs{i}, roiNames, groupName, ['sm' num2str(i) groupName], 'dlw');
+        [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(g.DLWs{1}, g.sm2DLWs{i}, roiNames, groupName, ['smlin' num2str(i) groupName], 'dlw');
+        [cnsmcnDLWsUt, cnsmcnDLWsUtP, cnsmcnDLWsUtP2] = calculateAlzWilcoxonTest(g.DLWs{1}, g.smmvDLWs{i}, roiNames, groupName, ['smmv' num2str(i) groupName], 'dlw');
     end
 end
 
-% ==================================================================================================================
+% ---------------------------------------------------------------------------------------------------------------------------------------
 
 function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, group, algorithm, orgGroup, isRaw, inSiRange, lags, isAutoExo, activateFunc)
     if nargin < 10, activateFunc = @reluLayer; end
