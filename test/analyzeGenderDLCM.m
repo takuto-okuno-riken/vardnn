@@ -11,6 +11,11 @@ function analyzeGenderDLCM
     [tr25Signals, roiNames] = connData2signalsFile(base, pathesTR25, 'tr25', 'data/indi', 'id');
     [tr14Signals] = connData2signalsFile(base, pathesTR14, 'tr14', 'data/indi', 'id');
     [tr6Signals] = connData2signalsFile(base, pathesTR6, 'tr6', 'data/indi', 'id');
+    load('data/indi/sbjInfo');
+    Idx1 = intersect(find(sbjInfo(:,3)==1),find(sbjInfo(:,4)==1));
+    Idx2 = intersect(find(sbjInfo(:,3)==2),find(sbjInfo(:,4)==1));
+    Idx3 = intersect(find(sbjInfo2(:,3)==1),find(sbjInfo2(:,4)==1));
+    Idx4 = intersect(find(sbjInfo2(:,3)==2),find(sbjInfo2(:,4)==1));
 
     global resultsPath;
     global resultsPrefix;
@@ -87,36 +92,68 @@ function analyzeGenderDLCM
         [tr14DLWs{j}, meanTR14DLW{j}, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'dlw', 0, i, 1);
         [tr6DLWs{j}, meanTR6DLW{j}, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'dlw', 0, i, 1);
     end
+    % FC no exogenous (pairwise, then exogenous does not have meaning)
+    [tr25FCs, meanTR25FC, ~] = calculateConnectivity(tr25Signals, roiNames, 'tr25', 'fc', 1, j, 0);
+    [tr14FCs, meanTR14FC, ~] = calculateConnectivity(tr14Signals, roiNames, 'tr14', 'fc', 1, j, 0);
+    [tr6FCs, meanTR6FC, ~] = calculateConnectivity(tr6Signals, roiNames, 'tr6', 'fc', 1, j, 0);
     
+    % diagnose groups and show ROC curves
+    statisticalDiagnosisFramework(tr25GCs, tr25MVARECs, tr25MVARs, tr25MPCVARECs, tr25DL2s, tr25DLW2s, ...
+        tr25DLs, tr25DLWs, tr25FCs, Idx1, Idx2, 'tr25f', 'm', roiNames);
+    statisticalDiagnosisFramework(tr14GCs, tr14MVARECs, tr14MVARs, tr14MPCVARECs, tr14DL2s, tr14DLW2s, ...
+        tr14DLs, tr14DLWs, tr14FCs, Idx3, Idx4, 'tr14f', 'm', roiNames);
+    statisticalDiagnosisFramework(tr6GCs, tr6MVARECs, tr6MVARs, tr6MPCVARECs, tr6DL2s, tr6DLW2s, ...
+        tr6DLs, tr6DLWs, tr6FCs, Idx3, Idx4, 'tr6f', 'm', roiNames);
+end
+
+function statisticalDiagnosisFramework(GCs, MVARECs, MVARs, MPCVARECs, DL2s, DLW2s, ...
+        DLs, DLWs, FCs, Idx1, Idx2, name1, name2, roiNames)
+    global resultsPath;
+    global resultsPrefix;
+
+    maxLag = length(GCs) / 2;
+
     % plot correlation and cos similarity
-    nanx = eye(size(meanTR25GC{1},1),size(meanTR25GC{1},2));
+    nanx = eye(size(GCs{1},1),size(GCs{1},2));
     nanx(nanx==1) = NaN;
-    cosSim = zeros(maxLag*6*2,1);
+    cosSim = zeros(maxLag*2*8+1,1);
+    for j=1:maxLag*2
+        i = 0;
+        cosSim(j+i) = getCosSimilarity(nanmean(GCs{j}(:,:,Idx1),3)+nanx, nanmean(GCs{j}(:,:,Idx2),3)+nanx); i=i+10;
+        cosSim(j+i) = getCosSimilarity(nanmean(MVARECs{j}(:,:,Idx1),3)+nanx, nanmean(MVARECs{j}(:,:,Idx2),3)+nanx); i=i+10;
+        cosSim(j+i) = getCosSimilarity(nanmean(MVARs{j}(:,:,Idx1),3)+nanx, nanmean(MVARs{j}(:,:,Idx2),3)+nanx); i=i+10;
+        cosSim(j+i) = getCosSimilarity(nanmean(MPCVARECs{j}(:,:,Idx1),3)+nanx, nanmean(MPCVARECs{j}(:,:,Idx2),3)+nanx); i=i+10;
+        cosSim(j+i) = getCosSimilarity(nanmean(DL2s{j}(:,:,Idx1),3)+nanx, nanmean(DL2s{j}(:,:,Idx2),3)+nanx); i=i+10; % linear DNN
+        cosSim(j+i) = getCosSimilarity(nanmean(DLW2s{j}(:,:,Idx1),3)+nanx, nanmean(DLW2s{j}(:,:,Idx2),3)+nanx); i=i+10; % linear DNN
+        cosSim(j+i) = getCosSimilarity(nanmean(DLs{j}(:,:,Idx1),3)+nanx, nanmean(DLs{j}(:,:,Idx2),3)+nanx); i=i+10; % non-linear DNN
+        cosSim(j+i) = getCosSimilarity(nanmean(DLWs{j}(:,:,Idx1),3)+nanx, nanmean(DLWs{j}(:,:,Idx2),3)+nanx); i=i+10; % non-linear DNN
+    end
+    cosSim(i+1) = getCosSimilarity(nanmean(FCs(:,:,Idx1),3)+nanx, nanmean(FCs(:,:,Idx2),3)+nanx);
     figure; bar(cosSim);
-    title('cos similarity between TR25 and TR14 by each algorithm');
+    title(['cos similarity between ' name1 ' and ' name2 ' by each algorithm']);
 
     % normality test
-%    tr25DLWsNt = calculateAlzNormalityTest(tr25DLWs{j}, roiNames, 'tr25', 'dlw');
-%    tr14DLWsNt = calculateAlzNormalityTest(tr14DLWs{j}, roiNames, 'tr14', 'dlw');
-%    mciDLWsNt = calculateAlzNormalityTest(mciDLWs{j}, roiNames, 'mci', 'dlw');
+%    DLWsNt = calculateAlzNormalityTest(DLWs{j}(:,:,Idx1), roiNames, name1, 'dlw');
 
     % compalizon test (Wilcoxon, Mann?Whitney U test)
     for j=1:maxLag*2
-        [~, cnadGCsUtP{j}, ~] = calculateAlzWilcoxonTest(cnGCs{j}, adGCs{j}, roiNames, 'tr25', 'tr14', ['gc' num2str(j)]);
-        [~, cnadMvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMVARECs{j}, adMVARECs{j}, roiNames, 'tr25', 'tr14', ['mvarec' num2str(j)]);
-        [~, cnadMvarsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMVARs{j}, adMVARs{j}, roiNames, 'tr25', 'tr14', ['mvar' num2str(j)]);
-        [~, cnadMpcvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMPCVARECs{j}, adMPCVARECs{j}, roiNames, 'tr25', 'tr14', ['mpcvarec' num2str(j)]);
-        [~, cnadDL2sUtP{j}, ~] = calculateAlzWilcoxonTest(cnDL2s{j}, adDL2s{j}, roiNames, 'tr25', 'tr14', ['dlcm_lin' num2str(j)]);
-        [~, cnadDLW2sUtP{j}, ~] = calculateAlzWilcoxonTest(cnDLW2s{j}, adDLW2s{j}, roiNames, 'tr25', 'tr14', ['dlw_lin' num2str(j)]);
-        [~, cnadDLsUtP{j}, ~] = calculateAlzWilcoxonTest(cnDLs{j}, adDLs{j}, roiNames, 'tr25', 'tr14', ['dlcm' num2str(j)]);
-        [~, cnadDLWsUtP{j}, ~] = calculateAlzWilcoxonTest(cnDLWs{j}, adDLWs{j}, roiNames, 'tr25', 'tr14', ['dlw' num2str(j)]);
+        [~, GCsUtP{j}, ~] = calculateAlzWilcoxonTest(GCs{j}(:,:,Idx1), GCs{j}(:,:,Idx2), roiNames, name1, name2, ['gc' num2str(j)]);
+        [~, MvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(MVARECs{j}(:,:,Idx1), MVARECs{j}(:,:,Idx2), roiNames, name1, name2, ['mvarec' num2str(j)]);
+        [~, MvarsUtP{j}, ~] = calculateAlzWilcoxonTest(MVARs{j}(:,:,Idx1), MVARs{j}(:,:,Idx2), roiNames, name1, name2, ['mvar' num2str(j)]);
+        [~, MpcvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(MPCVARECs{j}(:,:,Idx1), MPCVARECs{j}(:,:,Idx2), roiNames, name1, name2, ['mpcvarec' num2str(j)]);
+        [~, DL2sUtP{j}, ~] = calculateAlzWilcoxonTest(DL2s{j}(:,:,Idx1), DL2s{j}(:,:,Idx2), roiNames, name1, name2, ['dlcm_lin' num2str(j)]);
+        [~, DLW2sUtP{j}, ~] = calculateAlzWilcoxonTest(DLW2s{j}(:,:,Idx1), DLW2s{j}(:,:,Idx2), roiNames, name1, name2, ['dlw_lin' num2str(j)]);
+        [~, DLsUtP{j}, ~] = calculateAlzWilcoxonTest(DLs{j}(:,:,Idx1), DLs{j}(:,:,Idx2), roiNames, name1, name2, ['dlcm' num2str(j)]);
+        [~, DLWsUtP{j}, ~] = calculateAlzWilcoxonTest(DLWs{j}(:,:,Idx1), DLWs{j}(:,:,Idx2), roiNames, name1, name2, ['dlw' num2str(j)]);
     end
+    [~, FCsUtP, ~] = calculateAlzWilcoxonTest(FCs(:,:,Idx1), FCs(:,:,Idx2), roiNames, name1, name2, 'fc');
 
     % using minimum 100 p-value relations. perform 5-fold cross validation.
     topNum = 100;
     sigTh = 2;
-    N = 5;
+    N = 4;
 
+    fcAUC = zeros(1,N);
     gcAUC = zeros(maxLag*2,N);
     mvarecAUC = zeros(maxLag*2,N);
     mvarAUC = zeros(maxLag*2,N);
@@ -125,6 +162,8 @@ function analyzeGenderDLCM
     dlwAUC = zeros(maxLag*2,N);
     dl2AUC = zeros(maxLag*2,N);
     dlw2AUC = zeros(maxLag*2,N);
+    fcROC = cell(N,2);
+    fcACC = cell(N,1);
     for lags=1:maxLag*2
         gcROC{lags} = cell(N,2);
         mvarecROC{lags} = cell(N,2);
@@ -144,78 +183,85 @@ function analyzeGenderDLCM
         dlw2ACC{lags} = cell(N,1);
     end
 
-    sigCntCN = cell(N,maxLag*2*6);
-    sigCntAD = cell(N,maxLag*2*6);
+    sigCntG1 = cell(N,maxLag*2*8+1);
+    sigCntG2 = cell(N,maxLag*2*8+1);
     for k=1:N
         for j=1:maxLag*2
             i = 1;
             % check sigma of healthy subject
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnGCs{j}, adGCs{j}, k, N);
-            [B, I, X] = sortAndPairPValues(control, target, cnadGCsUtP{j}, topNum);
-            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            [gcROC{j}{k,1}, gcROC{j}{k,2}, gcAUC(j,k), gcACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(GCs{j}(:,:,Idx1), GCs{j}(:,:,Idx2), k, N);
+            [B, I, X] = sortAndPairPValues(control, target, GCsUtP{j}, topNum);
+            sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [gcROC{j}{k,1}, gcROC{j}{k,2}, gcAUC(j,k), gcACC{j}{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnMVARECs{j}, adMVARECs{j}, k, N);
-            [B, I, X] = sortAndPairPValues(control, target, cnadMvarECsUtP{j}, topNum);
-            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            [mvarecROC{j}{k,1}, mvarecROC{j}{k,2}, mvarecAUC(j,k), mvarecACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(MVARECs{j}(:,:,Idx1), MVARECs{j}(:,:,Idx2), k, N);
+            [B, I, X] = sortAndPairPValues(control, target, MvarECsUtP{j}, topNum);
+            sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [mvarecROC{j}{k,1}, mvarecROC{j}{k,2}, mvarecAUC(j,k), mvarecACC{j}{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnMVARs{j}, adMVARs{j}, k, N);
-            [B, I, X] = sortAndPairPValues(control, target, cnadMvarsUtP{j}, topNum);
-            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            [mvarROC{j}{k,1}, mvarROC{j}{k,2}, mvarAUC(j,k), mvarACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(MVARs{j}(:,:,Idx1), MVARs{j}(:,:,Idx2), k, N);
+            [B, I, X] = sortAndPairPValues(control, target, MvarsUtP{j}, topNum);
+            sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [mvarROC{j}{k,1}, mvarROC{j}{k,2}, mvarAUC(j,k), mvarACC{j}{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnMPCVARECs{j}, adMPCVARECs{j}, k, N);
-            [B, I, X] = sortAndPairPValues(control, target, cnadMpcvarECsUtP{j}, topNum);
-            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            [mpcvarecROC{j}{k,1}, mpcvarecROC{j}{k,2}, mpcvarecAUC(j,k), mpcvarecACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(MPCVARECs{j}(:,:,Idx1), MPCVARECs{j}(:,:,Idx2), k, N);
+            [B, I, X] = sortAndPairPValues(control, target, MpcvarECsUtP{j}, topNum);
+            sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [mpcvarecROC{j}{k,1}, mpcvarecROC{j}{k,2}, mpcvarecAUC(j,k), mpcvarecACC{j}{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDL2s{j}, adDL2s{j}, k, N);
-            [B, I, X] = sortAndPairPValues(control, target, cnadDL2sUtP{j}, topNum);
-            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            [dl2ROC{j}{k,1}, dl2ROC{j}{k,2}, dl2AUC(j,k), dl2ACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(DL2s{j}(:,:,Idx1), DL2s{j}(:,:,Idx2), k, N);
+            [B, I, X] = sortAndPairPValues(control, target, DL2sUtP{j}, topNum);
+            sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [dl2ROC{j}{k,1}, dl2ROC{j}{k,2}, dl2AUC(j,k), dl2ACC{j}{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDLW2s{j}, adDLW2s{j}, k, N);         % replece cn*s, ad*s
-            [B, I, X] = sortAndPairPValues(control, target, cnadDLW2sUtP{j}, topNum);                                  % replace cnad*sUtP
-            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            [dlw2ROC{j}{k,1}, dlw2ROC{j}{k,2}, dlw2AUC(j,k), dlw2ACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(DLW2s{j}(:,:,Idx1), DLW2s{j}(:,:,Idx2), k, N);         % replece tr25*s, tr25*s
+            [B, I, X] = sortAndPairPValues(control, target, DLW2sUtP{j}, topNum);                                  % replace tr25*sUtP
+            sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [dlw2ROC{j}{k,1}, dlw2ROC{j}{k,2}, dlw2AUC(j,k), dlw2ACC{j}{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);         % replace *ROC, *AUC
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDLs{j}, adDLs{j}, k, N);
-            [B, I, X] = sortAndPairPValues(control, target, cnadDLsUtP{j}, topNum);
-            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            [dlROC{j}{k,1}, dlROC{j}{k,2}, dlAUC(j,k), dlACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(DLs{j}(:,:,Idx1), DLs{j}(:,:,Idx2), k, N);
+            [B, I, X] = sortAndPairPValues(control, target, DLsUtP{j}, topNum);
+            sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [dlROC{j}{k,1}, dlROC{j}{k,2}, dlAUC(j,k), dlACC{j}{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDLWs{j}, adDLWs{j}, k, N);         % replece cn*s, ad*s
-            [B, I, X] = sortAndPairPValues(control, target, cnadDLWsUtP{j}, topNum);                                  % replace cnad*sUtP
-            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
-            [dlwROC{j}{k,1}, dlwROC{j}{k,2}, dlwAUC(j,k), dlwACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(DLWs{j}(:,:,Idx1), DLWs{j}(:,:,Idx2), k, N);         % replece tr25*s, ad*s
+            [B, I, X] = sortAndPairPValues(control, target, DLWsUtP{j}, topNum);                                  % replace tr25*sUtP
+            sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [dlwROC{j}{k,1}, dlwROC{j}{k,2}, dlwAUC(j,k), dlwACC{j}{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);         % replace *ROC, *AUC
         end
+
+        i = i + 1;
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(FCs(:,:,Idx1), FCs(:,:,Idx2), k, N);
+        [B, I, X] = sortAndPairPValues(control, target, FCsUtP, topNum);
+        sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        [fcROC{k,1}, fcROC{k,2}, fcAUC(1,k), fcACC{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);
     end
 
     % save result
-    fname = [resultsPath '/' resultsPrefix '-cn-ad-roi' num2str(132) '-result.mat'];
-    save(fname, 'cosSim', 'gcAUC','mvarecAUC','mvarAUC','mpcvarecAUC','dlAUC','dlwAUC','dl2AUC','dlw2AUC', ...
-        'gcROC','mvarecROC','mvarROC','mpcvarecROC','dlROC','dlwROC','dl2ROC','dlw2ROC', ...
-        'gcACC','mvarecACC','mvarACC','mpcvarecACC','dlACC','dlwACC','dl2ACC','dlw2ACC', ...
-        'sigCntCN', 'sigCntAD');
+    fname = [resultsPath '/' resultsPrefix '-' name1 '-' name2 '-roi' num2str(132) '-result.mat'];
+    save(fname, 'cosSim', 'fcAUC','gcAUC','mvarecAUC','mvarAUC','mpcvarecAUC','dlAUC','dlwAUC','dl2AUC','dlw2AUC', ...
+        'fcROC','gcROC','mvarecROC','mvarROC','mpcvarecROC','dlROC','dlwROC','dl2ROC','dlw2ROC', ...
+        'fcACC','gcACC','mvarecACC','mvarACC','mpcvarecACC','dlACC','dlwACC','dl2ACC','dlw2ACC', ...
+        'sigCntG1', 'sigCntG2');
 
     % show box plot
-    AUCs = nan(N,80);
+    AUCs = nan(N,maxLag*2*8+1);
     r = [1:10];
     AUCs(:,r) = gcAUC.'; r=r+10;
     AUCs(:,r) = mvarecAUC.'; r=r+10;
@@ -225,10 +271,11 @@ function analyzeGenderDLCM
     AUCs(:,r) = dlw2AUC.'; r=r+10;
     AUCs(:,r) = dlAUC.'; r=r+10;
     AUCs(:,r) = dlwAUC.'; r=r+10;
+    AUCs(:,r(1)) = fcAUC.'; 
     figure; boxplot(AUCs);
-    title('AUC box plot idx');
+    title(['AUC box plot : ' name1 ' vs ' name2]);
 
-    % show average ROC curve of DCM
+    % show average ROC curves
     figure; 
     hold on;
     for lags=1:maxLag
@@ -241,16 +288,17 @@ function analyzeGenderDLCM
         plotAverageROCcurve(dlwROC{lags}, N, '-', [0.2,0.2,0.2]+(lags*0.1),1.0);
         plotAverageROCcurve(dlw2ROC{lags}, N, '--', [0.2,0.2,0.2]+(lags*0.1),0.4); % linear
     end
+    plotAverageROCcurve(fcROC, N, '-', [0.5,0.5,0.2],1.0);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);
     xlim([0 1]);
     daspect([1 1 1]);
-    title(['averaged ROC curve (without exogenous)']);
+    title(['averaged ROC curve (without exogenous) : ' name1 ' vs ' name2]);
     xlabel('False Positive Rate')
     ylabel('True Positive Rate')
 
-    % show average ROC curve of DCM
+    % show average ROC curves
     figure; 
     hold on;
     for lags=1:maxLag
@@ -264,12 +312,13 @@ function analyzeGenderDLCM
         plotAverageROCcurve(dlwROC{k}, N, '-', [0.2,0.2,0.2]+(lags*0.1),1.0);
         plotAverageROCcurve(dlw2ROC{k}, N, '--', [0.2,0.2,0.2]+(lags*0.1),0.4); % linear
     end
+    plotAverageROCcurve(fcROC, N, '-', [0.5,0.5,0.2],1.0);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);
     xlim([0 1]);
     daspect([1 1 1]);
-    title(['averaged ROC curve (with exogenous)']);
+    title(['averaged ROC curve (with exogenous) : ' name1 ' vs ' name2]);
     xlabel('False Positive Rate')
     ylabel('True Positive Rate')
 end
