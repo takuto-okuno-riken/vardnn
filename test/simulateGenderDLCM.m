@@ -32,24 +32,24 @@ function simulateGenderDLCM
 
     % --------------------------------------------------------------------------------------------------------------
     % simulate by algorithms
-    tr25 = simulateGroupByAlgorithms(tr25, 'tr25', maxLag);
-    tr14 = simulateGroupByAlgorithms(tr14, 'tr14', maxLag);
-    tr6  = simulateGroupByAlgorithms(tr6, 'tr6', maxLag);
+    tr25 = simulateGroupByAlgorithms(tr25, roiNames, 'tr25', maxLag);
+    tr14 = simulateGroupByAlgorithms(tr14, roiNames, 'tr14', maxLag);
+    tr6  = simulateGroupByAlgorithms(tr6, roiNames, 'tr6', maxLag);
 
     % --------------------------------------------------------------------------------------------------------------
     % check DLCM-EC and DLCM-GC of simulated TR25, TR14, TR6
-    tr25 = checkSimSignalsByDLCM_EC_GC(tr25, 'tr25', maxLag);
-    tr14 = checkSimSignalsByDLCM_EC_GC(tr14, 'tr14', maxLag);
-    tr6  = checkSimSignalsByDLCM_EC_GC(tr6, 'tr6', maxLag);
+    tr25 = checkSimSignalsByDLCM_EC_GC(tr25, roiNames, 'tr25', maxLag);
+    tr14 = checkSimSignalsByDLCM_EC_GC(tr14, roiNames, 'tr14', maxLag);
+%    tr6  = checkSimSignalsByDLCM_EC_GC(tr6, roiNames, 'tr6', maxLag);
 
     % check FC of simulated TR25, TR14, TR6
-    tr25 = checkSimSignalsByFC(tr25, 'tr25', maxLag);
-    tr14 = checkSimSignalsByFC(tr14, 'tr14', maxLag);
-    tr6  = checkSimSignalsByFC(tr6, 'tr6', maxLag);
+    tr25 = checkSimSignalsByFC(tr25, roiNames, 'tr25', maxLag);
+%    tr14 = checkSimSignalsByFC(tr14, roiNames, 'tr14', maxLag);
+%    tr6  = checkSimSignalsByFC(tr6, roiNames, 'tr6', maxLag);
 
     % --------------------------------------------------------------------------------------------------------------
     % box plot of signal MAEs 
-    tr25 = plotSimSignalsResults(tr25, 'tr25', maxLag);
+    tr25 = plotSimSignalsResults(tr25, roiNames, 'tr25', maxLag);
 
 end
 
@@ -66,7 +66,7 @@ function g = getDLCM_EC_GC_FC(g, roiNames, groupName)
     end
 end
 
-function g = simulateGroupByAlgorithms(g, groupName, maxLag)
+function g = simulateGroupByAlgorithms(g, roiNames, groupName, maxLag)
     signals = g.signals;
     for j=1:maxLag
         % DLCM(j) no exogenous 
@@ -114,7 +114,7 @@ function g = simulateGroupByAlgorithms(g, groupName, maxLag)
     end
 end
 
-function g = checkSimSignalsByDLCM_EC_GC(g, groupName, maxLag)
+function g = checkSimSignalsByDLCM_EC_GC(g, roiNames, groupName, maxLag)
     for j=1:maxLag
         % DLCM(j) no exogenous 
         [g.smDLs{j}, g.meanSmDL{j}, ~] = calculateConnectivity(g.smSignals{j}, roiNames, ['sm' groupName], 'dlcm', 1, j, 0);
@@ -146,7 +146,7 @@ function g = checkSimSignalsByDLCM_EC_GC(g, groupName, maxLag)
     end
 end
 
-function g = checkSimSignalsByFC(g, groupName, maxLag)
+function g = checkSimSignalsByFC(g, roiNames, groupName, maxLag)
     for j=1:maxLag
         % DLCM(j) no exogenous 
         [g.smFCs{j}, g.meanSmFC{j}, ~] = calculateConnectivity(g.smSignals{j}, roiNames, ['sm' groupName], 'fc', 1, j, 0);
@@ -170,7 +170,7 @@ function g = checkSimSignalsByFC(g, groupName, maxLag)
     end
 end
 
-function g = plotSimSignalsResults(g, groupName, maxLag)
+function g = plotSimSignalsResults(g, roiNames, groupName, maxLag)
     signals = g.signals;
     maes = nan(g.sbjNum,40);
     for j=1:g.sbjNum
