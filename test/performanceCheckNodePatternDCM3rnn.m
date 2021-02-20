@@ -59,6 +59,9 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     mvarecAUC = zeros(1,N);
     pvarecAUC = zeros(1,N);
     mpcvarecAUC = zeros(1,N);
+    mpcvargcAUC = zeros(1,N);
+    ppcvarecAUC = zeros(1,N);
+    ppcvargcAUC = zeros(1,N);
     rnnROC = cell(N,2);
     linueROC = cell(N,2);
     nnnueROC = cell(N,2);
@@ -71,6 +74,9 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     mvarecROC = cell(N,2);
     pvarecROC = cell(N,2);
     mpcvarecROC = cell(N,2);
+    mpcvargcROC = cell(N,2);
+    ppcvarecROC = cell(N,2);
+    ppcvargcROC = cell(N,2);
     rnnRf = figure;
     linueRf = figure;
     nnnueRf = figure;
@@ -83,6 +89,9 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     mvarecRf = figure;
     pvarecRf = figure;
     mpcvarecRf = figure;
+    mpcvargcRf = figure;
+    ppcvarecRf = figure;
+    ppcvargcRf = figure;
     
     origf = figure;
     rnnTrial = 8;
@@ -175,14 +184,31 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         figure(pvarecRf); hold on; [pvarecROC{k,1}, pvarecROC{k,2}, pvarecAUC(k)] = plotROCcurve(pvarEC, pP.A, 100, 1, Gth); hold off;
         title('pVAR-EC');
         % extra tests (multivaliate Principal Component Vector Auto-Regression EC)
-        netMPCVAR = initMpcvarNetwork(y2.', [], [], [], 3);
+        netMPCVAR = initMpcvarNetwork(y2.', [], [], [], 2);
         fg = figure; mpcvarEC = plotMpcvarEC(netMPCVAR, [], []); close(fg);
         figure(mpcvarecRf); hold on; [mpcvarecROC{k,1}, mpcvarecROC{k,2}, mpcvarecAUC(k)] = plotROCcurve(mpcvarEC, pP.A, 100, 1, Gth); hold off;
         title('mPCVAR-EC');
+        % extra tests (multivaliate Principal Component Vector Auto-Regression EC)
+        fg = figure; mpcvarGC = plotMpcvarGCI(y2.', [], [], [], netMPCVAR); close(fg);
+        figure(mpcvargcRf); hold on; [mpcvargcROC{k,1}, mpcvargcROC{k,2}, mpcvargcAUC(k)] = plotROCcurve(mpcvarGC, pP.A, 100, 1, Gth); hold off;
+        title('mPCVAR-GC');
+        % extra tests (pairwise Principal Component Vector Auto-Regression EC)
+        netPPCVAR = initPpcvarNetwork(y2.', [], [], [], 2);
+        fg = figure; ppcvarEC = plotPpcvarEC(netPPCVAR, [], []); close(fg);
+        figure(ppcvarecRf); hold on; [ppcvarecROC{k,1}, ppcvarecROC{k,2}, ppcvarecAUC(k)] = plotROCcurve(ppcvarEC, pP.A, 100, 1, Gth); hold off;
+        title('pPCVAR-EC');
+        % extra tests (multivaliate Principal Component Vector Auto-Regression EC)
+        fg = figure; ppcvarGC = plotPpcvarGCI(y2.', [], [], [], netPPCVAR); close(fg);
+        figure(ppcvargcRf); hold on; [ppcvargcROC{k,1}, ppcvargcROC{k,2}, ppcvargcAUC(k)] = plotROCcurve(ppcvarGC, pP.A, 100, 1, Gth); hold off;
+        title('pPCVAR-GC');
     end
     % save result
-    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','dcmAUC','rnnAUC','linueAUC','nnnueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC','mvarecAUC','pvarecAUC','mpcvarecAUC',...
-        'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','dcmROC','rnnROC','linueROC','nnnueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC','mvarecROC','pvarecROC','mpcvarecROC');
+    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','dcmAUC', ...
+        'rnnAUC','linueAUC','nnnueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC', ...
+        'mvarecAUC','pvarecAUC','mpcvarecAUC','mpcvargcAUC','ppcvarecAUC','ppcvargcAUC',...
+        'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','dcmROC', ...
+        'rnnROC','linueROC','nnnueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC', ...
+        'mvarecROC','pvarecROC','mpcvarecROC','mpcvargcROC','ppcvarecROC','ppcvargcROC');
     
     % show average ROC curve of DCM
     figure; 
@@ -225,6 +251,9 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plotAverageROCcurve(mvarecROC, N, '-', [0.3,0.3,0.3],0.5);
 %    plotAverageROCcurve(pvarecROC, N, '-', [0.6,0.3,0.3],0.5);
     plotAverageROCcurve(mpcvarecROC, N, '--', [0.3,0.3,0.3],0.5);
+    plotAverageROCcurve(mpcvargcROC, N, '-.', [0.3,0.3,0.3],0.5);
+    plotAverageROCcurve(ppcvarecROC, N, '--', [0.3,0.6,0.6],0.5);
+    plotAverageROCcurve(ppcvargcROC, N, '-.', [0.3,0.6,0.6],0.5);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);

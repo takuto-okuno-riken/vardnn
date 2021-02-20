@@ -1,6 +1,6 @@
 %%
-% Caluclate Pairwised VAR DNN-EC
-% returns Pairwised VAR DNN EC matrix (EC) and impaired node signals (ECsub)
+% Caluclate pairwise VAR DNN-EC
+% returns pairwise VAR DNN EC matrix (EC) and impaired node signals (ECsub)
 % input:
 %  net          trained Pairwised VAR DNN network structure
 %  nodeControl  node control matrix (node x node) (optional)

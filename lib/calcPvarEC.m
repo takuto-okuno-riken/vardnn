@@ -1,6 +1,6 @@
 %%
-% Caluclate PVAR (pairwised vector auto-regression) EC
-% returns PVAR EC matrix (EC) and impaired node signals (ECsub)
+% Caluclate pVAR (pairwise Vector Auto-Regression) EC
+% returns pVAR EC matrix (EC) and impaired node signals (ECsub)
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -23,7 +23,7 @@ function [EC, ECsub] = calcPvarEC(X, exSignal, nodeControl, exControl, lags, isF
     % set node input
     X = [X; exSignal];
     
-    % calc Pairwised DNN granger causality
+    % calc Pairwise VAR
     EC = nan(nodeNum, nodeMax);
     ECsub = nan(nodeNum, nodeMax, 2);
     for i=1:nodeNum

@@ -5,7 +5,7 @@
 %  net          mPCVAR network
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
-%  isFullNode   return both node & exogenous causality matrix (optional)
+%  isFullNode   return both node & exogenous causality matrix (default:0)
 
 function [EC, ECsub] = calcMpcvarEC(net, nodeControl, exControl, isFullNode)
     if nargin < 4, isFullNode = 0; end
@@ -16,7 +16,7 @@ function [EC, ECsub] = calcMpcvarEC(net, nodeControl, exControl, isFullNode)
     nodeInNum = nodeNum + net.exNum;
     lags = net.lags;
     if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
-    
+
     % calc mPCVAR EC
     EC = nan(nodeNum,nodeMax);
     ECsub = nan(nodeNum,nodeMax+1);

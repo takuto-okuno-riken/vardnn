@@ -1,5 +1,5 @@
 %%
-% Create pairwised VAR DNN network
+% Create pairwise VAR DNN network
 % input:
 %  nodeNum         node number
 %  exNum           exogenous input number
