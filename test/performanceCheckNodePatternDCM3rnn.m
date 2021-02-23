@@ -234,12 +234,12 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
     plotAverageROCcurve(pgcROC, N, '--', [0.0,0.5,0.0],0.5);
 %    plotAverageROCcurve(dlROC, N, '-', [0.2,0.2,0.2],1.2);
-%    plotAverageROCcurve(dlwROC, N, '--', [0.2,0.2,0.2],0.7); % TODO:
+%    plotAverageROCcurve(dlwROC, N, '--', [0.2,0.2,0.2],0.8); % TODO:
     plotAverageROCcurve(dlwROC, N, '-', [0.2,0.2,0.2],1.2);
-    plotAverageROCcurve(dlROC, N, '--', [0.2,0.2,0.2],0.7); % TODO:
+    plotAverageROCcurve(dlROC, N, '--', [0.2,0.2,0.2],0.8); % TODO:
     plotAverageROCcurve(dcmROC, N, '-', [0.2,0.2,0.8],0.5);
     plotAverageROCcurve(rnnROC, N, '--', [0.7,0.7,0.2],0.5);
-    plotAverageROCcurve(linueROC, N, '--', [0.2,0.5,0.7],0.5);
+    plotAverageROCcurve(linueROC, N, '--', [0.2,0.5,0.8],0.5);
     plotAverageROCcurve(nnnueROC, N, '--', [0.7,0.2,0.7],0.5);
     plotAverageROCcurve(dlgROC, N, '-.', [0.6,0.6,0.3],0.5);
     plotAverageROCcurve(pcsROC, N, '-', [0.5,0.5,0.5],0.5);
@@ -250,10 +250,10 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
 %    plotAverageROCcurve(tsfcaROC, N, '-.', [0.6,0.2,0.2],1.2);
     plotAverageROCcurve(mvarecROC, N, '-', [0.3,0.3,0.3],0.5);
 %    plotAverageROCcurve(pvarecROC, N, '-', [0.6,0.3,0.3],0.5);
-    plotAverageROCcurve(mpcvarecROC, N, '--', [0.3,0.3,0.3],0.5);
-    plotAverageROCcurve(mpcvargcROC, N, '-.', [0.3,0.3,0.3],0.5);
-    plotAverageROCcurve(ppcvarecROC, N, '--', [0.3,0.6,0.6],0.5);
-    plotAverageROCcurve(ppcvargcROC, N, '-.', [0.3,0.6,0.6],0.5);
+    plotAverageROCcurve(mpcvarecROC, N, '-', [0.3,0.6,0.6],1.0);
+    plotAverageROCcurve(mpcvargcROC, N, '--', [0.3,0.6,0.6],0.8);
+    plotAverageROCcurve(ppcvarecROC, N, '-', [0.3,0.6,0.6],0.5);
+    plotAverageROCcurve(ppcvargcROC, N, '--', [0.3,0.6,0.6],0.5);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);

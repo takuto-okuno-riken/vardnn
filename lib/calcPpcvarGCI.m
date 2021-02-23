@@ -63,8 +63,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPpcvarGCI(X, exSignal, nodeControl
             % var of residuals (reduced)
             scorej = (Yti - mu) / net.coeff{i,j}.';
             pcXti = [scorej(:,1:mc), ones(sigLen-p,1)]; % might not be good to add bias
-            
-            [b,bint,r] = regress(Yt,pcXti);
+            r = Yt - pcXti * net.bvec{i,j}; % calc residuals
             Vyt = var(r);
 
             gcI(i,j) = log(Vyt / Vxt);

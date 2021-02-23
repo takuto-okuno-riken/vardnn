@@ -496,10 +496,10 @@ function analyzeAlzheimerDLCM
 %    plotAverageROCcurve(tsfcROC, N, '-', [0.6,0.2,0.2],1.2);
 %    plotAverageROCcurve(tsfcaROC, N, '-.', [0.6,0.2,0.2],1.2);
     plotAverageROCcurve(mvarecROC, N, '-', [0.3,0.3,0.3],0.5);
-    plotAverageROCcurve(mpcvarecROC, N, '--', [0.3,0.3,0.3],0.5);
-    plotAverageROCcurve(mpcvargcROC, N, '-.', [0.3,0.3,0.3],0.5);
-    plotAverageROCcurve(ppcvarecROC, N, '--', [0.3,0.6,0.6],0.5);
-    plotAverageROCcurve(ppcvargcROC, N, '-.', [0.3,0.6,0.6],0.5);
+    plotAverageROCcurve(mpcvarecROC, N, '-', [0.3,0.6,0.6],1.0);
+    plotAverageROCcurve(mpcvargcROC, N, '--', [0.3,0.6,0.6],0.8);
+    plotAverageROCcurve(ppcvarecROC, N, '-', [0.3,0.6,0.6],0.5);
+    plotAverageROCcurve(ppcvargcROC, N, '--', [0.3,0.6,0.6],0.5);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);

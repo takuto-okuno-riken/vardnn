@@ -88,8 +88,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMpcvarGCI(X, exS
             end
             scorej = (Xtj - mu) / net.coeff{i}.';
             pcXti = [scorej(:,1:mc), ones(sigLen-p,1)]; % might not be good to add bias
-            
-            [b,bint,r] = regress(Xt,pcXti);
+            r = Xt - pcXti * net.bvec{i}; % calc residuals
             Vyt = var(r);
 
             gcI(i,j) = log(Vyt / Vxt);
