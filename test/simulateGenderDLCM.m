@@ -40,17 +40,18 @@ function simulateGenderDLCM
     % check DLCM-EC and DLCM-GC of simulated TR25, TR14, TR6
     tr25 = checkSimSignalsByDLCM_EC_GC(tr25, roiNames, 'tr25', maxLag);
     tr14 = checkSimSignalsByDLCM_EC_GC(tr14, roiNames, 'tr14', maxLag);
-%    tr6  = checkSimSignalsByDLCM_EC_GC(tr6, roiNames, 'tr6', maxLag);
+    tr6  = checkSimSignalsByDLCM_EC_GC(tr6, roiNames, 'tr6', maxLag);
 
     % check FC of simulated TR25, TR14, TR6
     tr25 = checkSimSignalsByFC(tr25, roiNames, 'tr25', maxLag);
-%    tr14 = checkSimSignalsByFC(tr14, roiNames, 'tr14', maxLag);
-%    tr6  = checkSimSignalsByFC(tr6, roiNames, 'tr6', maxLag);
+    tr14 = checkSimSignalsByFC(tr14, roiNames, 'tr14', maxLag);
+    tr6  = checkSimSignalsByFC(tr6, roiNames, 'tr6', maxLag);
 
     % --------------------------------------------------------------------------------------------------------------
     % box plot of signal MAEs 
     tr25 = plotSimSignalsResults(tr25, roiNames, 'tr25', maxLag);
-
+    tr14 = plotSimSignalsResults(tr14, roiNames, 'tr14', maxLag);
+    tr6  = plotSimSignalsResults(tr6, roiNames, 'tr6', maxLag);
 end
 
 % ==================================================================================================================
@@ -263,7 +264,7 @@ function g = plotSimSignalsResults(g, roiNames, groupName, maxLag)
             cosSims(j,i) = getCosSimilarity(g.FCs{1}(:,:,j), g.smmpvFCs{k}(:,:,j)); i=i+10;
         end
     end
-    figure; boxplot(cosSims); title(['cos similarity between mean CN matrix and each subject EC by each algorithm : ' groupName]);
+    figure; boxplot(cosSims); title(['cos similarity between each Original EC and each Simulated EC by each algorithm : ' groupName]);
 
     % change Z score
 %{
