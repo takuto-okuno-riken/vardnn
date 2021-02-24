@@ -99,6 +99,8 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 netMVAR = initMvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 [mat, sub] = calcMvarEC(netMVAR, [], exControl); % |Zi-Zi\j| version
                 mat = repmat(sub(:,1), [1 size(mat,2)]) - sub(:,2:end); % subtract Zi-Zi\j version
+            case 'pvarec'
+                mat = calcPvarEC(signals{i}, exSignal, [], exControl, lags); % |Zi-Zi\j| version
             case 'mpcvarec'
                 netMPCVAR = initMpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 mat = calcMpcvarEC(netMPCVAR, [], exControl);
@@ -277,6 +279,12 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : mVAR(' num2str(lags) ')-EC Index'];
+    case 'pvarec'
+        sigma = std(meanWeights(:),1,'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : pVAR(' num2str(lags) ')-EC Index'];
     case 'mvar'
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
