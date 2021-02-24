@@ -133,5 +133,5 @@ Example results of causal relation matrix graphs of human fMRI signals (132 ROI)
 ## Citing DLCM toolbox
 If you find DLCM useful in your research, please consider citing:  
 Takuto Okuno, Alexander Woodward,
-["DLCM: A Data-Driven Deep-Learning Based Effective Connectivity Estimation Toolbox"](https://yahoo.com/), under reviewing.
+["DLCM: A Data-Driven Deep Learning-Based Effective Connectivity Estimation Toolbox"](https://yahoo.com/), under reviewing.
 
