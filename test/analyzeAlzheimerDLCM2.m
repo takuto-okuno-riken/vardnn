@@ -5,12 +5,12 @@ function analyzeAlzheimerDLCM2
     % CONN output path
     pathesCN = {'ADNI2_65-78_F_CN_nii', 'ADNI2_65-78_M_CN_nii'};
     pathesAD = {'ADNI2_65-75_F_AD_nii', 'ADNI2_65-75_M_AD_nii'};
-    pathesMCI = {'ADNI2_65-75_F_MCI_nii', 'ADNI2_65-75_M_MCI_nii'};
+%    pathesMCI = {'ADNI2_65-75_F_MCI_nii', 'ADNI2_65-75_M_MCI_nii'};
 
     % load each type signals
-    [cnSignals, roiNames] = connData2signalsFile(base, pathesCN, 'cn', 'data/ad', 'ad');
-    [adSignals] = connData2signalsFile(base, pathesAD, 'ad', 'data/ad', 'ad');
-    [mciSignals] = connData2signalsFile(base, pathesMCI, 'mci', 'data/ad', 'ad');
+    [cn.signals, roiNames] = connData2signalsFile(base, pathesCN, 'cn', 'data/ad', 'ad');
+    [ad.signals] = connData2signalsFile(base, pathesAD, 'ad', 'data/ad', 'ad');
+%    [mciSignals] = connData2signalsFile(base, pathesMCI, 'mci', 'data/ad', 'ad');
 
     global resultsPath;
     global resultsPrefix;
@@ -18,82 +18,83 @@ function analyzeAlzheimerDLCM2
     resultsPrefix = 'ad';
 
     maxLag = 5;
+    
     % calculate connectivity
+    cn = calculateConnectivitiesByAlgorithms(cn, roiNames, 'cn', maxLag);
+    ad = calculateConnectivitiesByAlgorithms(ad, roiNames, 'ad', maxLag);
+    
+    % diagnose groups and show ROC curves
+    statisticalGroupIdentificationByAlgorithms(cn, ad, roiNames, 'cn', 'ad', maxLag);
+end
+
+
+function g = calculateConnectivitiesByAlgorithms(g, roiNames, groupName, maxLag)
+    signals = g.signals;
     for j=1:maxLag
         % mvGC(i) no exogenous 
-        [cnGCs{j}, meanCNGC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'gc', 1, j, 0);
-        [adGCs{j}, meanADGC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'gc', 1, j, 0);
+        [g.GCs{j}, g.meanGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'gc', 1, j, 0);
         % mvarEC(i) no exogenous 
-        [cnMVARECs{j}, meanCNMVAREC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mvarec', 1, j, 0);
-        [adMVARECs{j}, meanADMVAREC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvarec', 1, j, 0);
-        [cnMVARs{j}, meanCNMVAR{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mvar', 1, j, 0);
-        [adMVARs{j}, meanADMVAR{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvar', 1, j, 0);
+        [g.MVARECs{j}, g.meanMVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvarec', 1, j, 0);
+        [g.MVARs{j}, g.meanMVAR{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvar', 1, j, 0);
         % mpcvarEC(i) no exogenous 
-        [cnMPCVARECs{j}, meanCNMPCVAREC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mpcvarec', 1, j, 0);
-        [adMPCVARECs{j}, meanADMPCVAREC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mpcvarec', 1, j, 0);
+        [g.MPCVARECs{j}, g.meanMPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvarec', 1, j, 0);
         % DLCM(i)-GC linear no exogenous
-        [cnDL2s{j}, meanCNDL2{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 0, j, 0, []);
-        [adDL2s{j}, meanADDL2{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 0, j, 0, []);
+        [g.DL2s{j}, g.meanDL2{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlcm', 0, j, 0, []);
         % DLCM(i)-EC linear no exogenous
-        [cnDLW2s{j}, meanCNDLW2{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlw', 0, j, 0, []);
-        [adDLW2s{j}, meanADDLW2{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlw', 0, j, 0, []);
+        [g.DLW2s{j}, g.meanDLW2{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlw', 0, j, 0, []);
         % DLCM(i)-GC no exogenous
-        [cnDLs{j}, meanCNDL{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 0, j, 0);
-        [adDLs{j}, meanADDL{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 0, j, 0);
+        [g.DLs{j}, g.meanDL{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlcm', 0, j, 0);
         % DLCM(i)-EC no exogenous
-        [cnDLWs{j}, meanCNDLW{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlw', 0, j, 0);
-        [adDLWs{j}, meanADDLW{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlw', 0, j, 0);
+        [g.DLWs{j}, g.meanDLW{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlw', 0, j, 0);
     end
 
     for i=1:maxLag
         j = i+maxLag;
         % mvGC(i) auto exogenous 
-        [cnGCs{j}, meanCNGC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'gc', 1, i, 1);
-        [adGCs{j}, meanADGC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'gc', 1, i, 1);
+        [g.GCs{j}, g.meanGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'gc', 1, i, 1);
         % mvarEC(i) auto exogenous 
-        [cnMVARECs{j}, meanCNMVAREC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mvarec', 1, i, 1);
-        [adMVARECs{j}, meanADMVAREC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvarec', 1, i, 1);
-        [cnMVARs{j}, meanCNMVAR{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mvar', 1, i, 1);
-        [adMVARs{j}, meanADMVAR{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mvar', 1, i, 1);
+        [g.MVARECs{j}, g.meanMVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvarec', 1, i, 1);
+        [g.MVARs{j}, g.meanMVAR{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvar', 1, i, 1);
         % mpcvarEC(i) auto exogenous 
-        [cnMPCVARECs{j}, meanCNMPCVAREC{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mpcvarec', 1, i, 1);
-        [adMPCVARECs{j}, meanADMPCVAREC{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'mpcvarec', 1, i, 1);
+        [g.MPCVARECs{j}, g.meanMPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvarec', 1, i, 1);
         % DLCM(i)-GC linear auto exogenous
-        [cnDL2s{j}, meanCNDL2{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 0, i, 1, []);
-        [adDL2s{j}, meanADDL2{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 0, i, 1, []);
+        [g.DL2s{j}, g.meanDL2{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlcm', 0, i, 1, []);
         % DLCM(i)-EC linear auto exogenous
-        [cnDLW2s{j}, meanCNDLW2{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlw', 0, i, 1, []);
-        [adDLW2s{j}, meanADDLW2{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlw', 0, i, 1, []);
+        [g.DLW2s{j}, g.meanDLW2{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlw', 0, i, 1, []);
         % DLCM(i)-GC auto exogenous
-        [cnDLs{j}, meanCNDL{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlcm', 0, i, 1);
-        [adDLs{j}, meanADDL{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlcm', 0, i, 1);
+        [g.DLs{j}, g.meanDL{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlcm', 0, i, 1);
         % DLCM(i)-EC auto exogenous
-        [cnDLWs{j}, meanCNDLW{j}, ~] = calculateConnectivity(cnSignals, roiNames, 'cn', 'dlw', 0, i, 1);
-        [adDLWs{j}, meanADDLW{j}, ~] = calculateConnectivity(adSignals, roiNames, 'ad', 'dlw', 0, i, 1);
+        [g.DLWs{j}, g.meanDLW{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlw', 0, i, 1);
     end
-    
+    % FC no exogenous (pairwise, then exogenous does not have meaning)
+    [g.FCs, g.meanFC, ~] = calculateConnectivity(signals, roiNames, groupName, 'fc', 1, j, 0);
+end
+
+function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2, maxLag)
+    global resultsPath;
+    global resultsPrefix;
+
     % plot correlation and cos similarity
-    nanx = eye(size(meanCNGC{1},1),size(meanCNGC{1},2));
+    nanx = eye(size(g.meanGC{1},1),size(g.meanGC{1},2));
     nanx(nanx==1) = NaN;
     cosSim = zeros(maxLag*6*2,1);
     figure; bar(cosSim);
-    title('cos similarity between CN and AD by each algorithm');
+    title(['cos similarity between ' name1 ' and ' name2 ' by each algorithm']);
 
     % normality test
-%    cnDLWsNt = calculateAlzNormalityTest(cnDLWs{j}, roiNames, 'cn', 'dlw');
-%    adDLWsNt = calculateAlzNormalityTest(adDLWs{j}, roiNames, 'ad', 'dlw');
-%    mciDLWsNt = calculateAlzNormalityTest(mciDLWs{j}, roiNames, 'mci', 'dlw');
+%    g.DLWsNt = calculateAlzNormalityTest(g.DLWs{j}, roiNames, name1, 'dlw');
+%    p.DLWsNt = calculateAlzNormalityTest(p.DLWs{j}, roiNames, name2, 'dlw');
 
     % compalizon test (Wilcoxon, Mann?Whitney U test)
     for j=1:maxLag*2
-        [~, cnadGCsUtP{j}, ~] = calculateAlzWilcoxonTest(cnGCs{j}, adGCs{j}, roiNames, 'cn', 'ad', ['gc' num2str(j)]);
-        [~, cnadMvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMVARECs{j}, adMVARECs{j}, roiNames, 'cn', 'ad', ['mvarec' num2str(j)]);
-        [~, cnadMvarsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMVARs{j}, adMVARs{j}, roiNames, 'cn', 'ad', ['mvar' num2str(j)]);
-        [~, cnadMpcvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(cnMPCVARECs{j}, adMPCVARECs{j}, roiNames, 'cn', 'ad', ['mpcvarec' num2str(j)]);
-        [~, cnadDL2sUtP{j}, ~] = calculateAlzWilcoxonTest(cnDL2s{j}, adDL2s{j}, roiNames, 'cn', 'ad', ['dlcm_lin' num2str(j)]);
-        [~, cnadDLW2sUtP{j}, ~] = calculateAlzWilcoxonTest(cnDLW2s{j}, adDLW2s{j}, roiNames, 'cn', 'ad', ['dlw_lin' num2str(j)]);
-        [~, cnadDLsUtP{j}, ~] = calculateAlzWilcoxonTest(cnDLs{j}, adDLs{j}, roiNames, 'cn', 'ad', ['dlcm' num2str(j)]);
-        [~, cnadDLWsUtP{j}, ~] = calculateAlzWilcoxonTest(cnDLWs{j}, adDLWs{j}, roiNames, 'cn', 'ad', ['dlw' num2str(j)]);
+        [~, GCsUtP{j}, ~] = calculateAlzWilcoxonTest(g.GCs{j}, p.GCs{j}, roiNames, name1, name2, ['gc' num2str(j)]);
+        [~, MvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(g.MVARECs{j}, p.MVARECs{j}, roiNames, name1, name2, ['mvarec' num2str(j)]);
+        [~, MvarsUtP{j}, ~] = calculateAlzWilcoxonTest(g.MVARs{j}, p.MVARs{j}, roiNames, name1, name2, ['mvar' num2str(j)]);
+        [~, MpcvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(g.MPCVARECs{j}, p.MPCVARECs{j}, roiNames, name1, name2, ['mpcvarec' num2str(j)]);
+        [~, DL2sUtP{j}, ~] = calculateAlzWilcoxonTest(g.DL2s{j}, p.DL2s{j}, roiNames, name1, name2, ['dlcm_lin' num2str(j)]);
+        [~, DLW2sUtP{j}, ~] = calculateAlzWilcoxonTest(g.DLW2s{j}, p.DLW2s{j}, roiNames, name1, name2, ['dlw_lin' num2str(j)]);
+        [~, DLsUtP{j}, ~] = calculateAlzWilcoxonTest(g.DLs{j}, p.DLs{j}, roiNames, name1, name2, ['dlcm' num2str(j)]);
+        [~, DLWsUtP{j}, ~] = calculateAlzWilcoxonTest(g.DLWs{j}, p.DLWs{j}, roiNames, name1, name2, ['dlw' num2str(j)]);
     end
 
     % using minimum 100 p-value relations. perform 5-fold cross validation.
@@ -134,57 +135,57 @@ function analyzeAlzheimerDLCM2
         for j=1:maxLag*2
             i = 1;
             % check sigma of healthy subject
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnGCs{j}, adGCs{j}, k, N);
-            [B, I, X] = sortAndPairPValues(control, target, cnadGCsUtP{j}, topNum);
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.GCs{j}, p.GCs{j}, k, N);
+            [B, I, X] = sortAndPairPValues(control, target, GCsUtP{j}, topNum);
             sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             [gcROC{j}{k,1}, gcROC{j}{k,2}, gcAUC(j,k), gcACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnMVARECs{j}, adMVARECs{j}, k, N);
-            [B, I, X] = sortAndPairPValues(control, target, cnadMvarECsUtP{j}, topNum);
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.MVARECs{j}, p.MVARECs{j}, k, N);
+            [B, I, X] = sortAndPairPValues(control, target, MvarECsUtP{j}, topNum);
             sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             [mvarecROC{j}{k,1}, mvarecROC{j}{k,2}, mvarecAUC(j,k), mvarecACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnMVARs{j}, adMVARs{j}, k, N);
-            [B, I, X] = sortAndPairPValues(control, target, cnadMvarsUtP{j}, topNum);
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.MVARs{j}, p.MVARs{j}, k, N);
+            [B, I, X] = sortAndPairPValues(control, target, MvarsUtP{j}, topNum);
             sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             [mvarROC{j}{k,1}, mvarROC{j}{k,2}, mvarAUC(j,k), mvarACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnMPCVARECs{j}, adMPCVARECs{j}, k, N);
-            [B, I, X] = sortAndPairPValues(control, target, cnadMpcvarECsUtP{j}, topNum);
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.MPCVARECs{j}, p.MPCVARECs{j}, k, N);
+            [B, I, X] = sortAndPairPValues(control, target, MpcvarECsUtP{j}, topNum);
             sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             [mpcvarecROC{j}{k,1}, mpcvarecROC{j}{k,2}, mpcvarecAUC(j,k), mpcvarecACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDL2s{j}, adDL2s{j}, k, N);
-            [B, I, X] = sortAndPairPValues(control, target, cnadDL2sUtP{j}, topNum);
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.DL2s{j}, p.DL2s{j}, k, N);
+            [B, I, X] = sortAndPairPValues(control, target, DL2sUtP{j}, topNum);
             sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             [dl2ROC{j}{k,1}, dl2ROC{j}{k,2}, dl2AUC(j,k), dl2ACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDLW2s{j}, adDLW2s{j}, k, N);         % replece cn*s, ad*s
-            [B, I, X] = sortAndPairPValues(control, target, cnadDLW2sUtP{j}, topNum);                                  % replace cnad*sUtP
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.DLW2s{j}, p.DLW2s{j}, k, N);         % replece g.*s, p.*s
+            [B, I, X] = sortAndPairPValues(control, target, DLW2sUtP{j}, topNum);                                  % replace g.p.*sUtP
             sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             [dlw2ROC{j}{k,1}, dlw2ROC{j}{k,2}, dlw2AUC(j,k), dlw2ACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDLs{j}, adDLs{j}, k, N);
-            [B, I, X] = sortAndPairPValues(control, target, cnadDLsUtP{j}, topNum);
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.DLs{j}, p.DLs{j}, k, N);
+            [B, I, X] = sortAndPairPValues(control, target, DLsUtP{j}, topNum);
             sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             [dlROC{j}{k,1}, dlROC{j}{k,2}, dlAUC(j,k), dlACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnDLWs{j}, adDLWs{j}, k, N);         % replece cn*s, ad*s
-            [B, I, X] = sortAndPairPValues(control, target, cnadDLWsUtP{j}, topNum);                                  % replace cnad*sUtP
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.DLWs{j}, p.DLWs{j}, k, N);         % replece g.*s, p.*s
+            [B, I, X] = sortAndPairPValues(control, target, DLWsUtP{j}, topNum);                                  % replace g.p.*sUtP
             sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             [dlwROC{j}{k,1}, dlwROC{j}{k,2}, dlwAUC(j,k), dlwACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
@@ -192,7 +193,7 @@ function analyzeAlzheimerDLCM2
     end
 
     % save result
-    fname = [resultsPath '/' resultsPrefix '-cn-ad-roi' num2str(132) '-result.mat'];
+    fname = [resultsPath '/' resultsPrefix '-' name1 '-' name2 '-roi' num2str(132) '-result.mat'];
     save(fname, 'cosSim', 'gcAUC','mvarecAUC','mvarAUC','mpcvarecAUC','dlAUC','dlwAUC','dl2AUC','dlw2AUC', ...
         'gcROC','mvarecROC','mvarROC','mpcvarecROC','dlROC','dlwROC','dl2ROC','dlw2ROC', ...
         'gcACC','mvarecACC','mvarACC','mpcvarecACC','dlACC','dlwACC','dl2ACC','dlw2ACC', ...
