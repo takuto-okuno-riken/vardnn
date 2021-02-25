@@ -36,8 +36,16 @@ function g = calculateConnectivitiesByAlgorithms(g, roiNames, groupName, maxLag)
         % mvarEC(i) no exogenous 
         [g.MVARECs{j}, g.meanMVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvarec', 1, j, 0);
         [g.MVARs{j}, g.meanMVAR{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvar', 1, j, 0);
+        % pvarEC(i) no exogenous 
+        [g.PVARECs{j}, g.meanPVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'pvarec', 1, j, 0);
         % mpcvarEC(i) no exogenous 
         [g.MPCVARECs{j}, g.meanMPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvarec', 1, j, 0);
+        % ppcvarEC(i) no exogenous 
+        [g.PPCVARECs{j}, g.meanPPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'ppcvarec', 1, j, 0);
+        % mpcvarGC(i) no exogenous 
+        [g.MPCVARGCs{j}, g.meanMPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvargc', 1, j, 0);
+        % ppcvarGC(i) no exogenous 
+        [g.PPCVARGCs{j}, g.meanPPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'ppcvargc', 1, j, 0);
         % DLCM(i)-GC linear no exogenous
         [g.DL2s{j}, g.meanDL2{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlcm', 0, j, 0, []);
         % DLCM(i)-EC linear no exogenous
@@ -55,8 +63,16 @@ function g = calculateConnectivitiesByAlgorithms(g, roiNames, groupName, maxLag)
         % mvarEC(i) auto exogenous 
         [g.MVARECs{j}, g.meanMVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvarec', 1, i, 1);
         [g.MVARs{j}, g.meanMVAR{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvar', 1, i, 1);
+        % pvarEC(i) no exogenous 
+        [g.PVARECs{j}, g.meanPVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'pvarec', 1, j, 1);
         % mpcvarEC(i) auto exogenous 
         [g.MPCVARECs{j}, g.meanMPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvarec', 1, i, 1);
+        % ppcvarEC(i) no exogenous 
+        [g.PPCVARECs{j}, g.meanPPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'ppcvarec', 1, j, 1);
+        % mpcvarGC(i) no exogenous 
+        [g.MPCVARGCs{j}, g.meanMPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvargc', 1, j, 1);
+        % ppcvarGC(i) no exogenous 
+        [g.PPCVARGCs{j}, g.meanPPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'ppcvargc', 1, j, 1);
         % DLCM(i)-GC linear auto exogenous
         [g.DL2s{j}, g.meanDL2{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlcm', 0, i, 1, []);
         % DLCM(i)-EC linear auto exogenous
@@ -96,12 +112,14 @@ function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2
         [~, DLsUtP{j}, ~] = calculateAlzWilcoxonTest(g.DLs{j}, p.DLs{j}, roiNames, name1, name2, ['dlcm' num2str(j)]);
         [~, DLWsUtP{j}, ~] = calculateAlzWilcoxonTest(g.DLWs{j}, p.DLWs{j}, roiNames, name1, name2, ['dlw' num2str(j)]);
     end
+    [~, FCsUtP, ~] = calculateAlzWilcoxonTest(g.FCs, p.FCs, roiNames, name1, name2, 'fc');
 
     % using minimum 100 p-value relations. perform 5-fold cross validation.
     topNum = 100;
     sigTh = 2;
     N = 5;
 
+    fcAUC = zeros(1,N);
     gcAUC = zeros(maxLag*2,N);
     mvarecAUC = zeros(maxLag*2,N);
     mvarAUC = zeros(maxLag*2,N);
@@ -110,6 +128,8 @@ function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2
     dlwAUC = zeros(maxLag*2,N);
     dl2AUC = zeros(maxLag*2,N);
     dlw2AUC = zeros(maxLag*2,N);
+    fcROC = cell(N,2);
+    fcACC = cell(N,1);
     for lags=1:maxLag*2
         gcROC{lags} = cell(N,2);
         mvarecROC{lags} = cell(N,2);
@@ -190,13 +210,20 @@ function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2
             sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             [dlwROC{j}{k,1}, dlwROC{j}{k,2}, dlwAUC(j,k), dlwACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
         end
+
+        i = i + 1;
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.FCs, p.FCs, k, N);
+        [B, I, X] = sortAndPairPValues(control, target, FCsUtP, topNum);
+        sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        [fcROC{k,1}, fcROC{k,2}, fcAUC(1,k), fcACC{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);
     end
 
     % save result
     fname = [resultsPath '/' resultsPrefix '-' name1 '-' name2 '-roi' num2str(132) '-result.mat'];
-    save(fname, 'cosSim', 'gcAUC','mvarecAUC','mvarAUC','mpcvarecAUC','dlAUC','dlwAUC','dl2AUC','dlw2AUC', ...
-        'gcROC','mvarecROC','mvarROC','mpcvarecROC','dlROC','dlwROC','dl2ROC','dlw2ROC', ...
-        'gcACC','mvarecACC','mvarACC','mpcvarecACC','dlACC','dlwACC','dl2ACC','dlw2ACC', ...
+    save(fname, 'cosSim', 'fcAUC','gcAUC','mvarecAUC','mvarAUC','mpcvarecAUC','dlAUC','dlwAUC','dl2AUC','dlw2AUC', ...
+        'fcROC','gcROC','mvarecROC','mvarROC','mpcvarecROC','dlROC','dlwROC','dl2ROC','dlw2ROC', ...
+        'fcACC','gcACC','mvarecACC','mvarACC','mpcvarecACC','dlACC','dlwACC','dl2ACC','dlw2ACC', ...
         'sigCntCN', 'sigCntAD');
 
     % show box plot
@@ -210,8 +237,9 @@ function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2
     AUCs(:,r) = dlw2AUC.'; r=r+10;
     AUCs(:,r) = dlAUC.'; r=r+10;
     AUCs(:,r) = dlwAUC.'; r=r+10;
+    AUCs(:,r(1)) = fcAUC.';
     figure; boxplot(AUCs);
-    title('AUC box plot idx');
+    title(['AUC box plot : ' name1 ' vs ' name2]);
 
     % show average ROC curves
     figure; 
