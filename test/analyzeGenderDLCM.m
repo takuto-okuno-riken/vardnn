@@ -33,7 +33,6 @@ function analyzeGenderDLCM
     statisticalGroupIdentificationByAlgorithms(tr25, roiNames, Idx1, Idx2, 'tr25f', 'm', maxLag);
     statisticalGroupIdentificationByAlgorithms(tr14, roiNames, Idx3, Idx4, 'tr14f', 'm', maxLag);
     statisticalGroupIdentificationByAlgorithms(tr6,  roiNames, Idx3, Idx4, 'tr6f', 'm', maxLag);
-    
 end
 
 function g = calculateConnectivitiesByAlgorithms(g, roiNames, groupName, maxLag)
@@ -76,13 +75,15 @@ function g = calculateConnectivitiesByAlgorithms(g, roiNames, groupName, maxLag)
     end
     % FC no exogenous (pairwise, then exogenous does not have meaning)
     [g.FCs, g.meanFC, ~] = calculateConnectivity(signals, roiNames, groupName, 'fc', 1, j, 0);
+    % PC no exogenous (pairwise, then exogenous does not have meaning)
+    [g.PCs, g.meanPC, ~] = calculateConnectivity(signals, roiNames, groupName, 'pc', 1, j, 0);
 end
 
 function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, name1, name2, maxLag)
     global resultsPath;
     global resultsPrefix;
 
-    GCs=g.GCs; FCs= g.FCs;
+    GCs=g.GCs; FCs= g.FCs; PCs= g.PCs;
     MVARECs= g.MVARECs; MVARs= g.MVARs; MPCVARECs= g.MPCVARECs;
     DL2s= g.DL2s; DLW2s= g.DLW2s;
     DLs= g.DLs; DLWs= g.DLWs;
@@ -121,6 +122,7 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
         [~, DLWsUtP{j}, ~] = calculateAlzWilcoxonTest(DLWs{j}(:,:,Idx1), DLWs{j}(:,:,Idx2), roiNames, name1, name2, ['dlw' num2str(j)]);
     end
     [~, FCsUtP, ~] = calculateAlzWilcoxonTest(FCs(:,:,Idx1), FCs(:,:,Idx2), roiNames, name1, name2, 'fc');
+    [~, PCsUtP, ~] = calculateAlzWilcoxonTest(PCs(:,:,Idx1), PCs(:,:,Idx2), roiNames, name1, name2, 'pc');
 
     % using minimum 100 p-value relations. perform 5-fold cross validation.
     topNum = 100;
@@ -128,6 +130,7 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
     N = 4;
 
     fcAUC = zeros(1,N);
+    pcAUC = zeros(1,N);
     gcAUC = zeros(maxLag*2,N);
     mvarecAUC = zeros(maxLag*2,N);
     mvarAUC = zeros(maxLag*2,N);
@@ -138,6 +141,8 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
     dlw2AUC = zeros(maxLag*2,N);
     fcROC = cell(N,2);
     fcACC = cell(N,1);
+    pcROC = cell(N,2);
+    pcACC = cell(N,1);
     for lags=1:maxLag*2
         gcROC{lags} = cell(N,2);
         mvarecROC{lags} = cell(N,2);
@@ -225,13 +230,20 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
         sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [fcROC{k,1}, fcROC{k,2}, fcAUC(1,k), fcACC{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);
+
+        i = i + 1;
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(PCs(:,:,Idx1), PCs(:,:,Idx2), k, N);
+        [B, I, X] = sortAndPairPValues(control, target, PCsUtP, topNum);
+        sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        [pcROC{k,1}, pcROC{k,2}, pcAUC(1,k), pcACC{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);
     end
 
     % save result
     fname = [resultsPath '/' resultsPrefix '-' name1 '-' name2 '-roi' num2str(132) '-result.mat'];
-    save(fname, 'cosSim', 'fcAUC','gcAUC','mvarecAUC','mvarAUC','mpcvarecAUC','dlAUC','dlwAUC','dl2AUC','dlw2AUC', ...
-        'fcROC','gcROC','mvarecROC','mvarROC','mpcvarecROC','dlROC','dlwROC','dl2ROC','dlw2ROC', ...
-        'fcACC','gcACC','mvarecACC','mvarACC','mpcvarecACC','dlACC','dlwACC','dl2ACC','dlw2ACC', ...
+    save(fname, 'cosSim', 'fcAUC','pcAUC','gcAUC','mvarecAUC','mvarAUC','mpcvarecAUC','dlAUC','dlwAUC','dl2AUC','dlw2AUC', ...
+        'fcROC','pcROC','gcROC','mvarecROC','mvarROC','mpcvarecROC','dlROC','dlwROC','dl2ROC','dlw2ROC', ...
+        'fcACC','pcACC','gcACC','mvarecACC','mvarACC','mpcvarecACC','dlACC','dlwACC','dl2ACC','dlw2ACC', ...
         'sigCntG1', 'sigCntG2');
 
     % show box plot
@@ -246,6 +258,7 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
     AUCs(:,r) = dlAUC.'; r=r+10;
     AUCs(:,r) = dlwAUC.'; r=r+10;
     AUCs(:,r(1)) = fcAUC.'; 
+    AUCs(:,r(2)) = pcAUC.'; 
     figure; boxplot(AUCs);
     title(['AUC box plot : ' name1 ' vs ' name2]);
 

@@ -36,8 +36,16 @@ function g = calculateConnectivitiesByAlgorithms(g, roiNames, groupName, maxLag)
         % mvarEC(i) no exogenous 
         [g.MVARECs{j}, g.meanMVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvarec', 1, j, 0);
         [g.MVARs{j}, g.meanMVAR{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvar', 1, j, 0);
+        % pvarEC(i) no exogenous 
+        [g.PVARECs{j}, g.meanPVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'pvarec', 1, j, 0);
         % mpcvarEC(i) no exogenous 
         [g.MPCVARECs{j}, g.meanMPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvarec', 1, j, 0);
+        % ppcvarEC(i) no exogenous 
+        [g.PPCVARECs{j}, g.meanPPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'ppcvarec', 1, j, 0);
+        % mpcvarGC(i) no exogenous 
+        [g.MPCVARGCs{j}, g.meanMPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvargc', 1, j, 0);
+        % ppcvarGC(i) no exogenous 
+        [g.PPCVARGCs{j}, g.meanPPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'ppcvargc', 1, j, 0);
         % DLCM(i)-GC linear no exogenous
         [g.DL2s{j}, g.meanDL2{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlcm', 0, j, 0, []);
         % DLCM(i)-EC linear no exogenous
@@ -55,8 +63,16 @@ function g = calculateConnectivitiesByAlgorithms(g, roiNames, groupName, maxLag)
         % mvarEC(i) auto exogenous 
         [g.MVARECs{j}, g.meanMVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvarec', 1, i, 1);
         [g.MVARs{j}, g.meanMVAR{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvar', 1, i, 1);
+        % pvarEC(i) no exogenous 
+        [g.PVARECs{j}, g.meanPVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'pvarec', 1, j, 1);
         % mpcvarEC(i) auto exogenous 
         [g.MPCVARECs{j}, g.meanMPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvarec', 1, i, 1);
+        % ppcvarEC(i) no exogenous 
+        [g.PPCVARECs{j}, g.meanPPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'ppcvarec', 1, j, 1);
+        % mpcvarGC(i) no exogenous 
+        [g.MPCVARGCs{j}, g.meanMPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvargc', 1, j, 1);
+        % ppcvarGC(i) no exogenous 
+        [g.PPCVARGCs{j}, g.meanPPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'ppcvargc', 1, j, 1);
         % DLCM(i)-GC linear auto exogenous
         [g.DL2s{j}, g.meanDL2{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlcm', 0, i, 1, []);
         % DLCM(i)-EC linear auto exogenous
@@ -68,6 +84,8 @@ function g = calculateConnectivitiesByAlgorithms(g, roiNames, groupName, maxLag)
     end
     % FC no exogenous (pairwise, then exogenous does not have meaning)
     [g.FCs, g.meanFC, ~] = calculateConnectivity(signals, roiNames, groupName, 'fc', 1, j, 0);
+    % PC no exogenous (pairwise, then exogenous does not have meaning)
+    [g.PCs, g.meanPC, ~] = calculateConnectivity(signals, roiNames, groupName, 'pc', 1, j, 0);
 end
 
 function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2, maxLag)
@@ -91,25 +109,39 @@ function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2
         [~, MvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(g.MVARECs{j}, p.MVARECs{j}, roiNames, name1, name2, ['mvarec' num2str(j)]);
         [~, MvarsUtP{j}, ~] = calculateAlzWilcoxonTest(g.MVARs{j}, p.MVARs{j}, roiNames, name1, name2, ['mvar' num2str(j)]);
         [~, MpcvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(g.MPCVARECs{j}, p.MPCVARECs{j}, roiNames, name1, name2, ['mpcvarec' num2str(j)]);
+        [~, MpcvarGCsUtP{j}, ~] = calculateAlzWilcoxonTest(g.MPCVARGCs{j}, p.MPCVARGCs{j}, roiNames, name1, name2, ['mpcvargc' num2str(j)]);
+        [~, PpcvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(g.PPCVARECs{j}, p.PPCVARECs{j}, roiNames, name1, name2, ['ppcvarec' num2str(j)]);
+        [~, PpcvarGCsUtP{j}, ~] = calculateAlzWilcoxonTest(g.PPCVARGCs{j}, p.PPCVARGCs{j}, roiNames, name1, name2, ['ppcvargc' num2str(j)]);
         [~, DL2sUtP{j}, ~] = calculateAlzWilcoxonTest(g.DL2s{j}, p.DL2s{j}, roiNames, name1, name2, ['dlcm_lin' num2str(j)]);
         [~, DLW2sUtP{j}, ~] = calculateAlzWilcoxonTest(g.DLW2s{j}, p.DLW2s{j}, roiNames, name1, name2, ['dlw_lin' num2str(j)]);
         [~, DLsUtP{j}, ~] = calculateAlzWilcoxonTest(g.DLs{j}, p.DLs{j}, roiNames, name1, name2, ['dlcm' num2str(j)]);
         [~, DLWsUtP{j}, ~] = calculateAlzWilcoxonTest(g.DLWs{j}, p.DLWs{j}, roiNames, name1, name2, ['dlw' num2str(j)]);
     end
+    [~, FCsUtP, ~] = calculateAlzWilcoxonTest(g.FCs, p.FCs, roiNames, name1, name2, 'fc');
+    [~, PCsUtP, ~] = calculateAlzWilcoxonTest(g.PCs, p.PCs, roiNames, name1, name2, 'pc');
 
     % using minimum 100 p-value relations. perform 5-fold cross validation.
     topNum = 100;
     sigTh = 2;
     N = 5;
 
+    fcAUC = zeros(1,N);
+    pcAUC = zeros(1,N);
     gcAUC = zeros(maxLag*2,N);
     mvarecAUC = zeros(maxLag*2,N);
     mvarAUC = zeros(maxLag*2,N);
     mpcvarecAUC = zeros(maxLag*2,N);
+    mpcvargcAUC = zeros(maxLag*2,N);
+    ppcvarecAUC = zeros(maxLag*2,N);
+    ppcvargcAUC = zeros(maxLag*2,N);
     dlAUC = zeros(maxLag*2,N);
     dlwAUC = zeros(maxLag*2,N);
     dl2AUC = zeros(maxLag*2,N);
     dlw2AUC = zeros(maxLag*2,N);
+    fcROC = cell(N,2);
+    fcACC = cell(N,1);
+    pcROC = cell(N,2);
+    pcACC = cell(N,1);
     for lags=1:maxLag*2
         gcROC{lags} = cell(N,2);
         mvarecROC{lags} = cell(N,2);
@@ -123,6 +155,9 @@ function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2
         mvarecACC{lags} = cell(N,1);
         mvarACC{lags} = cell(N,1);
         mpcvarecACC{lags} = cell(N,1);
+        mpcvargcACC{lags} = cell(N,1);
+        ppcvarecACC{lags} = cell(N,1);
+        ppcvargcACC{lags} = cell(N,1);
         dlACC{lags} = cell(N,1);
         dlwACC{lags} = cell(N,1);
         dl2ACC{lags} = cell(N,1);
@@ -163,6 +198,27 @@ function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2
             [mpcvarecROC{j}{k,1}, mpcvarecROC{j}{k,2}, mpcvarecAUC(j,k), mpcvarecACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
             i = i + 1;
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.MPCVARGCs{j}, p.MPCVARGCs{j}, k, N);
+            [B, I, X] = sortAndPairPValues(control, target, MpcvarGCsUtP{j}, topNum);
+            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [mpcvargcROC{j}{k,1}, mpcvargcROC{j}{k,2}, mpcvargcAUC(j,k), mpcvargcACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+
+            i = i + 1;
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.PPCVARECs{j}, p.PPCVARECs{j}, k, N);
+            [B, I, X] = sortAndPairPValues(control, target, PpcvarECsUtP{j}, topNum);
+            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [ppcvarecROC{j}{k,1}, ppcvarecROC{j}{k,2}, ppcvarecAUC(j,k), ppcvarecACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+
+            i = i + 1;
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.PPCVARGCs{j}, p.PPCVARGCs{j}, k, N);
+            [B, I, X] = sortAndPairPValues(control, target, PpcvarGCsUtP{j}, topNum);
+            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [ppcvargcROC{j}{k,1}, ppcvargcROC{j}{k,2}, ppcvargcAUC(j,k), ppcvargcACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+            
+            i = i + 1;
             [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.DL2s{j}, p.DL2s{j}, k, N);
             [B, I, X] = sortAndPairPValues(control, target, DL2sUtP{j}, topNum);
             sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
@@ -190,17 +246,31 @@ function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2
             sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             [dlwROC{j}{k,1}, dlwROC{j}{k,2}, dlwAUC(j,k), dlwACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);         % replace *ROC, *AUC
         end
+
+        i = i + 1;
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.FCs, p.FCs, k, N);
+        [B, I, X] = sortAndPairPValues(control, target, FCsUtP, topNum);
+        sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        [fcROC{k,1}, fcROC{k,2}, fcAUC(1,k), fcACC{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);
+
+        i = i + 1;
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(g.PCs, p.PCs, k, N);
+        [B, I, X] = sortAndPairPValues(control, target, PCsUtP, topNum);
+        sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        [pcROC{k,1}, pcROC{k,2}, pcAUC(1,k), pcACC{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);
     end
 
     % save result
     fname = [resultsPath '/' resultsPrefix '-' name1 '-' name2 '-roi' num2str(132) '-result.mat'];
-    save(fname, 'cosSim', 'gcAUC','mvarecAUC','mvarAUC','mpcvarecAUC','dlAUC','dlwAUC','dl2AUC','dlw2AUC', ...
-        'gcROC','mvarecROC','mvarROC','mpcvarecROC','dlROC','dlwROC','dl2ROC','dlw2ROC', ...
-        'gcACC','mvarecACC','mvarACC','mpcvarecACC','dlACC','dlwACC','dl2ACC','dlw2ACC', ...
+    save(fname, 'cosSim', 'fcAUC','pcAUC','gcAUC','mvarecAUC','mvarAUC','mpcvarecAUC','mpcvargcAUC','ppcvarecAUC','ppcvargcAUC','dlAUC','dlwAUC','dl2AUC','dlw2AUC', ...
+        'fcROC','pcROC','gcROC','mvarecROC','mvarROC','mpcvarecROC','mpcvargcROC','ppcvarecROC','ppcvargcROC','dlROC','dlwROC','dl2ROC','dlw2ROC', ...
+        'fcACC','pcACC','gcACC','mvarecACC','mvarACC','mpcvarecACC','mpcvargcACC','ppcvarecACC','ppcvargcACC','dlACC','dlwACC','dl2ACC','dlw2ACC', ...
         'sigCntCN', 'sigCntAD');
 
     % show box plot
-    AUCs = nan(N,80);
+    AUCs = nan(N,81);
     r = [1:10];
     AUCs(:,r) = gcAUC.'; r=r+10;
     AUCs(:,r) = mvarecAUC.'; r=r+10;
@@ -210,8 +280,26 @@ function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2
     AUCs(:,r) = dlw2AUC.'; r=r+10;
     AUCs(:,r) = dlAUC.'; r=r+10;
     AUCs(:,r) = dlwAUC.'; r=r+10;
+    AUCs(:,r(1)) = fcAUC.';
+    AUCs(:,r(2)) = pcAUC.';
     figure; boxplot(AUCs);
-    title('AUC box plot idx');
+    title(['AUC box plot : ' name1 ' vs ' name2]);
+
+    % show box plot2
+    AUCs = nan(N,41);
+    r = [1:5];
+    AUCs(:,r) = gcAUC(6:10,:).'; r=r+5;
+    AUCs(:,r) = mpcvargcAUC(6:10,:).'; r=r+5;
+    AUCs(:,r) = ppcvargcAUC(6:10,:).'; r=r+5;
+    AUCs(:,r) = dlAUC(6:10,:).'; r=r+5;
+    AUCs(:,r) = mvarecAUC(6:10,:).'; r=r+5;
+    AUCs(:,r) = mpcvarecAUC(6:10,:).'; r=r+5;
+    AUCs(:,r) = ppcvarecAUC(6:10,:).'; r=r+5;
+    AUCs(:,r) = dlwAUC(6:10,:).'; r=r+5;
+    AUCs(:,r(1)) = fcAUC.';
+    AUCs(:,r(2)) = pcAUC.';
+    figure; boxplot(AUCs);
+    title(['AUC box plot2 : ' name1 ' vs ' name2]);
 
     % show average ROC curves
     figure; 
@@ -445,6 +533,8 @@ function [utestH, utestP, utestP2] = calculateAlzWilcoxonTest(control, target, r
     countTarget = nansum(utestH,2);
     save(outfName, 'utestH', 'utestP', 'utestP2', 'roiNames', 'countSource', 'countTarget');
 
+    return; % do not show figures
+    
     load('test/colormap.mat')
     % U test result
     figure; 
