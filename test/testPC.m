@@ -23,6 +23,9 @@ sigma = cov(X.');
 B = inv(sigma);
 pc5 = -B(1,2) / sqrt(B(1,1)*B(2,2));
 
+PC3 = calcPartialCorrelation__(X);
+Z = PC - PC2;
+
 % synchronize signal 6 == 2, 7 invert 3
 % this is rank down operation, then invert of cov matrix does not work!!
 X(2,:) = X(6,:);
@@ -32,10 +35,26 @@ PC = calcPartialCorrelation(X); % calc PC - many NaN values
 
 PC2 = calcPartialCorrelation_(X,0); % calc PC - this does not work well.
 
+PC3 = calcPartialCorrelation__(X); % calc PC
+
 % plot matrix
 figure;
 clims = [-1 1];
 imagesc(PC,clims);
-title('Partial Correlation');
+title('Partial Correlation (matlab implementation)');
+colorbar;
+
+% plot matrix
+figure;
+clims = [-1 1];
+imagesc(PC2,clims);
+title('Partial Correlation (invert of cov matrix)');
+colorbar;
+
+% plot matrix
+figure;
+clims = [-1 1];
+imagesc(PC3,clims);
+title('Partial Correlation (regression base)');
 colorbar;
 

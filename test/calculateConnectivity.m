@@ -57,7 +57,8 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
             case 'tsfca'
                 mat = calcTimeShiftedCorrelationAbs(signals{i}, exSignal, [], exControl, lags);
             case 'pc'
-                mat = calcPartialCorrelation(signals{i});
+%                mat = calcPartialCorrelation(signals{i});
+                mat = calcPartialCorrelation__(signals{i});
             case 'wcs'
                 fName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(fName, 'file')

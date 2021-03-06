@@ -477,7 +477,7 @@ function analyzeAlzheimerDLCM
     figure;
     hold on;
     plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
-%    plotErrorROCcurve(pcROC, N, [0.8,0.2,0.2]);
+    plotErrorROCcurve(pcROC, N, [0.8,0.2,0.2]);
 %    plotErrorROCcurve(wcsROC, N, [0.9,0.5,0]);
     plotErrorROCcurve(gcROC, N, [0.2,0.8,0.2]);
 %    plotErrorROCcurve(pgcROC, N, [0.0,0.5,0.0]);
@@ -492,7 +492,7 @@ function analyzeAlzheimerDLCM
 %    plotErrorROCcurve(cpcROC, N, [0.5,0.5,0.5]);
 %    plotErrorROCcurve(fgesROC, N, [0.5,0.5,0.5]);
     plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
-%    plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
+    plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
 %    plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
 %    plotAverageROCcurve(pgcROC, N, '--', [0.0,0.5,0.0],0.5);
