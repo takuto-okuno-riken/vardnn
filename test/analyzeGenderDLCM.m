@@ -45,6 +45,10 @@ function g = calculateConnectivitiesByAlgorithms(g, roiNames, groupName, maxLag)
         [g.MVARs{j}, g.meanMVAR{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvar', 1, j, 0);
         % mpcvarEC(i) no exogenous 
         [g.MPCVARECs{j}, g.meanMPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvarec', 1, j, 0);
+        % mpcvarGC(i) no exogenous 
+        [g.MPCVARGCs{j}, g.meanMPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvargc', 1, j, 0);
+        % ppcvarGC(i) no exogenous 
+        [g.PPCVARGCs{j}, g.meanPPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'ppcvargc', 1, j, 0);
         % DLCM(i)-GC linear no exogenous
         [g.DL2s{j}, g.meanDL2{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlcm', 0, j, 0, []);
         % DLCM(i)-EC linear no exogenous
@@ -64,6 +68,10 @@ function g = calculateConnectivitiesByAlgorithms(g, roiNames, groupName, maxLag)
         [g.MVARs{j}, g.meanMVAR{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvar', 1, i, 1);
         % mpcvarEC(i) auto exogenous 
         [g.MPCVARECs{j}, g.meanMPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvarec', 1, i, 1);
+        % mpcvarGC(i) auto exogenous 
+        [g.MPCVARGCs{j}, g.meanMPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvargc', 1, i, 1);
+        % ppcvarGC(i) auto exogenous 
+        [g.PPCVARGCs{j}, g.meanPPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'ppcvargc', 1, i, 1);
         % DLCM(i)-GC linear auto exogenous
         [g.DL2s{j}, g.meanDL2{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlcm', 0, i, 1, []);
         % DLCM(i)-EC linear auto exogenous
@@ -74,9 +82,9 @@ function g = calculateConnectivitiesByAlgorithms(g, roiNames, groupName, maxLag)
         [g.DLWs{j}, g.meanDLW{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlw', 0, i, 1);
     end
     % FC no exogenous (pairwise, then exogenous does not have meaning)
-    [g.FCs, g.meanFC, ~] = calculateConnectivity(signals, roiNames, groupName, 'fc', 1, j, 0);
+    [g.FCs, g.meanFC, ~] = calculateConnectivity(signals, roiNames, groupName, 'fc', 1, 1, 0);
     % PC no exogenous (pairwise, then exogenous does not have meaning)
-    [g.PCs, g.meanPC, ~] = calculateConnectivity(signals, roiNames, groupName, 'pc', 1, j, 0);
+    [g.PCs, g.meanPC, ~] = calculateConnectivity(signals, roiNames, groupName, 'pc', 1, 1, 0);
 end
 
 function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, name1, name2, maxLag)
@@ -85,6 +93,7 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
 
     GCs=g.GCs; FCs= g.FCs; PCs= g.PCs;
     MVARECs= g.MVARECs; MVARs= g.MVARs; MPCVARECs= g.MPCVARECs;
+    MPCVARGCs= g.MPCVARGCs; PPCVARGCs= g.PPCVARGCs;
     DL2s= g.DL2s; DLW2s= g.DLW2s;
     DLs= g.DLs; DLWs= g.DLWs;
 
@@ -104,6 +113,23 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
         cosSim(j+i) = getCosSimilarity(nanmean(DLWs{j}(:,:,Idx1),3)+nanx, nanmean(DLWs{j}(:,:,Idx2),3)+nanx); i=i+10; % non-linear DNN
     end
     cosSim(i+1) = getCosSimilarity(nanmean(FCs(:,:,Idx1),3)+nanx, nanmean(FCs(:,:,Idx2),3)+nanx);
+    cosSim(i+2) = getCosSimilarity(nanmean(PCs(:,:,Idx1),3)+nanx, nanmean(PCs(:,:,Idx2),3)+nanx);
+    figure; bar(cosSim);
+    title(['cos similarity between ' name1 ' and ' name2 ' by each algorithm']);
+
+    cosSim = zeros(maxLag*7+2,1);
+    for j=1:maxLag
+        i = 0; k=j+5;
+        cosSim(j+i) = getCosSimilarity(nanmean(GCs{k}(:,:,Idx1),3)+nanx, nanmean(GCs{k}(:,:,Idx2),3)+nanx); i=i+5;
+        cosSim(j+i) = getCosSimilarity(nanmean(MPCVARGCs{k}(:,:,Idx1),3)+nanx, nanmean(MPCVARGCs{k}(:,:,Idx2),3)+nanx); i=i+5;
+        cosSim(j+i) = getCosSimilarity(nanmean(PPCVARGCs{k}(:,:,Idx1),3)+nanx, nanmean(PPCVARGCs{k}(:,:,Idx2),3)+nanx); i=i+5;
+        cosSim(j+i) = getCosSimilarity(nanmean(DLs{k}(:,:,Idx1),3)+nanx, nanmean(DLs{k}(:,:,Idx2),3)+nanx); i=i+5; % non-linear DNN
+        cosSim(j+i) = getCosSimilarity(nanmean(MVARECs{k}(:,:,Idx1),3)+nanx, nanmean(MVARECs{k}(:,:,Idx2),3)+nanx); i=i+5;
+        cosSim(j+i) = getCosSimilarity(nanmean(MPCVARECs{k}(:,:,Idx1),3)+nanx, nanmean(MPCVARECs{k}(:,:,Idx2),3)+nanx); i=i+5;
+        cosSim(j+i) = getCosSimilarity(nanmean(DLWs{k}(:,:,Idx1),3)+nanx, nanmean(DLWs{k}(:,:,Idx2),3)+nanx); i=i+5; % non-linear DNN
+    end
+    cosSim(i+1) = getCosSimilarity(nanmean(FCs(:,:,Idx1),3)+nanx, nanmean(FCs(:,:,Idx2),3)+nanx);
+    cosSim(i+2) = getCosSimilarity(nanmean(PCs(:,:,Idx1),3)+nanx, nanmean(PCs(:,:,Idx2),3)+nanx);
     figure; bar(cosSim);
     title(['cos similarity between ' name1 ' and ' name2 ' by each algorithm']);
 
@@ -116,6 +142,8 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
         [~, MvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(MVARECs{j}(:,:,Idx1), MVARECs{j}(:,:,Idx2), roiNames, name1, name2, ['mvarec' num2str(j)]);
         [~, MvarsUtP{j}, ~] = calculateAlzWilcoxonTest(MVARs{j}(:,:,Idx1), MVARs{j}(:,:,Idx2), roiNames, name1, name2, ['mvar' num2str(j)]);
         [~, MpcvarECsUtP{j}, ~] = calculateAlzWilcoxonTest(MPCVARECs{j}(:,:,Idx1), MPCVARECs{j}(:,:,Idx2), roiNames, name1, name2, ['mpcvarec' num2str(j)]);
+        [~, MpcvarGCsUtP{j}, ~] = calculateAlzWilcoxonTest(MPCVARGCs{j}(:,:,Idx1), MPCVARGCs{j}(:,:,Idx2), roiNames, name1, name2, ['mpcvargc' num2str(j)]);
+        [~, PpcvarGCsUtP{j}, ~] = calculateAlzWilcoxonTest(PPCVARGCs{j}(:,:,Idx1), PPCVARGCs{j}(:,:,Idx2), roiNames, name1, name2, ['ppcvargc' num2str(j)]);
         [~, DL2sUtP{j}, ~] = calculateAlzWilcoxonTest(DL2s{j}(:,:,Idx1), DL2s{j}(:,:,Idx2), roiNames, name1, name2, ['dlcm_lin' num2str(j)]);
         [~, DLW2sUtP{j}, ~] = calculateAlzWilcoxonTest(DLW2s{j}(:,:,Idx1), DLW2s{j}(:,:,Idx2), roiNames, name1, name2, ['dlw_lin' num2str(j)]);
         [~, DLsUtP{j}, ~] = calculateAlzWilcoxonTest(DLs{j}(:,:,Idx1), DLs{j}(:,:,Idx2), roiNames, name1, name2, ['dlcm' num2str(j)]);
@@ -135,6 +163,8 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
     mvarecAUC = zeros(maxLag*2,N);
     mvarAUC = zeros(maxLag*2,N);
     mpcvarecAUC = zeros(maxLag*2,N);
+    mpcvargcAUC = zeros(maxLag*2,N);
+    ppcvargcAUC = zeros(maxLag*2,N);
     dlAUC = zeros(maxLag*2,N);
     dlwAUC = zeros(maxLag*2,N);
     dl2AUC = zeros(maxLag*2,N);
@@ -148,6 +178,8 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
         mvarecROC{lags} = cell(N,2);
         mvarROC{lags} = cell(N,2);
         mpcvarecROC{lags} = cell(N,2);
+        mpcvargcROC{lags} = cell(N,2);
+        ppcvargcROC{lags} = cell(N,2);
         dlROC{lags} = cell(N,2);
         dlwROC{lags} = cell(N,2);
         dl2ROC{lags} = cell(N,2);
@@ -156,6 +188,8 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
         mvarecACC{lags} = cell(N,1);
         mvarACC{lags} = cell(N,1);
         mpcvarecACC{lags} = cell(N,1);
+        mpcvargcACC{lags} = cell(N,1);
+        ppcvargcACC{lags} = cell(N,1);
         dlACC{lags} = cell(N,1);
         dlwACC{lags} = cell(N,1);
         dl2ACC{lags} = cell(N,1);
@@ -194,6 +228,21 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
             sigCntG1{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             sigCntG2{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             [mpcvarecROC{j}{k,1}, mpcvarecROC{j}{k,2}, mpcvarecAUC(j,k), mpcvarecACC{j}{k}] = calcAlzROCcurve(sigCntG1{k,i}, sigCntG2{k,i}, topNum);
+
+
+            i = i + 1;
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(MPCVARGCs{j}, p.MPCVARGCs{j}, k, N);
+            [B, I, X] = sortAndPairPValues(control, target, MpcvarGCsUtP{j}, topNum);
+            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [mpcvargcROC{j}{k,1}, mpcvargcROC{j}{k,2}, mpcvargcAUC(j,k), mpcvargcACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+
+            i = i + 1;
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(PPCVARGCs{j}, p.PPCVARGCs{j}, k, N);
+            [B, I, X] = sortAndPairPValues(control, target, PpcvarGCsUtP{j}, topNum);
+            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [ppcvargcROC{j}{k,1}, ppcvargcROC{j}{k,2}, ppcvargcAUC(j,k), ppcvargcACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
             i = i + 1;
             [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(DL2s{j}(:,:,Idx1), DL2s{j}(:,:,Idx2), k, N);
@@ -241,9 +290,9 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
 
     % save result
     fname = [resultsPath '/' resultsPrefix '-' name1 '-' name2 '-roi' num2str(132) '-result.mat'];
-    save(fname, 'cosSim', 'fcAUC','pcAUC','gcAUC','mvarecAUC','mvarAUC','mpcvarecAUC','dlAUC','dlwAUC','dl2AUC','dlw2AUC', ...
-        'fcROC','pcROC','gcROC','mvarecROC','mvarROC','mpcvarecROC','dlROC','dlwROC','dl2ROC','dlw2ROC', ...
-        'fcACC','pcACC','gcACC','mvarecACC','mvarACC','mpcvarecACC','dlACC','dlwACC','dl2ACC','dlw2ACC', ...
+    save(fname, 'cosSim', 'fcAUC','pcAUC','gcAUC','mvarecAUC','mvarAUC','mpcvarecAUC','mpcvargcAUC','ppcvargcAUC','dlAUC','dlwAUC','dl2AUC','dlw2AUC', ...
+        'fcROC','pcROC','gcROC','mvarecROC','mvarROC','mpcvarecROC','mpcvargcROC','ppcvargcROC','dlROC','dlwROC','dl2ROC','dlw2ROC', ...
+        'fcACC','pcACC','gcACC','mvarecACC','mvarACC','mpcvarecACC','mpcvargcACC','ppcvargcACC','dlACC','dlwACC','dl2ACC','dlw2ACC', ...
         'sigCntG1', 'sigCntG2');
 
     % show box plot
@@ -261,6 +310,22 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
     AUCs(:,r(2)) = pcAUC.'; 
     figure; boxplot(AUCs);
     title(['AUC box plot : ' name1 ' vs ' name2]);
+
+    % show box plot2
+    AUCs = nan(N,37);
+    r = [1:5];
+    AUCs(:,r) = gcAUC(6:10,:).'; r=r+5;
+    AUCs(:,r) = mpcvargcAUC(6:10,:).'; r=r+5;
+    AUCs(:,r) = ppcvargcAUC(6:10,:).'; r=r+5;
+    AUCs(:,r) = dlAUC(6:10,:).'; r=r+5;
+    AUCs(:,r) = mvarecAUC(6:10,:).'; r=r+5;
+    AUCs(:,r) = mpcvarecAUC(6:10,:).'; r=r+5;
+%    AUCs(:,r) = ppcvarecAUC(6:10,:).'; r=r+5;
+    AUCs(:,r) = dlwAUC(6:10,:).'; r=r+5;
+    AUCs(:,r(1)) = fcAUC.';
+    AUCs(:,r(2)) = pcAUC.';
+    figure; boxplot(AUCs);
+    title(['AUC box plot2 : ' name1 ' vs ' name2]);
 
     % show average ROC curves
     figure; 

@@ -64,15 +64,15 @@ function g = calculateConnectivitiesByAlgorithms(g, roiNames, groupName, maxLag)
         [g.MVARECs{j}, g.meanMVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvarec', 1, i, 1);
         [g.MVARs{j}, g.meanMVAR{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mvar', 1, i, 1);
         % pvarEC(i) no exogenous 
-        [g.PVARECs{j}, g.meanPVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'pvarec', 1, j, 1);
+        [g.PVARECs{j}, g.meanPVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'pvarec', 1, i, 1);
         % mpcvarEC(i) auto exogenous 
         [g.MPCVARECs{j}, g.meanMPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvarec', 1, i, 1);
-        % ppcvarEC(i) no exogenous 
-        [g.PPCVARECs{j}, g.meanPPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'ppcvarec', 1, j, 1);
-        % mpcvarGC(i) no exogenous 
-        [g.MPCVARGCs{j}, g.meanMPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvargc', 1, j, 1);
-        % ppcvarGC(i) no exogenous 
-        [g.PPCVARGCs{j}, g.meanPPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'ppcvargc', 1, j, 1);
+        % ppcvarEC(i) auto exogenous 
+        [g.PPCVARECs{j}, g.meanPPCVAREC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'ppcvarec', 1, i, 1);
+        % mpcvarGC(i) auto exogenous 
+        [g.MPCVARGCs{j}, g.meanMPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'mpcvargc', 1, i, 1);
+        % ppcvarGC(i) auto exogenous 
+        [g.PPCVARGCs{j}, g.meanPPCVARGC{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'ppcvargc', 1, i, 1);
         % DLCM(i)-GC linear auto exogenous
         [g.DL2s{j}, g.meanDL2{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlcm', 0, i, 1, []);
         % DLCM(i)-EC linear auto exogenous
@@ -83,9 +83,9 @@ function g = calculateConnectivitiesByAlgorithms(g, roiNames, groupName, maxLag)
         [g.DLWs{j}, g.meanDLW{j}, ~] = calculateConnectivity(signals, roiNames, groupName, 'dlw', 0, i, 1);
     end
     % FC no exogenous (pairwise, then exogenous does not have meaning)
-    [g.FCs, g.meanFC, ~] = calculateConnectivity(signals, roiNames, groupName, 'fc', 1, j, 0);
+    [g.FCs, g.meanFC, ~] = calculateConnectivity(signals, roiNames, groupName, 'fc', 1, 1, 0);
     % PC no exogenous (pairwise, then exogenous does not have meaning)
-    [g.PCs, g.meanPC, ~] = calculateConnectivity(signals, roiNames, groupName, 'pc', 1, j, 0);
+    [g.PCs, g.meanPC, ~] = calculateConnectivity(signals, roiNames, groupName, 'pc', 1, 1, 0);
 end
 
 function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2, maxLag)
@@ -95,7 +95,19 @@ function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2
     % plot correlation and cos similarity
     nanx = eye(size(g.meanGC{1},1),size(g.meanGC{1},2));
     nanx(nanx==1) = NaN;
-    cosSim = zeros(maxLag*6*2,1);
+    cosSim = zeros(maxLag*7+2,1);
+    for j=1:maxLag
+        i = 0; k=j+5;
+        cosSim(j+i) = getCosSimilarity(nanmean(g.GCs{k},3)+nanx, nanmean(p.GCs{k},3)+nanx); i=i+5;
+        cosSim(j+i) = getCosSimilarity(nanmean(g.MPCVARGCs{k},3)+nanx, nanmean(p.MPCVARGCs{k},3)+nanx); i=i+5;
+        cosSim(j+i) = getCosSimilarity(nanmean(g.PPCVARGCs{k},3)+nanx, nanmean(p.PPCVARGCs{k},3)+nanx); i=i+5;
+        cosSim(j+i) = getCosSimilarity(nanmean(g.DLs{k},3)+nanx, nanmean(p.DLs{k},3)+nanx); i=i+5; % non-linear DNN
+        cosSim(j+i) = getCosSimilarity(nanmean(g.MVARECs{k},3)+nanx, nanmean(p.MVARECs{k},3)+nanx); i=i+5;
+        cosSim(j+i) = getCosSimilarity(nanmean(g.MPCVARECs{k},3)+nanx, nanmean(p.MPCVARECs{k},3)+nanx); i=i+5;
+        cosSim(j+i) = getCosSimilarity(nanmean(g.DLWs{k},3)+nanx, nanmean(p.DLWs{k},3)+nanx); i=i+5; % non-linear DNN
+    end
+    cosSim(i+1) = getCosSimilarity(nanmean(g.FCs,3)+nanx, nanmean(g.FCs,3)+nanx);
+    cosSim(i+2) = getCosSimilarity(nanmean(g.PCs,3)+nanx, nanmean(g.PCs,3)+nanx);
     figure; bar(cosSim);
     title(['cos similarity between ' name1 ' and ' name2 ' by each algorithm']);
 
@@ -286,7 +298,7 @@ function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2
     title(['AUC box plot : ' name1 ' vs ' name2]);
 
     % show box plot2
-    AUCs = nan(N,41);
+    AUCs = nan(N,37);
     r = [1:5];
     AUCs(:,r) = gcAUC(6:10,:).'; r=r+5;
     AUCs(:,r) = mpcvargcAUC(6:10,:).'; r=r+5;
@@ -294,7 +306,7 @@ function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2
     AUCs(:,r) = dlAUC(6:10,:).'; r=r+5;
     AUCs(:,r) = mvarecAUC(6:10,:).'; r=r+5;
     AUCs(:,r) = mpcvarecAUC(6:10,:).'; r=r+5;
-    AUCs(:,r) = ppcvarecAUC(6:10,:).'; r=r+5;
+%    AUCs(:,r) = ppcvarecAUC(6:10,:).'; r=r+5;
     AUCs(:,r) = dlwAUC(6:10,:).'; r=r+5;
     AUCs(:,r(1)) = fcAUC.';
     AUCs(:,r(2)) = pcAUC.';
@@ -330,13 +342,15 @@ function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2
         k = lags+5;
         plotAverageROCcurve(gcROC{k}, N, '-', [0.2,0.5,0.2]+(lags*0.1),1.0);
         plotAverageROCcurve(mvarecROC{k}, N, '-', [0.5,0.2,0.2]+(lags*0.1),1.0);
-        plotAverageROCcurve(mvarROC{k}, N, '--', [0.5,0.2,0.2]+(lags*0.1),1.0);
+%        plotAverageROCcurve(mvarROC{k}, N, '--', [0.5,0.2,0.2]+(lags*0.1),1.0);
         plotAverageROCcurve(mpcvarecROC{k}, N, '-.', [0.5,0.2,0.2]+(lags*0.1),1.0);
         plotAverageROCcurve(dlROC{k}, N, '-', [0.2,0.2,0.4]+(lags*0.1),1.0);
-        plotAverageROCcurve(dl2ROC{k}, N, '--', [0.2,0.2,0.4]+(lags*0.1),0.4); % linear
+%        plotAverageROCcurve(dl2ROC{k}, N, '--', [0.2,0.2,0.4]+(lags*0.1),0.4); % linear
         plotAverageROCcurve(dlwROC{k}, N, '-', [0.2,0.2,0.2]+(lags*0.1),1.0);
-        plotAverageROCcurve(dlw2ROC{k}, N, '--', [0.2,0.2,0.2]+(lags*0.1),0.4); % linear
+%        plotAverageROCcurve(dlw2ROC{k}, N, '--', [0.2,0.2,0.2]+(lags*0.1),0.4); % linear
     end
+    plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
+    plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);
