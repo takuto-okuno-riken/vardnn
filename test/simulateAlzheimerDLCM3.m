@@ -181,6 +181,18 @@ function simulateAlzheimerDLCM3
     end
     figure; boxplot(maes); title('MAEs between mean cnSignals and each algorithm signals');
 
+    maes = nan(cnSbjNum,15);
+    for j=1:cnSbjNum
+        si = convert2SigmoidSignal(cnSignals{j});
+        for i=1:maxLag
+            k = i+5;
+            maes(j,i) = getTwoSignalsError(si, smmvcnSignals{k}{j}); % VAR linear (ex)
+            maes(j,5+i) = getTwoSignalsError(si, smmpvcnSignals{k}{j}); % PCVAR linear (ex)
+            maes(j,10+i) = getTwoSignalsError(si, smcnSignals{k}{j}); % DLCM non linear (ex)
+        end
+    end
+    figure; boxplot(maes); title('MAEs between mean cnSignals and each algorithm signals');
+
     % plot correlation and cos similarity
     cosSim = zeros(120,1);
     for k=1:maxLag*2
@@ -198,7 +210,24 @@ function simulateAlzheimerDLCM3
         cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSmmvcnFC{k}); i=i+10;
         cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSmmpvcnFC{k}); i=i+10;
     end
-    figure; bar(cosSim); title('cos similarity between mean CN matrix and SimCN by each algorithm');
+    figure; bar(cosSim); title('cos similarity between mean CN and mean simulated CN by each algorithm');
+    
+    cosSim = zeros(15,1);
+    for k=1:maxLag
+        i=k; j=k+5;
+        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmmvcnDLW{j}); i=i+5; % mvar linear (ex)
+        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmmpvcnDLW{j}); i=i+5; % mpcvar linear (ex)
+        cosSim(i) = getCosSimilarity(meanCnDLW{1}, meanSmcnDLW{j}); i=i+5; % non linear (ex)
+    end
+    figure; bar(cosSim); title('cos similarity between mean CN and mean simulated CN DLCM-EC matrix');
+    cosSim = zeros(15,1);
+    for k=1:maxLag
+        i=k; j=k+5;
+        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSmmvcnFC{j}); i=i+5;
+        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSmmpvcnFC{j}); i=i+5;
+        cosSim(i) = getCosSimilarity(meanCnFC{1}, meanSmcnFC{j}); i=i+5;
+    end
+    figure; bar(cosSim); title('cos similarity (FC) between mean CN and mean simulated CN FC matrix');
 %{
     cosSim = zeros(algNum,1);
     figure; bar(cosSim); title('cos similarity between mean AD matrix and SimAD by each algorithm');
@@ -267,7 +296,28 @@ function simulateAlzheimerDLCM3
             cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), smmpvcnFCs{k}(:,:,j)); i=i+10;
         end
     end
-    figure; boxplot(cosSims); title('cos similarity between mean CN matrix and each subject EC by each algorithm');
+    figure; boxplot(cosSims); title('cos similarity between original EC and simulated signals EC by each algorithm');
+
+    cosSims = nan(cnSbjNum,15);
+    for j=1:cnSbjNum
+        for k=1:maxLag
+            i=k; n=k+5;
+            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smmvcnDLWs{n}(:,:,j)); i=i+5; % mvar linear (ex)
+            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smmpvcnDLWs{n}(:,:,j)); i=i+5; % mpcvar linear (ex)
+            cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smcnDLWs{n}(:,:,j)); i=i+5; % DLCM non linear (ex)
+        end
+    end
+    figure; boxplot(cosSims); title('cos similarity between original and simulated signals DLCM-EC');
+    cosSims = nan(cnSbjNum,15);
+    for j=1:cnSbjNum
+        for k=1:maxLag
+            i=k; n=k+5;
+            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), smmvcnFCs{n}(:,:,j)); i=i+5;
+            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), smmpvcnFCs{n}(:,:,j)); i=i+5;
+            cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), smcnFCs{n}(:,:,j)); i=i+5;
+        end
+    end
+    figure; boxplot(cosSims); title('cos similarity between original and simulated signals FC');
 %{
     cosSims = nan(cnSbjNum,30);
     for j=1:adSbjNum
