@@ -307,7 +307,7 @@ function simulateAlzheimerDLCM3
             cosSims(j,i) = getCosSimilarity(cnDLWs{1}(:,:,j), smcnDLWs{n}(:,:,j)); i=i+5; % DLCM non linear (ex)
         end
     end
-    figure; boxplot(cosSims); title('cos similarity between original and simulated signals DLCM-EC');
+    figure; boxplot(cosSims); title('cos similarity between original and simulated signals DLCM-EC'); ylim([0 1]);
     cosSims = nan(cnSbjNum,15);
     for j=1:cnSbjNum
         for k=1:maxLag
@@ -317,7 +317,7 @@ function simulateAlzheimerDLCM3
             cosSims(j,i) = getCosSimilarity(cnFCs{1}(:,:,j), smcnFCs{n}(:,:,j)); i=i+5;
         end
     end
-    figure; boxplot(cosSims); title('cos similarity between original and simulated signals FC');
+    figure; boxplot(cosSims); title('cos similarity between original and simulated signals FC'); ylim([0 1]);
 %{
     cosSims = nan(cnSbjNum,30);
     for j=1:adSbjNum
