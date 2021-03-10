@@ -231,14 +231,14 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
 
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(MPCVARGCs{j}, p.MPCVARGCs{j}, k, N);
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(MPCVARGCs{j}(:,:,Idx1), MPCVARGCs{j}(:,:,Idx2), k, N);
             [B, I, X] = sortAndPairPValues(control, target, MpcvarGCsUtP{j}, topNum);
             sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             [mpcvargcROC{j}{k,1}, mpcvargcROC{j}{k,2}, mpcvargcAUC(j,k), mpcvargcACC{j}{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
             i = i + 1;
-            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(PPCVARGCs{j}, p.PPCVARGCs{j}, k, N);
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(PPCVARGCs{j}(:,:,Idx1), PPCVARGCs{j}(:,:,Idx2), k, N);
             [B, I, X] = sortAndPairPValues(control, target, PpcvarGCsUtP{j}, topNum);
             sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
@@ -326,6 +326,7 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
     AUCs(:,r(2)) = pcAUC.';
     figure; boxplot(AUCs);
     title(['AUC box plot2 : ' name1 ' vs ' name2]);
+    ylim([0 1.2]);
 
     % show average ROC curves
     figure; 
