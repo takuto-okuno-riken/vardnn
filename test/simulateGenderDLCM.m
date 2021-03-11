@@ -268,13 +268,13 @@ function g = plotSimSignalsResults(g, roiNames, groupName, maxLag)
 %    [sortCosCnFC,idxCosCnFC] = sort(cosSims(:,21),'descend');
 
     % plot correlation between original EC matrix and simulated signals EC matrix
-%{
+    nodeNum = size(g.SubDLWs{5}(:,:,1),1);
     for i=1:1 %cnSbjNum
         % calc & plot correlation of original Zi vs simulating Zi
-        [corrZi, corrZij] = calcCorrelationZiZij(cnSubDLWs(:,:,i), smcnSubDLWs(:,:,i), nodeNum);
-        plotCorrelationZiZij(cnDLWs(:,:,i), cnSubDLWs(:,:,i), smcnDLWs(:,:,i), smcnSubDLWs(:,:,i), nodeNum, ['sbj' num2str(i)], 'original', 'simulating');
+        [corrZi, corrZij] = calcCorrelationZiZij(g.SubDLWs{5}(:,:,i), g.smSubDLWs{5}(:,:,i), nodeNum);
+        plotCorrelationZiZij([], g.SubDLWs{5}(:,:,i), [], g.smSubDLWs{5}(:,:,i), nodeNum, ['sbj' num2str(i)], 'original', 'simulating');
     end
-%}
+    
     % plot box-and-whisker plot of cos similarity between original ec matrix and simulated signals ec matrix
     cosSims = nan(g.sbjNum,120);
     for j=1:g.sbjNum
@@ -456,6 +456,37 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
     end
 end
 
+function plotCorrelationZiZij(EC, subEC, smEC, smSubEC, nodeNum, prefix, orig, sim)
+    if ~isempty(subEC)
+        figure; hold on; plot([0.5 1.2], [0.5 1.2],':','Color',[0.5 0.5 0.5]);
+        for i=1:nodeNum
+            X = subEC(i,2:end);
+            Y = smSubEC(i,2:end); Y(i) = nan;
+            plotTwoSignalsCorrelation(X, Y, [0.3+0.07*mod(i,10) 0.3+0.07*ceil(mod(i,100)/10) 0.6+0.2*ceil(i/100)]);
+        end
+        for i=1:nodeNum
+            plotTwoSignalsCorrelation(subEC(i,1), smSubEC(i,1), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'd', 8);
+        end
+        hold off; title([prefix ' Zij corr: ' orig ' vs ' sim]);
+    end
+    if ~isempty(EC)
+        figure; hold on; plot([0 0.5], [0 0.5],':','Color',[0.5 0.5 0.5]);
+        for i=1:nodeNum
+            plotTwoSignalsCorrelation(EC(i,:), smEC(i,:), [0.4+0.2*ceil(i/100) 0.1*mod(i,5) 0.1*ceil(mod(i,50)/10)], 'x', 5);
+        end
+        hold off; title([prefix ' Zi corr: ' orig ' vs ' sim]);
+    end
+end
+
+function [ZiCorr, ZijCorr] = calcCorrelationZiZij(subEC, smSubEC, nodeNum)        
+    ZiCorr = corr2(subEC(:,1), smSubEC(:,1));
+    ZijCorr = nan(nodeNum,1);
+    for i=1:nodeNum
+        X = subEC(i,2:end);
+        Y = smSubEC(i,2:end); Y(i) = nan;
+        ZijCorr(i) = corr2(X(~isnan(X)), Y(~isnan(Y)));
+    end
+end
 
 function [utestH, utestP, utestP2] = calculateAlzWilcoxonTest(control, target, roiNames, controlGroup, targetGroup, algorithm, force, testname, showfig)
     if nargin < 9
