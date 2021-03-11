@@ -183,8 +183,20 @@ function g = plotSimSignalsResults(g, roiNames, groupName, maxLag)
             maes(j,30+i) = getTwoSignalsError(si, g.smmpvSignals{i}{j}); % linear (no ex, ex)
         end
     end
-    figure; boxplot(maes); title(['MAEs between mean cnSignals and each algorithm signals : ' groupName]);
+    figure; boxplot(maes); title(['MAEs between original and simulated signals : ' groupName]);
 
+    maes = nan(g.sbjNum,15);
+    for j=1:g.sbjNum
+        si = convert2SigmoidSignal(signals{j});
+        for i=1:maxLag
+            k = i+5;
+            maes(j,i) = getTwoSignalsError(si, g.smmvSignals{k}{j}); % VAR linear (ex)
+            maes(j,5+i) = getTwoSignalsError(si, g.smmpvSignals{k}{j}); % PCVAR linear (ex)
+            maes(j,10+i) = getTwoSignalsError(si, g.smSignals{k}{j}); % DLCM non linear (ex)
+        end
+    end
+    figure; boxplot(maes); title(['MAEs between original and simulated signals : ' groupName]);
+    
     % plot correlation and cos similarity
     cosSim = zeros(120,1);
     for k=1:maxLag*2
@@ -202,7 +214,25 @@ function g = plotSimSignalsResults(g, roiNames, groupName, maxLag)
         cosSim(i) = getCosSimilarity(g.meanFC{1}, g.meanSmmvFC{k}); i=i+10;
         cosSim(i) = getCosSimilarity(g.meanFC{1}, g.meanSmmpvFC{k}); i=i+10;
     end
-    figure; bar(cosSim); title(['cos similarity between mean CN matrix and SimCN by each algorithm : ' groupName]);
+    figure; bar(cosSim); title(['cos similarity between mean ' groupName ' matrix and simulated ' groupName ' by each algorithm']);
+
+    cosSim = zeros(15,1);
+    for k=1:maxLag
+        i=k; j=k+5;
+        cosSim(i) = getCosSimilarity(g.meanDLW{1}, g.meanSmmvDLW{j}); i=i+5; % mvar linear (ex)
+        cosSim(i) = getCosSimilarity(g.meanDLW{1}, g.meanSmmpvDLW{j}); i=i+5; % mpcvar linear (ex)
+        cosSim(i) = getCosSimilarity(g.meanDLW{1}, g.meanSmDLW{j}); i=i+5; % non linear (ex)
+    end
+    figure; bar(cosSim); title(['cos similarity between mean ' groupName ' and mean simulated ' groupName ' DLCM-EC matrix']);
+    cosSim = zeros(15,1);
+    for k=1:maxLag
+        i=k; j=k+5;
+        cosSim(i) = getCosSimilarity(g.meanFC{1}, g.meanSmmvFC{j}); i=i+5;
+        cosSim(i) = getCosSimilarity(g.meanFC{1}, g.meanSmmpvFC{j}); i=i+5;
+        cosSim(i) = getCosSimilarity(g.meanFC{1}, g.meanSmFC{j}); i=i+5;
+    end
+    figure; bar(cosSim); title(['cos similarity between mean ' groupName ' and mean simulated ' groupName ' FC matrix']);
+
 %{
     cosSim = zeros(algNum,1);
     figure; bar(cosSim); title('cos similarity between mean AD matrix and SimAD by each algorithm');
@@ -229,7 +259,7 @@ function g = plotSimSignalsResults(g, roiNames, groupName, maxLag)
 %        cosSims(i,11) = getCosSimilarity(meanCnDL, cnDLs(:,:,i));
 %        cosSims(i,21) = getCosSimilarity(meanCnFC, cnFCs(:,:,i));
     end
-    figure; boxplot(cosSims); title(['cos similarity between mean CN matrix and each subject EC by each algorithm : ' groupName]);
+    figure; boxplot(cosSims); title(['cos similarity between mean ' groupName ' matrix and each subject EC by each algorithm']);
 %    [anovaP,tbl,stats] = kruskalwallis(cosSims(:,1:30));
 %    c = multcompare(stats);
 %    [p1,h1] = ranksum(cosSims(:,1),cosSims(:,2));
@@ -266,6 +296,28 @@ function g = plotSimSignalsResults(g, roiNames, groupName, maxLag)
     end
     figure; boxplot(cosSims); title(['cos similarity between each Original EC and each Simulated EC by each algorithm : ' groupName]);
 
+
+    cosSims = nan(g.sbjNum,15);
+    for j=1:g.sbjNum
+        for k=1:maxLag
+            i=k; n=k+5;
+            cosSims(j,i) = getCosSimilarity(g.DLWs{1}(:,:,j), g.smmvDLWs{n}(:,:,j)); i=i+5; % mvar linear (ex)
+            cosSims(j,i) = getCosSimilarity(g.DLWs{1}(:,:,j), g.smmpvDLWs{n}(:,:,j)); i=i+5; % mpcvar linear (ex)
+            cosSims(j,i) = getCosSimilarity(g.DLWs{1}(:,:,j), g.smDLWs{n}(:,:,j)); i=i+5; % DLCM non linear (ex)
+        end
+    end
+    figure; boxplot(cosSims); title(['cos similarity between original and simulated signals DLCM-EC : ' groupName]); ylim([0 1]);
+    cosSims = nan(g.sbjNum,15);
+    for j=1:g.sbjNum
+        for k=1:maxLag
+            i=k; n=k+5;
+            cosSims(j,i) = getCosSimilarity(g.FCs{1}(:,:,j), g.smmvFCs{n}(:,:,j)); i=i+5;
+            cosSims(j,i) = getCosSimilarity(g.FCs{1}(:,:,j), g.smmpvFCs{n}(:,:,j)); i=i+5;
+            cosSims(j,i) = getCosSimilarity(g.FCs{1}(:,:,j), g.smFCs{n}(:,:,j)); i=i+5;
+        end
+    end
+    figure; boxplot(cosSims); title(['cos similarity between original and simulated signals FC : ' groupName]); ylim([0 1]);
+    
     % change Z score
 %{
     cnDLWs = calcZScores(cnDLWs);
