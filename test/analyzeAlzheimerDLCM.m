@@ -212,8 +212,30 @@ function analyzeAlzheimerDLCM
     [cnadPpcvarECsUt, cnadPpcvarECsUtP, cnadPpcvarECsUtP2] = calculateAlzWilcoxonTest(cnPPCVARECs, adPPCVARECs, roiNames, 'cn', 'ad', 'ppcvarec');
     [cnadPpcvarGCsUt, cnadPpcvarGCsUtP, cnadPpcvarGCsUtP2] = calculateAlzWilcoxonTest(cnPPCVARGCs, adPPCVARGCs, roiNames, 'cn', 'ad', 'ppcvargc');
     
-    % using minimum 100 p-value relations. perform 5-fold cross validation.
+    % show top 100 most different relations
     topNum = 100;
+    [B,I]=sort(cnadDLWsUtP(:));
+    figure; semilogy(B(1:topNum)); title('DLCM(1)');
+    figure; hold on; plot(meanCNDLW(I(1:topNum))); plot(meanADDLW(I(1:topNum))); hold off; title('DLCM(1)');
+    
+    [B,I]=sort(cnadFCAsUtP(:));
+    figure; semilogy(B(1:topNum)); title('FC');
+    figure; hold on; plot(meanCNFC(I(1:topNum))); plot(meanADFC(I(1:topNum))); hold off; title('FC');
+    
+    % show top3 most different EC histgram
+    for i=1:3
+        [B,I]=sort(cnadDLWsUtP(:));
+        [c, r] = index2rowCol(I(i),132); eg=[0:0.025:0.4];
+        figure; hold on; histogram(cnDLWs(r,c,:),eg); histogram(adDLWs(r,c,:),eg); hold off;
+        title(['DLCM(1)-EC top' num2str(i) ' (' num2str(r) ',' num2str(c) ')']);
+
+        [B,I]=sort(cnadFCAsUtP(:));
+        [c, r] = index2rowCol(I(i),132); eg=[-0.2:0.1:1];
+        figure; hold on; histogram(cnFCs(r,c,:),eg); histogram(adFCs(r,c,:),eg); hold off;
+        title(['FC top' num2str(i) ' (' num2str(r) ',' num2str(c) ')']);
+    end
+    
+    % using minimum 100 p-value relations. perform 5-fold cross validation.
     sigTh = 2;
     N = 5;
 
@@ -527,6 +549,10 @@ function analyzeAlzheimerDLCM
     ylabel('True Positive Rate')
 end
 
+function [c, r] = index2rowCol(idx,n)
+    c=1+floor((idx-1)/n); r=1+mod(idx-1,n);
+end
+
 function [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(orgControl, orgTarget, k, N)
     un = floor(size(orgControl,3) / N);
     st = (k-1)*un+1;
@@ -713,6 +739,8 @@ function [utestH, utestP, utestP2] = calculateAlzWilcoxonTest(control, target, r
     countTarget = nansum(utestH,2);
     save(outfName, 'utestH', 'utestP', 'utestP2', 'roiNames', 'countSource', 'countTarget');
 
+    return; % do not show figures
+    
     load('test/colormap.mat')
     % U test result
     figure; 

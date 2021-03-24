@@ -152,8 +152,35 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
     [~, FCsUtP, ~] = calculateAlzWilcoxonTest(FCs(:,:,Idx1), FCs(:,:,Idx2), roiNames, name1, name2, 'fc');
     [~, PCsUtP, ~] = calculateAlzWilcoxonTest(PCs(:,:,Idx1), PCs(:,:,Idx2), roiNames, name1, name2, 'pc');
 
-    % using minimum 100 p-value relations. perform 5-fold cross validation.
+    
+    % show top 100 most different relations
     topNum = 100;
+    [B,I]=sort(DLWsUtP{6}(:));
+    figure; semilogy(B(1:topNum)); title('DLCM(1)');
+    g1m=nanmean(DLWs{6}(:,:,Idx1),3); g2m=nanmean(DLWs{6}(:,:,Idx2),3);
+    figure; hold on; plot(g1m(I(1:topNum))); plot(g2m(I(1:topNum))); hold off; title('DLCM(1)');
+    
+    [B,I]=sort(FCsUtP(:));
+    figure; semilogy(B(1:topNum)); title('FC');
+    g1m=nanmean(FCs(:,:,Idx1),3); g2m=nanmean(FCs(:,:,Idx2),3);
+    figure; hold on; plot(g1m(I(1:topNum))); plot(g2m(I(1:topNum))); hold off; title('FC');
+    
+    % show top3 most different EC histgram
+    for i=1:3
+        [B,I]=sort(DLWsUtP{6}(:));
+        [c, r] = index2rowCol(I(i),132);
+        g1=DLWs{6}(:,:,Idx1); g2=DLWs{6}(:,:,Idx2);
+        figure; hold on; histogram(g1(r,c,:)); histogram(g2(r,c,:)); hold off;
+        title(['DLCM(1)-EC top' num2str(i) ' (' num2str(r) ',' num2str(c) ')']);
+
+        [B,I]=sort(FCsUtP(:));
+        [c, r] = index2rowCol(I(i),132);
+        g1=FCs(:,:,Idx1); g2=FCs(:,:,Idx2);
+        figure; hold on; histogram(g1(r,c,:)); histogram(g2(r,c,:)); hold off;
+        title(['FC top' num2str(i) ' (' num2str(r) ',' num2str(c) ')']);
+    end
+    
+    % using minimum 100 p-value relations. perform 5-fold cross validation.
     sigTh = 2;
     N = 4;
 
@@ -376,6 +403,10 @@ function statisticalGroupIdentificationByAlgorithms(g, roiNames, Idx1, Idx2, nam
     ylabel('True Positive Rate')
 end
 
+function [c, r] = index2rowCol(idx,n)
+    c=1+floor((idx-1)/n); r=1+mod(idx-1,n);
+end
+
 function [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(orgControl, orgTarget, k, N)
     un = floor(size(orgControl,3) / N);
     st = (k-1)*un+1;
@@ -556,6 +587,8 @@ function [utestH, utestP, utestP2] = calculateAlzWilcoxonTest(control, target, r
     countTarget = nansum(utestH,2);
     save(outfName, 'utestH', 'utestP', 'utestP2', 'roiNames', 'countSource', 'countTarget');
 
+    return; % do not show figures
+    
     load('test/colormap.mat')
     % U test result
     figure; 
