@@ -106,8 +106,8 @@ function statisticalGroupIdentificationByAlgorithms(g, p, roiNames, name1, name2
         cosSim(j+i) = getCosSimilarity(nanmean(g.MPCVARECs{k},3)+nanx, nanmean(p.MPCVARECs{k},3)+nanx); i=i+5;
         cosSim(j+i) = getCosSimilarity(nanmean(g.DLWs{k},3)+nanx, nanmean(p.DLWs{k},3)+nanx); i=i+5; % non-linear DNN
     end
-    cosSim(i+1) = getCosSimilarity(nanmean(g.FCs,3)+nanx, nanmean(g.FCs,3)+nanx);
-    cosSim(i+2) = getCosSimilarity(nanmean(g.PCs,3)+nanx, nanmean(g.PCs,3)+nanx);
+    cosSim(i+1) = getCosSimilarity(nanmean(g.FCs,3)+nanx, nanmean(p.FCs,3)+nanx);
+    cosSim(i+2) = getCosSimilarity(nanmean(g.PCs,3)+nanx, nanmean(p.PCs,3)+nanx);
     figure; bar(cosSim);
     title(['cos similarity between ' name1 ' and ' name2 ' by each algorithm']);
 
