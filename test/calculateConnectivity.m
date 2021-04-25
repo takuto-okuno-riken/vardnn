@@ -114,6 +114,18 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
             case 'ppcvargc'
                 netPPCVAR = initPpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 mat = calcPpcvarGCI(signals{i}, exSignal, [], exControl, netPPCVAR);
+            case 'mplsvarec'
+                netMPLSVAR = initMplsvarNetwork(signals{i}, exSignal, [], exControl, lags);
+                mat = calcMplsvarEC(netMPLSVAR, [], exControl);
+            case 'mplsvargc'
+                netMPLSVAR = initMplsvarNetwork(signals{i}, exSignal, [], exControl, lags);
+                mat = calcMplsvarGCI(signals{i}, exSignal, [], exControl, netMPLSVAR);
+            case 'pplsvarec'
+                netPPLSVAR = initPplsvarNetwork(signals{i}, exSignal, [], exControl, lags);
+                mat = calcPplsvarEC(netPPLSVAR, [], exControl);
+            case 'pplsvargc'
+                netPPLSVAR = initPplsvarNetwork(signals{i}, exSignal, [], exControl, lags);
+                mat = calcPplsvarGCI(signals{i}, exSignal, [], exControl, netPPLSVAR);
             case 'dlcm'
                 dlcmName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(dlcmName, 'file')
@@ -316,6 +328,30 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : pPCVAR(' num2str(lags) ')-GC Index'];
+    case 'mplsvarec'
+        sigma = std(meanWeights(:),1,'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : mPLSVAR(' num2str(lags) ')-EC Index'];
+    case 'mplsvargc'
+        sigma = std(meanWeights(:),1,'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : mPLSVAR(' num2str(lags) ')-GC Index'];
+    case 'pplsvarec'
+        sigma = std(meanWeights(:),1,'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : pPLSVAR(' num2str(lags) ')-EC Index'];
+    case 'pplsvargc'
+        sigma = std(meanWeights(:),1,'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : pPLSVAR(' num2str(lags) ')-GC Index'];
     end
     imagesc(sigWeights,clims);
     daspect([1 1 1]);

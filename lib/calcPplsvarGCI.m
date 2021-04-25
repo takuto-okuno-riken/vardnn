@@ -1,6 +1,6 @@
 %%
-% Caluclate pairwise PCVAR Granger Causality
-% returns pairwise PCVAR Granger causality index matrix (gcI), significance (h=1 or 0)
+% Caluclate pairwise PLSVAR Granger Causality
+% returns pairwise PLSVAR Granger causality index matrix (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
 % and AIC, BIC (of node vector)
 % input:
@@ -8,11 +8,11 @@
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
-%  net          trained pairwise PCVAR network structure
+%  net          trained pairwise PLS VAR network structure
 %  alpha        the significance level of F-statistic (optional)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [gcI, h, P, F, cvFd, AIC, BIC] = calcPpcvarGCI(X, exSignal, nodeControl, exControl, net, alpha, isFullNode)
+function [gcI, h, P, F, cvFd, AIC, BIC] = calcPplsvarGCI(X, exSignal, nodeControl, exControl, net, alpha, isFullNode)
     if nargin < 7, isFullNode = 0; end
     if nargin < 6, alpha = 0.05; end
 
@@ -25,7 +25,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPpcvarGCI(X, exSignal, nodeControl
     % set node input
     Y = [X; exSignal];
 
-    % calc Pairwised PCVAR granger causality
+    % calc Pairwised PLS VAR granger causality
     gcI = nan(nodeNum, nodeMax);
     h = nan(nodeNum,nodeMax);
     P = nan(nodeNum,nodeMax);
@@ -50,20 +50,17 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPpcvarGCI(X, exSignal, nodeControl
             end
 
             % var of residuals (full)
-            r = net.rvec{i,j};
+            r = net.stats{i,j}.Yresiduals;
             Vxt = var(r);
 
             % AIC and BIC of this node (assuming residuals are gausiann distribution)
-            mc = net.maxComp{i,j};
-            mu = net.mu{i,j};
+            mc = net.ncomp;
             T = sigLen-p;
             RSS = r'*r;
             k = mc+1;
 
             % var of residuals (reduced)
-            scorej = (Yti - mu) / net.coeff{i,j}.';
-            pcXti = [scorej(:,1:mc), ones(sigLen-p,1)]; % might not be good to add bias
-            r = Yt - pcXti * net.bvec{i,j}; % calc residuals
+            r = Yt - [ones(size(Yti,1),1), Yti] * net.bvec{i,j};
             Vyt = var(r);
 
             gcI(i,j) = log(Vyt / Vxt);

@@ -24,7 +24,7 @@ function analyzeAlzheimerDLCM
     resultsPrefix = 'ad';
 
     % calculate connectivity
-    algNum = 21;
+    algNum = 25;
     [cnFCs, meanCNFC, stdCNFC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'fc');
     [adFCs, meanADFC, stdADFC] = calculateConnectivity(adSignals, roiNames, 'ad', 'fc');
     [mciFCs, meanMCIFC, stdMCIFC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'fc');
@@ -105,6 +105,18 @@ function analyzeAlzheimerDLCM
     [cnPPCVARGCs, meanCNPPCVARGC, stdCNPPCVARGC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'ppcvargc', 0, 3);
     [adPPCVARGCs, meanADPPCVARGC, stdADPPCVARGC] = calculateConnectivity(adSignals, roiNames, 'ad', 'ppcvargc', 0, 3);
 
+    [cnMPLSVARECs, meanCNMPLSVAREC, stdCNMPLSVAREC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mplsvarec', 0, 3);
+    [adMPLSVARECs, meanADMPLSVAREC, stdADMPLSVAREC] = calculateConnectivity(adSignals, roiNames, 'ad', 'mplsvarec', 0, 3);
+
+    [cnMPLSVARGCs, meanCNMPLSVARGC, stdCNMPLSVARGC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'mplsvargc', 0, 3);
+    [adMPLSVARGCs, meanADMPLSVARGC, stdADMPLSVARGC] = calculateConnectivity(adSignals, roiNames, 'ad', 'mplsvargc', 0, 3);
+
+    [cnPPLSVARECs, meanCNPPLSVAREC, stdCNPPLSVAREC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'pplsvarec', 0, 3);
+    [adPPLSVARECs, meanADPPLSVAREC, stdADPPLSVAREC] = calculateConnectivity(adSignals, roiNames, 'ad', 'pplsvarec', 0, 3);
+
+    [cnPPLSVARGCs, meanCNPPLSVARGC, stdCNPPLSVARGC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'pplsvargc', 0, 3);
+    [adPPLSVARGCs, meanADPPLSVARGC, stdADPPLSVARGC] = calculateConnectivity(adSignals, roiNames, 'ad', 'pplsvargc', 0, 3);
+
     % plot correlation and cos similarity
     nanx = eye(size(meanADFC,1),size(meanADFC,2));
     nanx(nanx==1) = NaN;
@@ -134,8 +146,12 @@ function analyzeAlzheimerDLCM
     cosSim(19) = getCosSimilarity(meanCNMPCVARGC+nanx, meanADMPCVARGC+nanx);
     cosSim(20) = getCosSimilarity(meanCNPPCVAREC+nanx, meanADPPCVAREC+nanx);
     cosSim(21) = getCosSimilarity(meanCNPPCVARGC+nanx, meanADPPCVARGC+nanx);
+    cosSim(22) = getCosSimilarity(meanCNMPLSVAREC+nanx, meanADMPLSVAREC+nanx);
+    cosSim(23) = getCosSimilarity(meanCNMPLSVARGC+nanx, meanADMPLSVARGC+nanx);
+    cosSim(24) = getCosSimilarity(meanCNPPLSVAREC+nanx, meanADPPLSVAREC+nanx);
+    cosSim(25) = getCosSimilarity(meanCNPPLSVARGC+nanx, meanADPPLSVARGC+nanx);
     X = categorical({'FC','PC','WCS','GC','PGC','TE','DLCM-GC','DLW','dLiNG','PCS','CPC','FGES','FCa','tsFC','tsFCa', ...
-        'mVAR-EC','pVAR-EC','mPCVAR-EC','mPCVAR-GC','pPCVAR-EC','pPCVAR-GC'});
+        'mVAR-EC','pVAR-EC','mPCVAR-EC','mPCVAR-GC','pPCVAR-EC','pPCVAR-GC','mPLSVAR-EC','mPLSVAR-GC','pPLSVAR-EC','pPLSVAR-GC'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and AD by each algorithm');
     
@@ -211,6 +227,10 @@ function analyzeAlzheimerDLCM
     [cnadMpcvarGCsUt, cnadMpcvarGCsUtP, cnadMpcvarGCsUtP2] = calculateAlzWilcoxonTest(cnMPCVARGCs, adMPCVARGCs, roiNames, 'cn', 'ad', 'mpcvargc');
     [cnadPpcvarECsUt, cnadPpcvarECsUtP, cnadPpcvarECsUtP2] = calculateAlzWilcoxonTest(cnPPCVARECs, adPPCVARECs, roiNames, 'cn', 'ad', 'ppcvarec');
     [cnadPpcvarGCsUt, cnadPpcvarGCsUtP, cnadPpcvarGCsUtP2] = calculateAlzWilcoxonTest(cnPPCVARGCs, adPPCVARGCs, roiNames, 'cn', 'ad', 'ppcvargc');
+    [cnadMplsvarECsUt, cnadMplsvarECsUtP, cnadMplsvarECsUtP2] = calculateAlzWilcoxonTest(cnMPLSVARECs, adMPLSVARECs, roiNames, 'cn', 'ad', 'mplsvarec');
+    [cnadMplsvarGCsUt, cnadMplsvarGCsUtP, cnadMplsvarGCsUtP2] = calculateAlzWilcoxonTest(cnMPLSVARGCs, adMPLSVARGCs, roiNames, 'cn', 'ad', 'mplsvargc');
+    [cnadPplsvarECsUt, cnadPplsvarECsUtP, cnadPplsvarECsUtP2] = calculateAlzWilcoxonTest(cnPPLSVARECs, adPPLSVARECs, roiNames, 'cn', 'ad', 'pplsvarec');
+    [cnadPplsvarGCsUt, cnadPplsvarGCsUtP, cnadPplsvarGCsUtP2] = calculateAlzWilcoxonTest(cnPPLSVARGCs, adPPLSVARGCs, roiNames, 'cn', 'ad', 'pplsvargc');
     
     % show top 100 most different relations
     topNum = 100;
@@ -260,6 +280,10 @@ function analyzeAlzheimerDLCM
     mpcvargcAUC = zeros(1,N);
     ppcvarecAUC = zeros(1,N);
     ppcvargcAUC = zeros(1,N);
+    mplsvarecAUC = zeros(1,N);
+    mplsvargcAUC = zeros(1,N);
+    pplsvarecAUC = zeros(1,N);
+    pplsvargcAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
     wcsROC = cell(N,2);
@@ -281,6 +305,10 @@ function analyzeAlzheimerDLCM
     mpcvargcROC = cell(N,2);
     ppcvarecROC = cell(N,2);
     ppcvargcROC = cell(N,2);
+    mplsvarecROC = cell(N,2);
+    mplsvargcROC = cell(N,2);
+    pplsvarecROC = cell(N,2);
+    pplsvargcROC = cell(N,2);
     fcACC = cell(N,1);
     pcACC = cell(N,1);
     wcsACC = cell(N,1);
@@ -302,6 +330,10 @@ function analyzeAlzheimerDLCM
     mpcvargcACC = cell(N,1);
     ppcvarecACC = cell(N,1);
     ppcvargcACC = cell(N,1);
+    mplsvarecACC = cell(N,1);
+    mplsvargcACC = cell(N,1);
+    pplsvarecACC = cell(N,1);
+    pplsvargcACC = cell(N,1);
 
     sigCntCN = cell(N,algNum);
     sigCntAD = cell(N,algNum);
@@ -453,14 +485,42 @@ function analyzeAlzheimerDLCM
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [ppcvargcROC{k,1}, ppcvargcROC{k,2}, ppcvargcAUC(k), ppcvargcACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+
+        i = i + 1;
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnMPLSVARECs, adMPLSVARECs, k, N);
+        [B, I, X] = sortAndPairPValues(control, target, cnadMplsvarECsUtP, topNum);
+        sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        [mplsvarecROC{k,1}, mplsvarecROC{k,2}, mplsvarecAUC(k), mplsvarecACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+
+        i = i + 1;
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnMPLSVARGCs, adMPLSVARGCs, k, N);
+        [B, I, X] = sortAndPairPValues(control, target, cnadMplsvarGCsUtP, topNum);
+        sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        [mplsvargcROC{k,1}, mplsvargcROC{k,2}, mplsvargcAUC(k), mplsvargcACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+        
+        i = i + 1;
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnPPLSVARECs, adPPLSVARECs, k, N);
+        [B, I, X] = sortAndPairPValues(control, target, cnadPplsvarECsUtP, topNum);
+        sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        [pplsvarecROC{k,1}, pplsvarecROC{k,2}, pplsvarecAUC(k), pplsvarecACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+
+        i = i + 1;
+        [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnPPLSVARGCs, adPPLSVARGCs, k, N);
+        [B, I, X] = sortAndPairPValues(control, target, cnadPplsvarGCsUtP, topNum);
+        sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+        [pplsvargcROC{k,1}, pplsvargcROC{k,2}, pplsvargcAUC(k), pplsvargcACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
     end
     figure; boxplot(X);
 
     % save result
     fname = [resultsPath '/' resultsPrefix '-cn-ad-roi' num2str(132) '-result.mat'];
-    save(fname, 'cosSim', 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','teAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC','mvarecAUC','mpcvarecAUC', ...
-        'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','teROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC','mvarecROC','mpcvarecROC', ...
-        'fcACC','pcACC','wcsACC','gcACC','pgcACC','dlACC','dlwACC','dlgACC','teACC','pcsACC','cpcACC','fgesACC','fcaACC','tsfcACC','tsfcaACC','mvarecACC','mpcvarecACC', ...
+    save(fname, 'cosSim', 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','teAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC','mvarecAUC','mpcvarecAUC','mplsvarecAUC', ...
+        'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','teROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC','mvarecROC','mpcvarecROC','mplsvarecROC', ...
+        'fcACC','pcACC','wcsACC','gcACC','pgcACC','dlACC','dlwACC','dlgACC','teACC','pcsACC','cpcACC','fgesACC','fcaACC','tsfcACC','tsfcaACC','mvarecACC','mpcvarecACC','mplsvarecACC', ...
         'sigCntCN', 'sigCntAD');
     disp('AUCs');
     mean(dlAUC) % show result AUC
@@ -539,6 +599,10 @@ function analyzeAlzheimerDLCM
     plotAverageROCcurve(mpcvargcROC, N, '--', [0.3,0.6,0.6],0.8);
     plotAverageROCcurve(ppcvarecROC, N, '-', [0.3,0.6,0.6],0.5);
     plotAverageROCcurve(ppcvargcROC, N, '--', [0.3,0.6,0.6],0.5);
+    plotAverageROCcurve(mplsvarecROC, N, '-', [0.7,0.9,0.9],1.0);
+    plotAverageROCcurve(mplsvargcROC, N, '--', [0.7,0.9,0.9],0.8);
+%    plotAverageROCcurve(pplsvarecROC, N, '-', [0.7,0.9,0.9],0.5);
+%    plotAverageROCcurve(pplsvargcROC, N, '--', [0.7,0.9,0.9],0.5);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);
