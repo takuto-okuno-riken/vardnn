@@ -59,6 +59,8 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
             case 'pc'
 %                mat = calcPartialCorrelation(signals{i});
                 mat = calcPartialCorrelation__(signals{i});
+            case 'plspc'
+                mat = calcPLSPartialCorrelation(signals{i});
             case 'wcs'
                 fName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(fName, 'file')
@@ -233,6 +235,10 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
     case 'pc'
         clims = [-1,1];
         titleStr = [group ' : Partial Correlation'];
+        sigWeights = meanWeights;
+    case 'plspc'
+        clims = [-1,1];
+        titleStr = [group ' : PLS Partial Correlation'];
         sigWeights = meanWeights;
     case 'wcs'
         clims = [-1,1];

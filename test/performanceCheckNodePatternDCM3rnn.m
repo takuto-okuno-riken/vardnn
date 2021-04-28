@@ -56,6 +56,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     fcaAUC = zeros(1,N);
     tsfcAUC = zeros(1,N);
     tsfcaAUC = zeros(1,N);
+    plspcAUC = zeros(1,N);
     mvarecAUC = zeros(1,N);
     pvarecAUC = zeros(1,N);
     mpcvarecAUC = zeros(1,N);
@@ -75,6 +76,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     fcaROC = cell(N,2);
     tsfcROC = cell(N,2);
     tsfcaROC = cell(N,2);
+    plspcROC = cell(N,2);
     mvarecROC = cell(N,2);
     pvarecROC = cell(N,2);
     mpcvarecROC = cell(N,2);
@@ -94,6 +96,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     fcaRf = figure;
     tsfcRf = figure;
     tsfcaRf = figure;
+    plspcRf = figure;
     mvarecRf = figure;
     pvarecRf = figure;
     mpcvarecRf = figure;
@@ -186,6 +189,10 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         fg = figure; tsFCa = plotTimeShiftedCorrelationAbs(y2.', [], [], [], 3); close(fg);
         figure(tsfcaRf); hold on; [tsfcaROC{k,1}, tsfcaROC{k,2}, tsfcaAUC(k)] = plotROCcurve(tsFCa, pP.A, 100, 1, Gth); hold off;
         title('tsFCa');
+        % extra tests (PLS PC)
+        fg = figure; PLSPC = plotFunctionalConnectivityAbs(y2.'); close(fg);
+        figure(plspcRf); hold on; [plspcROC{k,1}, plspcROC{k,2}, plspcAUC(k)] = plotROCcurve(PLSPC, pP.A, 100, 1, Gth); hold off;
+        title('PLS PC');
         % extra tests (multivaliate Vector Auto-Regression EC)
         netMVAR = initMvarNetwork(y2.', [], [], [], 3);
         fg = figure; mvarEC = plotMvarEC(netMVAR, [], []); close(fg);
@@ -262,6 +269,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plotErrorROCcurve(fgesROC, N, [0.5,0.5,0.5]);
     plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
+    plotAverageROCcurve(plspcROC, N, '-.', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
     plotAverageROCcurve(pgcROC, N, '--', [0.0,0.5,0.0],0.5);
