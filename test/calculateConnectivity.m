@@ -1,6 +1,7 @@
 % this function is only for ADNI2 alzheimer analysis
 
-function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(signals, roiNames, group, algorithm, isRaw, lags, isAutoExo, activateFunc)
+function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(signals, roiNames, group, algorithm, isRaw, lags, isAutoExo, activateFunc, sigmoidAlpha)
+    if nargin < 9, sigmoidAlpha = 1; end
     if nargin < 8, activateFunc = @reluLayer; end
     if nargin < 7, isAutoExo = 0; end
     if nargin < 6, lags = 1; end
@@ -128,7 +129,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
             case 'pplsvargc'
                 netPPLSVAR = initPplsvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 mat = calcPplsvarGCI(signals{i}, exSignal, [], exControl, netPPLSVAR);
-            case 'dlcm'
+            case {'dlcm', 'dlcmB'}
                 dlcmName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(dlcmName, 'file')
                     f = load(dlcmName);
@@ -138,7 +139,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                         si = signals{i};
                         sig=0; c=0; maxsi=0; minsi=0;
                     else
-                        [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i});
+                        [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i},NaN,sigmoidAlpha);
                     end
                     % si = signals{i} - nanmin(signals{i}, [], 'all'); % simple linear transform
                     netDLCM = initDlcmNetwork(si, exSignal, [], exControl, lags, activateFunc); 
@@ -188,9 +189,11 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     mat = calcDlcmGCI(f.si, f.exSignal, [], f.exControl, netDLCM);
                     parsavedlsm(outName, netDLCM, f.si, f.exSignal, f.exControl, mat, f.sig, c, f.maxsi, f.minsi);
                 end
-            case {'dlw','dlwrc'} % should be called after dlcm
+            case {'dlw','dlwB','dlwrc'} % should be called after dlcm
                 if strcmp(algorithm, 'dlw')
                     dlcmName = [resultsPath '/' resultsPrefix '-dlcm' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                elseif strcmp(algorithm, 'dlwB')
+                    dlcmName = [resultsPath '/' resultsPrefix '-dlcmB' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 else
                     dlcmName = [resultsPath '/' resultsPrefix '-dlcmrc' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 end
@@ -280,13 +283,13 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         clims = [-1,1];
         titleStr = [group ' : Direct LiNGAM'];
         sigWeights = meanWeights;
-    case {'dlcm','dlcmrc'}
+    case {'dlcm','dlcmB','dlcmrc'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : DLCM(' num2str(lags) ') Granger Causality Index'];
-    case {'dlw','dlwrc'}
+    case {'dlw','dlwB','dlwrc'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
