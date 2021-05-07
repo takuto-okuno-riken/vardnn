@@ -15,7 +15,7 @@ function [Y, sig, c, maxsi, minsi] = convert2SigmoidSignal(X, centroid, a)
     end
     maxsi = max(X(:));
     minsi = min(X(:));
-    sig = sqrt(var(X(:)));
+    sig = sqrt(var(X(:),1));
     if isnan(centroid)
         c = mean(X(:));
     else

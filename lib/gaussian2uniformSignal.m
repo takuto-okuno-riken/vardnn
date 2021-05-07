@@ -7,7 +7,7 @@
 function [Y, sig, m, maxsi, minsi] = gaussian2uniformSignal(X)
     maxsi = max(X(:));
     minsi = min(X(:));
-    sig = sqrt(var(X(:)));
+    sig = sqrt(var(X(:),1));
     m = mean(X(:));
     Xn = (X-m)/ sig;
     Y = 0.5 * erfc(-Xn / sqrt(2));

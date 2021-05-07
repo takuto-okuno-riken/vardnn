@@ -69,7 +69,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI(
         Xti(:,[nodeDel, exDel]) = [];
         % apply the regress function
         [b,bint,r] = regress(Xt,Xti);
-        Vxt = var(r);
+        Vxt = var(r,1);
 
         % AIC and BIC of this node (assuming residuals are gausiann distribution)
         T = len-p;
@@ -86,7 +86,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI(
             Yt = Yj; %[Yj, ones(len-p,1)]; % might not be good to add bias
             Yt(:,[nodeDel, exDel, delrow]) = [];
             [b,bint,r] = regress(Xt,Yt);
-            Vyt = var(r);
+            Vyt = var(r,1);
 
             gcI(i,j) = log(Vyt / Vxt);
 

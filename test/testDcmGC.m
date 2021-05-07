@@ -181,7 +181,7 @@ function [gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 
     gcI = nan(n, n);
     for i=1:n
-        VarEi = var(invErr(:,i));
+        VarEi = var(invErr(:,i),1);
 
         uuj = Uus{end};
         uuj(:,i) = 0;
@@ -194,7 +194,7 @@ function [gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         % imparement node signals
         for j=1:n
             if i==j, continue; end
-            VarEj = var(invErrj(:,j));
+            VarEj = var(invErrj(:,j),1);
             gcI(i,j) = log(VarEj / VarEi);
         end
     end

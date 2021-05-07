@@ -22,7 +22,7 @@ function wcI = calcDlcmWCIv1(netDLCM, nodeControl, exControl)
 
         % imparement node signals
         for j=1:nodeNum
-            wcI(i,j) = var(w1(:,j));
+            wcI(i,j) = var(w1(:,j),1);
         end
     end
 end

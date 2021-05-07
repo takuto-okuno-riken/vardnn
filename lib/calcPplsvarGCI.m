@@ -51,7 +51,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPplsvarGCI(X, exSignal, nodeContro
 
             % var of residuals (full)
             r = net.stats{i,j}.Yresiduals;
-            Vxt = var(r);
+            Vxt = var(r,1);
 
             % AIC and BIC of this node (assuming residuals are gausiann distribution)
             mc = net.ncomp;
@@ -61,7 +61,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPplsvarGCI(X, exSignal, nodeContro
 
             % var of residuals (reduced)
             r = Yt - [ones(size(Yti,1),1), Yti] * net.bvec{i,j};
-            Vyt = var(r);
+            Vyt = var(r,1);
 
             gcI(i,j) = log(Vyt / Vxt);
 

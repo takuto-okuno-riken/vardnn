@@ -27,7 +27,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairGrangerCausality(X, Y, p, alph
     end
     % apply the regress function
     [b,bint,Xr] = regress(Xt,Xti);
-    Vxt = var(Xr);
+    Vxt = var(Xr,1);
 
     % autoregression plus other regression
     Yt = X(1:n-p);
@@ -37,7 +37,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairGrangerCausality(X, Y, p, alph
         Yti(:,p+i+1) = Y(i+1:n-p+i);
     end
     [b,bint,Yr] = regress(Yt,Yti);
-    Vyt = var(Yr);
+    Vyt = var(Yr,1);
     
     gcI = log(Vxt / Vyt);
 

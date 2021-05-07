@@ -67,7 +67,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMpcvarGCI(X, exS
 
         % var of residuals of node
         r = net.rvec{i};
-        Vxt = var(r);
+        Vxt = var(r,1);
 
         % AIC and BIC of this node (assuming residuals are gausiann distribution)
         T = sigLen-p;
@@ -89,7 +89,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMpcvarGCI(X, exS
             scorej = (Xtj - mu) / net.coeff{i}.';
             pcXti = [scorej(:,1:mc), ones(sigLen-p,1)]; % might not be good to add bias
             r = Xt - pcXti * net.bvec{i}; % calc residuals
-            Vyt = var(r);
+            Vyt = var(r,1);
 
             gcI(i,j) = log(Vyt / Vxt);
 

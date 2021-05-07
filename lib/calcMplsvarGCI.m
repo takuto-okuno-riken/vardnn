@@ -65,7 +65,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMplsvarGCI(X, ex
         % var of residuals of node
 %        r1 = Xt - [ones(size(Xti,1),1), Xti] * net.bvec{i}; % r1 == r
         r = net.stats{i}.Yresiduals;
-        Vxt = var(r);
+        Vxt = var(r,1);
 
         % AIC and BIC of this node (assuming residuals are gausiann distribution)
         T = sigLen-p;
@@ -85,7 +85,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMplsvarGCI(X, ex
                 Xtj(:,bIdx+nlen*(k-1)) = 0;
             end
             r = Xt - [ones(size(Xtj,1),1), Xtj] * net.bvec{i};
-            Vyt = var(r);
+            Vyt = var(r,1);
 
             gcI(i,j) = log(Vyt / Vxt);
 

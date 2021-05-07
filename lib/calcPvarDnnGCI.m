@@ -48,7 +48,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPvarDnnGCI(X, exSignal, nodeContro
             % predict 
             Si = predict(net.nodeNetwork{i,j}, nodeInput);
             err = Si - nodeTeach;
-            VarEi = var(err);
+            VarEi = var(err,1);
 
             % AIC and BIC of this node (assuming residuals are gausiann distribution)
             T = sigLen-1;
@@ -62,7 +62,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPvarDnnGCI(X, exSignal, nodeContro
             % predict 
             Sj = predict(net.nodeNetwork{i,j}, impInput);
             err = Sj - nodeTeach;
-            VarEj = var(err);
+            VarEj = var(err,1);
             gcI(i,j) = log(VarEj / VarEi);
 
             % AIC and BIC (assuming residuals are gausiann distribution)
