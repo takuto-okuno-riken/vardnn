@@ -289,7 +289,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of pVAR-EC (pat=' num2str(i) ')']);
 
         % show result of multivaliate PC Vector Auto-Regression EC
-        netMPCVAR = initMpcvarNetwork(si, [], [], [], 2);
+        netMPCVAR = initMpcvarNetwork(si, [], [], [], 3);
         mpcvarEC = calcMpcvarEC(netMPCVAR, [], []);
         figure(mpcvarecRf); hold on; [mpcvarecROC{k,1}, mpcvarecROC{k,2}, mpcvarecAUC(k)] = plotROCcurve(mpcvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of mPCVAR-EC (pat=' num2str(i) ')']);
@@ -300,7 +300,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of mPCVAR-GC (pat=' num2str(i) ')']);
 
         % show result of pairwise PC Vector Auto-Regression EC
-        netPPCVAR = initPpcvarNetwork(si, [], [], [], 2);
+        netPPCVAR = initPpcvarNetwork(si, [], [], [], 3);
         ppcvarEC = calcPpcvarEC(netPPCVAR, [], []);
         figure(ppcvarecRf); hold on; [ppcvarecROC{k,1}, ppcvarecROC{k,2}, ppcvarecAUC(k)] = plotROCcurve(ppcvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pPCVAR-EC (pat=' num2str(i) ')']);
@@ -311,7 +311,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of pPCVAR-GC (pat=' num2str(i) ')']);
 
         % show result of multivaliate PLS Vector Auto-Regression EC
-        netMPLSVAR = initMplsvarNetwork(si, [], [], [], 2);
+        netMPLSVAR = initMplsvarNetwork(si, [], [], [], 3);
         mplsvarEC = calcMplsvarEC(netMPLSVAR, [], []);
         figure(mplsvarecRf); hold on; [mplsvarecROC{k,1}, mplsvarecROC{k,2}, mplsvarecAUC(k)] = plotROCcurve(mplsvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of mPLSVAR-EC (pat=' num2str(i) ')']);
@@ -322,7 +322,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of mPLSVAR-GC (pat=' num2str(i) ')']);
 
         % show result of pairwise PLS Vector Auto-Regression EC
-        netPPLSVAR = initPplsvarNetwork(si, [], [], [], 2);
+        netPPLSVAR = initPplsvarNetwork(si, [], [], [], 3);
         pplsvarEC = calcPplsvarEC(netPPLSVAR, [], []);
         figure(pplsvarecRf); hold on; [pplsvarecROC{k,1}, pplsvarecROC{k,2}, pplsvarecAUC(k)] = plotROCcurve(pplsvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pPLSVAR-EC (pat=' num2str(i) ')']);
