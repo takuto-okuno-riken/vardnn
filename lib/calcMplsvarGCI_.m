@@ -12,7 +12,7 @@
 %  alpha        the significance level of F-statistic (default:0.05)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMplsvarGCI(X, exSignal, nodeControl, exControl, net, alpha, isFullNode)
+function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMplsvarGCI_(X, exSignal, nodeControl, exControl, net, alpha, isFullNode)
     if nargin < 7, isFullNode = 0; end
     if nargin < 6, alpha = 0.05; end
     if nargin < 4, exControl = []; end
@@ -79,15 +79,12 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMplsvarGCI(X, ex
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
 
-            % PLS vector auto-regression (VAR)
-            jIdx = idx;
-            for k=p:-1:1
-                jIdx(j+nlen*(k-1)) = [];
+            Xtj = Xti;
+            bIdx = find(idxList==j);
+            for k=1:p
+                Xtj(:,bIdx+nlen*(k-1)) = 0;
             end
-            Xtj = Yj(:,jIdx);
-            % apply the PLS regress function
-            [XL,YL,XS,YS,b,PCTVAR,MSE,stats] = plsregress(Xtj,Xt,mc);
-            r = stats.Yresiduals;
+            r = Xt - [ones(size(Xtj,1),1), Xtj] * net.bvec{i};
             Vyt = var(r,1);
 
             gcI(i,j) = log(Vyt / Vxt);

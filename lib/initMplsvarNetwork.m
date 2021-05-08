@@ -58,7 +58,7 @@ function net = initMplsvarNetwork(X, exSignal, nodeControl, exControl, lags)
 
         % PLS vector auto-regression (VAR)
         Xt = Y(1:sigLen-p,i);
-        Xti = Yj(:,idx); % might not be good to add bias
+        Xti = Yj(:,idx);
         % apply the PLS regress function
         [XL{i},YL{i},XS{i},YS{i},b{i},PCTVAR{i},MSE{i},stats{i}] = plsregress(Xti,Xt,ncomp);
     end
