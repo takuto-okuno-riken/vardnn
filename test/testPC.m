@@ -68,3 +68,5 @@ imagesc(PC4,clims);
 title('PLS Partial Correlation');
 colorbar;
 
+Z = PC3 - PC4;
+figure; clims = [-1 1]; imagesc(Z,clims); title('PC3 - PC4');

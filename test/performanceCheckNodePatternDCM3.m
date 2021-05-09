@@ -190,6 +190,10 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         fg = figure; PC = plotPartialCorrelation(y2.'); close(fg);
         figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(PC, pP.A); hold off;
         title('PC');
+        % PC and PLSPC diff check
+        PLSPC = calcPLSPartialCorrelation(y2.'); % calc PLS PC
+        Z = PC - PLSPC; pcdiff=nanmean(abs(Z),'all'); disp(['mae of PC-PLSPC=' num2str(pcdiff)]);
+        figure; clims = [-1 1]; imagesc(Z,clims); title('PC - PLSPC');
         % show result of WCS
         fg = figure; WCS = plotWaveletCoherence(y2.'); close(fg);
         figure(wcsRf); hold on; [wcsROC{k,1}, wcsROC{k,2}, wcsAUC(k)] = plotROCcurve(WCS, pP.A); hold off;
@@ -198,6 +202,11 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         fg = figure; gcI = plotMultivariateGCI_(y2.',[],[],[],3,0); close(fg);
         figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, pP.A); hold off;
         title('mvGC');
+        % mvGC and mPLSVARGC diff check
+        netMPLSVAR = initMplsvarNetwork(y2.', [], [], [], 3);
+        mplsvarGC = calcMplsvarGCI(y2.', [], [], [], netMPLSVAR);
+        Z = gcI - mplsvarGC; gcdiff=nanmean(abs(Z),'all'); disp(['mae of mvGC-mplsvarGC=' num2str(gcdiff) ' / ' num2str(max(max(gcI)))]);
+        figure; clims = [-1 1]; imagesc(Z,clims); title('mvGC - mplsvarGC');
         % show result of granger causality index (pwGC)
         fg = figure; gcI = plotPairwiseGCI(y2.',[],[],[],3,0); close(fg);
         figure(pgcRf); hold on; [pgcROC{k,1}, pgcROC{k,2}, pgcAUC(k)] = plotROCcurve(gcI, pP.A); hold off;

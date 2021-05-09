@@ -143,6 +143,10 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         PC = calcPartialCorrelation(si);
         figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(PC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of PC (pat=' num2str(i) ')']);
+        % PC and PLSPC diff check
+        PLSPC = calcPLSPartialCorrelation(si); % calc PLS PC
+        Z = PC - PLSPC; pcdiff=nanmean(abs(Z),'all'); disp(['mae of PC-PLSPC=' num2str(pcdiff)]);
+        figure; clims = [-1 1]; imagesc(Z,clims); title('PC - PLSPC');
 
         % show result of WCS
         wcsFile = ['results/wcs-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) '.mat'];
@@ -161,8 +165,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of mvGC (pat=' num2str(i) ')']);
 
         % show result of granger causality index (pwGC)
-        gcI = calcPairwiseGCI(si,[],[],[],lag);
-        figure(pgcRf); hold on; [pgcROC{k,1}, pgcROC{k,2}, pgcAUC(k)] = plotROCcurve(gcI, weights, 100, 1, Gth); hold off;
+        pgcI = calcPairwiseGCI(si,[],[],[],lag);
+        figure(pgcRf); hold on; [pgcROC{k,1}, pgcROC{k,2}, pgcAUC(k)] = plotROCcurve(pgcI, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pwGC (pat=' num2str(i) ')']);
 
         % show result of DirectLiNGAM
@@ -289,7 +293,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of pVAR-EC (pat=' num2str(i) ')']);
 
         % show result of multivaliate PC Vector Auto-Regression EC
-        netMPCVAR = initMpcvarNetwork(si, [], [], [], 3);
+        netMPCVAR = initMpcvarNetwork(si, [], [], [], lag);
         mpcvarEC = calcMpcvarEC(netMPCVAR, [], []);
         figure(mpcvarecRf); hold on; [mpcvarecROC{k,1}, mpcvarecROC{k,2}, mpcvarecAUC(k)] = plotROCcurve(mpcvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of mPCVAR-EC (pat=' num2str(i) ')']);
@@ -300,7 +304,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of mPCVAR-GC (pat=' num2str(i) ')']);
 
         % show result of pairwise PC Vector Auto-Regression EC
-        netPPCVAR = initPpcvarNetwork(si, [], [], [], 3);
+        netPPCVAR = initPpcvarNetwork(si, [], [], [], lag);
         ppcvarEC = calcPpcvarEC(netPPCVAR, [], []);
         figure(ppcvarecRf); hold on; [ppcvarecROC{k,1}, ppcvarecROC{k,2}, ppcvarecAUC(k)] = plotROCcurve(ppcvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pPCVAR-EC (pat=' num2str(i) ')']);
@@ -311,7 +315,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of pPCVAR-GC (pat=' num2str(i) ')']);
 
         % show result of multivaliate PLS Vector Auto-Regression EC
-        netMPLSVAR = initMplsvarNetwork(si, [], [], [], 3);
+        netMPLSVAR = initMplsvarNetwork(si, [], [], [], lag);
         mplsvarEC = calcMplsvarEC(netMPLSVAR, [], []);
         figure(mplsvarecRf); hold on; [mplsvarecROC{k,1}, mplsvarecROC{k,2}, mplsvarecAUC(k)] = plotROCcurve(mplsvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of mPLSVAR-EC (pat=' num2str(i) ')']);
@@ -321,8 +325,12 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(mplsvargcRf); hold on; [mplsvargcROC{k,1}, mplsvargcROC{k,2}, mplsvargcAUC(k)] = plotROCcurve(mplsvarGC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of mPLSVAR-GC (pat=' num2str(i) ')']);
 
+        % mvGC and mPLSVARGC diff check
+        Z = gcI - mplsvarGC; gcdiff=nanmean(abs(Z),'all'); disp(['mae of mvGC-mplsvarGC=' num2str(gcdiff) ' / ' num2str(max(max(gcI)))]);
+        figure; clims = [-1 1]; imagesc(Z,clims); title('mvGC - mplsvarGC');
+
         % show result of pairwise PLS Vector Auto-Regression EC
-        netPPLSVAR = initPplsvarNetwork(si, [], [], [], 3);
+        netPPLSVAR = initPplsvarNetwork(si, [], [], [], lag);
         pplsvarEC = calcPplsvarEC(netPPLSVAR, [], []);
         figure(pplsvarecRf); hold on; [pplsvarecROC{k,1}, pplsvarecROC{k,2}, pplsvarecAUC(k)] = plotROCcurve(pplsvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pPLSVAR-EC (pat=' num2str(i) ')']);
