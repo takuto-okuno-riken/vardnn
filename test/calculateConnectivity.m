@@ -101,8 +101,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 mat = calcMvarEC(netMVAR, [], exControl); % |Zi-Zi\j| version
             case 'mvar'
                 netMVAR = initMvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                [mat, sub] = calcMvarEC(netMVAR, [], exControl); % |Zi-Zi\j| version
-                mat = repmat(sub(:,1), [1 size(mat,2)]) - sub(:,2:end); % subtract Zi-Zi\j version
+                [~, ~, mat] = calcMvarEC(netMVAR, [], exControl); % |Zi-Zi\j| version
             case 'pvarec'
                 mat = calcPvarEC(signals{i}, exSignal, [], exControl, lags); % |Zi-Zi\j| version
             case 'mpcvarec'

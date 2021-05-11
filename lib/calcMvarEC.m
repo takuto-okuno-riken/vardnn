@@ -1,13 +1,14 @@
 %%
 % Caluclate mVAR (multivaliate Vector Auto-Regression) EC
-% returns mVAR EC matrix (EC) and impaired node signals (ECsub)
+% returns mVAR EC matrix (EC), impaired node signals (ECsub) and regression
+% coefficient matrix (coeff)
 % input:
 %  net          mVAR network
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [EC, ECsub] = calcMvarEC(net, nodeControl, exControl, isFullNode)
+function [EC, ECsub, coeff] = calcMvarEC(net, nodeControl, exControl, isFullNode)
     if nargin < 4, isFullNode = 0; end
     if nargin < 3, exControl = []; end
     if nargin < 2, nodeControl = []; end
@@ -52,5 +53,6 @@ function [EC, ECsub] = calcMvarEC(net, nodeControl, exControl, isFullNode)
             ECsub(i,j+1) = zj;
         end
     end
+    coeff = repmat(ECsub(:,1), [1 size(EC,2)]) - ECsub(:,2:end);
 end
 
