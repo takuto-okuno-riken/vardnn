@@ -23,6 +23,9 @@ function analyzeAlzheimerDLCM
     resultsPath = 'results/ad';
     resultsPrefix = 'ad';
 
+    % check amplitude difference by ROI
+    [ampDiffROI,cnStds,adStds] = checkAmplitudeDiffROI(cnSignals, adSignals);
+
     % calculate connectivity
     algNum = 25;
     [cnFCs, meanCNFC, stdCNFC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'fc');
@@ -611,6 +614,29 @@ function analyzeAlzheimerDLCM
     title(['averaged ROC curve']);
     xlabel('False Positive Rate')
     ylabel('True Positive Rate')
+end
+
+function [ampDiffROI,gAmpSigma,pAmpSigma] = checkAmplitudeDiffROI(si1, si2)
+    n = size(si1{1},1);
+    gAmpSigma = nan(n,length(si1));
+    pAmpSigma = nan(n,length(si2));
+    for i=1:length(si1)
+        gAmpSigma(:,i) = std(si1{i},1,2);
+    end
+    for i=1:length(si2)
+        pAmpSigma(:,i) = std(si2{i},1,2);
+    end
+    ampDiffROI = nan(n,1);
+    for i=1:n
+        [ampDiffROI(i), h] = ranksum(gAmpSigma(i,:),pAmpSigma(i,:));
+    end
+    figure; bar(ampDiffROI); title(['ampDiffROI : si1 vs si2 : P-value']);
+%    boxplotTwoGroup(gAmpSigma(6,:),pAmpSigma(6,:));
+%    boxplotTwoGroup(gAmpSigma(7,:),pAmpSigma(7,:));
+end
+
+function boxplotTwoGroup(X, Y)
+    figure; boxplot([X(:), Y(:)]);
 end
 
 function [c, r] = index2rowCol(idx,n)
