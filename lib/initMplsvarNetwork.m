@@ -46,7 +46,7 @@ function net = initMplsvarNetwork(X, exSignal, nodeControl, exControl, lags)
         if ~isempty(nodeControl)
             [~,nodeIdx] = find(nodeControl(i,:)==1);
         end
-        exIdx = [nodeNum+1:nodeNum+size(exSignal,1)];
+        exIdx = [nodeNum+1:nodeNum+exNum];
         if ~isempty(exControl)
             [~,exIdx] = find(exControl(i,:)==1);
             exIdx = exIdx + nodeNum;
