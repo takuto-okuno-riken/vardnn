@@ -24,13 +24,19 @@ function layers = createMvarDnnLayers(nodeNum, exNum, hiddenNums, lags, nNodeCon
     if nnetver < 12.1
         firstFCLayer = fullyConnectedLayer(hiddenNums(1));
     else
-        if isempty(initWeightFunc) && isempty(nExControl) && isempty(initBias)
+        if isempty(initBias)
             firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
                 'WeightsInitializer', @(sz) weightInitializer(sz, lags, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode));
         else
+            % set initial bias for each neuron
+            if length(initBias) > 1
+                initBias1 = ones(hiddenNums(1),1) * initBias(1);
+            else
+                initBias1 = ones(hiddenNums(1),1) * initBias;
+            end
             firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
                 'WeightsInitializer', @(sz) weightInitializer(sz, lags, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode), ...
-                'Bias', initBias);
+                'Bias', initBias1);
         end
     end
     
@@ -46,21 +52,40 @@ function layers = createMvarDnnLayers(nodeNum, exNum, hiddenNums, lags, nNodeCon
 
     hdLayers = [];
     for i=2:length(hiddenNums)
+        if nnetver < 12.1 || isempty(initBias)
+            hiddenFCLayer = fullyConnectedLayer(hiddenNums(i));
+        else
+            if length(initBias) > 1
+                initBiasH = ones(hiddenNums(i),1) * initBias(i);
+            else
+                initBiasH = ones(hiddenNums(i),1) * initBias;
+            end
+            hiddenFCLayer = fullyConnectedLayer(hiddenNums(i), 'Bias', initBiasH);
+        end
         hdLayers = [
             hdLayers;
             % Add a fully connected layer
-            fullyConnectedLayer(hiddenNums(i));
+            hiddenFCLayer;
             % Add an ReLU non-linearity.
             activateFunc();
         ];
     end
 
+    if nnetver < 12.1 || isempty(initBias)
+        outputFCLayer = fullyConnectedLayer(1);
+    else
+        if length(initBias) > 1
+            initBiasO = initBias(i+1);
+        else
+            initBiasO = initBias;
+        end
+        outputFCLayer = fullyConnectedLayer(1, 'Bias', initBiasO);
+    end
     layers = [
         inLayers;
         hdLayers;
         % Add a fully connected layer
-        fullyConnectedLayer(1);
-
+        outputFCLayer;
         % reggression for learning
         regressionLayer();
     ];

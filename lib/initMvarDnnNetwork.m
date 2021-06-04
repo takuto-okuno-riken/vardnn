@@ -29,9 +29,6 @@ function net = initMvarDnnNetwork(X, exSignal, nodeControl, exControl, lags, act
     % estimate neuron number of hidden layers
     hiddenNums = estimateHiddenNeurons((nodeNum+exNum)*lags, sigLen);
     
-    % set initial bias for each neuron
-    biasMat = ones(hiddenNums(1),1) * initBias;
-
     % layer parameters
-    net = createMvarDnnNetwork(nodeNum, exNum, hiddenNums, lags, nodeControl, exControl, activateFunc, initWeightFunc, initWeightParam, biasMat);
+    net = createMvarDnnNetwork(nodeNum, exNum, hiddenNums, lags, nodeControl, exControl, activateFunc, initWeightFunc, initWeightParam, initBias);
 end
