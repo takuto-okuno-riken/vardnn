@@ -12,7 +12,7 @@ function testMplsvarEC
     % control is all positive input
     exControl = [];
     si(2,2:end) = si(6,1:sigLen-1);
-    si(4,2:end) = si(6,1:sigLen-1);
+    si(4,2:end) = si(6,1:sigLen-1); % caution! node 2 & 4 is Multicollinearity case (correlated)
 
     %% test pattern 1 
     net = initMplsvarNetwork(si, exSignal, [], exControl, lags);

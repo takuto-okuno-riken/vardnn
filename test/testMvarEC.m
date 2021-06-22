@@ -3,7 +3,7 @@ function testMvarEC
     % load signals
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
-    lags = 5;
+    lags = 1;
     nodeNum = 8;
     exNum = 0;
     sigLen = 200;
@@ -12,14 +12,14 @@ function testMvarEC
     % control is all positive input
     exControl = [];
     si(2,2:end) = si(6,1:sigLen-1);
-    si(4,2:end) = si(6,1:sigLen-1);
+    si(4,2:end) = si(6,1:sigLen-1); % caution! node 2 & 4 is Multicollinearity case (correlated)
 
     %% test pattern 1 
     netMVAR = initMvarNetwork(si, exSignal, [], exControl, lags);
     
     % show multivaliate VAR-EC
-    figure; mEC = plotMvarEC(netMVAR, [], exControl, 0);
     figure; pEC = plotPvarEC(si, exSignal, [], exControl, lags, 0);
+    figure; mEC = plotMvarEC(netMVAR, [], exControl, 0);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0);
 
@@ -34,8 +34,8 @@ function testMvarEC
     netMVAR = initMvarNetwork(si, exSignal, [], exControl, lags);
     
     % show multivaliate MVAR-EC
-    figure; mEC = plotMvarEC(netMVAR, [], exControl, 0, 1);
     figure; pEC = plotPvarEC(si, exSignal, [], exControl, lags, 0, 1);
+    figure; mEC = plotMvarEC(netMVAR, [], exControl, 0, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0, 0, 1);
 end

@@ -21,7 +21,8 @@ function [EC, ECsub] = calcPvarEC(X, exSignal, nodeControl, exControl, lags, isF
     if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeNum + size(exSignal,1); end
     
     % set node input
-    X = [X; exSignal];
+    Y = [X; exSignal];
+    Y = flipud(Y.'); % need to flip signal
     
     % calc Pairwise VAR
     EC = nan(nodeNum, nodeMax);
@@ -31,17 +32,15 @@ function [EC, ECsub] = calcPvarEC(X, exSignal, nodeControl, exControl, lags, isF
             if i==j, continue; end
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
-            X1 = flipud(X(i,:));
-            X2 = flipud(X(j,:));
 
             % autoregression plus other regression
-            Yt = X2(1:sigLen-p); % TODO: X1 & X2 opposite ??
+            Yt = Y(1:(sigLen-p),i); % target
             Yti = ones(sigLen-p, p*2+1);
             for k=1:p
-                Yti(:,k+1) = X2(k+1:sigLen-p+k);
-                Yti(:,p+k+1) = X1(k+1:sigLen-p+k);
+                Yti(:,1+k) = Y(k+1:sigLen-p+k,i); % target
+                Yti(:,1+p+k) = Y(k+1:sigLen-p+k,j); % source
             end
-            [b,bint,Yr] = regress(Yt.',Yti);
+            [b,bint,Yr] = regress(Yt,Yti);
             ECsub(i,j,1) = sum(b);
             ECsub(i,j,2) = sum(b(1:p+1));
             EC(i,j) = abs(ECsub(i,j,1)-ECsub(i,j,2)); % actually this is sum of b(p+2:end)

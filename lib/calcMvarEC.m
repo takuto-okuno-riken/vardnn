@@ -20,6 +20,7 @@ function [EC, ECsub, coeff] = calcMvarEC(net, nodeControl, exControl, isFullNode
     
     % calc mVAR EC
     EC = nan(nodeNum,nodeMax);
+    coeff = nan(nodeNum,nodeMax);
     ECsub = nan(nodeNum,nodeMax+1);
     for i=1:nodeNum
         b = net.bvec{i};
@@ -50,9 +51,9 @@ function [EC, ECsub, coeff] = calcMvarEC(net, nodeControl, exControl, isFullNode
             end
 
             EC(i,j) = abs(z - zj); % actually this is sum of b(bIdx+nlen*(k-1))
+            coeff(i,j) = z - zj;
             ECsub(i,j+1) = zj;
         end
     end
-    coeff = repmat(ECsub(:,1), [1 size(EC,2)]) - ECsub(:,2:end);
 end
 
