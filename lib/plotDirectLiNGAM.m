@@ -17,7 +17,7 @@ function [Aest, Best, stdeest, ciest, kest] = plotDirectLiNGAM(X, rowcut)
     end
     % show Direct LiNGAM
     [Aest, Best, stdeest, ciest, kest] = calcDirectLiNGAM(X);
-    if rowcut>0, mWCS(end-rowcut+1:end,:) = []; end
+    if rowcut>0, Aest(end-rowcut+1:end,:) = []; end
     clims = [-1,1];
     imagesc(Aest,clims);
     daspect([1 1 1]);
