@@ -7,7 +7,7 @@
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [EC, ECsub] = calcMplsvarEC(net, nodeControl, exControl, isFullNode)
+function [EC, ECsub, coeff] = calcMplsvarEC(net, nodeControl, exControl, isFullNode)
     if nargin < 4, isFullNode = 0; end
     if nargin < 3, exControl = []; end
     if nargin < 2, nodeControl = []; end
@@ -19,6 +19,7 @@ function [EC, ECsub] = calcMplsvarEC(net, nodeControl, exControl, isFullNode)
     
     % calc mPLSVAR EC
     EC = nan(nodeNum,nodeMax);
+    coeff = nan(nodeNum,nodeMax);
     ECsub = nan(nodeNum,nodeMax+1);
     for i=1:nodeNum
         b = net.bvec{i};
@@ -49,6 +50,7 @@ function [EC, ECsub] = calcMplsvarEC(net, nodeControl, exControl, isFullNode)
             end
 
             EC(i,j) = abs(z - zj); % actually this is sum of b(bIdx+nlen*(k-1))
+            coeff(i,j) = z - zj;
             ECsub(i,j+1) = zj;
         end
     end

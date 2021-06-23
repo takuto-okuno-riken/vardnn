@@ -9,13 +9,13 @@
 %               if range==0, range shows standard deviation [-3 sigma, 3 sigma]
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [EC, ECsub] = plotMpcvarEC(net, nodeControl, exControl, range, isFullNode)
+function [EC, ECsub, coeff] = plotMpcvarEC(net, nodeControl, exControl, range, isFullNode)
     if nargin < 5, isFullNode = 0; end
     if nargin < 4, range = 10; end
     if nargin < 3, exControl = []; end
     if nargin < 2, nodeControl = []; end
 
-    [EC, ECsub] = calcMpcvarEC(net, nodeControl, exControl, isFullNode);
+    [EC, ECsub, coeff] = calcMpcvarEC(net, nodeControl, exControl, isFullNode);
     if range <= 0
         sigma = std(EC(:),1,'omitnan');
         avg = mean(EC(:),'omitnan');

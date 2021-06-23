@@ -1,5 +1,5 @@
 %%
-% Plotting pPCVAR (pairwise Principal Component Vector Auto-Regression) Granger Causality
+% Plotting pLassoVAR (pairwise Lasso Vector Auto-Regression) Granger Causality
 % returns Granger causality index matrix (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
 % and AIC, BIC (of node vector)
@@ -8,21 +8,26 @@
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
-%  net          pPCVAR network
+%  lags         number of lags for autoregression (default:3)
+%  lambda       lambda for the Lasso (default:0.01)
+%  elaAlpha     Elastic Net Alpha for the Lasso (default:1)
 %  range        plotting minimum and maximum range of GCI (default:10)
 %               if range==0, range shows standard deviation [-3 sigma, 3 sigma]
 %  alpha        the significance level of F-statistic (default:0.05)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [gcI, h, P, F, cvFd, AIC, BIC] = plotPpcvarGCI(X, exSignal, nodeControl, exControl, net, range, alpha, isFullNode)
-    if nargin < 8, isFullNode = 0; end
-    if nargin < 7, alpha = 0.05; end
-    if nargin < 6, range = 10; end
+function [gcI, h, P, F, cvFd, AIC, BIC] = plotPlassovarGCI(X, exSignal, nodeControl, exControl, lags, lambda, elaAlpha, range, alpha, isFullNode)
+    if nargin < 10, isFullNode = 0; end
+    if nargin < 9, alpha = 0.05; end
+    if nargin < 8, range = 10; end
+    if nargin < 7, elaAlpha = 1; end
+    if nargin < 6, lambda = 0.01; end
+    if nargin < 5, lags = 3; end
     if nargin < 4, exControl = []; end
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end
 
-    [gcI, h, P, F, cvFd, AIC, BIC] = calcPpcvarGCI(X, exSignal, nodeControl, exControl, net, alpha, isFullNode);
+    [gcI, h, P, F, cvFd, AIC, BIC] = calcPlassovarGCI(X, exSignal, nodeControl, exControl, lags, lambda, elaAlpha, alpha, isFullNode);
     if range <= 0
         sigma = std(gcI(:),1,'omitnan');
         avg = mean(gcI(:),'omitnan');
@@ -34,7 +39,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = plotPpcvarGCI(X, exSignal, nodeControl
     clims = [-range, range];
     imagesc(gcI2,clims);
     daspect([1 1 1]);
-    title('pPCVAR Granger Causality Index');
+    title('pLassoVAR Granger Causality Index');
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;
