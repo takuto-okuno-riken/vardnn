@@ -84,6 +84,7 @@ function net = initMpcvarNetwork(X, exSignal, nodeControl, exControl, lags, expl
     net.score = score;
     net.latent = latent;
     net.explained = explained;
+    net.explainedTh = explainedTh;
     net.mu = mu;
     net.maxComp = maxComp;
     net.bvec = b;
