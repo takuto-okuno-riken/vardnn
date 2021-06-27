@@ -32,7 +32,7 @@ usage: dlcm [options] filename.csv ...
   -f, --fc            output Functional Conectivity matrix result (<filename>_fc.csv)
   -p, --pc            output Partial Correlation matrix result (<filename>_pc.csv)
   -w, --wc            output Wavelet Coherence matrix result (<filename>_wc.csv)
-  -v, --mvarec        output multivaliate VAR (Vector Auto-Regression) Effective Connectivity matrix result (<filename>_mvarec.csv)
+  -v, --var           output VAR (Vector Auto-Regression) coefficient matrix result (<filename>_mvar.csv)
   --outpath           output files path (default:"results")
   --pval              save P-value matrix of DLCM-GC, mvGC, pwGC, TE, FC and PC (<filename>_*_pval.csv)
   --fval alpha        save F-value with <alpha> matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_fval.csv, <filename>_*_fcrit.csv)

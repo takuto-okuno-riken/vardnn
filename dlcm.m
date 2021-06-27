@@ -40,7 +40,7 @@ function dlcm(varargin)
     handles.fc = 0;
     handles.pc = 0;
     handles.wc = 0;
-    handles.mvarec = 0;
+    handles.mvar = 0;
     handles.dllag = 1;
     handles.lag = 3;
     handles.pval = 0;
@@ -84,8 +84,8 @@ function dlcm(varargin)
                 handles.pc = 1;
             case {'-w','--wc'}
                 handles.wc = 1;
-            case {'-v','--varec'}
-                handles.mvarec = 1;
+            case {'-v','--var'}
+                handles.mvar = 1;
             case {'--outpath'}
                 handles.outpath = varargin{i+1};
                 i = i + 1;
@@ -189,7 +189,7 @@ function showUsage()
     disp('  -f, --fc            output Functional Conectivity matrix result (<filename>_fc.csv)');
     disp('  -p, --pc            output Partial Correlation matrix result (<filename>_pc.csv)');
     disp('  -w, --wc            output Wavelet Coherence matrix result (<filename>_wc.csv)');
-    disp('  -v, --varec         output VAR (Vector Auto-Regression) Effective Connectivity matrix result (<filename>_mvarec.csv)');
+    disp('  -v, --var           output VAR (Vector Auto-Regression) coefficient matrix result (<filename>_mvar.csv)');
     disp('  --outpath           output files path (default:"results")');
     disp('  --pval              save P-value matrix of DLCM-GC, mvGC, pwGC, TE, FC and PC (<filename>_*_pval.csv)');
     disp('  --fval alpha        save F-value with <alpha> matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_fval.csv, <filename>_*_fcrit.csv)');
@@ -233,7 +233,7 @@ function processInputFiles(handles)
     dlROC = cell(N,2);
     dleROC = cell(N,2);
     teROC = cell(N,2);
-    mvarecROC = cell(N,2);
+    mvarROC = cell(N,2);
     if handles.showROC > 0
         if handles.dlec > 0, dleRf = figure; end
         if handles.dlgc > 0, dlRf = figure; end
@@ -243,7 +243,7 @@ function processInputFiles(handles)
         if handles.fc > 0, fcRf = figure; end
         if handles.pc > 0, pcRf = figure; end
         if handles.wc > 0, wcRf = figure; end
-        if handles.mvarec > 0, mvarecRf = figure; end
+        if handles.mvar > 0, mvarecRf = figure; end
     end
     
     % process each file
@@ -649,33 +649,32 @@ function processInputFiles(handles)
             saveResultFiles(handles, mWCS, [], [], [], [], [], auc, [savename '_wc']);
         end
 
-        % calc MVAR-EC
-        if handles.mvarec > 0
+        % calc mVAR
+        if handles.mvar > 0
             netMVAR = initMvarNetwork(X, exSignal, nodeControl, exControl, handles.lag);
-            % show MVAR-EC matrix
+            % show MVAR matrix
+            [~, ~, mvar] = calcMvarEC(netMVAR, nodeControl, exControl, isFullNode);
             if handles.showMat > 0
-                figure; mvarEC = plotMvarEC(netMVAR, nodeControl, exControl, 0, isFullNode);
-                title(['MVAR(' num2str(handles.lag) ') Effective Connectivity : ' name]);
-            else
-                mvarEC = calcMvarEC(netMVAR, nodeControl, exControl, isFullNode);
+                figure; plotEC(mvar, 'mVAR', 5);
+                title(['mVAR(' num2str(handles.lag) ') coefficient : ' name]);
             end
             
             if handles.showCG > 0
-                figure; plotCircleGraph(mvarEC, ['MVAR(' num2str(handles.lag) ') Effective Connectivity : ' name], roiNames, 1, 5, 1);
+                figure; plotCircleGraph(mvar, ['mVAR(' num2str(handles.lag) ') coefficient : ' name], roiNames, 1, 5, 1);
             end
             
             % show ROC curve 
             if ~isempty(groundTruth)
                 if handles.showROC > 0
-                    figure(mvarecRf); hold on; [mvarecROC{i,1}, mvarecROC{i,2}, auc] = plotROCcurve(mvarEC, groundTruth, 100, 1, handles.Gth); hold off;
-                    title(['ROC curve of MVAR(' num2str(handles.lag) ') Effective Connectivity']);
+                    figure(mvarecRf); hold on; [mvarROC{i,1}, mvarROC{i,2}, auc] = plotROCcurve(mvar, groundTruth, 100, 1, handles.Gth); hold off;
+                    title(['ROC curve of mVAR(' num2str(handles.lag) ') coefficient']);
                 else
-                    [mvarecROC{i,1}, mvarecROC{i,2}, auc] = calcROCcurve(mvarEC, groundTruth, 100, 1, handles.Gth);
+                    [mvarROC{i,1}, mvarROC{i,2}, auc] = calcROCcurve(mvar, groundTruth, 100, 1, handles.Gth);
                 end
             end
             
             % output result matrix files
-            saveResultFiles(handles, mvarEC, [], [], [], [], [], auc, [savename '_mvarec']);
+            saveResultFiles(handles, mvar, [], [], [], [], [], auc, [savename '_mvar']);
         end
     end
     
@@ -691,7 +690,7 @@ function processInputFiles(handles)
         plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]);
         plotErrorROCcurve(dleROC, N, [0.2,0.2,0.2]);
         plotErrorROCcurve(teROC, N, [0.2,0.6,0.8]);
-        plotErrorROCcurve(mvarecROC, N, [0.3,0.3,0.3]);
+        plotErrorROCcurve(mvarROC, N, [0.3,0.3,0.3]);
         plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
         plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
         plotAverageROCcurve(wcROC, N, '--', [0.8,0.5,0.2],0.5);
@@ -700,7 +699,7 @@ function processInputFiles(handles)
         plotAverageROCcurve(dlROC, N, '--', [0.2,0.2,0.2],0.8);
         plotAverageROCcurve(dleROC, N, '-', [0.2,0.2,0.2],1.2);
         plotAverageROCcurve(teROC, N, '--', [0.2,0.5,0.7],0.5);
-        plotAverageROCcurve(mvarecROC, N, '-', [0.3,0.3,0.3],0.5);
+        plotAverageROCcurve(mvarROC, N, '-', [0.3,0.3,0.3],0.5);
         plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
         hold off;
         ylim([0 1]);
