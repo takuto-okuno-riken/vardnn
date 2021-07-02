@@ -100,7 +100,7 @@ function checkingPattern(si, exSignal, exControl, winLen, idx, prefix, l2, weigh
             load(dlcmFile);
         else
             % init DLCM network
-            netDLCM = initDlcmNetwork(si, exSignal, [], exControl, 1, @reluLayer, weightFunc, weightParam, bias);
+            netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl, 1, @reluLayer, weightFunc, weightParam, bias);
 
             % set training options
             maxEpochs = 1000;
@@ -118,7 +118,7 @@ function checkingPattern(si, exSignal, exControl, winLen, idx, prefix, l2, weigh
         %            'Plots','training-progress');
 
             % training DLCM network
-            netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+            netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
             % recover training 
             [netDLCM, time] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);

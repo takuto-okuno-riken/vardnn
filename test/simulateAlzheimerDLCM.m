@@ -941,7 +941,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
                 exSignal = exSignals;
             end
             % init DLCM network
-            netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
+            netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
 
             % training DLCM network
             maxEpochs = 1000;
@@ -975,7 +975,7 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
         end
 
         % recalculate EC
-        weights(:,:,i) = calcDlcmEC(netDLCM, [], exControl);
+        weights(:,:,i) = calcMvarDnnEC(netDLCM, [], exControl);
     end
     save(outfName, 'weights', 'roiNames');
     meanWeights = nanmean(weights, 3);
@@ -1100,7 +1100,7 @@ function [ECs, nodeSignals] = calculateNodeSignals(signals, S2, IS2, roiNames, g
             dlcmName = ['results/adsim/adsim-dlcm-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             f=load(dlcmName);
             [Y, time] = predictDlcmNetwork(si, exSignal, [], f.exControl, f.netDLCM);
-            ec = calcDlcmEC(f.netDLCM, [], f.exControl);
+            ec = calcMvarDnnEC(f.netDLCM, [], f.exControl);
         end
         ECs(:,:,i) = ec;
         nodeSignals(:,:,i) = Y;
@@ -1140,7 +1140,7 @@ function [ECs, nodeSignals, exSignals, exControls] = calculateNodeSignals2(signa
             dlcmName = ['results/' prefix '-dlcm-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             load(dlcmName);
             [Y, time] = predictDlcmNetwork(S2, IS2, [], exControl, netDLCM);
-            ec = calcDlcmEC(netDLCM, [], exControl);
+            ec = calcMvarDnnEC(netDLCM, [], exControl);
         end
         ECs(:,:,i) = ec;
         nodeSignals(:,:,i) = Y;

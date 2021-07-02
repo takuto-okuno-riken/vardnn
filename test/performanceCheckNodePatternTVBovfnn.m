@@ -61,7 +61,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
                 biasMat = ones(hiddenNums(1),1) * 0;
 
                 % layer parameters
-                netDLCM = createDlcmNetwork(nodeNum, exNum, hiddenNums, [], exControl, [], [], biasMat);
+                netDLCM = createMvarDnnNetwork(nodeNum, exNum, hiddenNums, 1, [], exControl, @reluLayer, [], [], biasMat);
 
                 % training DLCM network
                 maxEpochs = 1000;
@@ -77,7 +77,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             %            'Plots','training-progress');
 
                 disp('start training');
-                netDLCM = trainDlcmNetwork(Y, exSignal, [], exControl, netDLCM, options);
+                netDLCM = trainMvarDnnNetwork(Y, exSignal, [], exControl, netDLCM, options);
                 save(dlcmFile, 'netDLCM', 'Y', 'exSignal', 'Y', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
             end
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
@@ -85,7 +85,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             dlErr(k,j) = rsme;
             
             % show DLCM-GC
-            dlGC = calcDlcmGCI(Y, exSignal, [], exControl, netDLCM);
+            dlGC = calcMvarDnnGCI(Y, exSignal, [], exControl, netDLCM);
 
             % calc ROC curve
             [~, ~, dlAUC(k,j)] = calcROCcurve(dlGC, weights, 100, 1, Gth);

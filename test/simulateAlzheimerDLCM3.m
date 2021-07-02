@@ -417,7 +417,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
                 exSignal = f.exSignal;
             end
             [Y, time] = simulateDlcmNetwork(si, exSignal, [], f.exControl, f.netDLCM);
-            [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl);
+            [ec, subECs(:,:,i)] = calcMvarDnnEC(f.netDLCM, [], f.exControl);
         case 'mvarec'
             dlcmName = [resultsPath '/' resultsPrefix '-dlcm' lagStr exoStr linStr '-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             f = load(dlcmName);
@@ -437,7 +437,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
             % simulate mVAR network with 1st frame & exogenous input signal
             netMVAR = initMvarNetwork(si, exSignal, [], f.exControl, lags);
             [Y, time] = simulateMvarNetwork(si, exSignal, [], f.exControl, netMVAR);
-            [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl); % not used this
+            [ec, subECs(:,:,i)] = calcMvarDnnEC(f.netDLCM, [], f.exControl); % not used this
         case 'mpcvarec'
             dlcmName = [resultsPath '/' resultsPrefix '-dlcm' lagStr exoStr linStr '-' orgGroup '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
             f = load(dlcmName);
@@ -457,7 +457,7 @@ function [ECs, simSignals, subECs] = simulateNodeSignals(signals, roiNames, grou
             % simulate mPCVAR network with 1st frame & exogenous input signal
             netMVAR = initMpcvarNetwork(si, exSignal, [], f.exControl, lags);
             [Y, time] = simulateMpcvarNetwork(si, exSignal, [], f.exControl, netMVAR);
-            [ec, subECs(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl); % not used this
+            [ec, subECs(:,:,i)] = calcMvarDnnEC(f.netDLCM, [], f.exControl); % not used this
         end
         ECs(:,:,i) = ec;
         simSignals{i} = Y;

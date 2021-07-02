@@ -141,7 +141,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                         [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i},NaN,sigmoidAlpha);
                     end
                     % si = signals{i} - nanmin(signals{i}, [], 'all'); % simple linear transform
-                    netDLCM = initDlcmNetwork(si, exSignal, [], exControl, lags, activateFunc); 
+                    netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl, lags, activateFunc); 
                     % training DLCM network
                     maxEpochs = 1000;
                     miniBatchSize = ceil(sigLen / 3);
@@ -156,11 +156,11 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 %            'Plots','training-progress');
 
                     disp('start training');
-                    netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+                    netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
                     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
                     disp(['end training : rsme=' num2str(rsme)]);
                     % calc dlcm-gc
-                    mat = calcDlcmGCI(si, exSignal, [], exControl, netDLCM);
+                    mat = calcMvarDnnGCI(si, exSignal, [], exControl, netDLCM);
                     
                     parsavedlsm(dlcmName, netDLCM, si, exSignal, exControl, mat, sig, c, maxsi, minsi);
                 end
@@ -185,7 +185,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                         'L2Regularization',0.05, ...
                         'Verbose',false);
                     [netDLCM, time] = recoveryTrainDlcmNetwork(f.si, f.exSignal, [], f.exControl, f.netDLCM, options);
-                    mat = calcDlcmGCI(f.si, f.exSignal, [], f.exControl, netDLCM);
+                    mat = calcMvarDnnGCI(f.si, f.exSignal, [], f.exControl, netDLCM);
                     parsavedlsm(outName, netDLCM, f.si, f.exSignal, f.exControl, mat, f.sig, c, f.maxsi, f.minsi);
                 end
             case {'dlw','dlwB','dlwrc'} % should be called after dlcm
@@ -198,7 +198,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 end
                 f = load(dlcmName);
                 if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
-                [mat, subweights(:,:,i)] = calcDlcmEC(f.netDLCM, [], f.exControl);
+                [mat, subweights(:,:,i)] = calcMvarDnnEC(f.netDLCM, [], f.exControl);
             end
             weights(:,:,i) = mat;
         end

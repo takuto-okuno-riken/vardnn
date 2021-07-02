@@ -40,10 +40,10 @@ function performanceCheckSignalLen
             end
 
             % layer parameters
-            netDLCM = createDlcmNetwork(nodeNum, exNum, hiddenNums);
+            netDLCM = createMvarDnnNetwork(nodeNum, exNum, hiddenNums);
 
             % training DLCM network
-            netDLCM = trainDlcmNetwork(si, [], [], [], netDLCM, options);
+            netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);
             save(dlcmFile, 'netDLCM');
         end
     end

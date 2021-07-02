@@ -33,9 +33,9 @@ function testRecoverTrain
         load(dlcmFile);
     else
         % init DLCM network
-        netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
+        netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
         % training DLCM network
-        netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+        netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
         [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
         %plotDlcmWeight(netDLCM);
@@ -60,7 +60,7 @@ function testRecoverTrain
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
-    figure; dlEC = plotDlcmECmeanWeight(netDLCM);
+    figure; dlEC = plotMvarDnnECmeanWeight(netDLCM);
     % plot correlation graph between original predicted node signals
     figure; R = plotTwoSignalsCorrelation(si, S) % show R result
     figure; R = getCosSimilarity(si, S) % show R result

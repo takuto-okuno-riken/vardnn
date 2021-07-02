@@ -33,9 +33,9 @@ function testSimulation
         load(dlcmFile);
     else
         % init DLCM network
-        netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
+        netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
         % training DLCM network
-        netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+        netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
         [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
         %plotDlcmWeight(netDLCM);
@@ -55,6 +55,6 @@ function testSimulation
     figure; gcI = plotPairwiseGCI(si);
     figure; gcI = plotPairwiseGCI(S);
     % show DLCM-GC
-    figure; dlGC = plotDlcmGCI(si, exSignal, [], exControl, netDLCM, 0);
+    figure; dlGC = plotMvarDnnGCI(si, exSignal, [], exControl, netDLCM, 0);
 end
 

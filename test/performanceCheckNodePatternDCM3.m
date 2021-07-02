@@ -234,7 +234,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         sigLen = size(si,2);
         if isempty(netDLCM)
             % layer parameters
-            netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
+            netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
             % training DLCM network
             maxEpochs = 1000;
             miniBatchSize = ceil(sigLen / 3);
@@ -249,7 +249,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         %            'Plots','training-progress');
 
             disp('start training');
-            netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+            netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
             % recoverty training
             %[netDLCM, time] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
             save(dlcmFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
@@ -260,12 +260,12 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         disp(['t=' num2str(t) ', mae=' num2str(mae)]);
 
         % show result of DLCM-GC
-        fg = figure; dlGC = plotDlcmGCI(si, exSignal, [], exControl, netDLCM, 0); close(fg);
+        fg = figure; dlGC = plotMvarDnnGCI(si, exSignal, [], exControl, netDLCM, 0); close(fg);
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A); hold off;
         title('DLCM-GC');
 
         % show result of DLCM weight causality index (DLCM-wci) as DLCM-EC
-        fg = figure; dlwGC = plotDlcmEC(netDLCM, [], exControl, 0); close(fg);
+        fg = figure; dlwGC = plotMvarDnnEC(netDLCM, [], exControl, 0); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A); hold off;
         title('DLCM-EC');
     end

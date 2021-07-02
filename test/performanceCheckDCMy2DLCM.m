@@ -52,7 +52,7 @@ function performanceCheckDCMy2DLCM
             load(dlcmFile);
         else
             % init DLCM network
-            netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
+            netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
 
             % set training options
             maxEpochs = 1000;
@@ -71,7 +71,7 @@ function performanceCheckDCMy2DLCM
 %                'GradientThresholdMethod', 'global-l2norm' , ...
 
             % training DLCM network
-            netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+            netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
             % recover training 
             [netDLCM, time, mae] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);

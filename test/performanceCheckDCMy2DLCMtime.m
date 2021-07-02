@@ -105,7 +105,7 @@ function performanceCheckDCMy2DLCM
         else
             ticHdl = tic;
             % init DLCM network
-            netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
+            netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
 
             % set training options
             maxEpochs = 1000;
@@ -124,9 +124,9 @@ function performanceCheckDCMy2DLCM
 %                'GradientThresholdMethod', 'global-l2norm' , ...
 
             % training DLCM network
-            netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+            netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
             % calc dlcm-gc
-            mat = calcDlcmGCI(si, exSignal, [], exControl, netDLCM);
+            mat = calcMvarDnnGCI(si, exSignal, [], exControl, netDLCM);
             time = toc(ticHdl);
             disp(['finish calculating DLCM-GC! t = ' num2str(time) 's']);
 
@@ -138,7 +138,7 @@ function performanceCheckDCMy2DLCM
         
         % calculate DLCM-EC and get computational time
         ticHdl = tic;
-        mat = calcDlcmEC(netDLCM, [], exControl);
+        mat = calcMvarDnnEC(netDLCM, [], exControl);
         time = toc(ticHdl) + netDLCM.trainTime;
         DLEtime(k,1) = time;
         disp(['finish DLCM-EC! t = ' num2str(time) 's']);        

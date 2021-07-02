@@ -35,9 +35,9 @@ function testSimulationMVAR
         load(mvardnnFile);
     else
         % init mVAR DNN network
-        net = initDlcmNetwork(si, exSignal, [], exControl, lags);
+        net = initMvarDnnNetwork(si, exSignal, [], exControl, lags);
         % training mVAR DNN network
-        net = trainDlcmNetwork(si, exSignal, [], exControl, net, options);
+        net = trainMvarDnnNetwork(si, exSignal, [], exControl, net, options);
         [time, loss, rsme] = getDlcmTrainingResult(net);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 
@@ -75,16 +75,16 @@ function testSimulationMVAR
         load(mvardnnFile);
     else
         % init mVAR DNN network
-        net = initDlcmNetwork(si, exSignal, [], exControl, lags);
+        net = initMvarDnnNetwork(si, exSignal, [], exControl, lags);
         % training mVAR DNN network
-        net = trainDlcmNetwork(si, exSignal, [], exControl, net, options);
+        net = trainMvarDnnNetwork(si, exSignal, [], exControl, net, options);
         [time, loss, rsme] = getDlcmTrainingResult(net);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 
         % init mVAR DNN network (linear)
-        net2 = initDlcmNetwork(si, exSignal, [], exControl, lags, []);
+        net2 = initMvarDnnNetwork(si, exSignal, [], exControl, lags, []);
         % training mVAR DNN network (linear)
-        net2 = trainDlcmNetwork(si, exSignal, [], exControl, net2, options);
+        net2 = trainMvarDnnNetwork(si, exSignal, [], exControl, net2, options);
         [time, loss, rsme] = getDlcmTrainingResult(net2);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 

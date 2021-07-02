@@ -36,9 +36,9 @@ function testSimulationMarmo
         load(dlcmFile);
     else
         % init DLCM network
-        netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
+        netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
         % training DLCM network
-        netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+        netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
         % recover training 
         [netDLCM, time] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
         [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
@@ -58,6 +58,6 @@ function testSimulationMarmo
     figure; gcI = plotPairwiseGCI(si,[],[],[],3,0);
 %    figure; gcI = plotPairwiseGCI(S,[],[],[],3,0);
     % show DLCM-GC
-    figure; dlGC = plotDlcmGCI(si, exSignal, [], exControl, netDLCM, 0);
+    figure; dlGC = plotMvarDnnGCI(si, exSignal, [], exControl, netDLCM, 0);
 end
 

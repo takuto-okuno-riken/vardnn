@@ -41,10 +41,10 @@ function performanceCheckVariHidden
             end
 
             % layer parameters
-            netDLCM = createDlcmNetwork(nodeNum, exNum, hdnNums);
+            netDLCM = createMvarDnnNetwork(nodeNum, exNum, hdnNums);
 
             % training DLCM network
-            netDLCM = trainDlcmNetwork(si, [], [], [], netDLCM, options);
+            netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);
             save(dlcmFile, 'netDLCM');
         end
     end

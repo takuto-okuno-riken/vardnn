@@ -76,7 +76,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     sigLen = size(si,2);
 
     % layer parameters
-    netDLCM = initDlcmNetwork(si);
+    netDLCM = initMvarDnnNetwork(si);
 
     % show signals before training
     %{
@@ -92,7 +92,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 %            'Plots','training-progress');
 
     disp('initial state before training');
-    netDLCM = trainDlcmNetwork(si, [], [], [], netDLCM, options);
+    netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);
     [t,mae,maeerr] = plotNodeSignals(nodeNum,si,exSignal,netDLCM);
     disp(['t=' num2str(t) ', mae=' num2str(mae)]);
     %}
@@ -109,7 +109,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 %            'Plots','training-progress');
 
     disp('start training');
-    netDLCM = trainDlcmNetwork(si, [], [], [], netDLCM, options);
+    netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);
     dlcmFile = ['results/net-pat-' num2str(idx) '.mat'];
     save(dlcmFile, 'netDLCM');
 
@@ -124,12 +124,12 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
-%    figure; dlEC = plotDlcmECmeanWeight(netDLCM);
-%    figure; dlEC = plotDlcmECmeanAbsWeight(netDLCM);
-%    figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
-    figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
+%    figure; dlEC = plotMvarDnnECmeanWeight(netDLCM);
+%    figure; dlEC = plotMvarDnnECmeanAbsWeight(netDLCM);
+%    figure; dlEC = plotMvarDnnECmeanDeltaWeight(netDLCM);
+    figure; dlEC = plotMvarDnnECmeanAbsDeltaWeight(netDLCM);
     % show DLCM-GC
-    figure; dlGC = plotDlcmGCI(si, [], [], [], netDLCM);
+    figure; dlGC = plotMvarDnnGCI(si, [], [], [], netDLCM);
 
     % DEM Structure: create random inputs
     % -------------------------------------------------------------------------

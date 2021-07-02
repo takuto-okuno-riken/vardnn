@@ -223,26 +223,26 @@ function [dlGC] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
             for lags=1:maxLag
                 if isempty(netDLCM{lags})
                     % train DLCM with normal activation function (ReLU)
-                    netDLCM{lags} = initDlcmNetwork(si, exSignal, [], exControl, lags);
-                    netDLCM{lags} = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM{lags}, options);
+                    netDLCM{lags} = initMvarDnnNetwork(si, exSignal, [], exControl, lags);
+                    netDLCM{lags} = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM{lags}, options);
                     save(dlcmFile, 'netDLCM', 'netDLCM2', 'netDLCM3', 'netDLCM4', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
                 end
                 if isempty(netDLCM2{lags})
                     % train DLCM without activation function (ReLU) (linear case)
-                    netDLCM2{lags} = initDlcmNetwork(si, exSignal, [], exControl, lags, []);
-                    netDLCM2{lags} = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM2{lags}, options);
+                    netDLCM2{lags} = initMvarDnnNetwork(si, exSignal, [], exControl, lags, []);
+                    netDLCM2{lags} = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM2{lags}, options);
                     save(dlcmFile, 'netDLCM', 'netDLCM2', 'netDLCM3', 'netDLCM4', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
                 end
                 if isempty(netDLCM3{lags})
                     % train DLCM with normal activation function (ReLU) without exogenous signals
-                    netDLCM3{lags} = initDlcmNetwork(si, [], [], [], lags);
-                    netDLCM3{lags} = trainDlcmNetwork(si, [], [], [], netDLCM3{lags}, options);
+                    netDLCM3{lags} = initMvarDnnNetwork(si, [], [], [], lags);
+                    netDLCM3{lags} = trainMvarDnnNetwork(si, [], [], [], netDLCM3{lags}, options);
                     save(dlcmFile, 'netDLCM', 'netDLCM2', 'netDLCM3', 'netDLCM4', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
                 end
                 if isempty(netDLCM4{lags})
                     % train DLCM without activation function (ReLU) (linear case) without exogenous signals
-                    netDLCM4{lags} = initDlcmNetwork(si, [], [], [], lags, []);
-                    netDLCM4{lags} = trainDlcmNetwork(si, [], [], [], netDLCM4{lags}, options);
+                    netDLCM4{lags} = initMvarDnnNetwork(si, [], [], [], lags, []);
+                    netDLCM4{lags} = trainMvarDnnNetwork(si, [], [], [], netDLCM4{lags}, options);
                     save(dlcmFile, 'netDLCM', 'netDLCM2', 'netDLCM3', 'netDLCM4', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
                 end
 
@@ -281,42 +281,42 @@ function [dlGC] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
                 title(['mPCVAR(' num2str(lags) ')-EC (without exogenous)']);
 
                 % show result of DLCM-GC
-                dlGC = calcDlcmGCI(si, exSignal, [], exControl, netDLCM{lags}, 0);
+                dlGC = calcMvarDnnGCI(si, exSignal, [], exControl, netDLCM{lags}, 0);
                 figure(dlRf{lags}); hold on; [dlROC{lags}{k,1}, dlROC{lags}{k,2}, dlAUC(lags,k)] = plotROCcurve(dlGC, pP.A); hold off;
                 title(['DLCM(' num2str(lags) ')-GC']);
 
                 % show result of DLCM-EC
-                dlwEC = calcDlcmEC(netDLCM{lags}, [], exControl, 0);
+                dlwEC = calcMvarDnnEC(netDLCM{lags}, [], exControl, 0);
                 figure(dlwRf{lags}); hold on; [dlwROC{lags}{k,1}, dlwROC{lags}{k,2}, dlwAUC(lags,k)] = plotROCcurve(dlwEC, pP.A); hold off;
                 title(['DLCM(' num2str(lags) ')-EC']);
 
                 % show result of linear DLCM-GC
-                dl2GC = calcDlcmGCI(si, exSignal, [], exControl, netDLCM2{lags}, 0);
+                dl2GC = calcMvarDnnGCI(si, exSignal, [], exControl, netDLCM2{lags}, 0);
                 figure(dl2Rf{lags}); hold on; [dl2ROC{lags}{k,1}, dl2ROC{lags}{k,2}, dl2AUC(lags,k)] = plotROCcurve(dl2GC, pP.A); hold off;
                 title(['linear DLCM(' num2str(lags) ')-GC']);
 
                 % show result of linear DLCM EC 
-                dlw2EC = calcDlcmEC(netDLCM2{lags}, [], exControl, 0);
+                dlw2EC = calcMvarDnnEC(netDLCM2{lags}, [], exControl, 0);
                 figure(dlw2Rf{lags}); hold on; [dlw2ROC{lags}{k,1}, dlw2ROC{lags}{k,2}, dlw2AUC(lags,k)] = plotROCcurve(dlw2EC, pP.A); hold off;
                 title(['linear DLCM(' num2str(lags) ')-EC']);
 
                 % show result of DLCM-GC (without exogenous)
-                dl3GC = calcDlcmGCI(si, [], [], [], netDLCM3{lags}, 0);
+                dl3GC = calcMvarDnnGCI(si, [], [], [], netDLCM3{lags}, 0);
                 figure(dl3Rf{lags}); hold on; [dl3ROC{lags}{k,1}, dl3ROC{lags}{k,2}, dl3AUC(lags,k)] = plotROCcurve(dl3GC, pP.A); hold off;
                 title(['DLCM(' num2str(lags) ')-GC (without exogenous)']);
 
                 % show result of DLCM EC (without exogenous)
-                dlw3EC = calcDlcmEC(netDLCM3{lags}, [], [], 0);
+                dlw3EC = calcMvarDnnEC(netDLCM3{lags}, [], [], 0);
                 figure(dlw3Rf{lags}); hold on; [dlw3ROC{lags}{k,1}, dlw3ROC{lags}{k,2}, dlw3AUC(lags,k)] = plotROCcurve(dlw3EC, pP.A); hold off;
                 title(['DLCM(' num2str(lags) ')-EC (without exogenous)']);
                 
                 % show result of linear DLCM-GC (without exogenous)
-                dl4GC = calcDlcmGCI(si, [], [], [], netDLCM4{lags}, 0);
+                dl4GC = calcMvarDnnGCI(si, [], [], [], netDLCM4{lags}, 0);
                 figure(dl4Rf{lags}); hold on; [dl4ROC{lags}{k,1}, dl4ROC{lags}{k,2}, dl4AUC(lags,k)] = plotROCcurve(dl4GC, pP.A); hold off;
                 title(['linear DLCM(' num2str(lags) ')-GC (without exogenous)']);
 
                 % show result of linear DLCM EC (without exogenous)
-                dlw4EC = calcDlcmEC(netDLCM4{lags}, [], [], 0);
+                dlw4EC = calcMvarDnnEC(netDLCM4{lags}, [], [], 0);
                 figure(dlw4Rf{lags}); hold on; [dlw4ROC{lags}{k,1}, dlw4ROC{lags}{k,2}, dlw4AUC(lags,k)] = plotROCcurve(dlw4EC, pP.A); hold off;
                 title(['linear DLCM(' num2str(lags) ')-EC (without exogenous)']);
             end

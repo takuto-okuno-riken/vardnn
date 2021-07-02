@@ -81,7 +81,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
         load(dlcmFile);
     else
         % layer parameters
-        netDLCM = initDlcmNetwork(si);
+        netDLCM = initMvarDnnNetwork(si);
 
         % show signals before training
         %{
@@ -97,7 +97,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     %            'Plots','training-progress');
 
         disp('initial state before training');
-        netDLCM = trainDlcmNetwork(si, [], [], [], netDLCM, options);
+        netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);
         [t,mae,maeerr] = plotNodeSignals(nodeNum,si,exSignal,netDLCM);
         disp(['t=' num2str(t) ', mae=' num2str(mae)]);
         %}
@@ -114,7 +114,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     %            'Plots','training-progress');
 
         disp('start training');
-        netDLCM = trainDlcmNetwork(si, [], [], [], netDLCM, options);  
+        netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);  
         save(dlcmFile, 'netDLCM');
     end
 
@@ -135,14 +135,14 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     figure; tsCr = plotTimeShiftedCorrelation(si, [], [], [], 2);
     figure; tsCra = plotTimeShiftedCorrelationAbs(si, [], [], [], 2);
     % show deep-learning effective connectivity
-%    figure; dlEC = plotDlcmECmeanWeight(netDLCM);
-%    figure; dlEC = plotDlcmECmeanAbsWeight(netDLCM);
-%    figure; dlEC = plotDlcmECmeanDeltaWeight(netDLCM);
-%    figure; dlEC = plotDlcmECmeanAbsDeltaWeight(netDLCM);
+%    figure; dlEC = plotMvarDnnECmeanWeight(netDLCM);
+%    figure; dlEC = plotMvarDnnECmeanAbsWeight(netDLCM);
+%    figure; dlEC = plotMvarDnnECmeanDeltaWeight(netDLCM);
+%    figure; dlEC = plotMvarDnnECmeanAbsDeltaWeight(netDLCM);
     % show DLCM-GC
-    figure; dlGC = plotDlcmGCI(si, [], [], [], netDLCM, 0);
+    figure; dlGC = plotMvarDnnGCI(si, [], [], [], netDLCM, 0);
     % show DLCM-WCI as DLCM-EC
-    figure; dlWC = plotDlcmEC(netDLCM, [], [], 0);
+    figure; dlWC = plotMvarDnnEC(netDLCM, [], [], 0);
     % show DLCM-weight-GC
 %    figure; dlwGC = plotDlcmDeltaWeightGCI(netDLCM);
     figure; Aest = plotDirectLiNGAM(si);

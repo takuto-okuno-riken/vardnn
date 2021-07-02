@@ -198,7 +198,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             weightFunc = @estimateInitWeightRoughHe;
             weightParam = [10];
             bias = 0.5;
-            netDLCM = initDlcmNetwork(Y, exSignal, [], exControl); % weightFunc, weightParam, bias);
+            netDLCM = initMvarDnnNetwork(Y, exSignal, [], exControl); % weightFunc, weightParam, bias);
             % training DLCM network
             maxEpochs = 1000;
             miniBatchSize = ceil(sigLen / 3);
@@ -213,7 +213,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         %            'Plots','training-progress');
 
             disp('start training');
-            netDLCM = trainDlcmNetwork(Y, exSignal, [], exControl, netDLCM, options);
+            netDLCM = trainMvarDnnNetwork(Y, exSignal, [], exControl, netDLCM, options);
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
             disp(['end training : rsme=' num2str(rsme)]);
 
@@ -223,7 +223,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         end
         if isempty(dlGC)
             % show DLCM-GC
-            dlGC = calcDlcmGCI(Y, exSignal, [], exControl, netDLCM);
+            dlGC = calcMvarDnnGCI(Y, exSignal, [], exControl, netDLCM);
             save(dlcmFile, 'netDLCM', 'Y', 'exSignal', 'si', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2', 'dlGC');
         end
         
@@ -232,7 +232,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of DLCM-GC (pat=' num2str(i) ')']);
 
         % show result of DLCM weight causality index (DLCM-wci) as DLCM-EC
-        fg = figure; dlwGC = plotDlcmEC(netDLCM, [], exControl); close(fg);
+        fg = figure; dlwGC = plotMvarDnnEC(netDLCM, [], exControl); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of DLCM-WCI (pat=' num2str(i) ')']);
 %%}

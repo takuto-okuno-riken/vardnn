@@ -52,7 +52,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
                 Y = si;
                 exSignal = uu;
                 % layer parameters
-                netDLCM = initDlcmNetwork(Y, exSignal, [], exControl);
+                netDLCM = initMvarDnnNetwork(Y, exSignal, [], exControl);
                 % training DLCM network
                 maxEpochs = 1000;
                 miniBatchSize = ceil(sigLen / 3);
@@ -67,7 +67,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             %            'Plots','training-progress');
 
                 disp('start training');
-                netDLCM = trainDlcmNetwork(Y, exSignal, [], exControl, netDLCM, options);
+                netDLCM = trainMvarDnnNetwork(Y, exSignal, [], exControl, netDLCM, options);
                 save(dlcmFile, 'netDLCM', 'Y', 'exSignal', 'Y', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
             end
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
@@ -75,7 +75,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             dlErr(k,j) = rsme;
             
             % show DLCM-GC
-            dlGC = calcDlcmGCI(Y, exSignal, [], exControl, netDLCM);
+            dlGC = calcMvarDnnGCI(Y, exSignal, [], exControl, netDLCM);
 
             % calc ROC curve
             [~, ~, dlAUC(k,j)] = calcROCcurve(dlGC, weights, 100, 1, Gth);

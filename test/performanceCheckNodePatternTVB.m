@@ -90,7 +90,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             weightFunc = @estimateInitWeightRoughHe;
             weightParam = [10];
             bias = 0.5;
-            netDLCM = initDlcmNetwork(Y, exSignal, [], exControl); % weightFunc, weightParam, bias);
+            netDLCM = initMvarDnnNetwork(Y, exSignal, [], exControl); % weightFunc, weightParam, bias);
             % training DLCM network
             maxEpochs = 1000;
             miniBatchSize = ceil(sigLen / 3);
@@ -105,7 +105,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         %            'Plots','training-progress');
 
             disp('start training');
-            netDLCM = trainDlcmNetwork(Y, exSignal, [], exControl, netDLCM, options);
+            netDLCM = trainMvarDnnNetwork(Y, exSignal, [], exControl, netDLCM, options);
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
             disp(['end training : rsme=' num2str(rsme)]);
 
@@ -114,7 +114,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             save(dlcmFile, 'netDLCM', 'Y', 'exSignal', 'Y', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
         end
         % show DLCM-GC
-        dlGC = calcDlcmGCI(Y, exSignal, [], exControl, netDLCM);
+        dlGC = calcMvarDnnGCI(Y, exSignal, [], exControl, netDLCM);
         
         % calc ROC curve
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, weights, 100, 1, Gth); hold off;

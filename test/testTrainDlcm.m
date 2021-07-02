@@ -21,7 +21,7 @@ function testTrainDlcm
         load(dlcmFile);
     else
         % init DLCM network
-        netDLCM = initDlcmNetwork(si);
+        netDLCM = initMvarDnnNetwork(si);
 
         % set training options
         maxEpochs = 1000;
@@ -43,7 +43,7 @@ function testTrainDlcm
             'LearnRateDropFactor',0.5, ...
 %}
         % training DLCM network
-        netDLCM = trainDlcmNetwork(si, [], [], [], netDLCM, options);
+        netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);
         save(dlcmFile, 'netDLCM');
     end
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);

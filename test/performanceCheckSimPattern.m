@@ -86,7 +86,7 @@ function checkingPattern(si, exSignal, exControl, idx)
         load(dlcmFile);
     else
         % init DLCM network
-        netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
+        netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
 
         % set training options
         maxEpochs = 1000;
@@ -103,7 +103,7 @@ function checkingPattern(si, exSignal, exControl, idx)
     %            'Plots','training-progress');
 
         % training DLCM network
-        netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+        netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
         [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
         %plotDlcmWeight(netDLCM);
@@ -125,6 +125,6 @@ function checkingPattern(si, exSignal, exControl, idx)
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
-    figure; dlEC = plotDlcmEC(netDLCM,[],exControl,0,1);
+    figure; dlEC = plotMvarDnnEC(netDLCM,[],exControl,0,1);
 end
 

@@ -35,9 +35,9 @@ function testDlcmWeights
         load(dlcmFile);
     else
         % init DLCM network
-        netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
+        netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
         % training DLCM network
-        netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+        netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
         [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 
@@ -79,6 +79,6 @@ function testDlcmWeights
     figure; imagesc(r4); daspect([1 1 1]); colorbar;
     
     % DLCM weight causal index as DLCM-EC
-    wci = plotDlcmEC(netDLCM, [], [], 0);
+    wci = plotMvarDnnEC(netDLCM, [], [], 0);
 end
 

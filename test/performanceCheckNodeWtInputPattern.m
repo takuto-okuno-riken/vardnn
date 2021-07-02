@@ -84,7 +84,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, exSignal, exControl, idx)
     sigLen = size(si,2);
 
     % layer parameters
-    netDLCM = initDlcmNetwork(si, exSignal, [], exControl);
+    netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
 
     % show signals before training
     %{
@@ -100,7 +100,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, exSignal, exControl, idx)
 %            'Plots','training-progress');
 
     disp('initial state before training');
-    netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+    netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
     [t,mae,maeerr] = plotNodeSignals(nodeNum,si,exSignal,netDLCM);
     disp(['t=' num2str(t) ', mae=' num2str(mae)]);
     %}
@@ -117,7 +117,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, exSignal, exControl, idx)
 %            'Plots','training-progress');
 
     disp('start training');
-    netDLCM = trainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+    netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
     dlcmFile = ['results/net-pat-in' num2str(idx) '.mat'];
     save(dlcmFile, 'netDLCM');
 
@@ -132,6 +132,6 @@ function [FC, dlEC, gcI] = checkingPattern(si, exSignal, exControl, idx)
     % show original time shifted correlation (tsc-FC)
     %figure; tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
-    figure; dlEC = plotDlcmEC(netDLCM, [], exControl, 0, 1);    
+    figure; dlEC = plotMvarDnnEC(netDLCM, [], exControl, 0, 1);    
 end
 
