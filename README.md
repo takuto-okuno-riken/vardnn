@@ -96,7 +96,7 @@ output csv file : results/signal8_vdgc.csv
 ~~~
 ___
 This demo inputs 32 nodes synthetic fMRI BOLD signals of .mat file and outputs FC, PC, mvGC, TE, VARDNN-GC and VARDNN-DI results.
-Result matrices of EC, P-value, F-value, AIC and BIC are saved in ww32-1_&lt;algorithm&gt;_all.mat file.
+Result matrices of directed FC, P-value, F-value, AIC and BIC are saved in ww32-1_&lt;algorithm&gt;_all.mat file.
 ~~~
 >> vardnn -d -c -f -p -m -t --transform 1 --pval --lag 5 --epoch 500 --l2 0.1 --fval 0.05 --aic --bic --format 2 --roiname data/roi32.csv --showsig --showmat --showcg --showroc data/ww32-1.mat data/ww32-2.mat data/ww32-3.mat data/ww32-4.mat
 start training
@@ -106,7 +106,7 @@ training node 2
 ...
 training node 31
 training node 32
-finish training whole VARDNN network! t = 61.5208s
+finish training whole multivariate VAR DNN network! t = 61.5208s
 VARDNN training result : rsme=0.017795
 ~~~
 .mat file includes input data matrices.
