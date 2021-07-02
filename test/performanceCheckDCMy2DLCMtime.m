@@ -104,7 +104,7 @@ function performanceCheckDCMy2DLCM
             load(dlcmFile);
         else
             ticHdl = tic;
-            % init DLCM network
+            % init VARDNN network
             netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
 
             % set training options
@@ -123,7 +123,7 @@ function performanceCheckDCMy2DLCM
         %            'Plots','training-progress');
 %                'GradientThresholdMethod', 'global-l2norm' , ...
 
-            % training DLCM network
+            % training VARDNN network
             netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
             % calc dlcm-gc
             mat = calcMvarDnnGCI(si, exSignal, [], exControl, netDLCM);

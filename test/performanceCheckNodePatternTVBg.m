@@ -67,7 +67,7 @@ function checkingPattern(Gval, node_num, num_scan, hz, GTth, N, i)
             exSignal = uu;
             % layer parameters
             netDLCM = initMvarDnnNetwork(Y, exSignal, [], exControl); % weightFunc, weightParam, bias);
-            % training DLCM network
+            % training VARDNN network
             maxEpochs = 1000;
             miniBatchSize = ceil(sigLen / 3);
             options = trainingOptions('adam', ...

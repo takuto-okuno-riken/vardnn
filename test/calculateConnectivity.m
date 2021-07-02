@@ -142,7 +142,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     end
                     % si = signals{i} - nanmin(signals{i}, [], 'all'); % simple linear transform
                     netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl, lags, activateFunc); 
-                    % training DLCM network
+                    % training VARDNN network
                     maxEpochs = 1000;
                     miniBatchSize = ceil(sigLen / 3);
                     options = trainingOptions('adam', ...

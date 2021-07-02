@@ -226,7 +226,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         if isempty(netDLCM)
             % layer parameters
             netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
-            % training DLCM network
+            % training VARDNN network
             maxEpochs = 1000;
             miniBatchSize = ceil(sigLen / 3);
             options = trainingOptions('adam', ...

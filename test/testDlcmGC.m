@@ -34,9 +34,9 @@ function testDlcmGC
     if exist(dlcmFile, 'file')
         load(dlcmFile);
     else
-        % init DLCM network
+        % init VARDNN network
         netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
-        % training DLCM network
+        % training VARDNN network
         netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
         [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);

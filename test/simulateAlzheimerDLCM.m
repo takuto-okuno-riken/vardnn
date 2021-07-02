@@ -116,7 +116,7 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    calculateAlzWilcoxonTest(cnDLWnss, vadDLWnss, roiNames, 'cnns', 'vadns', 'dlw');
 %    calculateAlzWilcoxonTest(adDLWnss, vadDLWnss, roiNames, 'adns', 'vadns', 'dlw');
     % --------------------------------------------------------------------------------------------------------------
-    % re-training DLCM network (type 2 : EC, net)
+    % re-training VARDNN network (type 2 : EC, net)
     [vad2DLWs, meanVad2DLWns, stdVad2DLWns] = retrainDLCMAndEC(vadDLWnss, cnS2, cnIS2, roiNames, 'vadns');
     [vad2bDLWs, vad2DLWnss] = calculateNodeSignals(cnSignals, cnS2, cnIS2, roiNames, 'vadns', 'dlw');
     vad2Zi = repmat(vad2DLWnss(:,1,:),[1 ROINUM 1]);
@@ -141,7 +141,7 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    calculateAlzWilcoxonTest(adDLWsR, vad2DLWsR, roiNames, 'adecR', 'vad2ecR', 'dlw');
 %    calculateAlzWilcoxonTest(adDLWnss, vad2DLWnss, roiNames, 'adns', 'vad2ns', 'dlw');
     % --------------------------------------------------------------------------------------------------------------
-    % re-training DLCM network (type 12 : EC, net) (optimise for DLCM training)
+    % re-training VARDNN network (type 12 : EC, net) (optimise for DLCM training)
 %    [r1m, r2m, r3m, h1c, p1m] = retrainDLCMAndECmultiPattern(cnSignals, adDLWs, vadDLWs, vadDLWnss, vadZij, vadDLWsR, cnS2, cnIS2, roiNames, 'vad18');
 
     % --------------------------------------------------------------------------------------------------------------
@@ -179,7 +179,7 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    [vadH, vadP, ~] = calculateAlzWilcoxonTest(adDLWs, vadDLWs, roiNames, 'adec', 'vadec', 'dlw', 1, 'ranksum');
 
     % --------------------------------------------------------------------------------------------------------------
-    % re-training DLCM network (type 14 : EC, net) (optimise for DLCM training)
+    % re-training VARDNN network (type 14 : EC, net) (optimise for DLCM training)
 %    [r1m, r2m, r3m, h1c, p1m] = retrainDLCMAndECmultiPattern(cnSignals, adDLWs, vad19DLWs, vad19DLWnss, vad19Zij, vad19DLWsR, cnS2, cnIS2, roiNames, 'vad21');
 
     % --------------------------------------------------------------------------------------------------------------
@@ -221,7 +221,7 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    [vadH, vadP, ~] = calculateAlzWilcoxonTest(adDLWs, vadDLWs, roiNames, 'adec', 'vadec', 'dlw', 1, 'ranksum');
 
     % --------------------------------------------------------------------------------------------------------------
-    % re-training DLCM network (type 16 : EC, net) (optimise for DLCM training)
+    % re-training VARDNN network (type 16 : EC, net) (optimise for DLCM training)
 %{
     [r1m, r2m, r3m, h1c, p1m, cnS24, cnIS24, vad24name] = retrainDLCMAndECmultiPattern(cnSignals, adDLWs, vad22DLWs, vad22DLWnss, vad22Zij, vad22DLWsR, cnS3, cnIS3, roiNames, 'vad24');
     [vad24DLWs, vad24DLWnss] = calculateNodeSignals(cnSignals, cnS3, cnIS3, roiNames, vad24name, 'dlw');
@@ -232,7 +232,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     % --------------------------------------------------------------------------------------------------------------
     % generate virtual ad signals (type 17 : EC, BOLD-signals, net)
     % transform cn signals to vad signals linearly (based on EC rate),
-    % then convined with re-training DLCM network (type 16)
+    % then convined with re-training VARDNN network (type 16)
 %{
     vad3Signals = calculateVirtualADSignals3(cnSignals, roiNames, cnDLWs, adDLWs, 'dlw');
     [vad25Signals] = calculateNodeSignals3(vad3Signals, cnExSignals, cnExControls, roiNames, vad24name, 'dlw');
@@ -312,7 +312,7 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    calculateAlzWilcoxonTest(adDLWnss, vad7DLWnss, roiNames, 'adns', 'vad7ns', 'dlw');
     
     % --------------------------------------------------------------------------------------------------------------
-    % re-training DLCM network (type 6 : EC, net)
+    % re-training VARDNN network (type 6 : EC, net)
     [vad8DLWs, meanVad8DLWns, stdVad8DLWns] = retrainDLCMAndEC(vad7DLWnss, cnS2, cnIS2, roiNames, 'vad8ns');
 %    calculateAlzWilcoxonTest(cnDLWs, vad8DLWs, roiNames, 'cnec', 'vad8ec', 'dlw');
 %    calculateAlzWilcoxonTest(adDLWs, vad8DLWs, roiNames, 'adec', 'vad8ec', 'dlw');
@@ -336,7 +336,7 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    calculateAlzWilcoxonTest(adDLWnss, vad9DLWnss, roiNames, 'adns', 'vad9ns', 'dlw');
 
     % --------------------------------------------------------------------------------------------------------------
-    % re-training DLCM network (type 8 : EC, net)
+    % re-training VARDNN network (type 8 : EC, net)
     [vad10DLWs, meanVad10DLWns, stdVad10DLWns] = retrainDLCMAndEC(vad9DLWnss, cnS2, cnIS2, roiNames, 'vad10ns');
     [vad10bDLWs, vad10DLWnss] = calculateNodeSignals(cnSignals, cnS2, cnIS2, roiNames, 'vad10ns', 'dlw');
 %    figure; plotEC(mean(adDLWs,3),'ad DLW',0);
@@ -354,7 +354,7 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    calculateAlzWilcoxonTest(vad9DLWnss, vad10DLWnss, roiNames, 'vad9ns', 'vad10ns', 'dlw', 1, 'ranksum');
 
     % --------------------------------------------------------------------------------------------------------------
-    % re-training DLCM network (type 9 : EC, net) (optimise for DLCM training)
+    % re-training VARDNN network (type 9 : EC, net) (optimise for DLCM training)
     vad11DLWnss = [repmat(vad9DLWnss(:,1,:),[1 160 1]) vad9DLWnss(:,2:end,:)];
     cnS11 = [repmat(cnS2(:,1,:),[1 160 1]) cnS2(:,2:end,:)];
     cnIS11 = [repmat(cnIS2(:,1,:),[1 160 1]) cnS2(:,2:end,:)];
@@ -367,7 +367,7 @@ b(:,3) = squeeze(adZij(i,j,:));
 %    calculateAlzWilcoxonTest(vad9DLWs, vad12bDLWs, roiNames, 'vad9ec', 'vad12ec', 'dlw', 1, 'ttest2');
 
     % --------------------------------------------------------------------------------------------------------------
-    % re-training DLCM network (type 10 : EC, net) (optimise for DLCM training)
+    % re-training VARDNN network (type 10 : EC, net) (optimise for DLCM training)
     vad13DLWnss = vadDLWnss;
     vad13Zi = repmat(vadDLWnss(:,1,:),[1 ROINUM 1]);
     vad19Zij = vad13Zi - (repmat(meanAdDLWs, [1 1 cnSbjNum]) + repmat(stdAdDLWs, [1 1 cnSbjNum]) .* sigCnDLW .* 0.8);
@@ -410,7 +410,7 @@ b(:,3) = squeeze(adZij(i,j,:));
     end
 %}
     % --------------------------------------------------------------------------------------------------------------
-    % re-training DLCM network (type 11 : EC, net) (optimise for DLCM training)
+    % re-training VARDNN network (type 11 : EC, net) (optimise for DLCM training)
 %{
     for i=2:2
         for j=25:25
@@ -940,10 +940,10 @@ function [weights, meanWeights, stdWeights] = retrainDLCMAndEC(teachSignals, nod
                 si = nodeSignals;
                 exSignal = exSignals;
             end
-            % init DLCM network
+            % init VARDNN network
             netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
 
-            % training DLCM network
+            % training VARDNN network
             maxEpochs = 1000;
             miniBatchSize = ceil(sigLen / 2);
             options = trainingOptions('adam', ...

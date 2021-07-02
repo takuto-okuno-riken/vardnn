@@ -792,7 +792,7 @@ function [shiftDLWs, shiftSubDLWs, shiftSignals] = shiftAndExpandAmplitude(signa
                 filter = repmat(f.exControl(i,:).', 1, size(Si1,2));
                 Si1(nodeNum+1:end,:) = Si1(nodeNum+1:end,:) .* filter;
 
-                % training DLCM network
+                % training VARDNN network
                 maxEpochs = 1000;
                 miniBatchSize = ceil(sigLen / 3);
                 options = trainingOptions('adam', ...
@@ -2719,10 +2719,10 @@ function [weights, meanWeights, stdWeights, subweights] = retrainDLCMAndEC(teach
                 si = nodeSignals;
                 exSignal = exSignals;
             end
-            % init DLCM network
+            % init VARDNN network
             netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
 
-            % training DLCM network
+            % training VARDNN network
             maxEpochs = 1000;
             miniBatchSize = ceil(sigLen / 2);
             options = trainingOptions('adam', ...

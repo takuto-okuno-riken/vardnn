@@ -101,7 +101,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
         [t,mae,maeerr] = plotNodeSignals(nodeNum,si,exSignal,netDLCM);
         disp(['t=' num2str(t) ', mae=' num2str(mae)]);
         %}
-        % training DLCM network
+        % training VARDNN network
         maxEpochs = 1000;
         miniBatchSize = ceil(sigLen / 3);
         options = trainingOptions('adam', ...

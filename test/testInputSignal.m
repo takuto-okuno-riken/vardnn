@@ -25,18 +25,18 @@ function testInputSignal
 
     %% test pattern 1 -- no exogenous signal (default weight initializer)
 %%{
-    % init DLCM network
+    % init VARDNN network
     netDLCM = initMvarDnnNetwork(si);
-    % training DLCM network
+    % training VARDNN network
     netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['1) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 %%}
     %% test pattern 2 -- exogenous signal without exogenous control (default weight initializer)
 %{
-    % init DLCM network
+    % init VARDNN network
     netDLCM = initMvarDnnNetwork(si, exSignal, []);
-    % training DLCM network
+    % training VARDNN network
     netDLCM = trainMvarDnnNetwork(si, exSignal, [], [], netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['2) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
@@ -46,9 +46,9 @@ function testInputSignal
 %%{
     % control is all zero
     exControl = logical(zeros(nodeNum,exNum));
-    % init DLCM network
+    % init VARDNN network
     netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
-    % training DLCM network
+    % training VARDNN network
     netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
@@ -61,9 +61,9 @@ function testInputSignal
     for i=1:nodeNum
         exControl(i, mod(i-1,4)+1) = 1;
     end
-    % init DLCM network
+    % init VARDNN network
     netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
-    % training DLCM network
+    % training VARDNN network
     netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
@@ -77,9 +77,9 @@ function testInputSignal
         exControl(i, mod(i-1,4)+1) = 1;
         exControl(i, mod(i+1,4)+1) = 1;
     end
-    % init DLCM network
+    % init VARDNN network
     netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
-    % training DLCM network
+    % training VARDNN network
     netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
@@ -89,9 +89,9 @@ function testInputSignal
 %{
     % control one by one
     exControl = logical(ones(nodeNum,exNum));
-    % init DLCM network
+    % init VARDNN network
     netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
-    % training DLCM network
+    % training VARDNN network
     netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
@@ -109,7 +109,7 @@ function testInputSignal
     hiddenNums = estimateHiddenNeurons(nodeNum, sigLen);
     % layer parameters
     netDLCM = createMvarDnnNetwork(nodeNum, exNum, hiddenNums, 1, [], exControl, []);
-    % training DLCM network
+    % training VARDNN network
     netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
     [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);

@@ -20,7 +20,7 @@ function testTrainDlcm
     if exist(dlcmFile, 'file')
         load(dlcmFile);
     else
-        % init DLCM network
+        % init VARDNN network
         netDLCM = initMvarDnnNetwork(si);
 
         % set training options
@@ -42,7 +42,7 @@ function testTrainDlcm
             'LearnRateDropPeriod',400, ...
             'LearnRateDropFactor',0.5, ...
 %}
-        % training DLCM network
+        % training VARDNN network
         netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);
         save(dlcmFile, 'netDLCM');
     end

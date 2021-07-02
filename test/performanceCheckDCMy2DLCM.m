@@ -51,7 +51,7 @@ function performanceCheckDCMy2DLCM
         if exist(dlcmFile, 'file')
             load(dlcmFile);
         else
-            % init DLCM network
+            % init VARDNN network
             netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
 
             % set training options
@@ -70,7 +70,7 @@ function performanceCheckDCMy2DLCM
         %            'Plots','training-progress');
 %                'GradientThresholdMethod', 'global-l2norm' , ...
 
-            % training DLCM network
+            % training VARDNN network
             netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
             % recover training 
             [netDLCM, time, mae] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
