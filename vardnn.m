@@ -1,7 +1,7 @@
 %%
-% DLCM command line tool
+% VARDNN command line tool
 
-function dlcm(varargin)
+function vardnn(varargin)
 
     % set version number
     versionNumber = '0.1';
@@ -32,8 +32,8 @@ function dlcm(varargin)
     handles.roiNames = {};
     handles.commandError = 0;
     handles.outpath = 'results';
-    handles.dlec = 0;
-    handles.dlgc = 0;
+    handles.vddi = 0;
+    handles.vdgc = 0;
     handles.mvgc = 0;
     handles.pwgc = 0;
     handles.te = 0;
@@ -68,10 +68,10 @@ function dlcm(varargin)
             break;
         end
         switch varargin{i}
-            case {'-e','--dlec'}
-                handles.dlec = 1;
-            case {'-d','--dlgc'}
-                handles.dlgc = 1;
+            case {'-d','--vddi'}
+                handles.vddi = 1;
+            case {'-c','--vdgc'}
+                handles.vdgc = 1;
             case {'-m','--mvgc'}
                 handles.mvgc = 1;
             case {'-g','--pwgc'}
@@ -181,8 +181,8 @@ function showUsage()
     global exePath;
     global exeName;
     disp(['usage: ' exeName ' [options] filename.csv ...']);
-    disp('  -e, --dlec          output DLCM Effective Connectivity matrix result (<filename>_dlec.csv)');
-    disp('  -d, --dlgc          output DLCM Granger Causality matrix result (<filename>_dlgc.csv)');
+    disp('  -d, --vddi          output VARDNN Directional Influence matrix result (<filename>_vddi.csv)');
+    disp('  -c, --vdgc          output VARDNN Granger Causality matrix result (<filename>_vdgc.csv)');
     disp('  -m, --mvgc          output multivaliate Granger Causality matrix result (<filename>_mvgc.csv)');
     disp('  -g, --pwgc          output pairwise Granger Causality matrix result (<filename>_pwgc.csv)');
     disp('  -t, --te            output (LINUE) Transfer Entropy matrix result (<filename>_te.csv)');
@@ -191,27 +191,27 @@ function showUsage()
     disp('  -w, --wc            output Wavelet Coherence matrix result (<filename>_wc.csv)');
     disp('  -v, --var           output VAR (Vector Auto-Regression) coefficient matrix result (<filename>_mvar.csv)');
     disp('  --outpath           output files path (default:"results")');
-    disp('  --pval              save P-value matrix of DLCM-GC, mvGC, pwGC, TE, FC and PC (<filename>_*_pval.csv)');
-    disp('  --fval alpha        save F-value with <alpha> matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_fval.csv, <filename>_*_fcrit.csv)');
-    disp('  --aic               save AIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_aic.csv)');
-    disp('  --bic               save BIC matrix of DLCM-GC, mvGC, pwGC and TE (<filename>_*_bic.csv)');
+    disp('  --pval              save P-value matrix of VARDNN-GC, mvGC, pwGC, TE, FC and PC (<filename>_*_pval.csv)');
+    disp('  --fval alpha        save F-value with <alpha> matrix of VARDNN-GC, mvGC, pwGC and TE (<filename>_*_fval.csv, <filename>_*_fcrit.csv)');
+    disp('  --aic               save AIC matrix of VARDNN-GC, mvGC, pwGC and TE (<filename>_*_aic.csv)');
+    disp('  --bic               save BIC matrix of VARDNN-GC, mvGC, pwGC and TE (<filename>_*_bic.csv)');
     disp('  --format type       save file format <type> 0:csv, 1:mat(each), 2:mat(all) (default:0)');
-    disp('  --groundtruth files calculate ROC curve and save AUC of DLCM-EC, DLCM-GC, mVAR-EC, mvGC, pwGC, TE, FC, PC and WC (<filename>_*_auc.csv)');
+    disp('  --groundtruth files calculate ROC curve and save AUC of VARDNN-DI, VARDNN-GC, mVAR, mvGC, pwGC, TE, FC, PC and WC (<filename>_*_auc.csv)');
     disp('  --transform type    input signal transform <type> 0:raw, 1:sigmoid (default:0)');
     disp('  --transopt num      signal transform option <num> (for type 1:centroid value)');
-    disp('  --lag num           time lag <num> for mvGC, pwGC, TE and mVAR-EC (default:3)');
-    disp('  --ex files          DLCM exogenouse input signal <files> (file1.csv[:file2.csv:...])');
-    disp('  --nctrl files       DLCM node status control <files> (file1.csv[:file2.csv:...])');
-    disp('  --ectrl files       DLCM exogenous input control <files> (file1.csv[:file2.csv:...])');
-    disp('  --epoch num         DLCM training epoch number <num> (default:1000)');
-    disp('  --l2 num            DLCM training L2Regularization <num> (default:0.05)');
+    disp('  --lag num           time lag <num> for mvGC, pwGC, TE and mVAR (default:3)');
+    disp('  --ex files          VARDNN exogenouse input signal <files> (file1.csv[:file2.csv:...])');
+    disp('  --nctrl files       VARDNN node status control <files> (file1.csv[:file2.csv:...])');
+    disp('  --ectrl files       VARDNN exogenous input control <files> (file1.csv[:file2.csv:...])');
+    disp('  --epoch num         VARDNN training epoch number <num> (default:1000)');
+    disp('  --l2 num            VARDNN training L2Regularization <num> (default:0.05)');
     disp('  --roiname files     ROI names <files> (file1.csv[:file2.csv:...])');
     disp('  --showsig           show node status signals of <filename>.csv');
     disp('  --showex            show exogenous input signals of <file1>.csv');
-    disp('  --showmat           show result matrix of DLCM-EC, DLCM-GC, mVAR-EC, mvGC, pwGC, TE, FC, PC and WC');
-    disp('  --showcg            show circle graph of DLCM-EC, DLCM-GC, mVAR-EC, mvGC, pwGC, TE, FC, PC and WC');
-    disp('  --showroc           show ROC curve (by GroundTruth) of DLCM-EC, DLCM-GC, mVAR-EC, mvGC, pwGC, TE, FC, PC and WC');
-    disp('  --nocache           do not use cache file for DLCM training');
+    disp('  --showmat           show result matrix of VARDNN-DI, VARDNN-GC, mVAR, mvGC, pwGC, TE, FC, PC and WC');
+    disp('  --showcg            show circle graph of VARDNN-DI, VARDNN-GC, mVAR, mvGC, pwGC, TE, FC, PC and WC');
+    disp('  --showroc           show ROC curve (by GroundTruth) of VARDNN-DI, VARDNN-GC, mVAR, mvGC, pwGC, TE, FC, PC and WC');
+    disp('  --nocache           do not use cache file for VARDNN training');
     disp('  -v, --version       show version number');
     disp('  -h, --help          show command line help');
 end
@@ -235,8 +235,8 @@ function processInputFiles(handles)
     teROC = cell(N,2);
     mvarROC = cell(N,2);
     if handles.showROC > 0
-        if handles.dlec > 0, dleRf = figure; end
-        if handles.dlgc > 0, dlRf = figure; end
+        if handles.vddi > 0, dleRf = figure; end
+        if handles.vdgc > 0, dlRf = figure; end
         if handles.mvgc > 0, gcRf = figure; end
         if handles.pwgc > 0, pwRf = figure; end
         if handles.te > 0, teRf = figure; end
@@ -387,16 +387,16 @@ function processInputFiles(handles)
             ylabel('Signal Value');
         end
         
-        % train DLCM network
-        if handles.dlec > 0 || handles.dlgc > 0
-            dlcmFile = [exePath '/results/cache-dlcm-' name '.mat'];
-            if exist(dlcmFile, 'file') && handles.noCache == 0
-                disp(['read cache file : ' dlcmFile]);
-                load(dlcmFile);
+        % train VARDNN network
+        if handles.vddi > 0 || handles.vdgc > 0
+            vardnnFile = [exePath '/results/cache-vardnn-' name '.mat'];
+            if exist(vardnnFile, 'file') && handles.noCache == 0
+                disp(['read cache file : ' vardnnFile]);
+                load(vardnnFile);
             else
                 % layer parameters
-                netDLCM = initDlcmNetwork(X, exSignal, nodeControl, exControl, handles.dllag);
-                % training DLCM network
+                net = initMvarDnnNetwork(X, exSignal, nodeControl, exControl, handles.dllag);
+                % training VARDNN network
                 miniBatchSize = ceil(sigLen / 3);
                 options = trainingOptions('adam', ...
                     'ExecutionEnvironment','cpu', ...
@@ -408,11 +408,11 @@ function processInputFiles(handles)
                     'Verbose',false);
 
                 disp('start training');
-                netDLCM = trainDlcmNetwork(X, exSignal, nodeControl, exControl, netDLCM, options);
-                [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
-                disp(['DLCM training result : rsme=' num2str(rsme)]);
+                net = trainMvarDnnNetwork(X, exSignal, nodeControl, exControl, net, options);
+                [time, loss, rsme] = getDlcmTrainingResult(net);
+                disp(['VARDNN training result : rsme=' num2str(rsme)]);
                 if handles.noCache == 0
-                    save(dlcmFile, 'netDLCM');
+                    save(vardnnFile, 'net');
                 end
             end
         end
@@ -423,60 +423,60 @@ function processInputFiles(handles)
             isFullNode = 0;
         end
 
-        % calc DLCM-EC
-        if handles.dlec > 0
-            % show DLCM-EC matrix
+        % calc VARDNN-DI
+        if handles.vddi > 0
+            % show VARDNN-DI matrix
             if handles.showMat > 0
-                figure; dlEC = plotDlcmEC(netDLCM, nodeControl, exControl, 0, isFullNode);
-                title(['DLCM(' num2str(handles.dllag) ') Effective Connectivity : ' name]);
+                figure; DI = plotMvarDnnEC(net, nodeControl, exControl, 0, isFullNode);
+                title(['VARDNN(' num2str(handles.dllag) ') Directional Influence : ' name]);
             else
-                dlEC = calcDlcmEC(netDLCM, nodeControl, exControl, isFullNode);
+                DI = calcMvarDnnEC(net, nodeControl, exControl, isFullNode);
             end
             
             if handles.showCG > 0
-                figure; plotCircleGraph(dlEC, ['DLCM(' num2str(handles.dllag) ') Effective Connectivity : ' name], roiNames, 1, 5, 1);
+                figure; plotCircleGraph(DI, ['VARDNN(' num2str(handles.dllag) ') Directional Influence : ' name], roiNames, 1, 5, 1);
             end
             
             % show ROC curve 
             if ~isempty(groundTruth)
                 if handles.showROC > 0
-                    figure(dleRf); hold on; [dleROC{i,1}, dleROC{i,2}, auc] = plotROCcurve(dlEC, groundTruth, 100, 1, handles.Gth); hold off;
-                    title(['ROC curve of DLCM(' num2str(handles.dllag) ') Effective Connectivity']);
+                    figure(dleRf); hold on; [dleROC{i,1}, dleROC{i,2}, auc] = plotROCcurve(DI, groundTruth, 100, 1, handles.Gth); hold off;
+                    title(['ROC curve of VARDNN(' num2str(handles.dllag) ') Directional Influence']);
                 else
-                    [dleROC{i,1}, dleROC{i,2}, auc] = calcROCcurve(dlEC, groundTruth, 100, 1, handles.Gth);
+                    [dleROC{i,1}, dleROC{i,2}, auc] = calcROCcurve(DI, groundTruth, 100, 1, handles.Gth);
                 end
             end
             
             % output result matrix files
-            saveResultFiles(handles, dlEC, [], [], [], [], [], auc, [savename '_dlec']);
+            saveResultFiles(handles, DI, [], [], [], [], [], auc, [savename '_vddi']);
         end
 
-        % calc DLCM-GC
-        if handles.dlgc > 0
-            % show DLCM-GC matrix
+        % calc VARDNN-GC
+        if handles.vdgc > 0
+            % show VARDNN-GC matrix
             if handles.showMat > 0
-                figure; [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotDlcmGCI(X, exSignal, nodeControl, exControl, netDLCM, 0, handles.alpha, isFullNode);
-                title(['DLCM(' num2str(handles.dllag) ') Granger Causality Index : ' name]);
+                figure; [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMvarDnnGCI(X, exSignal, nodeControl, exControl, net, 0, handles.alpha, isFullNode);
+                title(['VARDNN(' num2str(handles.dllag) ') Granger Causality Index : ' name]);
             else
-                [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcDlcmGCI(X, exSignal, nodeControl, exControl, netDLCM, handles.alpha, isFullNode);
+                [dlGC, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMvarDnnGCI(X, exSignal, nodeControl, exControl, net, handles.alpha, isFullNode);
             end
             
             if handles.showCG > 0
-                figure; plotCircleGraph(dlGC, ['DLCM(' num2str(handles.dllag) ') Granger Causality Index : ' name], roiNames, 1, 5, 1);
+                figure; plotCircleGraph(dlGC, ['VARDNN(' num2str(handles.dllag) ') Granger Causality Index : ' name], roiNames, 1, 5, 1);
             end
             
             % show ROC curve 
             if ~isempty(groundTruth)
                 if handles.showROC > 0
                     figure(dlRf); hold on; [dlROC{i,1}, dlROC{i,2}, auc] = plotROCcurve(dlGC, groundTruth, 100, 1, handles.Gth); hold off;
-                    title(['ROC curve of DLCM(' num2str(handles.dllag) ') Granger Causality']);
+                    title(['ROC curve of VARDNN(' num2str(handles.dllag) ') Granger Causality']);
                 else
                     [dlROC{i,1}, dlROC{i,2}, auc] = calcROCcurve(dlGC, groundTruth, 100, 1, handles.Gth);
                 end
             end
             
             % output result matrix files
-            saveResultFiles(handles, dlGC, P, F, cvFd, AIC, BIC, auc, [savename '_dlgc']);
+            saveResultFiles(handles, dlGC, P, F, cvFd, AIC, BIC, auc, [savename '_vdgc']);
         end
         
         % calc multivaliate Granger causality

@@ -16,7 +16,7 @@ function trainedNet = trainMvarDnnNetwork(X, exSignal, nodeControl, exControl, n
     if isfield(net, 'lags'), lags = net.lags; else lags = 1; end
 
     % training whole multivariate VAR DNN network
-    disp('start training whole multivariate VAR DNN (DLCM) network');
+    disp('start training whole multivariate VAR DNN network');
     ticH = tic;
     nodeInputOrg = [];
     for i=1:lags, nodeInputOrg = [nodeInputOrg; X(:,i:end-(lags-i+1))]; end
@@ -50,5 +50,5 @@ function trainedNet = trainMvarDnnNetwork(X, exSignal, nodeControl, exControl, n
     trainedNet.initWeights = initWeights;
     trainedNet.trainTime = time;
     trainedNet.trainOptions = options;
-    disp(['finish training whole multivariate VAR DNN (DLCM) network! t = ' num2str(time) 's']);
+    disp(['finish training whole multivariate VAR DNN network! t = ' num2str(time) 's']);
 end
