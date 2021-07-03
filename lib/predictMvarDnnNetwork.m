@@ -1,13 +1,13 @@
 %%
-% Prot predicted signals by traind DLCM
+% Prot predicted signals by traind mVAR DNN
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
-%  netDLCM      trained DLCM network
+%  net          trained mVAR DNN network
 
-function [Y, time] = predictDlcmNetwork(X, exSignal, nodeControl, exControl, netDLCM)
+function [Y, time] = predictMvarDnnNetwork(X, exSignal, nodeControl, exControl, net)
     nodeNum = size(X,1);
     Y = X;
     if isempty(exSignal)
@@ -26,7 +26,7 @@ function [Y, time] = predictDlcmNetwork(X, exSignal, nodeControl, exControl, net
             filter = repmat(exControl(i,:).', 1, size(nodeInput,2));
             nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
         end
-        zPred = predict(netDLCM.nodeNetwork{i}, nodeInput);
+        zPred = predict(net.nodeNetwork{i}, nodeInput);
         Y(i,:) = zPred;
     end
     time = toc(ticH);
