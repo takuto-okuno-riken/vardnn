@@ -100,7 +100,7 @@ function checkingPattern(si, exSignal, exControl, winLen, idx)
             % training VARDNN network
             netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
             % recover training 
-            [netDLCM, time] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+            [netDLCM, time] = recoveryTrainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
             disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
             %plotDlcmWeight(netDLCM);
@@ -123,7 +123,7 @@ function checkingPattern(si, exSignal, exControl, winLen, idx)
             sExSignal = exSignal(:,st:en);
             % do simulation
             if isempty(allS{i})
-                [S, time] = simulateDlcmNetwork(wSi, sExSignal, [], exControl, netDLCM);
+                [S, time] = simulateMvarDnnNetwork(wSi, sExSignal, [], exControl, netDLCM);
                 allS{i,1} = S; simTime(i) = time;
             else
                 S = allS{i,1}; time = simTime(i);

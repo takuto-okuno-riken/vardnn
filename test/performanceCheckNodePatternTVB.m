@@ -110,7 +110,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             disp(['end training : rsme=' num2str(rsme)]);
 
             % recoverty training
-            %[netDLCM, time] = recoveryTrainDlcmNetwork(Y, exSignal, [], exControl, netDLCM, options);
+            %[netDLCM, time] = recoveryTrainMvarDnnNetwork(Y, exSignal, [], exControl, netDLCM, options);
             save(dlcmFile, 'netDLCM', 'Y', 'exSignal', 'Y', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
         end
         % show DLCM-GC

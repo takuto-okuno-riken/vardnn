@@ -73,7 +73,7 @@ function performanceCheckDCMy2DLCM
             % training VARDNN network
             netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
             % recover training 
-            [netDLCM, time, mae] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+            [netDLCM, time, mae] = recoveryTrainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
             [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
             disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 
@@ -85,7 +85,7 @@ function performanceCheckDCMy2DLCM
         end
         
         % simulate DLCM network with 1st frame & exogenous input signal
-        [S, time] = simulateDlcmNetwork(si, exSignal, [], exControl, netDLCM);
+        [S, time] = simulateMvarDnnNetwork(si, exSignal, [], exControl, netDLCM);
 
         % show original & simulated signal correlation        
         figure; DLCorr(k,1) = plotTwoSignalsCorrelation(S, si);

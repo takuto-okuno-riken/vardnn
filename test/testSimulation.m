@@ -43,7 +43,7 @@ function testSimulation
     end
     
     % simulate DLCM network with 1st frame & exogenous input signal
-    [S, time] = simulateDlcmNetwork(si, exSignal, [], exControl, netDLCM);
+    [S, time] = simulateMvarDnnNetwork(si, exSignal, [], exControl, netDLCM);
 
     [mae, maeerr] = plotTwoSignals(si, S);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);

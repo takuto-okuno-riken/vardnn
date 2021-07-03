@@ -43,10 +43,10 @@ function testRecoverTrain
     end
     
     % recoverty training
-    [netDLCM, time] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+    [netDLCM, time] = recoveryTrainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
 
     % show result of recoverty training
-    [S, time] = simulateDlcmNetwork(si, exSignal, [], exControl, netDLCM);
+    [S, time] = simulateMvarDnnNetwork(si, exSignal, [], exControl, netDLCM);
     [mae, maeerr] = plotTwoSignals(si, S);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
     save(dlcmFile, 'netDLCM');

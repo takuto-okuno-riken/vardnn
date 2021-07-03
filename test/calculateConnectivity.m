@@ -184,7 +184,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                         'GradientThreshold',5,...
                         'L2Regularization',0.05, ...
                         'Verbose',false);
-                    [netDLCM, time] = recoveryTrainDlcmNetwork(f.si, f.exSignal, [], f.exControl, f.netDLCM, options);
+                    [netDLCM, time] = recoveryTrainMvarDnnNetwork(f.si, f.exSignal, [], f.exControl, f.netDLCM, options);
                     mat = calcMvarDnnGCI(f.si, f.exSignal, [], f.exControl, netDLCM);
                     parsavedlsm(outName, netDLCM, f.si, f.exSignal, f.exControl, mat, f.sig, c, f.maxsi, f.minsi);
                 end

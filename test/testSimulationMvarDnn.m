@@ -49,7 +49,7 @@ function testSimulationMVAR
     figure; [mae, maeerr] = plotTwoSignals(si, S);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
     
-    [S2, time] = simulateDlcmNetwork(si, exSignal, [], exControl, net);
+    [S2, time] = simulateMvarDnnNetwork(si, exSignal, [], exControl, net);
     figure; [mae, maeerr] = plotTwoSignals(si, S2);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
 

@@ -40,13 +40,13 @@ function testSimulationMarmo
         % training VARDNN network
         netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
         % recover training 
-        [netDLCM, time] = recoveryTrainDlcmNetwork(si, exSignal, [], exControl, netDLCM, options);
+        [netDLCM, time] = recoveryTrainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
         [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);        save(dlcmFile, 'netDLCM');
     end
     
     % simulate DLCM network with 1st frame & exogenous input signal
-    [S, time] = simulateDlcmNetwork(si, exSignal, [], exControl, netDLCM);
+    [S, time] = simulateMvarDnnNetwork(si, exSignal, [], exControl, netDLCM);
 
     figure; [mae, maeerr] = plotTwoSignals(si, S);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
