@@ -1,18 +1,18 @@
 %%
-% get DLCM weight causality index matrix (wcI) and impaired node signals (wcNS)
+% get VARDNN weight causality index matrix (wcI) and impaired node signals (wcNS)
 % input:
-%  netDLCM      trained DLCM network
+%  net          trained VARDNN network
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [wcI, wcNS] = calcDlcmWCIdm123a(netDLCM, nodeControl, exControl, isFullNode)
+function [wcI, wcNS] = calcDlcmWCIdm123a(net, nodeControl, exControl, isFullNode)
     if nargin < 4, isFullNode = 0; end
     if nargin < 3, exControl = []; end
     if nargin < 2, nodeControl = []; end
 
-    nodeNum = length(netDLCM.nodeNetwork); % old. for compatibility
-    nodeInNum = size(netDLCM.nodeNetwork{1, 1}.Layers(2, 1).Weights, 2); % old. for compatibility
+    nodeNum = length(net.nodeNetwork); % old. for compatibility
+    nodeInNum = size(net.nodeNetwork{1, 1}.Layers(2, 1).Weights, 2); % old. for compatibility
     if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
     wcI = nan(nodeNum,nodeMax);
     wcNS = nan(nodeNum,nodeMax+1);
@@ -29,12 +29,12 @@ function [wcI, wcNS] = calcDlcmWCIdm123a(netDLCM, nodeControl, exControl, isFull
         ctrl = [control, excontrol];
 
         % calc liner weights relation
-        w1 = netDLCM.nodeNetwork{i, 1}.Layers(2, 1).Weights;
-        w2 = netDLCM.nodeNetwork{i, 1}.Layers(4, 1).Weights;
-        w3 = netDLCM.nodeNetwork{i, 1}.Layers(6, 1).Weights;
-        b1 = netDLCM.nodeNetwork{i, 1}.Layers(2, 1).Bias;
-        b2 = netDLCM.nodeNetwork{i, 1}.Layers(4, 1).Bias;
-        b3 = netDLCM.nodeNetwork{i, 1}.Layers(6, 1).Bias;
+        w1 = net.nodeNetwork{i, 1}.Layers(2, 1).Weights;
+        w2 = net.nodeNetwork{i, 1}.Layers(4, 1).Weights;
+        w3 = net.nodeNetwork{i, 1}.Layers(6, 1).Weights;
+        b1 = net.nodeNetwork{i, 1}.Layers(2, 1).Bias;
+        b2 = net.nodeNetwork{i, 1}.Layers(4, 1).Bias;
+        b3 = net.nodeNetwork{i, 1}.Layers(6, 1).Bias;
         w1 = w1 .* repmat(ctrl, size(w1,1), 1);
 
         x = sum(w1,2) + b1;

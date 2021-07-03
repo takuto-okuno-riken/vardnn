@@ -1,18 +1,18 @@
 %%
-% get DLCM weight causality index matrix
+% get VARDNN weight causality index matrix
 % input:
-%  netDLCM      trained DLCM network
+%  net          trained VARDNN network
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 
-function wcI = calcDlcmWCIm1(netDLCM, nodeControl, exControl)
+function wcI = calcDlcmWCIm1(net, nodeControl, exControl)
     if nargin < 3
         exControl = [];
     end
     if nargin < 2
         nodeControl = [];
     end
-    nodeNum = netDLCM.nodeNum;
+    nodeNum = net.nodeNum;
     nodeInNum = nodeNum + net.exNum;
 
     wcI = nan(nodeNum,nodeNum);
@@ -29,8 +29,8 @@ function wcI = calcDlcmWCIm1(netDLCM, nodeControl, exControl)
         ctrl = [control, excontrol];
 
         % remove useless weights
-        w = netDLCM.nodeNetwork{i, 1}.Layers(2, 1).Weights;
-        bias = netDLCM.nodeNetwork{i, 1}.Layers(2, 1).Bias;
+        w = net.nodeNetwork{i, 1}.Layers(2, 1).Weights;
+        bias = net.nodeNetwork{i, 1}.Layers(2, 1).Bias;
         for j=nodeInNum:-1:1
             if ctrl(j) < 1
                 w(:,j) = [];

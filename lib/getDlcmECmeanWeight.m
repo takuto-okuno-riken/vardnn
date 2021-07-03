@@ -1,7 +1,7 @@
 %%
 % get DLCM effective connectivity matrix (dlEC) and its standard error matrix
 % input:
-%  netDLCM     trained DLCM network
+%  net         trained DNNVAR network
 
 function [dlEC, dlECerr] = getDlcmECmeanWeight(netDLCM)
     nodeNum = netDLCM.nodeNum;

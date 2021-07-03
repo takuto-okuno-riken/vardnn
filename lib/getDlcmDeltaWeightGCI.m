@@ -1,16 +1,16 @@
 %%
-% get DLCM delta weight granger causality index matrix
+% get VARDNN delta weight granger causality index matrix
 % input:
-%  netDLCM     trained DLCM network
+%  net         trained VARDNN network
 
-function gcI = getDlcmDeltaWeightGCI(netDLCM)
-    nodeNum = netDLCM.nodeNum;
+function gcI = getDlcmDeltaWeightGCI(net)
+    nodeNum = net.nodeNum;
     nodeInNum = nodeNum + net.exNum;
 
     gcI = nan(nodeNum,nodeInNum);
     for i=1:nodeNum
-        weights = netDLCM.nodeNetwork{i, 1}.Layers(2, 1).Weights;
-        initWeights = netDLCM.initWeights{i};
+        weights = net.nodeNetwork{i, 1}.Layers(2, 1).Weights;
+        initWeights = net.initWeights{i};
         weight = weights - initWeights;
         VarEi = var(weight(:),1);
 

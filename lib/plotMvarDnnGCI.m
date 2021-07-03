@@ -8,7 +8,7 @@
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
-%  netDLCM      trained multivariate VAR DNN network
+%  net          trained multivariate VAR DNN network
 %  range        plotting minimum and maximum range of GCI (default:10)
 %               if range==0, range shows standard deviation [-3 sigma, 3 sigma]
 %  alpha        the significance level of F-statistic (optional)

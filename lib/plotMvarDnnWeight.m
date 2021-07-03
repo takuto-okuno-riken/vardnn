@@ -1,16 +1,16 @@
 %%
-% plot DLCM network weight by each node
+% plot VARDNN network weight by each node
 % input:
-%  netDLCM   trained DLCM network
+%  net       trained VARDNN network
 %  type      graph type ('bar' (default), 'whisker')
 
-function plotDlcmWeight(netDLCM, type)
+function plotMvarDnnWeight(net, type)
     if nargin < 2, type = 'bar'; end
     % weight plot
     disp('plot DLCM connection weight amang nodes');
-    nodeNum = length(netDLCM.nodeLayers);
+    nodeNum = length(net.nodeLayers);
     for i=1:nodeNum
-        weight = netDLCM.nodeNetwork{i, 1}.Layers(2, 1).Weights;
+        weight = net.nodeNetwork{i, 1}.Layers(2, 1).Weights;
         mweight = mean(weight,1);
         eweight = std(weight,1) / sqrt(size(weight,1));
         switch type
