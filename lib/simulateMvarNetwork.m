@@ -15,23 +15,29 @@ function [S, time] = simulateMvarNetwork(X, exSignal, nodeControl, exControl, ne
     % set node input
     S = [X; exSignal];
 
+    % set node control index
+    idxs = {};
+    for i=1:nodeNum
+        nodeIdx = [1:nodeNum];
+        if ~isempty(nodeControl)
+            [~,nodeIdx] = find(nodeControl(i,:)==1);
+        end
+        exIdx = [nodeNum+1:nodeNum+net.exNum];
+        if ~isempty(exControl)
+            [~,exIdx] = find(exControl(i,:)==1);
+            exIdx = exIdx + nodeNum;
+        end
+        idxs{i} = [nodeIdx, exIdx];
+    end
+
     disp('start simulation whole mVAR network');
     ticH = tic;
     for t=p:sigLen-1
         if mod(t,10)==0, disp(['step : ' num2str(t)]); end
         for i=1:nodeNum
-            nodeIdx = [1:nodeNum];
-            if ~isempty(nodeControl)
-                [~,nodeIdx] = find(nodeControl(i,:)==1);
-            end
-            exIdx = [nodeNum+1:nodeNum+net.exNum];
-            if ~isempty(exControl)
-                [~,exIdx] = find(exControl(i,:)==1);
-                exIdx = exIdx + nodeNum;
-            end
             S2 = [];
             for k=1:p
-                S2 = [S2; S([nodeIdx, exIdx],t-(k-1))];
+                S2 = [S2; S(idxs{i},t-(k-1))];
             end
             S2 = [S2; 1]; % might not be good to add bias
 
