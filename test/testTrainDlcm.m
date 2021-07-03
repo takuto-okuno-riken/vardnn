@@ -46,7 +46,7 @@ function testTrainDlcm
         netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);
         save(dlcmFile, 'netDLCM');
     end
-    [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+    [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
     disp(['train result (mean nodes) time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     
     % weight plot

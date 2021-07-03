@@ -157,7 +157,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
 
                     disp('start training');
                     netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-                    [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+                    [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
                     disp(['end training : rsme=' num2str(rsme)]);
                     % calc dlcm-gc
                     mat = calcMvarDnnGCI(si, exSignal, [], exControl, netDLCM);

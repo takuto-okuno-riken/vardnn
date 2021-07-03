@@ -70,7 +70,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
                 netDLCM = trainMvarDnnNetwork(Y, exSignal, [], exControl, netDLCM, options);
                 save(dlcmFile, 'netDLCM', 'Y', 'exSignal', 'Y', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
             end
-            [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+            [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
             disp(['end training : rsme=' num2str(rsme)]);
             dlErr(k,j) = rsme;
             

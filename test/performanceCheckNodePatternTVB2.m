@@ -214,7 +214,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
             disp('start training');
             netDLCM = trainMvarDnnNetwork(Y, exSignal, [], exControl, netDLCM, options);
-            [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+            [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
             disp(['end training : rsme=' num2str(rsme)]);
 
             % recoverty training

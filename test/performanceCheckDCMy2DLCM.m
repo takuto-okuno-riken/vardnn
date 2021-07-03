@@ -74,7 +74,7 @@ function performanceCheckDCMy2DLCM
             netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
             % recover training 
             [netDLCM, time, mae] = recoveryTrainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-            [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+            [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
             disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 
             DLMAEs(k,1) = mae;

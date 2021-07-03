@@ -41,7 +41,7 @@ function testSimulationMarmo
         netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
         % recover training 
         [netDLCM, time] = recoveryTrainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-        [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+        [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);        save(dlcmFile, 'netDLCM');
     end
     

@@ -40,7 +40,7 @@ function testMvarDnnGC
             net = initMvarDnnNetwork(si, exSignal, [], exControl, i);
             % training multivariate VAR DNN network
             net = trainMvarDnnNetwork(si, exSignal, [], exControl, net, options);
-            [time, loss, rsme] = getDlcmTrainingResult(net);
+            [time, loss, rsme] = getMvarDnnTrainingResult(net);
             disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
             save(mvardnnFile, 'net');
         end
@@ -67,7 +67,7 @@ function testMvarDnnGC
             net = initMvarDnnNetwork(si, exSignal, [], exControl, i);
             % training multivariate VAR DNN network
             net = trainMvarDnnNetwork(si, exSignal, [], exControl, net, options);
-            [time, loss, rsme] = getDlcmTrainingResult(net);
+            [time, loss, rsme] = getMvarDnnTrainingResult(net);
             disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
             save(mvardnnFile, 'net');
         end
@@ -93,7 +93,7 @@ function testMvarDnnGC
             net = initMvarDnnNetwork(si, exSignal, [], exControl, i, []);
             % training multivariate VAR DNN network
             net = trainMvarDnnNetwork(si, exSignal, [], exControl, net, options);
-            [time, loss, rsme] = getDlcmTrainingResult(net);
+            [time, loss, rsme] = getMvarDnnTrainingResult(net);
             disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
             save(mvardnnFile, 'net');
         end

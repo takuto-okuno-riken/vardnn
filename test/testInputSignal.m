@@ -29,7 +29,7 @@ function testInputSignal
     netDLCM = initMvarDnnNetwork(si);
     % training VARDNN network
     netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);
-    [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+    [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
     disp(['1) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 %%}
     %% test pattern 2 -- exogenous signal without exogenous control (default weight initializer)
@@ -38,7 +38,7 @@ function testInputSignal
     netDLCM = initMvarDnnNetwork(si, exSignal, []);
     % training VARDNN network
     netDLCM = trainMvarDnnNetwork(si, exSignal, [], [], netDLCM, options);
-    [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+    [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
     disp(['2) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotMvarDnnWeight(netDLCM);
 %}
@@ -50,7 +50,7 @@ function testInputSignal
     netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
     % training VARDNN network
     netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-    [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+    [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotMvarDnnWeight(netDLCM);
 %%}
@@ -65,7 +65,7 @@ function testInputSignal
     netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
     % training VARDNN network
     netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-    [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+    [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotMvarDnnWeight(netDLCM);
 %}
@@ -81,7 +81,7 @@ function testInputSignal
     netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
     % training VARDNN network
     netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-    [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+    [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotMvarDnnWeight(netDLCM);
 %%}
@@ -93,7 +93,7 @@ function testInputSignal
     netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
     % training VARDNN network
     netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-    [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+    [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotMvarDnnWeight(netDLCM);
 %}
@@ -111,7 +111,7 @@ function testInputSignal
     netDLCM = createMvarDnnNetwork(nodeNum, exNum, hiddenNums, 1, [], exControl, []);
     % training VARDNN network
     netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-    [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+    [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
     disp(['3) train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
     plotMvarDnnWeight(netDLCM);
 %%}

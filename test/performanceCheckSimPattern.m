@@ -104,7 +104,7 @@ function checkingPattern(si, exSignal, exControl, idx)
 
         % training VARDNN network
         netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-        [time, loss, rsme] = getDlcmTrainingResult(netDLCM);
+        [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
         %plotMvarDnnWeight(netDLCM);
         save(dlcmFile, 'netDLCM');
