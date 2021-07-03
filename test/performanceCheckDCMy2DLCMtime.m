@@ -132,7 +132,7 @@ function performanceCheckDCMy2DLCM
 
             DLtime(k,1) = time;
 
-            %plotDlcmWeight(netDLCM);
+            %plotMvarDnnWeight(netDLCM);
             save(dlcmFile, 'netDLCM','mat','DLtime');
         end
         

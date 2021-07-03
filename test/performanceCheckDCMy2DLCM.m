@@ -80,7 +80,7 @@ function performanceCheckDCMy2DLCM
             DLMAEs(k,1) = mae;
             DLinvTms(k,1) = netDLCM.trainTime + netDLCM.recoverTrainTime;
 
-            %plotDlcmWeight(netDLCM);
+            %plotMvarDnnWeight(netDLCM);
             save(dlcmFile, 'netDLCM', 'DLMAEs', 'DLinvTms', 'DLCorr');
         end
         
