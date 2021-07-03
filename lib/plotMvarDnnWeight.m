@@ -7,7 +7,7 @@
 function plotMvarDnnWeight(net, type)
     if nargin < 2, type = 'bar'; end
     % weight plot
-    disp('plot DLCM connection weight amang nodes');
+    disp('plot mVAR DNN connection weight amang nodes');
     nodeNum = length(net.nodeLayers);
     for i=1:nodeNum
         weight = net.nodeNetwork{i, 1}.Layers(2, 1).Weights;

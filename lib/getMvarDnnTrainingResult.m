@@ -1,9 +1,9 @@
 %%
-% get DLCM training result (mean value of each nodes)
+% get mVARDNN training result (mean value of each nodes)
 % input:
-%  net         trained DLCM network
+%  net         trained VARDNN network
 
-function [time, loss, rsme] = getDlcmTrainingResult(net)
+function [time, loss, rsme] = getMvarDnnTrainingResult(net)
     if isfield(net, 'nodeNum'), nodeNum = net.nodeNum; else nodeNum = length(net.nodeNetwork); end % for compatibility
     maxEpochs = length(net.trainInfo{1, 1}.TrainingLoss);
     a=0; b=0; c=0;

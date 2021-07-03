@@ -409,7 +409,7 @@ function processInputFiles(handles)
 
                 disp('start training');
                 net = trainMvarDnnNetwork(X, exSignal, nodeControl, exControl, net, options);
-                [time, loss, rsme] = getDlcmTrainingResult(net);
+                [time, loss, rsme] = getMvarDnnTrainingResult(net);
                 disp(['VARDNN training result : rsme=' num2str(rsme)]);
                 if handles.noCache == 0
                     save(vardnnFile, 'net');
