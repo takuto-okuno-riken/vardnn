@@ -27,7 +27,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMvarDnnGCI(X, ex
     for i=1:lags, nodeInputOrg = [nodeInputOrg; X(:,i:end-(lags-i+1))]; end
     for i=1:lags, nodeInputOrg = [nodeInputOrg; exSignal(:,i:end-(lags-i+1))]; end
 
-    % calc DLCM granger causality
+    % calc mVAR DNN granger causality
     nodeAIC = zeros(nodeNum,1);
     nodeBIC = zeros(nodeNum,1);
     gcI = nan(nodeNum, nodeMax);
@@ -57,8 +57,8 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMvarDnnGCI(X, ex
         T = sigLen-1;
         RSS = err*err';
         k = nodeNum + size(exSignal, 1) + 1; % input + bias
-        %for j=2:2:length(netDLCM.nodeNetwork{i, 1}.Layers)
-        %    k = k + length(netDLCM.nodeNetwork{i, 1}.Layers(j, 1).Bias);   % added hidden neuron number
+        %for j=2:2:length(net.nodeNetwork{i, 1}.Layers)
+        %    k = k + length(net.nodeNetwork{i, 1}.Layers(j, 1).Bias);   % added hidden neuron number
         %end
         nodeAIC(i) = T*log(RSS/T) + 2 * k;
         nodeBIC(i) = T*log(RSS/T) + k*log(T);
