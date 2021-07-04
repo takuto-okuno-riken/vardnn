@@ -142,6 +142,9 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 
     fcAUC = zeros(1,N);
     pcAUC = zeros(1,N);
+    pcpcAUC = zeros(1,N);
+    lsopcAUC = zeros(1,N);
+    plspcAUC = zeros(1,N);
     wcsAUC = zeros(1,N);
     gcAUC = zeros(1,N);
     pgcAUC = zeros(1,N);
@@ -150,6 +153,9 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     dlgAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
+    pcpcROC = cell(N,2);
+    lsopcROC = cell(N,2);
+    plspcROC = cell(N,2);
     wcsROC = cell(N,2);
     gcROC = cell(N,2);
     pgcROC = cell(N,2);
@@ -158,6 +164,9 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     dlgROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
+    pcpcRf = figure;
+    lsopcRf = figure;
+    plspcRf = figure;
     wcsRf = figure;
     gcRf = figure;
     pgcRf = figure;
@@ -191,9 +200,24 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(PC, pP.A); hold off;
         title('PC');
         % PC and PLSPC diff check
-        PLSPC = calcPLSPartialCorrelation(y2.'); % calc PLS PC
-        Z = PC - PLSPC; pcdiff=nanmean(abs(Z),'all'); disp(['mae of PC-PLSPC=' num2str(pcdiff)]);
-        figure; clims = [-1 1]; imagesc(Z,clims); title('PC - PLSPC');
+        PC2 = calcPLSPartialCorrelation(y2.'); % calc PLS PC
+        Z = PC - PC2; pcdiff=nanmean(abs(Z),'all'); disp(['mae of PC-PLSPC=' num2str(pcdiff)]);
+%        figure; clims = [-1 1]; imagesc(Z,clims); title('PC - PLSPC');
+        figure(plspcRf); hold on; [plspcROC{k,1}, plspcROC{k,2}, plspcAUC(k)] = plotROCcurve(PC2, pP.A); hold off;
+        title('PLS-PC');
+        % show result of PCA-PC
+        PC2 = calcPcPartialCorrelation(y2.'); % calc PCA PC
+        Z = PC - PC2; pcdiff=nanmean(abs(Z),'all'); disp(['mae of PC-PCAPC=' num2str(pcdiff)]);
+%        figure; clims = [-1 1]; imagesc(Z,clims); title('PC - PCAPC');
+        figure(pcpcRf); hold on; [pcpcROC{k,1}, pcpcROC{k,2}, pcpcAUC(k)] = plotROCcurve(PC2, pP.A); hold off;
+        title('PCA-PC');
+        % show result of Lasso-PC
+        [lambda, alpha, errMat] = estimateLassoParamsForPC(y2.', [], [], [], 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
+        PC2 = calcLassoPartialCorrelation(y2.', [], [], [], lambda, alpha); % calc Lasso PC
+        Z = PC - PC2; pcdiff=nanmean(abs(Z),'all'); disp(['mae of PC-LassoPC=' num2str(pcdiff)]);
+%        figure; clims = [-1 1]; imagesc(Z,clims); title('PC - LassoPC');
+        figure(lsopcRf); hold on; [lsopcROC{k,1}, lsopcROC{k,2}, lsopcAUC(k)] = plotROCcurve(PC2, pP.A); hold off;
+        title('Lasso-PC');
         % show result of WCS
         fg = figure; WCS = plotWaveletCoherence(y2.'); close(fg);
         figure(wcsRf); hold on; [wcsROC{k,1}, wcsROC{k,2}, wcsAUC(k)] = plotROCcurve(WCS, pP.A); hold off;
@@ -229,7 +253,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure; plot(si.');
         %figure; plot(exSignal.');
 
-        % train DLCM
+        % train VARDNN
         nodeNum = size(si,1);
         sigLen = size(si,2);
         if isempty(netDLCM)
@@ -270,6 +294,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         title('VARDNN-DI');
     end
     fname = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
-    save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlwAUC', 'dlgAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC');
+    save(fname, 'fcAUC', 'pcAUC', 'pcpcAUC', 'plspcAUC', 'lsopcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlwAUC', 'dlgAUC', ...
+        'fcROC','pcROC','pcpcROC','plspcROC','lsopcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC');
 end
 
