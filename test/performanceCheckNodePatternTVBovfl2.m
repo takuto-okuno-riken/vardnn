@@ -38,7 +38,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(origf); plotEC(weights, 'Ground Truth', 1);
         figure(origSigf); plot(t, si);
 
-        % calcurate and show DLCM-GC
+        % calcurate and show VARDNN-GC
         nodeNum = size(si,1);
         sigLen = size(si,2);
         exControl = eye(nodeNum, nodeNum);
@@ -74,7 +74,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             disp(['end training : rsme=' num2str(rsme)]);
             dlErr(k,j) = rsme;
             
-            % show DLCM-GC
+            % show VARDNN-GC
             dlGC = calcMvarDnnGCI(Y, exSignal, [], exControl, netDLCM);
 
             % calc ROC curve

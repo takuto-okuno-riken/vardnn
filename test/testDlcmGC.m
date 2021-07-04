@@ -59,7 +59,7 @@ function testDlcmGC
     figure; gcI = plotPairwiseGCI(si);
     figure; gcI = plotPairwiseGCI(S);
 
-    % show DLCM-GC, DLCM-EC
+    % show VARDNN-GC, VARDNN-DI
     figure; dlGC = plotMvarDnnGCI(si, exSignal, [], exControl, netDLCM, 0);
     figure; dlEC = plotMvarDnnEC(netDLCM, [], exControl, 0);
 end

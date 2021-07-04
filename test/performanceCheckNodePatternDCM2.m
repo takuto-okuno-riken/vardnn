@@ -221,7 +221,7 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 %    figure; dlEC = plotMvarDnnECmeanAbsWeight(netDLCM);
 %    figure; dlEC = plotMvarDnnECmeanDeltaWeight(netDLCM);
 %    figure; dlEC = plotMvarDnnECmeanAbsDeltaWeight(netDLCM);
-    % show DLCM-GC
+    % show VARDNN-GC
     figure; dlGC = plotMvarDnnGCI(si, exSignal, [], exControl, netDLCM, 0);
 
 end

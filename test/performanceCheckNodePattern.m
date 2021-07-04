@@ -139,9 +139,9 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 %    figure; dlEC = plotMvarDnnECmeanAbsWeight(netDLCM);
 %    figure; dlEC = plotMvarDnnECmeanDeltaWeight(netDLCM);
 %    figure; dlEC = plotMvarDnnECmeanAbsDeltaWeight(netDLCM);
-    % show DLCM-GC
+    % show VARDNN-GC
     figure; dlGC = plotMvarDnnGCI(si, [], [], [], netDLCM, 0);
-    % show DLCM-WCI as DLCM-EC
+    % show VARDNN-WCI as VARDNN-DI
     figure; dlWC = plotMvarDnnEC(netDLCM, [], [], 0);
     % show DLCM-weight-GC
 %    figure; dlwGC = plotDlcmDeltaWeightGCI(netDLCM);

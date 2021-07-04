@@ -1,13 +1,13 @@
 function performanceCheckNodePatternTVB2
     node_nums = [11,22,33,44,55,66];
     num_scan = 55;
-    if num_scan == 47 % deco's 66 node. weight add. DLCM-GC show highest AUC, others so so.
+    if num_scan == 47 % deco's 66 node. weight add. VARDNN-GC show highest AUC, others so so.
         Gths = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2];
-    elseif num_scan == 48 % deco's 66 node. original. FC so so. GC and DLCM-GC show low AUC
+    elseif num_scan == 48 % deco's 66 node. original. FC so so. GC and VARDNN-GC show low AUC
         Gths = [0.001, 0.001, 0.001, 0.001, 0.001, 0.001];
     elseif num_scan == 2048 % deco's 66 node. original TR=2 BOLD / FC ok. others bad.
         Gths = [0.001, 0.001, 0.001, 0.001, 0.001, 0.001];
-    elseif num_scan == 3048 % deco's 66 node. original TR=0.1 BOLD / FC and DLCM-GC so so.
+    elseif num_scan == 3048 % deco's 66 node. original TR=0.1 BOLD / FC and VARDNN-GC so so.
         Gths = [0.001, 0.001, 0.001, 0.001, 0.001, 0.001];
     elseif num_scan == 2948 % deco's 66 node. original TR=0.1 BOLD / all bad.
         Gths = [0.001, 0.001, 0.001, 0.001, 0.001, 0.001];
@@ -183,7 +183,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(si);
         [uu, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
             
-        % calcurate and show DLCM-GC
+        % calcurate and show VARDNN-GC
         dlGC = [];
         exControl = eye(nodeNum, nodeNum);
         netFile = ['results/net-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) '.mat'];
@@ -222,19 +222,19 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             save(netFile, 'netDLCM', 'Y', 'exSignal', 'si', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
         end
         if isempty(dlGC)
-            % show DLCM-GC
+            % show VARDNN-GC
             dlGC = calcMvarDnnGCI(Y, exSignal, [], exControl, netDLCM);
             save(netFile, 'netDLCM', 'Y', 'exSignal', 'si', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2', 'dlGC');
         end
         
         % calc ROC curve
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, weights, 100, 1, Gth); hold off;
-        title(['ROC curve of DLCM-GC (pat=' num2str(i) ')']);
+        title(['ROC curve of VARDNN-GC (pat=' num2str(i) ')']);
 
-        % show result of VARDNN weight causality index (DLCM-wci) as DLCM-EC
+        % show result of VARDNN weight causality index (VARDNN-WCI) as VARDNN-DI
         fg = figure; dlwGC = plotMvarDnnEC(netDLCM, [], exControl); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, weights, 100, 1, Gth); hold off;
-        title(['ROC curve of DLCM-WCI (pat=' num2str(i) ')']);
+        title(['ROC curve of VARDNN-WCI (pat=' num2str(i) ')']);
 %%}
 %%{
         % linue TE result
@@ -346,8 +346,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     disp(['WCS AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(wcsAUC))]);
     disp(['mvGC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(gcAUC))]);
     disp(['pwGC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(pgcAUC))]);
-    disp(['DLCM-GC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlAUC))]);
-    disp(['DLCM-WCI AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlwAUC))]);
+    disp(['VARDNN-GC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlAUC))]);
+    disp(['VARDNN-WCI AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlwAUC))]);
     disp(['LINUE-TE AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(linueAUC))]);
     disp(['DirectLiNGAM AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlgAUC))]);
     disp(['PC-sm AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(pcsAUC))]);

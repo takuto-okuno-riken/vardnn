@@ -219,12 +219,12 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         % show DCM signals
         [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(y2.', 0);
         [exSignal, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(u2.', 0);
-        % si = si - 0.5; (bad DLCM-EC)
-        % exSignal = exSignal - 0.5; (bad DLCM-EC)
-        % si = y2.'; % test raw data (bad DLCM-EC)
-        % exSignal = u2.'; % test raw data (bad DLCM-EC)
-        % si = y2.' - min(y2,[],'all'); % test raw data (nice DLCM-EC)
-        % exSignal = u2.' - min(u2,[],'all');; % test raw data (nice DLCM-EC)
+        % si = si - 0.5; (bad VARDNN-DI)
+        % exSignal = exSignal - 0.5; (bad VARDNN-DI)
+        % si = y2.'; % test raw data (bad VARDNN-DI)
+        % exSignal = u2.'; % test raw data (bad VARDNN-DI)
+        % si = y2.' - min(y2,[],'all'); % test raw data (nice VARDNN-DI)
+        % exSignal = u2.' - min(u2,[],'all');; % test raw data (nice VARDNN-DI)
         exControl = eye(n,n);
         figure; plot(si.');
         %figure; plot(exSignal.');
@@ -259,15 +259,15 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure; [S, t,mae,maeerr] = plotPredictSignals(si,exSignal,[],exControl,netDLCM);
         disp(['t=' num2str(t) ', mae=' num2str(mae)]);
 
-        % show result of DLCM-GC
+        % show result of VARDNN-GC
         fg = figure; dlGC = plotMvarDnnGCI(si, exSignal, [], exControl, netDLCM, 0); close(fg);
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A); hold off;
-        title('DLCM-GC');
+        title('VARDNN-GC');
 
-        % show result of VARDNN weight causality index (DLCM-wci) as DLCM-EC
+        % show result of VARDNN weight causality index (VARDNN-WCI) as VARDNN-DI
         fg = figure; dlwGC = plotMvarDnnEC(netDLCM, [], exControl, 0); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A); hold off;
-        title('DLCM-EC');
+        title('VARDNN-DI');
     end
     fname = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
     save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlwAUC', 'dlgAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC');

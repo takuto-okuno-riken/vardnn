@@ -54,7 +54,7 @@ function testSimulation
     % show original & simulated signal granger causality index (gc-EC)
     figure; gcI = plotPairwiseGCI(si);
     figure; gcI = plotPairwiseGCI(S);
-    % show DLCM-GC
+    % show VARDNN-GC
     figure; dlGC = plotMvarDnnGCI(si, exSignal, [], exControl, netDLCM, 0);
 end
 

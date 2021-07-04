@@ -54,7 +54,7 @@ function checkingPattern(Gval, node_num, num_scan, hz, GTth, N, i)
         [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(si);
         [uu, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
             
-        % calcurate and show DLCM-GC
+        % calcurate and show VARDNN-GC
         dlGC = [];
         exControl = eye(nodeNum, nodeNum);
         netFile = ['results/rww55g/net-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-' Gval 'g-idx' num2str(i) '-' num2str(k) '.mat'];
@@ -87,7 +87,7 @@ function checkingPattern(Gval, node_num, num_scan, hz, GTth, N, i)
             save(netFile, 'netDLCM', 'Y', 'exSignal', 'si', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
         end
         if isempty(dlGC)
-            % show DLCM-GC
+            % show VARDNN-GC
             dlGC = calcMvarDnnGCI(Y, exSignal, [], exControl, netDLCM);
             save(netFile, 'netDLCM', 'Y', 'exSignal', 'si', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2', 'dlGC');
         end
@@ -95,7 +95,7 @@ function checkingPattern(Gval, node_num, num_scan, hz, GTth, N, i)
         % calc ROC curve
         [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = calcROCcurve(dlGC, weights, 100, 1, GTth);
 
-        % show result of VARDNN weight causality index (DLCM-wci) as DLCM-EC
+        % show result of VARDNN weight causality index (VARDNN-WCI) as VARDNN-DI
         dlwGC = calcMvarDnnEC(netDLCM, [], exControl);
        [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = calcROCcurve(dlwGC, weights, 100, 1, GTth);
 %%}
@@ -103,8 +103,8 @@ function checkingPattern(Gval, node_num, num_scan, hz, GTth, N, i)
     % show result AUC
     disp(['FC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(fcAUC))]);
     disp(['mvGC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(gcAUC))]);
-    disp(['DLCM-GC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlAUC))]);
-    disp(['DLCM-WCI AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlwAUC))]);
+    disp(['VARDNN-GC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlAUC))]);
+    disp(['VARDNN-WCI AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlwAUC))]);
 
     % save result
     fname = ['results/rww55g/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan' Gval 'g-pat' num2str(i) '-' num2str(hz) 'hz-result.mat'];

@@ -128,7 +128,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 %    figure; dlEC = plotMvarDnnECmeanAbsWeight(netDLCM);
 %    figure; dlEC = plotMvarDnnECmeanDeltaWeight(netDLCM);
     figure; dlEC = plotMvarDnnECmeanAbsDeltaWeight(netDLCM);
-    % show DLCM-GC
+    % show VARDNN-GC
     figure; dlGC = plotMvarDnnGCI(si, [], [], [], netDLCM);
 
     % DEM Structure: create random inputs

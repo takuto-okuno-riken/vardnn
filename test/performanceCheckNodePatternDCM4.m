@@ -250,15 +250,15 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure; [S, t,mae,maeerr] = plotPredictSignals(si,exSignal,[],exControl,netDLCM);
         disp(['t=' num2str(t) ', mae=' num2str(mae)]);
 
-        % show result of DLCM-GC
+        % show result of VARDNN-GC
         fg = figure; dlGC = plotMvarDnnGCI(si, exSignal, [], exControl, netDLCM, 0); close(fg);
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A, 100, 1, 0.2); hold off;
-        title('DLCM-GC');
+        title('VARDNN-GC');
 
-        % show result of VARDNN weight causality index (DLCM-wci) as DLCM-EC
+        % show result of VARDNN weight causality index (VARDNN-WCI) as VARDNN-DI
         fg = figure; dlwGC = plotMvarDnnEC(netDLCM, [], exControl, 0); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A, 100, 1, 0.2); hold off;
-        title('DLCM-EC');
+        title('VARDNN-DI');
     end
     fname = ['results/net-pat4-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
     save(fname, 'fcAUC', 'pcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlwAUC', 'dlgAUC', 'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC');

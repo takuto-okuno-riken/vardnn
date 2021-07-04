@@ -153,7 +153,7 @@ function analyzeAlzheimerDLCM
     cosSim(23) = getCosSimilarity(meanCNMPLSVARGC+nanx, meanADMPLSVARGC+nanx);
     cosSim(24) = getCosSimilarity(meanCNPPLSVAREC+nanx, meanADPPLSVAREC+nanx);
     cosSim(25) = getCosSimilarity(meanCNPPLSVARGC+nanx, meanADPPLSVARGC+nanx);
-    X = categorical({'FC','PC','WCS','GC','PGC','TE','DLCM-GC','DLW','dLiNG','PCS','CPC','FGES','FCa','tsFC','tsFCa', ...
+    X = categorical({'FC','PC','WCS','GC','PGC','TE','VARDNN-GC','DLW','dLiNG','PCS','CPC','FGES','FCa','tsFC','tsFCa', ...
         'mVAR-EC','pVAR-EC','mPCVAR-EC','mPCVAR-GC','pPCVAR-EC','pPCVAR-GC','mPLSVAR-EC','mPLSVAR-GC','pPLSVAR-EC','pPLSVAR-GC'});
     figure; bar(X, cosSim);
     title('cos similarity between CN and AD by each algorithm');

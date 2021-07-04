@@ -125,10 +125,10 @@ function performanceCheckDCMy2DLCM
 
             % training VARDNN network
             netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-            % calc dlcm-gc
+            % calc VARDNN-GC
             mat = calcMvarDnnGCI(si, exSignal, [], exControl, netDLCM);
             time = toc(ticHdl);
-            disp(['finish calculating DLCM-GC! t = ' num2str(time) 's']);
+            disp(['finish calculating VARDNN-GC! t = ' num2str(time) 's']);
 
             DLtime(k,1) = time;
 
@@ -136,12 +136,12 @@ function performanceCheckDCMy2DLCM
             save(netFile, 'netDLCM','mat','DLtime');
         end
         
-        % calculate DLCM-EC and get computational time
+        % calculate VARDNN-DI and get computational time
         ticHdl = tic;
         mat = calcMvarDnnEC(netDLCM, [], exControl);
         time = toc(ticHdl) + netDLCM.trainTime;
         DLEtime(k,1) = time;
-        disp(['finish DLCM-EC! t = ' num2str(time) 's']);        
+        disp(['finish VARDNN-DI! t = ' num2str(time) 's']);        
     end
 
     % save result

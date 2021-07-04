@@ -72,7 +72,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(pgcRf); hold on; [pgcROC{k,1}, pgcROC{k,2}, pgcAUC(k)] = plotROCcurve(gcI, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pwGC (pat=' num2str(i) ')']);
 %%{
-        % calcurate and show DLCM-GC
+        % calcurate and show VARDNN-GC
         nodeNum = size(si,1);
         sigLen = size(si,2);
         exControl = eye(nodeNum, nodeNum);
@@ -113,12 +113,12 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             %[netDLCM, time] = recoveryTrainMvarDnnNetwork(Y, exSignal, [], exControl, netDLCM, options);
             save(netFile, 'netDLCM', 'Y', 'exSignal', 'Y', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
         end
-        % show DLCM-GC
+        % show VARDNN-GC
         dlGC = calcMvarDnnGCI(Y, exSignal, [], exControl, netDLCM);
         
         % calc ROC curve
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, weights, 100, 1, Gth); hold off;
-        title(['ROC curve of DLCM-GC (pat=' num2str(i) ')']);
+        title(['ROC curve of VARDNN-GC (pat=' num2str(i) ')']);
 %%}
 %%{
         % linue TE result
@@ -135,7 +135,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     disp(['FC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(fcAUC))]);
     disp(['mvGC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(gcAUC))]);
     disp(['pwGC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(pgcAUC))]);
-    disp(['DLCM-GC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlAUC))]);
+    disp(['VARDNN-GC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlAUC))]);
     disp(['LINUE-TE AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(linueAUC))]);
 
     % save result

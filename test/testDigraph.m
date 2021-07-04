@@ -1,4 +1,4 @@
-% load healthy control analysis result of DLCM-GC
+% load healthy control analysis result of VARDNN-GC
 load('results/ad-dlcm_ex-cn-roi132.mat');
 load('data/roiNames.mat');
 
