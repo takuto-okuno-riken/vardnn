@@ -98,7 +98,7 @@ function performanceCheckDCMy2DLCM
         si = convert2SigmoidSignal(si,0);
         exSignal = convert2SigmoidSignal(exSignal,0);
 
-        % do training or load DLCM network
+        % do training or load VARDNN network
         netFile = ['results/net-time-' num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];
         if exist(netFile, 'file')
             load(netFile);

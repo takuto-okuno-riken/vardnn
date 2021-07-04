@@ -27,7 +27,7 @@ function testRecoverTrain
 %            'Plots','training-progress');
 
     %% test pattern 1 
-    % do training or load DLCM network
+    % do training or load VARDNN network
     netFile = 'results/dlcm-sim-test8-4.mat';
     if exist(netFile, 'file')
         load(netFile);

@@ -80,7 +80,7 @@ function checkingPattern(si, exSignal, exControl, idx)
     exNum = size(exSignal,1);
     sigLen = size(si,2);
 
-    % do training or load DLCM network
+    % do training or load VARDNN network
     netFile = ['results/net-sim-pat' num2str(idx) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) '.mat'];
     if exist(netFile, 'file')
         load(netFile);
@@ -110,7 +110,7 @@ function checkingPattern(si, exSignal, exControl, idx)
         save(netFile, 'netDLCM');
     end
     
-    % simulate DLCM network with 1st frame & exogenous input signal
+    % simulate VARDNN network with 1st frame & exogenous input signal
     [S, time] = simulateMvarDnnNetwork(si, exSignal, [], exControl, netDLCM);
 
     [mae, maeerr] = plotTwoSignals(si, S);

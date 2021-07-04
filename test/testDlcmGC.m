@@ -29,7 +29,7 @@ function testDlcmGC
 %            'Plots','training-progress');
 
     %% test pattern 1 
-    % do training or load DLCM network
+    % do training or load VARDNN network
     netFile = ['results/dlcm-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
     if exist(netFile, 'file')
         load(netFile);
@@ -46,7 +46,7 @@ function testDlcmGC
         save(netFile, 'netDLCM');
     end
     
-    % simulate DLCM network with 1st frame & exogenous input signal
+    % simulate VARDNN network with 1st frame & exogenous input signal
     [S, time] = simulateMvarDnnNetwork(si, exSignal, [], exControl, netDLCM);
 
     [mae, maeerr] = plotTwoSignals(si, S);

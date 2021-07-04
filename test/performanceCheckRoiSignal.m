@@ -47,7 +47,7 @@ function checkingPattern(si, exSignal, exControl, winLen, idx, prefix, l2, weigh
     ph = []; ch = [];
 
     for k = 1:maxTrain
-        % do training or load DLCM network
+        % do training or load VARDNN network
         netFile = ['results/' prefix '-' num2str(idx) '_' num2str(k) '.mat'];
         if exist(netFile, 'file')
             load(netFile);
@@ -80,7 +80,7 @@ function checkingPattern(si, exSignal, exControl, winLen, idx, prefix, l2, weigh
             save(netFile, 'netDLCM');
         end
 
-        % simulate DLCM network with 1st frame & exogenous input signal
+        % simulate VARDNN network with 1st frame & exogenous input signal
         netFile = ['results/' prefix '-' num2str(idx) '_' num2str(k) 'sim.mat'];
         if exist(netFile, 'file')
             load(netFile);

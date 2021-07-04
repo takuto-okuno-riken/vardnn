@@ -29,7 +29,7 @@ function testDlcmWeights
 %            'Plots','training-progress');
 
     %% test pattern 1 
-    % do training or load DLCM network
+    % do training or load VARDNN network
     netFile = ['results/dlcm-w-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
     if exist(netFile, 'file')
         load(netFile);
