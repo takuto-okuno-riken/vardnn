@@ -83,8 +83,8 @@ function checkingPattern(pP,M,U,N,T,n,TR,options,prefix,Gth,idx)
 
     % calc input signal and node BOLD signals
     for k=1:N
-        dlcmFile = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
-        load(dlcmFile);
+        netFile = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
+        load(netFile);
 
         % show original connection
         figure(origf); plotDcmEC(pP.A);

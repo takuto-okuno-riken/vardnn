@@ -28,9 +28,9 @@ function testSimulation
 
     %% test pattern 1 
     % do training or load DLCM network
-    dlcmFile = 'results/dlcm-sim-test8-4.mat';
-    if exist(dlcmFile, 'file')
-        load(dlcmFile);
+    netFile = 'results/dlcm-sim-test8-4.mat';
+    if exist(netFile, 'file')
+        load(netFile);
     else
         % init VARDNN network
         netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
@@ -39,7 +39,7 @@ function testSimulation
         [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
         %plotMvarDnnWeight(netDLCM);
-        save(dlcmFile, 'netDLCM');
+        save(netFile, 'netDLCM');
     end
     
     % simulate DLCM network with 1st frame & exogenous input signal

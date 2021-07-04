@@ -51,8 +51,8 @@ function performanceCheckSimError
         sigLen = 200;
         winLen = 100;
 
-        dlcmFile = ['results/sim-err' prefix num2str(i) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) '.mat'];
-        load(dlcmFile);
+        netFile = ['results/sim-err' prefix num2str(i) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) '.mat'];
+        load(netFile);
         Mae = [Mae, eachMae];
         R = [R, eachR];
         FCcos = [FCcos, eachFCcos];
@@ -95,9 +95,9 @@ function checkingPattern(si, exSignal, exControl, winLen, idx, prefix, l2, weigh
 
     for k = 1:maxTrain
         % do training or load DLCM network
-        dlcmFile = ['results/net-sim-err' prefix num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) '.mat'];
-        if exist(dlcmFile, 'file')
-            load(dlcmFile);
+        netFile = ['results/net-sim-err' prefix num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) '.mat'];
+        if exist(netFile, 'file')
+            load(netFile);
         else
             % init VARDNN network
             netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl, 1, @reluLayer, weightFunc, weightParam, bias);
@@ -124,13 +124,13 @@ function checkingPattern(si, exSignal, exControl, winLen, idx, prefix, l2, weigh
             [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
             disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
             %plotMvarDnnWeight(netDLCM);
-            save(dlcmFile, 'netDLCM');
+            save(netFile, 'netDLCM');
         end
 
         % simulate DLCM network with 1st frame & exogenous input signal
-        dlcmFile = ['results/net-sim-err' prefix num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) 'sim.mat'];
-        if exist(dlcmFile, 'file')
-            load(dlcmFile);
+        netFile = ['results/net-sim-err' prefix num2str(idx) '-' num2str(k) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) 'sim.mat'];
+        if exist(netFile, 'file')
+            load(netFile);
         else
             allS = cell(maxWin,1);
             simTime = zeros(maxWin,1);
@@ -170,7 +170,7 @@ function checkingPattern(si, exSignal, exControl, winLen, idx, prefix, l2, weigh
             winGCcos = [winGCcos; cs];
             disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
         end
-        save(dlcmFile, 'allS', 'simTime');
+        save(netFile, 'allS', 'simTime');
         % show error line graph
         Y = mean(abs(errs),1);
         if isempty(ph)
@@ -228,7 +228,7 @@ function checkingPattern(si, exSignal, exControl, winLen, idx, prefix, l2, weigh
     hold off;
     drawnow;
 
-    dlcmFile = ['results/sim-err' prefix num2str(idx) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) '.mat'];
-    save(dlcmFile, 'allErr', 'allrSi', 'allrS', 'allTime', 'eachMae', 'eachR', 'eachFCcos', 'eachGCcos');
+    netFile = ['results/sim-err' prefix num2str(idx) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) '.mat'];
+    save(netFile, 'allErr', 'allrSi', 'allrS', 'allTime', 'eachMae', 'eachR', 'eachFCcos', 'eachGCcos');
 end
 

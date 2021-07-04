@@ -30,9 +30,9 @@ function testDlcmWeights
 
     %% test pattern 1 
     % do training or load DLCM network
-    dlcmFile = ['results/dlcm-w-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
-    if exist(dlcmFile, 'file')
-        load(dlcmFile);
+    netFile = ['results/dlcm-w-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
+    if exist(netFile, 'file')
+        load(netFile);
     else
         % init VARDNN network
         netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
@@ -43,7 +43,7 @@ function testDlcmWeights
 
         % recoverty training
         %[netDLCM, time] = recoveryTrainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-        save(dlcmFile, 'netDLCM');
+        save(netFile, 'netDLCM');
     end
 
     % show DLCM representative weights ------------------------------------

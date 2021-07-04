@@ -118,14 +118,14 @@ end
 
 %% 
 function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
-    dlcmFile = ['results/net-patdcm2-' num2str(n) 'x' num2str(T) '-N' num2str(N) '-TR' num2str(TR) '-' num2str(idx) '.mat'];
+    netFile = ['results/net-patdcm2-' num2str(n) 'x' num2str(T) '-N' num2str(N) '-TR' num2str(TR) '-' num2str(idx) '.mat'];
     netDLCM = [];
 
     % show original connection
     figure; plotDcmEC(pP.A);
     
-    if exist(dlcmFile, 'file')
-        load(dlcmFile);
+    if exist(netFile, 'file')
+        load(netFile);
     else
         CSD = {};
         RMS = [];
@@ -170,7 +170,7 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 
         A = BPA.Ep.A;
     end
-    save(dlcmFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'A', 'Uus', 'RMS', 'CSD');
+    save(netFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'A', 'Uus', 'RMS', 'CSD');
 
     % show estimated A by DCM
     figure; plotDcmEC(A,0);
@@ -203,7 +203,7 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
         % recoverty training
         [netDLCM, time] = recoveryTrainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-        save(dlcmFile, 'netDLCM', 'pP', 'M', 'U', 'N','T','n','TR', 'y2', 'u2', 'si', 'A', 'Uus', 'RMS', 'CSD');
+        save(netFile, 'netDLCM', 'pP', 'M', 'U', 'N','T','n','TR', 'y2', 'u2', 'si', 'A', 'Uus', 'RMS', 'CSD');
     end
 
     % show signals after training

@@ -110,8 +110,8 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 
     disp('start training');
     netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);
-    dlcmFile = ['results/net-pat-' num2str(idx) '.mat'];
-    save(dlcmFile, 'netDLCM');
+    netFile = ['results/net-pat-' num2str(idx) '.mat'];
+    save(netFile, 'netDLCM');
 
     % show signals after training
     figure; [S, t,mae,maeerr] = plotPredictSignals(si,[],[],[],netDLCM);

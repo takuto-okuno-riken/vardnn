@@ -42,9 +42,9 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         sigLen = size(si,2);
         exControl = eye(nodeNum, nodeNum);
         for j=1:trial
-            dlcmFile = ['results/net-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) 'ovf' num2str(j) '.mat'];
-            if exist(dlcmFile, 'file')
-                load(dlcmFile);
+            netFile = ['results/net-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) 'ovf' num2str(j) '.mat'];
+            if exist(netFile, 'file')
+                load(netFile);
                 if exist('inSignal','var'), exSignal=inSignal; end % for compatibility
             else
                 % train DLCM
@@ -67,7 +67,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
                 disp('start training');
                 netDLCM = trainMvarDnnNetwork(Y, exSignal, [], exControl, netDLCM, options);
-                save(dlcmFile, 'netDLCM', 'Y', 'exSignal', 'Y', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
+                save(netFile, 'netDLCM', 'Y', 'exSignal', 'Y', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
             end
             [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
             disp(['end training : rsme=' num2str(rsme)]);

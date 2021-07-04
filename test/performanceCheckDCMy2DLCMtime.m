@@ -49,8 +49,8 @@ function performanceCheckDCMy2DLCM
         exControl = eye(n,n);
 
         data = si;
-        dlcmFile = ['results/net-timeD-' num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];
-        save(dlcmFile, 'data','exSignal');
+        netFile = ['results/net-timeD-' num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];
+        save(netFile, 'data','exSignal');
 
         % calculate FC and get computational time
         ticHdl = tic;
@@ -99,9 +99,9 @@ function performanceCheckDCMy2DLCM
         exSignal = convert2SigmoidSignal(exSignal,0);
 
         % do training or load DLCM network
-        dlcmFile = ['results/net-time-' num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];
-        if exist(dlcmFile, 'file')
-            load(dlcmFile);
+        netFile = ['results/net-time-' num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];
+        if exist(netFile, 'file')
+            load(netFile);
         else
             ticHdl = tic;
             % init VARDNN network
@@ -133,7 +133,7 @@ function performanceCheckDCMy2DLCM
             DLtime(k,1) = time;
 
             %plotMvarDnnWeight(netDLCM);
-            save(dlcmFile, 'netDLCM','mat','DLtime');
+            save(netFile, 'netDLCM','mat','DLtime');
         end
         
         % calculate DLCM-EC and get computational time

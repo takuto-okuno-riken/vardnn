@@ -81,9 +81,9 @@ function checkingPattern(si, exSignal, exControl, idx)
     sigLen = size(si,2);
 
     % do training or load DLCM network
-    dlcmFile = ['results/net-sim-pat' num2str(idx) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) '.mat'];
-    if exist(dlcmFile, 'file')
-        load(dlcmFile);
+    netFile = ['results/net-sim-pat' num2str(idx) '_' num2str(nodeNum) '-' num2str(exNum) 'x' num2str(sigLen) '.mat'];
+    if exist(netFile, 'file')
+        load(netFile);
     else
         % init VARDNN network
         netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
@@ -107,7 +107,7 @@ function checkingPattern(si, exSignal, exControl, idx)
         [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
         %plotMvarDnnWeight(netDLCM);
-        save(dlcmFile, 'netDLCM');
+        save(netFile, 'netDLCM');
     end
     
     % simulate DLCM network with 1st frame & exogenous input signal

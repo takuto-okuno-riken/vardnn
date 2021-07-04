@@ -48,9 +48,9 @@ function checkingPattern(si, exSignal, exControl, winLen, idx, prefix, l2, weigh
 
     for k = 1:maxTrain
         % do training or load DLCM network
-        dlcmFile = ['results/' prefix '-' num2str(idx) '_' num2str(k) '.mat'];
-        if exist(dlcmFile, 'file')
-            load(dlcmFile);
+        netFile = ['results/' prefix '-' num2str(idx) '_' num2str(k) '.mat'];
+        if exist(netFile, 'file')
+            load(netFile);
         else
             % init VARDNN network
             netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl, 1, @reluLayer, weightFunc, weightParam, bias);
@@ -77,13 +77,13 @@ function checkingPattern(si, exSignal, exControl, winLen, idx, prefix, l2, weigh
             [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
             disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
             %plotMvarDnnWeight(netDLCM);
-            save(dlcmFile, 'netDLCM');
+            save(netFile, 'netDLCM');
         end
 
         % simulate DLCM network with 1st frame & exogenous input signal
-        dlcmFile = ['results/' prefix '-' num2str(idx) '_' num2str(k) 'sim.mat'];
-        if exist(dlcmFile, 'file')
-            load(dlcmFile);
+        netFile = ['results/' prefix '-' num2str(idx) '_' num2str(k) 'sim.mat'];
+        if exist(netFile, 'file')
+            load(netFile);
         else
             allS = cell(maxWin,1);
             simTime = zeros(maxWin,1);
@@ -123,7 +123,7 @@ function checkingPattern(si, exSignal, exControl, winLen, idx, prefix, l2, weigh
             winGCcos = [winGCcos; cs];
             disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
         end
-        save(dlcmFile, 'allS', 'simTime');
+        save(netFile, 'allS', 'simTime');
         % show error line graph
         Y = mean(abs(errs),1);
         if isempty(ph)
@@ -181,7 +181,7 @@ function checkingPattern(si, exSignal, exControl, winLen, idx, prefix, l2, weigh
     hold off;
     drawnow;
 
-    dlcmFile = ['results/' prefix '-' num2str(idx) '_' num2str(k) 'result.mat'];
-    save(dlcmFile, 'allErr', 'allrSi', 'allrS', 'allTime', 'eachMae', 'eachR', 'eachFCcos', 'eachGCcos');
+    netFile = ['results/' prefix '-' num2str(idx) '_' num2str(k) 'result.mat'];
+    save(netFile, 'allErr', 'allrSi', 'allrS', 'allTime', 'eachMae', 'eachR', 'eachFCcos', 'eachGCcos');
 end
 

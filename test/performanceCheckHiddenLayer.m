@@ -32,8 +32,8 @@ function performanceCheckHiddenLayer
         for j=start:step:step*stepMax
             disp(['training hidden layer num ' num2str(i) '-' num2str(j)]);
             % performance check of hidden layers
-            dlcmFile = ['results/net-hidden-' num2str(i) '-' num2str(j) '.mat'];
-            if exist(dlcmFile, 'file')
+            netFile = ['results/net-hidden-' num2str(i) '-' num2str(j) '.mat'];
+            if exist(netFile, 'file')
                 continue;
             end
 
@@ -43,7 +43,7 @@ function performanceCheckHiddenLayer
 
             % training VARDNN network
             netDLCM = trainMvarDnnNetwork(si, exSignal, [], [], netDLCM, options);
-            save(dlcmFile, 'netDLCM');
+            save(netFile, 'netDLCM');
         end
     end
     
@@ -59,8 +59,8 @@ function performanceCheckHiddenLayer
         for j=1:stepMax
             disp(['loading result of ' num2str(i*step) '-' num2str(j*step)]);
             % performance check of hidden layers
-            dlcmFile = ['results/net-hidden-' num2str(i*step) '-' num2str(j*step) '.mat'];
-            load(dlcmFile);
+            netFile = ['results/net-hidden-' num2str(i*step) '-' num2str(j*step) '.mat'];
+            load(netFile);
 
             a=0; b=0; c=0; d=0; e=0;
             for k=1:nodeNum

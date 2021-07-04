@@ -57,9 +57,9 @@ function checkingPattern(Gval, node_num, num_scan, hz, GTth, N, i)
         % calcurate and show DLCM-GC
         dlGC = [];
         exControl = eye(nodeNum, nodeNum);
-        dlcmFile = ['results/rww55g/net-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-' Gval 'g-idx' num2str(i) '-' num2str(k) '.mat'];
-        if exist(dlcmFile, 'file')
-            load(dlcmFile);
+        netFile = ['results/rww55g/net-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-' Gval 'g-idx' num2str(i) '-' num2str(k) '.mat'];
+        if exist(netFile, 'file')
+            load(netFile);
             if exist('inSignal','var'), exSignal=inSignal; end % for compatibility
         else
             % train DLCM    
@@ -84,12 +84,12 @@ function checkingPattern(Gval, node_num, num_scan, hz, GTth, N, i)
             [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
             disp(['end training : rsme=' num2str(rsme)]);
 
-            save(dlcmFile, 'netDLCM', 'Y', 'exSignal', 'si', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
+            save(netFile, 'netDLCM', 'Y', 'exSignal', 'si', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
         end
         if isempty(dlGC)
             % show DLCM-GC
             dlGC = calcMvarDnnGCI(Y, exSignal, [], exControl, netDLCM);
-            save(dlcmFile, 'netDLCM', 'Y', 'exSignal', 'si', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2', 'dlGC');
+            save(netFile, 'netDLCM', 'Y', 'exSignal', 'si', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2', 'dlGC');
         end
         
         % calc ROC curve

@@ -76,9 +76,9 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     nodeNum = size(si,1);
     sigLen = size(si,2);
 
-    dlcmFile = ['results/net-pat-' num2str(idx) '.mat'];
-    if exist(dlcmFile, 'file')
-        load(dlcmFile);
+    netFile = ['results/net-pat-' num2str(idx) '.mat'];
+    if exist(netFile, 'file')
+        load(netFile);
     else
         % layer parameters
         netDLCM = initMvarDnnNetwork(si);
@@ -115,7 +115,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
 
         disp('start training');
         netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);  
-        save(dlcmFile, 'netDLCM');
+        save(netFile, 'netDLCM');
     end
 
     % show signals after training

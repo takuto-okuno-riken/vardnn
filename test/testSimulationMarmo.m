@@ -31,9 +31,9 @@ function testSimulationMarmo
 
     %% test pattern 1 
     % do training or load DLCM network
-    dlcmFile = ['results/dlcm-sim-marmo' num2str(nodeNum) '-' num2str(exNum) '.mat'];
-    if exist(dlcmFile, 'file')
-        load(dlcmFile);
+    netFile = ['results/dlcm-sim-marmo' num2str(nodeNum) '-' num2str(exNum) '.mat'];
+    if exist(netFile, 'file')
+        load(netFile);
     else
         % init VARDNN network
         netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
@@ -42,7 +42,7 @@ function testSimulationMarmo
         % recover training 
         [netDLCM, time] = recoveryTrainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
         [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
-        disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);        save(dlcmFile, 'netDLCM');
+        disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);        save(netFile, 'netDLCM');
     end
     
     % simulate DLCM network with 1st frame & exogenous input signal

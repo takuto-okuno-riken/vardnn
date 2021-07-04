@@ -16,9 +16,9 @@ function testTrainDlcm
     si = y;
 %%}
     % load network or training network
-    dlcmFile = ['results/dlcm-net-test' num2str(size(si,1)) 'a.mat'];
-    if exist(dlcmFile, 'file')
-        load(dlcmFile);
+    netFile = ['results/dlcm-net-test' num2str(size(si,1)) 'a.mat'];
+    if exist(netFile, 'file')
+        load(netFile);
     else
         % init VARDNN network
         netDLCM = initMvarDnnNetwork(si);
@@ -44,7 +44,7 @@ function testTrainDlcm
 %}
         % training VARDNN network
         netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);
-        save(dlcmFile, 'netDLCM');
+        save(netFile, 'netDLCM');
     end
     [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
     disp(['train result (mean nodes) time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);

@@ -125,8 +125,8 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
 
     % reading RNN-GC, TE(LIN UE), TE(BIN NUE), TETRAD algorithms results
     for k=1:N
-        dlcmFile = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
-        load(dlcmFile);
+        netFile = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
+        load(netFile);
 
         % show original connection
         figure(origf); plotDcmEC(pP.A);

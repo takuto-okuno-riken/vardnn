@@ -167,10 +167,10 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 
     % calc input signal and node BOLD signals
     for k=1:N
-        dlcmFile = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
+        netFile = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) '.mat'];
         netDLCM = [];
-        if exist(dlcmFile, 'file')
-            load(dlcmFile);
+        if exist(netFile, 'file')
+            load(netFile);
         else
             % generate signal by DCM
             U.u = spm_rand_mar(T+50,n,1/2)/8;       % endogenous fluctuations
@@ -179,7 +179,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
             u2  = U.u(51:end,:);
             si = y2.';
             data = si; % for RNN-GC
-            save(dlcmFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data');
+            save(netFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data');
         end
 
         % show result of FC
@@ -252,7 +252,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
             netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
             % recoverty training
             %[netDLCM, time] = recoveryTrainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-            save(dlcmFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
+            save(netFile, 'netDLCM', 'pP', 'M', 'U','n','TR', 'y2', 'u2', 'si', 'data', 'sig', 'c', 'maxsi', 'minsi', 'sig2', 'c2', 'maxsi2', 'minsi2');
         end
 
         % show signals after training

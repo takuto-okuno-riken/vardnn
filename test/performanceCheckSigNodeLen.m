@@ -34,8 +34,8 @@ function performanceCheckSignalLen
 
             disp(['training signal ' num2str(j) 'x' num2str(i)]);
             % performance check of hidden layers
-            dlcmFile = ['results/net-sig' num2str(j) 'x' num2str(i) '-hdn' num2str(hiddenNums(1)) '-' num2str(hiddenNums(2)) '.mat'];
-            if exist(dlcmFile, 'file')
+            netFile = ['results/net-sig' num2str(j) 'x' num2str(i) '-hdn' num2str(hiddenNums(1)) '-' num2str(hiddenNums(2)) '.mat'];
+            if exist(netFile, 'file')
                 continue;
             end
 
@@ -44,7 +44,7 @@ function performanceCheckSignalLen
 
             % training VARDNN network
             netDLCM = trainMvarDnnNetwork(si, [], [], [], netDLCM, options);
-            save(dlcmFile, 'netDLCM');
+            save(netFile, 'netDLCM');
         end
     end
     
@@ -61,8 +61,8 @@ function performanceCheckSignalLen
         for j=1:stepMax2
             disp(['loading result of ' num2str(j*step2) 'x' num2str(i*step)]);
             % performance check of signal length
-            dlcmFile = ['results/net-sig' num2str(j*step2) 'x' num2str(i*step) '-hdn' num2str(hiddenNums(1)) '-' num2str(hiddenNums(2)) '.mat'];
-            load(dlcmFile);
+            netFile = ['results/net-sig' num2str(j*step2) 'x' num2str(i*step) '-hdn' num2str(hiddenNums(1)) '-' num2str(hiddenNums(2)) '.mat'];
+            load(netFile);
 
             % set signals
             si = siOrg(1:j*step2,1:i*step);

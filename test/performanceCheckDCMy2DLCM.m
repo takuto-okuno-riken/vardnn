@@ -47,9 +47,9 @@ function performanceCheckDCMy2DLCM
         exSignal = bold2dnnSignal(exSignal);
 
         % do training or load DLCM network
-        dlcmFile = ['results/net-vsDCM-' num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];
-        if exist(dlcmFile, 'file')
-            load(dlcmFile);
+        netFile = ['results/net-vsDCM-' num2str(n) '-' num2str(N) 'x' num2str(k) '.mat'];
+        if exist(netFile, 'file')
+            load(netFile);
         else
             % init VARDNN network
             netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
@@ -81,7 +81,7 @@ function performanceCheckDCMy2DLCM
             DLinvTms(k,1) = netDLCM.trainTime + netDLCM.recoverTrainTime;
 
             %plotMvarDnnWeight(netDLCM);
-            save(dlcmFile, 'netDLCM', 'DLMAEs', 'DLinvTms', 'DLCorr');
+            save(netFile, 'netDLCM', 'DLMAEs', 'DLinvTms', 'DLCorr');
         end
         
         % simulate DLCM network with 1st frame & exogenous input signal
@@ -89,7 +89,7 @@ function performanceCheckDCMy2DLCM
 
         % show original & simulated signal correlation        
         figure; DLCorr(k,1) = plotTwoSignalsCorrelation(S, si);
-        save(dlcmFile, 'netDLCM', 'DLMAEs', 'DLinvTms', 'DLCorr');
+        save(netFile, 'netDLCM', 'DLMAEs', 'DLinvTms', 'DLCorr');
     end
 end
 
