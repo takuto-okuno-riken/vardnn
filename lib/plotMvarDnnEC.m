@@ -8,13 +8,13 @@
 %               if range==0, range shows standard deviation [-3 sigma, 3 sigma]
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [EC, ECsub] = plotMvarDnnEC(netDLCM, nodeControl, exControl, range, isFullNode)
+function [EC, ECsub] = plotMvarDnnEC(net, nodeControl, exControl, range, isFullNode)
     if nargin < 5, isFullNode = 0; end
     if nargin < 4, range = 0.5; end
     if nargin < 3, exControl = []; end
     if nargin < 2, nodeControl = []; end
 
-    [EC, ECsub] = calcMvarDnnEC(netDLCM, nodeControl, exControl, isFullNode);
+    [EC, ECsub] = calcMvarDnnEC(net, nodeControl, exControl, isFullNode);
     % show DLCM weight causality of predicted node signals
     if range <= 0
         sigma = std(EC(:),1,'omitnan');
