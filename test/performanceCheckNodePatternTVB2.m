@@ -44,6 +44,9 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     % init
     fcAUC = zeros(1,N);
     pcAUC = zeros(1,N);
+    pcpcAUC = zeros(1,N);
+    lsopcAUC = zeros(1,N);
+    plspcAUC = zeros(1,N);
     wcsAUC = zeros(1,N);
     gcAUC = zeros(1,N);
     pgcAUC = zeros(1,N);
@@ -69,6 +72,9 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     pplsvargcAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
+    pcpcROC = cell(N,2);
+    lsopcROC = cell(N,2);
+    plspcROC = cell(N,2);
     wcsROC = cell(N,2);
     gcROC = cell(N,2);
     pgcROC = cell(N,2);
@@ -94,6 +100,9 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     pplsvargcROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
+    pcpcRf = figure;
+    lsopcRf = figure;
+    plspcRf = figure;
     wcsRf = figure;
     gcRf = figure;
     pgcRf = figure;
@@ -144,9 +153,22 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(pcRf); hold on; [pcROC{k,1}, pcROC{k,2}, pcAUC(k)] = plotROCcurve(PC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of PC (pat=' num2str(i) ')']);
         % PC and PLSPC diff check
-        PLSPC = calcPLSPartialCorrelation(si); % calc PLS PC
-        Z = PC - PLSPC; pcdiff=nanmean(abs(Z),'all'); disp(['mae of PC-PLSPC=' num2str(pcdiff)]);
-        figure; clims = [-1 1]; imagesc(Z,clims); title('PC - PLSPC');
+        PC2 = calcPLSPartialCorrelation(si); % calc PLS PC
+        Z = PC - PC2; pcdiff=nanmean(abs(Z),'all'); disp(['mae of PC-PLSPC=' num2str(pcdiff)]);
+%        figure; clims = [-1 1]; imagesc(Z,clims); title('PC - PLSPC');
+        figure(plspcRf); hold on; [plspcROC{k,1}, plspcROC{k,2}, plspcAUC(k)] = plotROCcurve(PC2, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of PC (pat=' num2str(i) ')']);
+        % show result of PCA-PC
+        PC2 = calcPcPartialCorrelation(si); % calc PCA PC
+        Z = PC - PC2; pcdiff=nanmean(abs(Z),'all'); disp(['mae of PC-PCAPC=' num2str(pcdiff)]);
+        figure(pcpcRf); hold on; [pcpcROC{k,1}, pcpcROC{k,2}, pcpcAUC(k)] = plotROCcurve(PC2, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of PCA-PC (pat=' num2str(i) ')']);
+        % show result of LassoPC
+        [lambda, alpha, errMat] = estimateLassoParamsForPC(si, [], [], [], 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
+        PC2 = calcLassoPartialCorrelation(si, [], [], [], lambda, alpha); % calc Lasso PC
+        Z = PC - PC2; pcdiff=nanmean(abs(Z),'all'); disp(['mae of PC-LassoPC=' num2str(pcdiff)]);
+        figure(lsopcRf); hold on; [lsopcROC{k,1}, lsopcROC{k,2}, lsopcAUC(k)] = plotROCcurve(PC2, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of Lasso PC (pat=' num2str(i) ')']);
 
         % show result of WCS
         wcsFile = ['results/wcs-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) '.mat'];
@@ -343,6 +365,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     % show result AUC
     disp(['FC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(fcAUC))]);
     disp(['PC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(pcAUC))]);
+    disp(['PCA-PC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(pcpcAUC))]);
     disp(['WCS AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(wcsAUC))]);
     disp(['mvGC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(gcAUC))]);
     disp(['pwGC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(pgcAUC))]);
@@ -354,8 +377,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
     % save result
     fname = ['results/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-result.mat'];
-    save(fname, 'fcAUC','pcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC','mvarecAUC','mpcvarecAUC', ...
-        'fcROC','pcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC','mvarecROC','mpcvarecROC');
+    save(fname, 'fcAUC','pcAUC','pcpcAUC','lsopcAUC','plspcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC','mvarecAUC','mpcvarecAUC', ...
+        'fcROC','pcROC','pcpcROC','lsopcROC','plspcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC','mvarecROC','mpcvarecROC');
 
     % show average ROC curve of DCM
     figure; 
@@ -376,7 +399,10 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     plotErrorROCcurve(cpcROC, N, [0.5,0.5,0.5]);
     plotErrorROCcurve(fgesROC, N, [0.5,0.5,0.5]);
     plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
-    plotAverageROCcurve(pcROC, N, '--', [0.8,0.2,0.2],0.5);
+    plotAverageROCcurve(pcROC, N, '-', [0.5,0.1,0.1],0.5);
+    plotAverageROCcurve(pcpcROC, N, '--', [0.5,0.1,0.1],0.5);
+    plotAverageROCcurve(lsopcROC, N, '-.', [0.5,0.1,0.1],0.5);
+    plotAverageROCcurve(plspcROC, N, ':', [0.5,0.1,0.1],0.5);
     plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
     plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
     plotAverageROCcurve(pgcROC, N, '--', [0.0,0.5,0.0],0.5);
