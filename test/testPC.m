@@ -37,6 +37,10 @@ PC5 = calcLassoPartialCorrelation(X, [], [], [], 0.01, 1); % calc Lasso PC
 Z = PC - PC5;
 figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC5 : sum err=' num2str(nansum(abs(Z),'all'))]);
 
+[lambda, alpha, errMat] = estimateLassoParamsForPC(X, [], [], [], 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
+PC5b = calcLassoPartialCorrelation(X, [], [], [], lambda, alpha); % calc Lasso PC
+Z = PC - PC5b; nansum(abs(Z),'all')
+
 PC6 = calcPcPartialCorrelation(X); % calc PCA+PC
 Z = PC - PC6;
 figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC6 : sum err=' num2str(nansum(abs(Z),'all'))]);
@@ -114,6 +118,10 @@ PC3 = calcPartialCorrelation__(X); % calc PC
 figure; PC4 = plotPLSPartialCorrelation(X); % calc PLS PC
 figure; PC5 = plotLassoPartialCorrelation(X, [], [], [], 0.01, 1); % calc Lasso PC
 figure; PC6 = plotPcPartialCorrelation(X, [], [], [], 1); % calc PCA+PC
+
+[lambda, alpha, errMat] = estimateLassoParamsForPC(X, [], [], [], 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
+PC5b = calcLassoPartialCorrelation(X, [], [], [], lambda, alpha); % calc Lasso PC
+Z = PC3 - PC5b; nansum(abs(Z),'all')
 
 % plot matrix
 figure;

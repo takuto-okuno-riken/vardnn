@@ -23,10 +23,6 @@ function [PC] = calcLassoPartialCorrelation(X, exSignal, nodeControl, exControl,
     exNum = size(exSignal,1);
     nodeMax = nodeNum + exNum;
 
-    ncomp = floor(nodeNum / 5);
-    if ncomp < 3, ncomp = 3; end
-    if ncomp > 50, ncomp = 50; end
-    
     % set node input
     Y = [X; exSignal];
     
