@@ -1,5 +1,5 @@
 %%
-% Estimate initial weight for DLCM
+% Estimate initial weight for VARDNN
 % input:
 %  sz      vector of (neuron num) (node num) 
 %  param   initial weight param [scale]

@@ -9,7 +9,7 @@
 %  options       training options
 
 function trainedNet = trainPvarDnnNetwork(X, exSignal, nodeControl, exControl, net, options)
-    global dlcmInitWeights;
+    global dnnInitWeights;
     nodeNum = size(X,1);
     exNum = size(exSignal,1);
     sigLen = size(X,2);
@@ -39,7 +39,7 @@ function trainedNet = trainPvarDnnNetwork(X, exSignal, nodeControl, exControl, n
             for k=1:lags, nodeInput(k,:) = Y(i,k:end-lags+(k-1)); end
             for k=1:lags, nodeInput(lags+k,:) = Y(j,k:end-lags+(k-1)); end
             [nodeNetwork{i,j}, trainInfo{i,j}] = trainNetwork(nodeInput, nodeTeach, nodeLayers{i,j}, options);
-            initWeights{i,j} = dlcmInitWeights;
+            initWeights{i,j} = dnnInitWeights;
         end
     end
     time = toc(ticH);

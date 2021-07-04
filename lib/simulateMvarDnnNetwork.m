@@ -15,7 +15,7 @@ function [S, time] = simulateMvarDnnNetwork(X, exSignal, nodeControl, exControl,
     % set first signal
     S = X;
 
-    disp('start simulation whole mVAR DNN (DLCM) network');
+    disp('start simulation whole mVAR DNN network');
     ticH = tic;
 
     for t=lags:sigLen-1
@@ -45,5 +45,5 @@ function [S, time] = simulateMvarDnnNetwork(X, exSignal, nodeControl, exControl,
         S(idx,t+1) = -0.2;
     end
     time = toc(ticH);
-    disp(['finish simulation whole mVAR DNN (DLCM) network! t = ' num2str(time) 's']);
+    disp(['finish simulation whole mVAR DNN network! t = ' num2str(time) 's']);
 end

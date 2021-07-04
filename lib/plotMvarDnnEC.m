@@ -15,7 +15,7 @@ function [EC, ECsub] = plotMvarDnnEC(net, nodeControl, exControl, range, isFullN
     if nargin < 2, nodeControl = []; end
 
     [EC, ECsub] = calcMvarDnnEC(net, nodeControl, exControl, isFullNode);
-    % show DLCM weight causality of predicted node signals
+    % show VARDNN weight causality of predicted node signals
     if range <= 0
         sigma = std(EC(:),1,'omitnan');
         avg = mean(EC(:),'omitnan');

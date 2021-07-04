@@ -9,7 +9,7 @@
 %  options       training options
 
 function trainedNet = trainMvarDnnNetwork(X, exSignal, nodeControl, exControl, net, options)
-    global dlcmInitWeights;
+    global dnnInitWeights;
     nodeNum = size(X,1);
     exNum = size(exSignal,1);
     trainedNet = net;
@@ -40,7 +40,7 @@ function trainedNet = trainMvarDnnNetwork(X, exSignal, nodeControl, exControl, n
             nodeInput(nodeNum*lags+1:end,:) = nodeInput(nodeNum*lags+1:end,:) .* filter;
         end
         [nodeNetwork{i}, trainInfo{i}] = trainNetwork(nodeInput, nodeTeach, nodeLayers{i}, options);
-        initWeights{i} = dlcmInitWeights;
+        initWeights{i} = dnnInitWeights;
     end
     time = toc(ticH);
     trainedNet.nodeNum = nodeNum; % for compatibility

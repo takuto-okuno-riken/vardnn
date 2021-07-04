@@ -1,5 +1,5 @@
 %%
-% Prot predicted signals by traind DLCM
+% Prot predicted signals by traind VARDNN
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)

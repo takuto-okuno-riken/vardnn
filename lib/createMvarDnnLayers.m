@@ -95,7 +95,7 @@ end
 % weight initializer
 % Returns He distribution + user specified weight
 function weights = weightInitializer(sz, lags, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode)
-    global dlcmInitWeights;
+    global dnnInitWeights;
 
     if ~isempty(initWeightFunc)
         weights = initWeightFunc(sz,initWeightParam);
@@ -117,5 +117,5 @@ function weights = weightInitializer(sz, lags, nNodeControl, nExControl, initWei
         filter = repmat(nExControl, size(weights,1), 1);
         weights(:, nodeNum+1:sz(2)) = weights(:, nodeNum+1:sz(2)) .* filter;
     end
-    dlcmInitWeights = weights;
+    dnnInitWeights = weights;
 end

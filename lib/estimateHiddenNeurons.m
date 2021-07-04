@@ -1,7 +1,7 @@
 %%
-% Estimate neuron numbers of DLCM hidden layers
+% Estimate neuron numbers of VARDNN hidden layers
 % input:
-%  nodeNum    DLCM node number
+%  nodeNum    VARDNN node number
 %  sigLen     data time series length
 
 function hiddenNums = estimateHiddenNeurons(nodeNum, sigLen)

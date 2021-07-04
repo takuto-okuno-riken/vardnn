@@ -65,7 +65,7 @@ end
 % weight initializer
 % Returns He distribution + user specified weight
 function weights = weightInitializerPvarDnn(sz, initWeightFunc, initWeightParam)
-    global dlcmInitWeights;
+    global dnnInitWeights;
 
     if ~isempty(initWeightFunc)
         weights = initWeightFunc(sz,initWeightParam);
@@ -77,5 +77,5 @@ function weights = weightInitializerPvarDnn(sz, initWeightFunc, initWeightParam)
         varWeights = 2 / ((1 + scale^2) * numIn);
         weights = randn(sz) * sqrt(varWeights);
     end
-    dlcmInitWeights = weights;
+    dnnInitWeights = weights;
 end

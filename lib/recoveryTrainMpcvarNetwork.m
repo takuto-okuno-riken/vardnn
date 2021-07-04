@@ -68,7 +68,7 @@ function [trainedNet, time, mae, errs] = recoveryTrainMpcvarNetwork(X, exSignal,
         idxs{i} = idx;
     end
 
-    % recovery training whole DLCM network
+    % recovery training whole VARDNN network
     Y = [X; exSignal];
     baseS = [];
     inputHist = [];
