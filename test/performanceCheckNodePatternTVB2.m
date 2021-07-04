@@ -191,7 +191,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             load(netFile);
             if exist('inSignal','var'), exSignal=inSignal; end % for compatibility
         else
-            % train DLCM    
+            % train VARDNN    
             Y = si;
             exSignal = uu;
             % layer parameters
@@ -231,7 +231,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of DLCM-GC (pat=' num2str(i) ')']);
 
-        % show result of DLCM weight causality index (DLCM-wci) as DLCM-EC
+        % show result of VARDNN weight causality index (DLCM-wci) as DLCM-EC
         fg = figure; dlwGC = plotMvarDnnEC(netDLCM, [], exControl); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of DLCM-WCI (pat=' num2str(i) ')']);

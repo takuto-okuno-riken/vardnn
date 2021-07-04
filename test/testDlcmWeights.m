@@ -46,7 +46,7 @@ function testDlcmWeights
         save(netFile, 'netDLCM');
     end
 
-    % show DLCM representative weights ------------------------------------
+    % show VARDNN representative weights ------------------------------------
     sampling = eye(nodeNum);
     sampling2 = zeros(nodeNum);
     repW = zeros(nodeNum,nodeNum);
@@ -62,7 +62,7 @@ function testDlcmWeights
     r2 = repW - repW2;
     figure; imagesc(r2); daspect([1 1 1]); colorbar;
 
-    % show DLCM representative weights 2 ----------------------------------
+    % show VARDNN representative weights 2 ----------------------------------
     allone = ones(nodeNum, 1);
     sampling3 = ones(nodeNum, nodeNum) - eye(nodeNum);
     repW3 = zeros(nodeNum,nodeNum);
@@ -78,7 +78,7 @@ function testDlcmWeights
     r4 = (r2 + repW3) / 2;
     figure; imagesc(r4); daspect([1 1 1]); colorbar;
     
-    % DLCM weight causal index as DLCM-EC
+    % VARDNN weight causal index as DLCM-EC
     wci = plotMvarDnnEC(netDLCM, [], [], 0);
 end
 

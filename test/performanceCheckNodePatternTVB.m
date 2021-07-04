@@ -81,7 +81,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             load(netFile);
             if exist('inSignal','var'), exSignal=inSignal; end % for compatibility
         else
-            % train DLCM    
+            % train VARDNN    
             %[Y, sig, m, maxsi, minsi] = convert2SigmoidSignal(si);
             %[exSignal, sig2, m2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
             Y = si;

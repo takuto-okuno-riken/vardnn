@@ -220,7 +220,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure; plot(si.');
         %figure; plot(exSignal.');
 
-        % train DLCM    
+        % train VARDNN    
         nodeNum = size(si,1);
         sigLen = size(si,2);
         if isempty(netDLCM)
@@ -255,7 +255,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         figure(dlRf); hold on; [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = plotROCcurve(dlGC, pP.A, 100, 1, 0.2); hold off;
         title('DLCM-GC');
 
-        % show result of DLCM weight causality index (DLCM-wci) as DLCM-EC
+        % show result of VARDNN weight causality index (DLCM-wci) as DLCM-EC
         fg = figure; dlwGC = plotMvarDnnEC(netDLCM, [], exControl, 0); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A, 100, 1, 0.2); hold off;
         title('DLCM-EC');

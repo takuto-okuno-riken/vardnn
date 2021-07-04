@@ -1,5 +1,5 @@
 %==========================================================================
-% train and simulate DLCM by simulated BOLD signal of DCM
+% train and simulate VARDNN by simulated BOLD signal of DCM
 % Before running this script, please add path of spm12 directory
 %
 function performanceCheckDCMy2DLCM
