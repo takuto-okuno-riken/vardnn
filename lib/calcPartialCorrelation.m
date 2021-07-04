@@ -2,7 +2,7 @@
 % Caluclate Partial Correlation
 % returns Partial Correlation (PC) and p-values (P)
 % input:
-%  X     multivariate time series matrix (node x time series)
+%  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
@@ -18,11 +18,10 @@ function [PC, P] = calcPartialCorrelation(X, exSignal, nodeControl, exControl, i
     nodeMax = nodeNum + size(exSignal,1);
     
     % set node input
-    if ~isempty(exSignal)
-        X = [X; exSignal];
-    end
+    Y = [X; exSignal];
+
     if isempty(nodeControl) && isempty(exControl)
-        [PC, P] = partialcorr(X.');
+        [PC, P] = partialcorr(Y.');
     else
         PC = nan(nodeNum, nodeMax);
         P = nan(nodeNum, nodeMax);
@@ -36,17 +35,18 @@ function [PC, P] = calcPartialCorrelation(X, exSignal, nodeControl, exControl, i
                 [~,exIdx] = find(exControl(i,:)==1);
                 exIdx = exIdx + nodeNum;
             end
-            X2 = X([nodeIdx, exIdx],:);
-            [PC2, P2] = partialcorr(X2.');
+            Y2 = Y([nodeIdx, exIdx],:);
+            [PC2, P2] = partialcorr(Y2.');
             PC(i,[nodeIdx, exIdx]) = PC2(i,:);
             P(i,[nodeIdx, exIdx]) = P2(i,:);
+        end
+        for i=1:nodeNum
+            for j=i:nodeNum, PC(j,i)=PC(i,j); P(j,i)=P(i,j); end
         end
     end
 
     % output control
-    if ~isempty(exSignal)
-        PC = PC(1:nodeNum,:); P = P(1:nodeNum,:); 
-    end
+    PC = PC(1:nodeNum,:); P = P(1:nodeNum,:); 
     if isFullNode == 0
         PC = PC(:,1:nodeNum); P = P(:,1:nodeNum); 
     end

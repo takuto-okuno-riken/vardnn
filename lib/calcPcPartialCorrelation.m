@@ -1,15 +1,17 @@
 %%
-% Caluclate PLS Partial Correlation
-% returns PLS Partial Correlation (PC)
+% Caluclate Principal Component Partial Correlation
+% returns Principal Component Partial Correlation (PC)
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
+%  explainedTh  explained threshold for PCA components (default:0.99)
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [PC] = calcPLSPartialCorrelation(X, exSignal, nodeControl, exControl, isFullNode)
-    if nargin < 5, isFullNode = 0; end
+function [PC] = calcPcPartialCorrelation(X, exSignal, nodeControl, exControl, explainedTh, isFullNode)
+    if nargin < 6, isFullNode = 0; end
+    if nargin < 5, explainedTh = 0.99; end
     if nargin < 4, exControl = []; end
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end
@@ -18,10 +20,7 @@ function [PC] = calcPLSPartialCorrelation(X, exSignal, nodeControl, exControl, i
     sigLen = size(X,2);
     exNum = size(exSignal,1);
     nodeMax = nodeNum + exNum;
-
-    ncomp = floor(nodeNum / 5);
-    if ncomp < 3, ncomp = 3; end
-    if ncomp > 50, ncomp = 50; end
+    expTh = explainedTh * 100;
     
     % set node input
     Y = [X; exSignal];
@@ -33,7 +32,7 @@ function [PC] = calcPLSPartialCorrelation(X, exSignal, nodeControl, exControl, i
         if ~isempty(exControl), eidx = find(exControl(i,:)==0); else eidx = []; end
         if ~isempty(eidx), eidx = eidx + nodeNum; end
         nodeIdx = setdiff(fullIdx,[nidx, eidx, i]);
-
+            
         for j=i:nodeMax
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
@@ -43,10 +42,22 @@ function [PC] = calcPLSPartialCorrelation(X, exSignal, nodeControl, exControl, i
             idx = setdiff(nodeIdx,j);
             z = Y(idx,:).';
 
-            [XL,YL,XS,YS,b,PCTVAR,MSE,stats1] = plsregress(z,x,ncomp);
-            [XL,YL,XS,YS,b,PCTVAR,MSE,stats2] = plsregress(z,y,ncomp);
-            r1 = stats1.Yresiduals;
-            r2 = stats2.Yresiduals;
+            % apply the Principal Component Regress function
+            [coeff,score,latent,~,explained,mu] = pca(z); % relation : Xti == score * coeff.' + repmat(mu,size(score,1),1);
+            % find 99% component range
+            expTotal = 0;
+            maxComp = size(score,2);
+            for k=1:size(z,2)
+                expTotal = expTotal + explained(k);
+                if expTotal >= expTh
+                    maxComp = k;
+                    break;
+                end
+            end
+            pcXti = [score(:,1:maxComp), ones(sigLen,1)]; % might not be good to add bias
+            [b1,bint1,r1] = regress(x, pcXti);
+            [b2,bint2,r2] = regress(y, pcXti);
+            
             PC(i,j) = (r1.'*r2) / (sqrt(r1.'*r1)*sqrt(r2.'*r2));
             PC(j,i) = PC(i,j);
         end

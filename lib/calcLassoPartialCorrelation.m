@@ -1,15 +1,19 @@
 %%
-% Caluclate PLS Partial Correlation
-% returns PLS Partial Correlation (PC)
+% Caluclate Lasso Partial Correlation
+% returns Lasso Partial Correlation (PC)
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
+%  lambda       lambda for the Lasso (default:0.01)
+%  elaAlpha     Elastic Net Alpha for the Lasso (default:1)
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [PC] = calcPLSPartialCorrelation(X, exSignal, nodeControl, exControl, isFullNode)
-    if nargin < 5, isFullNode = 0; end
+function [PC] = calcLassoPartialCorrelation(X, exSignal, nodeControl, exControl, lambda, elaAlpha, isFullNode)
+    if nargin < 7, isFullNode = 0; end
+    if nargin < 6, elaAlpha = 1; end
+    if nargin < 5, lambda = 0.01; end
     if nargin < 4, exControl = []; end
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end
@@ -43,10 +47,11 @@ function [PC] = calcPLSPartialCorrelation(X, exSignal, nodeControl, exControl, i
             idx = setdiff(nodeIdx,j);
             z = Y(idx,:).';
 
-            [XL,YL,XS,YS,b,PCTVAR,MSE,stats1] = plsregress(z,x,ncomp);
-            [XL,YL,XS,YS,b,PCTVAR,MSE,stats2] = plsregress(z,y,ncomp);
-            r1 = stats1.Yresiduals;
-            r2 = stats2.Yresiduals;
+            [b,info] = lasso(z,x,'Lambda',lambda,'Alpha',elaAlpha); % including Intercept
+            r1 = x - (z*b + info.Intercept);
+            [b,info] = lasso(z,y,'Lambda',lambda,'Alpha',elaAlpha); % including Intercept
+            r2 = y - (z*b + info.Intercept);
+            
             PC(i,j) = (r1.'*r2) / (sqrt(r1.'*r1)*sqrt(r2.'*r2));
             PC(j,i) = PC(i,j);
         end

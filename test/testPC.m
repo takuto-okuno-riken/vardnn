@@ -23,29 +23,97 @@ sigma = cov(X.');
 B = inv(sigma);
 pc5 = -B(1,2) / sqrt(B(1,1)*B(2,2));
 
+%% test pattern 1 -- just random
+% regression version
 PC3 = calcPartialCorrelation__(X);
 Z = PC - PC3;
-figure; clims = [-1 1]; imagesc(Z,clims); title('PC - PC3');
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC3 : sum err=' num2str(nansum(abs(Z),'all'))]);
 
+PC4 = calcPLSPartialCorrelation(X); % calc PLS PC
+Z = PC - PC4;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC4 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+PC5 = calcLassoPartialCorrelation(X, [], [], [], 0.01, 1); % calc Lasso PC
+Z = PC - PC5;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC5 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+PC6 = calcPcPartialCorrelation(X); % calc PCA+PC
+Z = PC - PC6;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC6 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+%% test pattern 2 -- one step
+exNum = 2;
+exSignal = si(nodeNum+1:nodeNum+exNum,1:sigLen);
+% control is all positive input
+exControl = ones(nodeNum,exNum);
+X = si(1:8, 1:sigLen);
+X(2,2:end) = X(6,1:sigLen-1);
+X(4,2:end) = X(6,1:sigLen-1); % caution! node 2 & 4 is Multicollinearity case (correlated)
+X(5,2:end) = exSignal(1,1:sigLen-1);
+%X(7,2:end) = exSignal(1,1:sigLen-1);
+
+figure; PC = plotPartialCorrelation(X, exSignal, [], exControl, 1); % calc PC - many NaN values
+PC3 = calcPartialCorrelation__(X, exSignal, [], exControl, 1);
+figure; PC4 = plotPLSPartialCorrelation(X, exSignal, [], exControl, 1); % calc PLS PC
+figure; PC5 = plotLassoPartialCorrelation(X, exSignal, [], exControl, 0.01, 1, 1); % calc Lasso PC
+figure; PC6 = plotPcPartialCorrelation(X, exSignal, [], exControl, 1, 1); % calc PCA+PC
+
+Z = PC - PC3;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC3 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+Z = PC - PC4;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC4 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+Z = PC - PC5;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC5 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+Z = PC - PC6;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC6 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+
+%% test pattern 3 -- one step
+exNum = 8;
+exSignal = si(nodeNum+1:nodeNum+exNum,1:sigLen);
+% control is all positive input
+exControl = eye(nodeNum,exNum);
+X = si(1:8, 1:sigLen);
+X(2,2:end) = X(6,1:sigLen-1);
+X(4,2:end) = X(6,1:sigLen-1); % caution! node 2 & 4 is Multicollinearity case (correlated)
+X(5,2:end) = exSignal(5,1:sigLen-1);
+X(7,2:end) = exSignal(7,1:sigLen-1);
+
+figure; PC = plotPartialCorrelation(X, exSignal, [], exControl, 1); % calc PC - many NaN values
+PC3 = calcPartialCorrelation__(X, exSignal, [], exControl, 1);
+figure; PC4 = plotPLSPartialCorrelation(X, exSignal, [], exControl, 1); % calc PLS PC
+figure; PC5 = plotLassoPartialCorrelation(X, exSignal, [], exControl, 0.01, 1, 1); % calc Lasso PC
+figure; PC6 = plotPcPartialCorrelation(X, exSignal, [], exControl, 1, 1); % calc PCA+PC
+
+Z = PC - PC3;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC3 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+Z = PC - PC4;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC4 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+Z = PC - PC5;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC5 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+Z = PC - PC6;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC6 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+
+%% test pattern 4 -- rank down
 % synchronize signal 6 == 2, 7 invert 3
 % this is rank down operation, then invert of cov matrix does not work!!
+X = si(1:8, 1:sigLen);
 X(2,:) = X(6,:);
 X(3,:) = 1 - X(7,:);
 
-PC = calcPartialCorrelation(X); % calc PC - many NaN values
-
+figure; PC = plotPartialCorrelation(X); % calc PC - many NaN values
 PC2 = calcPartialCorrelation_(X,0); % calc PC - this does not work well.
-
 PC3 = calcPartialCorrelation__(X); % calc PC
-
-PC4 = calcPLSPartialCorrelation(X); % calc PLS PC
-
-% plot matrix
-figure;
-clims = [-1 1];
-imagesc(PC,clims);
-title('Partial Correlation (matlab implementation)');
-colorbar;
+figure; PC4 = plotPLSPartialCorrelation(X); % calc PLS PC
+figure; PC5 = plotLassoPartialCorrelation(X, [], [], [], 0.01, 1); % calc Lasso PC
+figure; PC6 = plotPcPartialCorrelation(X, [], [], [], 1); % calc PCA+PC
 
 % plot matrix
 figure;
@@ -62,11 +130,11 @@ title('Partial Correlation (regression base)');
 colorbar;
 
 % plot matrix
-figure;
-clims = [-1 1];
-imagesc(PC4,clims);
-title('PLS Partial Correlation');
-colorbar;
-
 Z = PC3 - PC4;
-figure; clims = [-1 1]; imagesc(Z,clims); title('PC3 - PC4');
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC3 - PC4 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+Z = PC3 - PC5;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC3 - PC4 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+Z = PC3 - PC6;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC3 - PC6 : sum err=' num2str(nansum(abs(Z),'all'))]);

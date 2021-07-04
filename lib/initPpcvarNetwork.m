@@ -57,9 +57,10 @@ function net = initPpcvarNetwork(X, exSignal, nodeControl, exControl, lags, expl
 
             % find 99% component range
             expTotal = 0;
+            maxComp = size(score,2);
             for k=1:size(Yti,2)
                 expTotal = expTotal + explained{i,j}(k);
-                if expTotal > expTh
+                if expTotal >= expTh
                     maxComp{i,j} = k;
                     break;
                 end
