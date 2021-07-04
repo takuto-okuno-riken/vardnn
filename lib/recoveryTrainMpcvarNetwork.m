@@ -113,7 +113,7 @@ function [trainedNet, time, mae, errs] = recoveryTrainMpcvarNetwork(X, exSignal,
 
             % find 99% component range
             expTotal = 0;
-            maxComp = size(score,2);
+            maxComp{i} = size(score,2);
             for j=1:size(Xti,2)
                 expTotal = expTotal + explained{i}(j);
                 if expTotal >= expTh
