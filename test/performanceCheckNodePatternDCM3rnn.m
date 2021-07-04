@@ -300,7 +300,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plotErrorROCcurve(fgesROC, N, [0.5,0.5,0.5]);
     plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
     plotAverageROCcurve(pcROC, N, '-', [0.5,0.1,0.1],0.5);
-    plotAverageROCcurve(ppcpcROC, N, '--', [0.5,0.1,0.1],0.5);
+    plotAverageROCcurve(pcpcROC, N, '--', [0.5,0.1,0.1],0.5);
     plotAverageROCcurve(lsopcROC, N, '-.', [0.5,0.1,0.1],0.5);
     plotAverageROCcurve(plspcROC, N, ':', [0.5,0.1,0.1],0.5);
     plotAverageROCcurve(wcsROC, N, '--', [0.9,0.5,0],0.5);
