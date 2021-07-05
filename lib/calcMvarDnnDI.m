@@ -1,13 +1,13 @@
 %%
-% Caluclate multivariate VAR DNN effective connectivity matrix (EC) and impaired node signals (ECsub)
-% returns mVAR DNN EC matrix (EC) and impaired node signals (ECsub)
+% Caluclate multivariate VAR DNN effective connectivity matrix (DI) and impaired node signals (DIsub)
+% returns mVAR DNN DI matrix (DI) and impaired node signals (DIsub)
 % input:
 %  net          trained multivariate VAR DNN network
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [EC, ECsub] = calcMvarDnnEC(net, nodeControl, exControl, isFullNode)
+function [DI, DIsub] = calcMvarDnnDI(net, nodeControl, exControl, isFullNode)
     if nargin < 4, isFullNode = 0; end
 
     if isfield(net, 'nodeNum'), nodeNum = net.nodeNum; else nodeNum = length(net.nodeNetwork); end % for compatibility
@@ -15,9 +15,9 @@ function [EC, ECsub] = calcMvarDnnEC(net, nodeControl, exControl, isFullNode)
     if isfield(net, 'lags'), lags = net.lags; else lags = 1; end
     if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeNum + exNum; end
 
-    % calc multivariate VAR DNN EC
-    EC = nan(nodeNum,nodeMax);
-    ECsub = nan(nodeNum,nodeMax+1);
+    % calc multivariate VAR DNN DI
+    DI = nan(nodeNum,nodeMax);
+    DIsub = nan(nodeNum,nodeMax+1);
     for i=1:nodeNum
         nodeInput = ones((nodeNum + exNum)*lags, 1);
         if ~isempty(nodeControl)
@@ -29,7 +29,7 @@ function [EC, ECsub] = calcMvarDnnEC(net, nodeControl, exControl, isFullNode)
             nodeInput(nodeNum*lags+1:end,:) = nodeInput(nodeNum*lags+1:end,:) .* filter;
         end
         % predict 
-        ECsub(i,1)  = predict(net.nodeNetwork{i}, nodeInput, 'ExecutionEnvironment', 'cpu');
+        DIsub(i,1)  = predict(net.nodeNetwork{i}, nodeInput, 'ExecutionEnvironment', 'cpu');
 
         % imparement node signals
         for j=1:nodeMax
@@ -45,8 +45,8 @@ function [EC, ECsub] = calcMvarDnnEC(net, nodeControl, exControl, isFullNode)
             end
 
             % predict 
-            ECsub(i,j+1) = predict(net.nodeNetwork{i}, impInput, 'ExecutionEnvironment', 'cpu');
-            EC(i,j) = abs(ECsub(i,1) - ECsub(i,j+1));
+            DIsub(i,j+1) = predict(net.nodeNetwork{i}, impInput, 'ExecutionEnvironment', 'cpu');
+            DI(i,j) = abs(DIsub(i,1) - DIsub(i,j+1));
         end
     end
 end

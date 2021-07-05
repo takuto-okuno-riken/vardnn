@@ -260,7 +260,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of VARDNN-GC (pat=' num2str(i) ')']);
 
         % show result of VARDNN weight causality index (VARDNN-WCI) as VARDNN-DI
-        fg = figure; dlwGC = plotMvarDnnEC(netDLCM, [], exControl); close(fg);
+        fg = figure; dlwGC = plotMvarDnnDI(netDLCM, [], exControl); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of VARDNN-WCI (pat=' num2str(i) ')']);
 %%}

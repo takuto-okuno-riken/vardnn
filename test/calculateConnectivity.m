@@ -220,7 +220,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 end
                 f = load(dlcmName);
                 if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
-                [mat, subweights(:,:,i)] = calcMvarDnnEC(f.netDLCM, [], f.exControl);
+                [mat, subweights(:,:,i)] = calcMvarDnnDI(f.netDLCM, [], f.exControl);
             end
             weights(:,:,i) = mat;
         end

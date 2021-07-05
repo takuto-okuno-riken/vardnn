@@ -138,7 +138,7 @@ function performanceCheckDCMy2VarDnntime
         
         % calculate VARDNN-DI and get computational time
         ticHdl = tic;
-        mat = calcMvarDnnEC(netDLCM, [], exControl);
+        mat = calcMvarDnnDI(netDLCM, [], exControl);
         time = toc(ticHdl) + netDLCM.trainTime;
         DLEtime(k,1) = time;
         disp(['finish VARDNN-DI! t = ' num2str(time) 's']);        

@@ -132,6 +132,6 @@ function [FC, dlEC, gcI] = checkingPattern(si, exSignal, exControl, idx)
     % show original time shifted correlation (tsc-FC)
     %figure; tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
-    figure; dlEC = plotMvarDnnEC(netDLCM, [], exControl, 0, 1);    
+    figure; dlEC = plotMvarDnnDI(netDLCM, [], exControl, 0, 1);    
 end
 

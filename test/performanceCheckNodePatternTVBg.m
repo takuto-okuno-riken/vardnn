@@ -96,7 +96,7 @@ function checkingPattern(Gval, node_num, num_scan, hz, GTth, N, i)
         [dlROC{k,1}, dlROC{k,2}, dlAUC(k)] = calcROCcurve(dlGC, weights, 100, 1, GTth);
 
         % show result of VARDNN weight causality index (VARDNN-WCI) as VARDNN-DI
-        dlwGC = calcMvarDnnEC(netDLCM, [], exControl);
+        dlwGC = calcMvarDnnDI(netDLCM, [], exControl);
        [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = calcROCcurve(dlwGC, weights, 100, 1, GTth);
 %%}
     end

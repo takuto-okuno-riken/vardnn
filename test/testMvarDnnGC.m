@@ -47,7 +47,7 @@ function testMvarDnnGC
 
         % show mVAR-DNN-GC
         figure; mvdnnGC = plotMvarDnnGCI(si, exSignal, [], exControl, net, 0);
-        figure; mvdnnEC = plotMvarDnnEC(net, [], exControl, 0);
+        figure; mvdnnDI = plotMvarDnnDI(net, [], exControl, 0);
         figure; gcI = plotMultivariateGCI(si, exSignal, [], exControl, i, 0);
     end
 
@@ -74,7 +74,7 @@ function testMvarDnnGC
 
         % show mVAR-DNN-GC
         figure; mvdnnGC = plotMvarDnnGCI(si, exSignal, [], exControl, net, 0, 0, 1);
-        figure; mvdnnEC = plotMvarDnnEC(net, [], exControl, 0, 1);
+        figure; mvdnnDI = plotMvarDnnDI(net, [], exControl, 0, 1);
         figure; gcI = plotMultivariateGCI(si, exSignal, [], exControl, i, 0, 0, 1);
     end
     
@@ -100,7 +100,7 @@ function testMvarDnnGC
 
         % show mVAR-DNN-GC
         figure; mvdnnGC = plotMvarDnnGCI(si, exSignal, [], exControl, net, 0, 0, 1);
-        figure; mvdnnEC = plotMvarDnnEC(net, [], exControl, 0, 1);
+        figure; mvdnnDI = plotMvarDnnDI(net, [], exControl, 0, 1);
         figure; gcI = plotMultivariateGCI(si, exSignal, [], exControl, i, 0, 0, 1);
     end
 end

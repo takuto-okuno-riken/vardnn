@@ -142,7 +142,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     % show VARDNN-GC
     figure; dlGC = plotMvarDnnGCI(si, [], [], [], netDLCM, 0);
     % show VARDNN-WCI as VARDNN-DI
-    figure; dlWC = plotMvarDnnEC(netDLCM, [], [], 0);
+    figure; dlWC = plotMvarDnnDI(netDLCM, [], [], 0);
     % show DLCM-weight-GC
 %    figure; dlwGC = plotDlcmDeltaWeightGCI(netDLCM);
     figure; Aest = plotDirectLiNGAM(si);

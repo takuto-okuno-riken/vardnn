@@ -44,8 +44,8 @@ function testPvarDnnGC
     
     % show Pairwised DNN-GC
     figure; dnGC = plotPvarDnnGCI(si, exSignal, [], exControl, netPvarDNN, 0);
-    % show Pairwised DNN-EC
-    figure; dnEC = plotPvarDnnEC(netPvarDNN, [], exControl);
+    % show Pairwised DNN-DI
+    figure; dnDI = plotPvarDnnDI(netPvarDNN, [], exControl);
 
     %% test pattern 2
     exNum = 2;
@@ -68,7 +68,7 @@ function testPvarDnnGC
     
     % show Pairwised VAR DNN-GC
     figure; dnGC = plotPvarDnnGCI(si, exSignal, [], exControl, netPvarDNN, 0, 0.05, 1);
-    % show Pairwised VAR DNN-EC
-    figure; dnEC = plotPvarDnnEC(netPvarDNN, [], exControl, 0, 1);
+    % show Pairwised VAR DNN-DI
+    figure; dnDI = plotPvarDnnDI(netPvarDNN, [], exControl, 0, 1);
 end
 

@@ -427,10 +427,10 @@ function processInputFiles(handles)
         if handles.vddi > 0
             % show VARDNN-DI matrix
             if handles.showMat > 0
-                figure; DI = plotMvarDnnEC(net, nodeControl, exControl, 0, isFullNode);
+                figure; DI = plotMvarDnnDI(net, nodeControl, exControl, 0, isFullNode);
                 title(['VARDNN(' num2str(handles.dllag) ') Directional Influence : ' name]);
             else
-                DI = calcMvarDnnEC(net, nodeControl, exControl, isFullNode);
+                DI = calcMvarDnnDI(net, nodeControl, exControl, isFullNode);
             end
             
             if handles.showCG > 0

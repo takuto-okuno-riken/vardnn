@@ -280,7 +280,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         title('VARDNN-GC');
 
         % show result of VARDNN weight causality index (VARDNN-WCI) as VARDNN-DI
-        fg = figure; dlwGC = plotMvarDnnEC(netDLCM, [], exControl, 0); close(fg);
+        fg = figure; dlwGC = plotMvarDnnDI(netDLCM, [], exControl, 0); close(fg);
         figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A, 100, 1, 0.2); hold off;
         title('VARDNN-DI');
     end

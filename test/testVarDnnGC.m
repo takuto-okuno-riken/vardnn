@@ -30,7 +30,7 @@ function testVarDnnGC
 
     %% test pattern 1 
     % do training or load VARDNN network
-    netFile = ['results/dlcm-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
+    netFile = ['results/vardnn-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
     if exist(netFile, 'file')
         load(netFile);
     else
@@ -55,12 +55,12 @@ function testVarDnnGC
     % show original & simulated signal FC
     figure; FC = plotFunctionalConnectivity(si);
     figure; FC = plotFunctionalConnectivity(S);
-    % show original & simulated signal granger causality index (gc-EC)
+    % show original & simulated signal granger causality index (gc-DI)
     figure; gcI = plotPairwiseGCI(si);
     figure; gcI = plotPairwiseGCI(S);
 
     % show VARDNN-GC, VARDNN-DI
     figure; dlGC = plotMvarDnnGCI(si, exSignal, [], exControl, net, 0);
-    figure; dlEC = plotMvarDnnEC(net, [], exControl, 0);
+    figure; dlDI = plotMvarDnnDI(net, [], exControl, 0);
 end
 

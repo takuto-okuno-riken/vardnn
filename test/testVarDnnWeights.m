@@ -79,6 +79,6 @@ function testVarDnnWeights
     figure; imagesc(r4); daspect([1 1 1]); colorbar;
     
     % VARDNN weight causal index as VARDNN-DI
-    wci = plotMvarDnnEC(net, [], [], 0);
+    wci = plotMvarDnnDI(net, [], [], 0);
 end
 
