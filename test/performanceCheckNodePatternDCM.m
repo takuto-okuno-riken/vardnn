@@ -71,7 +71,7 @@ function performanceCheckNodePatternDCM
 end
 
 %% 
-function [FC, dlEC, gcI] = checkingPattern(si, idx)
+function [FC, DI, gcI] = checkingPattern(si, idx)
     nodeNum = size(si,1);
     sigLen = size(si,2);
 
@@ -124,10 +124,10 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
-%    figure; dlEC = plotMvarDnnECmeanWeight(netDLCM);
-%    figure; dlEC = plotMvarDnnECmeanAbsWeight(netDLCM);
-%    figure; dlEC = plotMvarDnnECmeanDeltaWeight(netDLCM);
-    figure; dlEC = plotMvarDnnECmeanAbsDeltaWeight(netDLCM);
+%    figure; DI = plotMvarDnnECmeanWeight(netDLCM);
+%    figure; DI = plotMvarDnnECmeanAbsWeight(netDLCM);
+%    figure; DI = plotMvarDnnECmeanDeltaWeight(netDLCM);
+    figure; DI = plotMvarDnnECmeanAbsDeltaWeight(netDLCM);
     % show VARDNN-GC
     figure; dlGC = plotMvarDnnGCI(si, [], [], [], netDLCM);
 

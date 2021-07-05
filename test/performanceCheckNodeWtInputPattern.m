@@ -78,7 +78,7 @@ function performanceCheckNodeWtInputPattern
 end
 
 %% 
-function [FC, dlEC, gcI] = checkingPattern(si, exSignal, exControl, idx)
+function [FC, DI, gcI] = checkingPattern(si, exSignal, exControl, idx)
     nodeNum = size(si,1);
     exNum = size(exSignal,1);
     sigLen = size(si,2);
@@ -132,6 +132,6 @@ function [FC, dlEC, gcI] = checkingPattern(si, exSignal, exControl, idx)
     % show original time shifted correlation (tsc-FC)
     %figure; tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
-    figure; dlEC = plotMvarDnnDI(netDLCM, [], exControl, 0, 1);    
+    figure; DI = plotMvarDnnDI(netDLCM, [], exControl, 0, 1);    
 end
 

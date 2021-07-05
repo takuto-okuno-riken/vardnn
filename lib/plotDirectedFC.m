@@ -2,7 +2,7 @@
 % plot directed FC matrix
 % input:
 %  dFC          directed FC matrix
-%  name         EC name for graph title
+%  name         directed FC name for graph title
 %  range        plotting minimum and maximum range of dFC (default:0.5)
 %  rowcut       cut bottom rows of result CI matrix (default:0)
 

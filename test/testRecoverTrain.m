@@ -60,7 +60,7 @@ function testRecoverTrain
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);
     % show deep-learning effective connectivity
-    figure; dlEC = plotMvarDnnECmeanWeight(netDLCM);
+    figure; dlDI = plotMvarDnnECmeanWeight(netDLCM);
     % plot correlation graph between original predicted node signals
     figure; R = plotTwoSignalsCorrelation(si, S) % show R result
     figure; R = getCosSimilarity(si, S) % show R result

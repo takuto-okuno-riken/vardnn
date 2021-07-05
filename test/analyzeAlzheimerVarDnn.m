@@ -248,17 +248,17 @@ function analyzeAlzheimerVarDnn
     [cnadFCAsUt, cnadFCAsUtP, cnadFCAsUtP2] = calculateAlzWilcoxonTest(cnFCAs, adFCAs, roiNames, 'cn', 'ad', 'fca');
     [cnadTsFCsUt, cnadTsFCsUtP, cnadTsFCsUtP2] = calculateAlzWilcoxonTest(cnTSFCs, adTSFCs, roiNames, 'cn', 'ad', 'tsfc');
     [cnadTsFCAsUt, cnadTsFCAsUtP, cnadTsFCAsUtP2] = calculateAlzWilcoxonTest(cnTSFCAs, adTSFCAs, roiNames, 'cn', 'ad', 'tsfca');
-    [cnadMvarECsUt, cnadMvarECsUtP, cnadMvarECsUtP2] = calculateAlzWilcoxonTest(cnMVARDIs, adMVARDIs, roiNames, 'cn', 'ad', 'mvarec');
-    [cnadPvarECsUt, cnadPvarECsUtP, cnadPvarECsUtP2] = calculateAlzWilcoxonTest(cnPVARDIs, adPVARDIs, roiNames, 'cn', 'ad', 'pvarec');
-    [cnadMpcvarECsUt, cnadMpcvarECsUtP, cnadMpcvarECsUtP2] = calculateAlzWilcoxonTest(cnMPCVARDIs, adMPCVARDIs, roiNames, 'cn', 'ad', 'mpcvarec');
+    [cnadMvarDIsUt, cnadMvarDIsUtP, cnadMvarDIsUtP2] = calculateAlzWilcoxonTest(cnMVARDIs, adMVARDIs, roiNames, 'cn', 'ad', 'mvarec');
+    [cnadPvarDIsUt, cnadPvarDIsUtP, cnadPvarDIsUtP2] = calculateAlzWilcoxonTest(cnPVARDIs, adPVARDIs, roiNames, 'cn', 'ad', 'pvarec');
+    [cnadMpcvarDIsUt, cnadMpcvarDIsUtP, cnadMpcvarDIsUtP2] = calculateAlzWilcoxonTest(cnMPCVARDIs, adMPCVARDIs, roiNames, 'cn', 'ad', 'mpcvarec');
     [cnadMpcvarGCsUt, cnadMpcvarGCsUtP, cnadMpcvarGCsUtP2] = calculateAlzWilcoxonTest(cnMPCVARGCs, adMPCVARGCs, roiNames, 'cn', 'ad', 'mpcvargc');
-    [cnadPpcvarECsUt, cnadPpcvarECsUtP, cnadPpcvarECsUtP2] = calculateAlzWilcoxonTest(cnPPCVARDIs, adPPCVARDIs, roiNames, 'cn', 'ad', 'ppcvarec');
+    [cnadPpcvarDIsUt, cnadPpcvarDIsUtP, cnadPpcvarDIsUtP2] = calculateAlzWilcoxonTest(cnPPCVARDIs, adPPCVARDIs, roiNames, 'cn', 'ad', 'ppcvarec');
     [cnadPpcvarGCsUt, cnadPpcvarGCsUtP, cnadPpcvarGCsUtP2] = calculateAlzWilcoxonTest(cnPPCVARGCs, adPPCVARGCs, roiNames, 'cn', 'ad', 'ppcvargc');
-    [cnadMplsvarECsUt, cnadMplsvarECsUtP, cnadMplsvarECsUtP2] = calculateAlzWilcoxonTest(cnMPLSVARDIs, adMPLSVARDIs, roiNames, 'cn', 'ad', 'mplsvarec');
+    [cnadMplsvarDIsUt, cnadMplsvarDIsUtP, cnadMplsvarDIsUtP2] = calculateAlzWilcoxonTest(cnMPLSVARDIs, adMPLSVARDIs, roiNames, 'cn', 'ad', 'mplsvarec');
     [cnadMplsvarGCsUt, cnadMplsvarGCsUtP, cnadMplsvarGCsUtP2] = calculateAlzWilcoxonTest(cnMPLSVARGCs, adMPLSVARGCs, roiNames, 'cn', 'ad', 'mplsvargc');
-    [cnadPplsvarECsUt, cnadPplsvarECsUtP, cnadPplsvarECsUtP2] = calculateAlzWilcoxonTest(cnPPLSVARDIs, adPPLSVARDIs, roiNames, 'cn', 'ad', 'pplsvarec');
+    [cnadPplsvarDIsUt, cnadPplsvarDIsUtP, cnadPplsvarDIsUtP2] = calculateAlzWilcoxonTest(cnPPLSVARDIs, adPPLSVARDIs, roiNames, 'cn', 'ad', 'pplsvarec');
     [cnadPplsvarGCsUt, cnadPplsvarGCsUtP, cnadPplsvarGCsUtP2] = calculateAlzWilcoxonTest(cnPPLSVARGCs, adPPLSVARGCs, roiNames, 'cn', 'ad', 'pplsvargc');
-    [cnadMlsovarECsUt, cnadMlsovarECsUtP, cnadMlsovarECsUtP2] = calculateAlzWilcoxonTest(cnMPLSVARDIs, adMPLSVARDIs, roiNames, 'cn', 'ad', 'mlsovarec');
+    [cnadMlsovarDIsUt, cnadMlsovarDIsUtP, cnadMlsovarDIsUtP2] = calculateAlzWilcoxonTest(cnMPLSVARDIs, adMPLSVARDIs, roiNames, 'cn', 'ad', 'mlsovarec');
     [cnadMlsovarGCsUt, cnadMlsovarGCsUtP, cnadMlsovarGCsUtP2] = calculateAlzWilcoxonTest(cnMPLSVARGCs, adMPLSVARGCs, roiNames, 'cn', 'ad', 'mlsovargc');
     
     % show top 100 most different relations
@@ -271,7 +271,7 @@ function analyzeAlzheimerVarDnn
     figure; semilogy(B(1:topNum)); title('FC');
     figure; hold on; plot(meanCNFC(I(1:topNum))); plot(meanADFC(I(1:topNum))); hold off; title('FC');
     
-    % show top3 most different EC histgram
+    % show top3 most different DI histgram
     for i=1:3
         [B,I]=sort(cnadDLWsUtP(:));
         [c, r] = index2rowCol(I(i),132); eg=[0:0.025:0.4];
@@ -511,21 +511,21 @@ function analyzeAlzheimerVarDnn
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnMVARDIs, adMVARDIs, k, N);
-        [B, I, X] = sortAndPairPValues(control, target, cnadMvarECsUtP, topNum);
+        [B, I, X] = sortAndPairPValues(control, target, cnadMvarDIsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [mvardiROC{k,1}, mvardiROC{k,2}, mvardiAUC(k), mvardiACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnPVARDIs, adPVARDIs, k, N);
-        [B, I, X] = sortAndPairPValues(control, target, cnadPvarECsUtP, topNum);
+        [B, I, X] = sortAndPairPValues(control, target, cnadPvarDIsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [pvardiROC{k,1}, pvardiROC{k,2}, pvardiAUC(k), pvardiACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnMPCVARDIs, adMPCVARDIs, k, N);
-        [B, I, X] = sortAndPairPValues(control, target, cnadMpcvarECsUtP, topNum);
+        [B, I, X] = sortAndPairPValues(control, target, cnadMpcvarDIsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [mpcvardiROC{k,1}, mpcvardiROC{k,2}, mpcvardiAUC(k), mpcvardiACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
@@ -539,7 +539,7 @@ function analyzeAlzheimerVarDnn
         
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnPPCVARDIs, adPPCVARDIs, k, N);
-        [B, I, X] = sortAndPairPValues(control, target, cnadPpcvarECsUtP, topNum);
+        [B, I, X] = sortAndPairPValues(control, target, cnadPpcvarDIsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [ppcvardiROC{k,1}, ppcvardiROC{k,2}, ppcvardiAUC(k), ppcvardiACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
@@ -553,7 +553,7 @@ function analyzeAlzheimerVarDnn
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnMPLSVARDIs, adMPLSVARDIs, k, N);
-        [B, I, X] = sortAndPairPValues(control, target, cnadMplsvarECsUtP, topNum);
+        [B, I, X] = sortAndPairPValues(control, target, cnadMplsvarDIsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [mplsdiROC{k,1}, mplsdiROC{k,2}, mplsdiAUC(k), mplsdiACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
@@ -567,7 +567,7 @@ function analyzeAlzheimerVarDnn
         
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnPPLSVARDIs, adPPLSVARDIs, k, N);
-        [B, I, X] = sortAndPairPValues(control, target, cnadPplsvarECsUtP, topNum);
+        [B, I, X] = sortAndPairPValues(control, target, cnadPplsvarDIsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [pplsdiROC{k,1}, pplsdiROC{k,2}, pplsdiAUC(k), pplsdiACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
@@ -581,7 +581,7 @@ function analyzeAlzheimerVarDnn
 
         i = i + 1;
         [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnMLSOVARDIs, adMLSOVARDIs, k, N);
-        [B, I, X] = sortAndPairPValues(control, target, cnadMlsovarECsUtP, topNum);
+        [B, I, X] = sortAndPairPValues(control, target, cnadMlsovarDIsUtP, topNum);
         sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
         [mlsodiROC{k,1}, mlsodiROC{k,2}, mlsodiAUC(k), mlsodiACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
