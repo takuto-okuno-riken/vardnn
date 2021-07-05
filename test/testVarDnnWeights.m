@@ -1,5 +1,5 @@
 
-function testDlcmWeights
+function testVarDnnWeights
     % load signals
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
@@ -35,15 +35,15 @@ function testDlcmWeights
         load(netFile);
     else
         % init VARDNN network
-        netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
+        net = initMvarDnnNetwork(si, exSignal, [], exControl);
         % training VARDNN network
-        netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-        [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
+        net = trainMvarDnnNetwork(si, exSignal, [], exControl, net, options);
+        [time, loss, rsme] = getMvarDnnTrainingResult(net);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 
         % recoverty training
-        %[netDLCM, time] = recoveryTrainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-        save(netFile, 'netDLCM');
+        %[net, time] = recoveryTrainMvarDnnNetwork(si, exSignal, [], exControl, net, options);
+        save(netFile, 'net');
     end
 
     % show VARDNN representative weights ------------------------------------
@@ -53,8 +53,8 @@ function testDlcmWeights
     repW2 = zeros(nodeNum,nodeNum);
     for i=1:nodeNum
         % predict representative weights
-        repW(i,:) = predict(netDLCM.nodeNetwork{i}, sampling);
-        repW2(i,:) = predict(netDLCM.nodeNetwork{i}, sampling2);
+        repW(i,:) = predict(net.nodeNetwork{i}, sampling);
+        repW2(i,:) = predict(net.nodeNetwork{i}, sampling2);
     end
     %figure; imagesc(repW); daspect([1 1 1]);
     %figure; imagesc(repW2); daspect([1 1 1]);
@@ -68,8 +68,8 @@ function testDlcmWeights
     repW3 = zeros(nodeNum,nodeNum);
     for i=1:nodeNum
         % predict representative weights
-        all = predict(netDLCM.nodeNetwork{i}, allone);
-        R = predict(netDLCM.nodeNetwork{i}, sampling3);
+        all = predict(net.nodeNetwork{i}, allone);
+        R = predict(net.nodeNetwork{i}, sampling3);
         repW3(i,:) = all - R;
     end
     figure; imagesc(repW3); daspect([1 1 1]); colorbar;
@@ -79,6 +79,6 @@ function testDlcmWeights
     figure; imagesc(r4); daspect([1 1 1]); colorbar;
     
     % VARDNN weight causal index as VARDNN-DI
-    wci = plotMvarDnnEC(netDLCM, [], [], 0);
+    wci = plotMvarDnnEC(net, [], [], 0);
 end
 

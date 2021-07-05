@@ -264,8 +264,8 @@ function analyzeAlzheimerVarDnn
     % show top 100 most different relations
     topNum = 100;
     [B,I]=sort(cnadDLWsUtP(:));
-    figure; semilogy(B(1:topNum)); title('DLCM(1)');
-    figure; hold on; plot(meanCNDLW(I(1:topNum))); plot(meanADDLW(I(1:topNum))); hold off; title('DLCM(1)');
+    figure; semilogy(B(1:topNum)); title('VARDNN(1)');
+    figure; hold on; plot(meanCNDLW(I(1:topNum))); plot(meanADDLW(I(1:topNum))); hold off; title('VARDNN(1)');
     
     [B,I]=sort(cnadFCAsUtP(:));
     figure; semilogy(B(1:topNum)); title('FC');
@@ -276,7 +276,7 @@ function analyzeAlzheimerVarDnn
         [B,I]=sort(cnadDLWsUtP(:));
         [c, r] = index2rowCol(I(i),132); eg=[0:0.025:0.4];
         figure; hold on; histogram(cnDLWs(r,c,:),eg); histogram(adDLWs(r,c,:),eg); hold off;
-        title(['DLCM(1)-DI top' num2str(i) ' (' num2str(r) ',' num2str(c) ')']);
+        title(['VARDNN(1)-DI top' num2str(i) ' (' num2str(r) ',' num2str(c) ')']);
 
         [B,I]=sort(cnadFCAsUtP(:));
         [c, r] = index2rowCol(I(i),132); eg=[-0.2:0.1:1];

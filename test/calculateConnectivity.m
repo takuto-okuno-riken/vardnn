@@ -163,7 +163,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                         [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i},NaN,sigmoidAlpha);
                     end
                     % si = signals{i} - nanmin(signals{i}, [], 'all'); % simple linear transform
-                    netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl, lags, activateFunc); 
+                    net = initMvarDnnNetwork(si, exSignal, [], exControl, lags, activateFunc); 
                     % training VARDNN network
                     maxEpochs = 1000;
                     miniBatchSize = ceil(sigLen / 3);
@@ -178,13 +178,13 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 %            'Plots','training-progress');
 
                     disp('start training');
-                    netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-                    [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
+                    net = trainMvarDnnNetwork(si, exSignal, [], exControl, net, options);
+                    [time, loss, rsme] = getMvarDnnTrainingResult(net);
                     disp(['end training : rsme=' num2str(rsme)]);
                     % calc VARDNN-GC
-                    mat = calcMvarDnnGCI(si, exSignal, [], exControl, netDLCM);
+                    mat = calcMvarDnnGCI(si, exSignal, [], exControl, net);
                     
-                    parsavedlsm(dlcmName, netDLCM, si, exSignal, exControl, mat, sig, c, maxsi, minsi);
+                    parsavedlsm(dlcmName, net, si, exSignal, exControl, mat, sig, c, maxsi, minsi);
                 end
             case 'dlcmrc' % should be called after dlcm
                 outName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
@@ -206,9 +206,9 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                         'GradientThreshold',5,...
                         'L2Regularization',0.05, ...
                         'Verbose',false);
-                    [netDLCM, time] = recoveryTrainMvarDnnNetwork(f.si, f.exSignal, [], f.exControl, f.netDLCM, options);
-                    mat = calcMvarDnnGCI(f.si, f.exSignal, [], f.exControl, netDLCM);
-                    parsavedlsm(outName, netDLCM, f.si, f.exSignal, f.exControl, mat, f.sig, c, f.maxsi, f.minsi);
+                    [net, time] = recoveryTrainMvarDnnNetwork(f.si, f.exSignal, [], f.exControl, f.netDLCM, options);
+                    mat = calcMvarDnnGCI(f.si, f.exSignal, [], f.exControl, net);
+                    parsavedlsm(outName, net, f.si, f.exSignal, f.exControl, mat, f.sig, c, f.maxsi, f.minsi);
                 end
             case {'dlw','dlwB','dlwrc'} % should be called after dlcm
                 if strcmp(algorithm, 'dlw')
@@ -305,13 +305,13 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : DLCM(' num2str(lags) ') Granger Causality Index'];
+        titleStr = [group ' : VARDNN(' num2str(lags) ') Granger Causality Index'];
     case {'dlw','dlwB','dlwrc'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : DLCM(' num2str(lags) ') Weight Causality Index'];
+        titleStr = [group ' : VARDNN(' num2str(lags) ') Weight Causality Index'];
     case {'mvarec','pvarec', 'mpcvarec','ppcvarec', 'mplsvarec','pplsvarec', 'mlsovarec','plsovarec'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');

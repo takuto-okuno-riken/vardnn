@@ -1,5 +1,5 @@
 
-function testDlcmGC
+function testVarDnnGC
     % load signals
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
@@ -35,19 +35,19 @@ function testDlcmGC
         load(netFile);
     else
         % init VARDNN network
-        netDLCM = initMvarDnnNetwork(si, exSignal, [], exControl);
+        net = initMvarDnnNetwork(si, exSignal, [], exControl);
         % training VARDNN network
-        netDLCM = trainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-        [time, loss, rsme] = getMvarDnnTrainingResult(netDLCM);
+        net = trainMvarDnnNetwork(si, exSignal, [], exControl, net, options);
+        [time, loss, rsme] = getMvarDnnTrainingResult(net);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
 
         % recoverty training
-        %[netDLCM, time] = recoveryTrainMvarDnnNetwork(si, exSignal, [], exControl, netDLCM, options);
-        save(netFile, 'netDLCM');
+        %[net, time] = recoveryTrainMvarDnnNetwork(si, exSignal, [], exControl, net, options);
+        save(netFile, 'net');
     end
     
     % simulate VARDNN network with 1st frame & exogenous input signal
-    [S, time] = simulateMvarDnnNetwork(si, exSignal, [], exControl, netDLCM);
+    [S, time] = simulateMvarDnnNetwork(si, exSignal, [], exControl, net);
 
     [mae, maeerr] = plotTwoSignals(si, S);
     disp(['simulation time=' num2str(time) ', mae=' num2str(mae)]);
@@ -60,7 +60,7 @@ function testDlcmGC
     figure; gcI = plotPairwiseGCI(S);
 
     % show VARDNN-GC, VARDNN-DI
-    figure; dlGC = plotMvarDnnGCI(si, exSignal, [], exControl, netDLCM, 0);
-    figure; dlEC = plotMvarDnnEC(netDLCM, [], exControl, 0);
+    figure; dlGC = plotMvarDnnGCI(si, exSignal, [], exControl, net, 0);
+    figure; dlEC = plotMvarDnnEC(net, [], exControl, 0);
 end
 
