@@ -1,6 +1,6 @@
 %%
-% Plotting PLassoVAR (pairwised Lasso vector auto-regression) EC matrix
-% returns PLassoVAR (pairwised Lasso vector auto-regression) EC matrix (EC) and impaired node signals (ECsub)
+% Plotting PLassoVAR (pairwised Lasso vector auto-regression) DI matrix
+% returns PLassoVAR (pairwised Lasso vector auto-regression) DI matrix (DI) and impaired node signals (DIsub)
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -13,7 +13,7 @@
 %               if range==0, range shows standard deviation [-3 sigma, 3 sigma]
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [EC, ECsub, coeff] = plotPlassovarEC(X, exSignal, nodeControl, exControl, lags, lambda, elaAlpha, range, isFullNode)
+function [DI, DIsub, coeff] = plotPlassovarDI(X, exSignal, nodeControl, exControl, lags, lambda, elaAlpha, range, isFullNode)
     if nargin < 9, isFullNode = 0; end
     if nargin < 8, range = 10; end
     if nargin < 7, elaAlpha = 1; end
@@ -23,17 +23,17 @@ function [EC, ECsub, coeff] = plotPlassovarEC(X, exSignal, nodeControl, exContro
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end
 
-    [EC, ECsub, coeff] = calcPlassovarEC(X, exSignal, nodeControl, exControl, lags, lambda, elaAlpha, isFullNode);
+    [DI, DIsub, coeff] = calcPlassovarDI(X, exSignal, nodeControl, exControl, lags, lambda, elaAlpha, isFullNode);
     if range <= 0
-        sigma = std(EC(:),1,'omitnan');
-        avg = mean(EC(:),'omitnan');
-        EC2 = (EC - avg) / sigma;
+        sigma = std(DI(:),1,'omitnan');
+        avg = mean(DI(:),'omitnan');
+        DI2 = (DI - avg) / sigma;
         range = 3;
     else
-        EC2 = EC;
+        DI2 = DI;
     end
     clims = [-range, range];
-    imagesc(EC2,clims);
+    imagesc(DI2,clims);
     daspect([1 1 1]);
     title('PLassoVAR Directional Influence');
     xlabel('Source Nodes');

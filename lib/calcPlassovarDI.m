@@ -1,6 +1,6 @@
 %%
-% Caluclate pLassoVAR (pairwise Lasso Vector Auto-Regression) EC
-% returns pLassoVAR EC matrix (EC) and impaired node signals (ECsub)
+% Caluclate pLassoVAR (pairwise Lasso Vector Auto-Regression) DI
+% returns pLassoVAR DI matrix (DI) and impaired node signals (DIsub)
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -11,7 +11,7 @@
 %  elaAlpha     Elastic Net Alpha for the Lasso (default:1)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [EC, ECsub, coeff] = calcPlassovarEC(X, exSignal, nodeControl, exControl, lags, lambda, elaAlpha, isFullNode)
+function [DI, DIsub, coeff] = calcPlassovarDI(X, exSignal, nodeControl, exControl, lags, lambda, elaAlpha, isFullNode)
     if nargin < 8, isFullNode = 0; end
     if nargin < 7, elaAlpha = 1; end
     if nargin < 6, lambda = 0.01; end
@@ -29,9 +29,9 @@ function [EC, ECsub, coeff] = calcPlassovarEC(X, exSignal, nodeControl, exContro
     Y = flipud(Y.'); % need to flip signal
     
     % calc Pairwise LassoVAR
-    EC = nan(nodeNum, nodeMax);
+    DI = nan(nodeNum, nodeMax);
     coeff = nan(nodeNum, nodeMax);
-    ECsub = nan(nodeNum, nodeMax, 2);
+    DIsub = nan(nodeNum, nodeMax, 2);
     for i=1:nodeNum
         for j=1:nodeMax
             if i==j, continue; end
@@ -46,10 +46,10 @@ function [EC, ECsub, coeff] = calcPlassovarEC(X, exSignal, nodeControl, exContro
                 Yti(:,p+k) = Y(k+1:sigLen-p+k,j); % source
             end
             [b,~] = lasso(Yti,Yt,'Lambda',lambda,'Alpha',elaAlpha);  % including Intercept
-            ECsub(i,j,1) = sum(b);
-            ECsub(i,j,2) = sum(b(1:p));
-            coeff(i,j) = ECsub(i,j,1)-ECsub(i,j,2); % actually this is sum of b(p+2:end)
-            EC(i,j) = abs(coeff(i,j));
+            DIsub(i,j,1) = sum(b);
+            DIsub(i,j,2) = sum(b(1:p));
+            coeff(i,j) = DIsub(i,j,1)-DIsub(i,j,2); % actually this is sum of b(p+2:end)
+            DI(i,j) = abs(coeff(i,j));
         end
     end
 end

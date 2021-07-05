@@ -372,7 +372,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         % (multivaliate Lasso Vector Auto-Regression EC) without exogenous signals
         [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(si, [], [], [], lag, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
         netMVAR = initMlassovarNetwork(si, [], [], [], lag, lambda, elaAlpha);
-        [mlsoEC,~,mlso] = calcMlassovarEC(netMVAR, [], []);
+        [mlsoEC,~,mlso] = calcMlassovarDI(netMVAR, [], []);
         figure(mlsodiRf); hold on; [mlsodiROC{k,1}, mlsodiROC{k,2}, mlsodiAUC(k)] = plotROCcurve(mlsoEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pLSOVAR-EC (pat=' num2str(i) ')']);
 

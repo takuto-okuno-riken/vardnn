@@ -1,5 +1,5 @@
 
-function testMlassovarEC
+function testMlassovarDI
     % load signals
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
@@ -18,9 +18,9 @@ function testMlassovarEC
     [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(si, exSignal, [], exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
     netMVAR = initMlassovarNetwork(si, exSignal, [], exControl, lags, lambda, elaAlpha);
     
-    % show multivaliate LassoVAR-EC
-    figure; pEC = plotPlassovarEC(si, exSignal, [], exControl, lags, lambda, elaAlpha, 0);
-    figure; mEC = plotMlassovarEC(netMVAR, [], exControl, 0);
+    % show multivaliate LassoVAR-DI
+    figure; pDI = plotPlassovarDI(si, exSignal, [], exControl, lags, lambda, elaAlpha, 0);
+    figure; mDI = plotMlassovarDI(netMVAR, [], exControl, 0);
     % show multivaliate & pairwise LassoVAR-GC
     figure; pGC = plotPlassovarGCI(si, exSignal, [], exControl, lags, lambda, elaAlpha, 0);
     figure; mGC = plotMlassovarGCI(si, exSignal, [], exControl, netMVAR, 0);
@@ -38,9 +38,9 @@ function testMlassovarEC
     [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(si, exSignal, [], exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
     netMVAR = initMlassovarNetwork(si, exSignal, [], exControl, lags, lambda, elaAlpha);
     
-    % show multivaliate MVAR-EC
-    figure; pEC = plotPlassovarEC(si, exSignal, [], exControl, lags, lambda, elaAlpha, 0, 1);
-    figure; mEC = plotMlassovarEC(netMVAR, [], exControl, 0, 1);
+    % show multivaliate MVAR-DI
+    figure; pDI = plotPlassovarDI(si, exSignal, [], exControl, lags, lambda, elaAlpha, 0, 1);
+    figure; mDI = plotMlassovarDI(netMVAR, [], exControl, 0, 1);
     % show multivaliate & pairwise LassoVAR-GC
     figure; pGC = plotPlassovarGCI(si, exSignal, [], exControl, lags, lambda, elaAlpha, 0, 0.05, 1);
     figure; mGC = plotMlassovarGCI(si, exSignal, [], exControl, netMVAR, 0, 0.05, 1);

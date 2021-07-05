@@ -139,14 +139,14 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
             case {'mlsovarec', 'mlsovar'}
                 [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(signals{i}, exSignal, [], exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
                 netMLSOVAR = initMlassovarNetwork(signals{i}, exSignal, [], exControl, lags, lambda, elaAlpha);
-                [ec,~,coeff] = calcMlassovarEC(netMLSOVAR, [], exControl);
+                [ec,~,coeff] = calcMlassovarDI(netMLSOVAR, [], exControl);
                 if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
             case 'mlsovargc'
                 [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(signals{i}, exSignal, [], exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
                 netMLSOVAR = initMlassovarNetwork(signals{i}, exSignal, [], exControl, lags, lambda, elaAlpha);
                 mat = calcMlassovarGCI(signals{i}, exSignal, [], exControl, netMLSOVAR);
             case {'plsovarec', 'plsovar'}
-                [ec,~,coeff] = calcPlassovarEC(signals{i}, exSignal, [], exControl, lags);
+                [ec,~,coeff] = calcPlassovarDI(signals{i}, exSignal, [], exControl, lags);
             case 'plsovargc'
                 mat = calcPlassovarGCI(signals{i}, exSignal, [], exControl, lags);
                 if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
