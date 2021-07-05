@@ -40,7 +40,7 @@ function checkingPattern(Gval, node_num, num_scan, hz, GTth, N, i)
         sigLen = size(si,2);
 
         % show original connection
-        figure(origf); plotEC(weights, 'Ground Truth', 1);
+        figure(origf); plotDirectedFC(weights, 'Ground Truth', 1);
         figure(origSigf); plot(t, si);
 
         % show result of FC

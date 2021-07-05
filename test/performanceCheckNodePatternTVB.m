@@ -54,7 +54,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         [uu, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(uu);
             
         % show original connection
-        figure(origf); plotEC(weights, 'Ground Truth', 1);
+        figure(origf); plotDirectedFC(weights, 'Ground Truth', 1);
         figure(origSigf); plot(t, si);
 
         % show original signal FC

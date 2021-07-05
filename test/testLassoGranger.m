@@ -28,6 +28,6 @@ function testLassoGranger
         [~, temp] = lassoGranger(si(index, :), lags, lambda, 'l');
         cause(in, :) = temp([2:in, 1, (in+1):N])';
     end
-    figure; plotEC(cause, 'Lasso Granger', 0);
+    figure; plotDirectedFC(cause, 'Lasso Granger', 0);
 end
 

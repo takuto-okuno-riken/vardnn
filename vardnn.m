@@ -655,7 +655,7 @@ function processInputFiles(handles)
             % show MVAR matrix
             [~, ~, mvar] = calcMvarEC(netMVAR, nodeControl, exControl, isFullNode);
             if handles.showMat > 0
-                figure; plotEC(mvar, 'mVAR', 5);
+                figure; plotDirectedFC(mvar, 'mVAR', 5);
                 title(['mVAR(' num2str(handles.lag) ') coefficient : ' name]);
             end
             

@@ -27,7 +27,7 @@ function [EC, ECsub, coeff] = plotMlassovarEC(net, nodeControl, exControl, range
     clims = [-range, range];
     imagesc(EC2,clims);
     daspect([1 1 1]);
-    title('mLassoVAR Effective Connectivity');
+    title('mLassoVAR Directional Influence');
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;

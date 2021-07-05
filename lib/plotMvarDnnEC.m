@@ -27,7 +27,7 @@ function [EC, ECsub] = plotMvarDnnEC(net, nodeControl, exControl, range, isFullN
     clims = [-range, range];
     imagesc(EC2,clims);
     daspect([1 1 1]);
-    title('multivariate VAR DNN Effective Connectivity');
+    title('multivariate VAR DNN Directional Influence');
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;

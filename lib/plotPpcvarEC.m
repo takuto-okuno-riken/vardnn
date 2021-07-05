@@ -27,7 +27,7 @@ function [EC, ECsub, coeff] = plotPpcvarEC(net, nodeControl, exControl, range, i
     clims = [-range, range];
     imagesc(EC2,clims);
     daspect([1 1 1]);
-    title('pPCVAR Effective Connectivity');
+    title('pPCVAR Directional Influence');
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;

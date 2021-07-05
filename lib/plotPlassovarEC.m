@@ -35,7 +35,7 @@ function [EC, ECsub, coeff] = plotPlassovarEC(X, exSignal, nodeControl, exContro
     clims = [-range, range];
     imagesc(EC2,clims);
     daspect([1 1 1]);
-    title('PLassoVAR Effective Connectivity');
+    title('PLassoVAR Directional Influence');
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;
