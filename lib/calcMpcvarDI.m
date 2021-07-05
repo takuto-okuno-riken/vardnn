@@ -1,13 +1,13 @@
 %%
-% Caluclate mPCVAR (multivaliate Principal Component Vector Auto-Regression) EC
-% returns mPCVAR EC matrix (EC) and impaired node signals (ECsub)
+% Caluclate mPCVAR (multivaliate Principal Component Vector Auto-Regression) DI
+% returns mPCVAR DI matrix (DI) and impaired node signals (DIsub)
 % input:
 %  net          mPCVAR network
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [EC, ECsub, coeff] = calcMpcvarEC(net, nodeControl, exControl, isFullNode)
+function [DI, DIsub, coeff] = calcMpcvarDI(net, nodeControl, exControl, isFullNode)
     if nargin < 4, isFullNode = 0; end
     if nargin < 3, exControl = []; end
     if nargin < 2, nodeControl = []; end
@@ -17,10 +17,10 @@ function [EC, ECsub, coeff] = calcMpcvarEC(net, nodeControl, exControl, isFullNo
     lags = net.lags;
     if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
 
-    % calc mPCVAR EC
-    EC = nan(nodeNum,nodeMax);
+    % calc mPCVAR DI
+    DI = nan(nodeNum,nodeMax);
     coeff = nan(nodeNum,nodeMax);
-    ECsub = nan(nodeNum,nodeMax+1);
+    DIsub = nan(nodeNum,nodeMax+1);
     for i=1:nodeNum
         nodeIdx = [1:nodeNum];
         if ~isempty(nodeControl)
@@ -46,7 +46,7 @@ function [EC, ECsub, coeff] = calcMpcvarEC(net, nodeControl, exControl, isFullNo
         score = (Xti - mu) / net.coeff{i}.';
         subScore = [score(:,1:mc), 1];
         z = subScore * net.bvec{i};
-        ECsub(i,1) = z;
+        DIsub(i,1) = z;
 
         for j=1:nodeMax
             if i==j, continue; end
@@ -62,9 +62,9 @@ function [EC, ECsub, coeff] = calcMpcvarEC(net, nodeControl, exControl, isFullNo
             subScorej = [scorej(:,1:mc), 1];
             zj = subScorej * net.bvec{i};
 
-            EC(i,j) = abs(z - zj);
+            DI(i,j) = abs(z - zj);
             coeff(i,j) = z - zj;
-            ECsub(i,j+1) = zj;
+            DIsub(i,j+1) = zj;
         end
     end
 end

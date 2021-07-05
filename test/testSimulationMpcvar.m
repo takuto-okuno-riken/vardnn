@@ -30,6 +30,6 @@ function testSimulationMpcvar
     figure; gcI = plotPairwiseGCI(si);
     figure; gcI = plotPairwiseGCI(S);
     % show multivaliate MVAR-EC
-    figure; EC = plotMpcvarEC(netMVAR, [], exControl, 0);
+    figure; EC = plotMpcvarDI(netMVAR, [], exControl, 0);
 end
 

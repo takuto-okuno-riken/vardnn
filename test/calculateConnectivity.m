@@ -110,14 +110,14 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
             case {'mpcvarec', 'mpcvar'}
                 netMPCVAR = initMpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                [ec,~,coeff] = calcMpcvarEC(netMPCVAR, [], exControl);
+                [ec,~,coeff] = calcMpcvarDI(netMPCVAR, [], exControl);
                 if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
             case 'mpcvargc'
                 netMPCVAR = initMpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 mat = calcMpcvarGCI(signals{i}, exSignal, [], exControl, netMPCVAR);
             case {'ppcvarec', 'ppcvar'}
                 netPPCVAR = initPpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                [ec,~,coeff] = calcPpcvarEC(netPPCVAR, [], exControl);
+                [ec,~,coeff] = calcPpcvarDI(netPPCVAR, [], exControl);
                 if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
             case 'ppcvargc'
                 netPPCVAR = initPpcvarNetwork(signals{i}, exSignal, [], exControl, lags);

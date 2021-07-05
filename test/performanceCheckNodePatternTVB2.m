@@ -322,7 +322,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
         % show result of multivaliate PC Vector Auto-Regression EC
         netMPCVAR = initMpcvarNetwork(si, [], [], [], lag);
-        mpcvarEC = calcMpcvarEC(netMPCVAR, [], []);
+        mpcvarEC = calcMpcvarDI(netMPCVAR, [], []);
         figure(mpcvardiRf); hold on; [mpcvardiROC{k,1}, mpcvardiROC{k,2}, mpcvardiAUC(k)] = plotROCcurve(mpcvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of mPCVAR-EC (pat=' num2str(i) ')']);
 
@@ -333,7 +333,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
         % show result of pairwise PC Vector Auto-Regression EC
         netPPCVAR = initPpcvarNetwork(si, [], [], [], lag);
-        ppcvarEC = calcPpcvarEC(netPPCVAR, [], []);
+        ppcvarEC = calcPpcvarDI(netPPCVAR, [], []);
         figure(ppcvardiRf); hold on; [ppcvardiROC{k,1}, ppcvardiROC{k,2}, ppcvardiAUC(k)] = plotROCcurve(ppcvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pPCVAR-EC (pat=' num2str(i) ')']);
 

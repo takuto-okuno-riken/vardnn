@@ -216,7 +216,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         title('pVAR-EC');
         % extra tests (multivaliate Principal Component Vector Auto-Regression EC)
         netMPCVAR = initMpcvarNetwork(y2.', [], [], [], 3);
-        fg = figure; mpcvarEC = plotMpcvarEC(netMPCVAR, [], []); close(fg);
+        fg = figure; mpcvarEC = plotMpcvarDI(netMPCVAR, [], []); close(fg);
         figure(mpcvarecRf); hold on; [mpcvarecROC{k,1}, mpcvarecROC{k,2}, mpcvarecAUC(k)] = plotROCcurve(mpcvarEC, pP.A, 100, 1, Gth); hold off;
         title('mPCVAR-EC');
         % extra tests (multivaliate Principal Component Vector Auto-Regression GC)
@@ -225,7 +225,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         title('mPCVAR-GC');
         % extra tests (pairwise Principal Component Vector Auto-Regression EC)
         netPPCVAR = initPpcvarNetwork(y2.', [], [], [], 3);
-        fg = figure; ppcvarEC = plotPpcvarEC(netPPCVAR, [], []); close(fg);
+        fg = figure; ppcvarEC = plotPpcvarDI(netPPCVAR, [], []); close(fg);
         figure(ppcvarecRf); hold on; [ppcvarecROC{k,1}, ppcvarecROC{k,2}, ppcvarecAUC(k)] = plotROCcurve(ppcvarEC, pP.A, 100, 1, Gth); hold off;
         title('pPCVAR-EC');
         % extra tests (pairwise Principal Component Vector Auto-Regression GC)

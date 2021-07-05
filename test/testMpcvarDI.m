@@ -1,5 +1,5 @@
 
-function testMpcvarEC
+function testMpcvarDI
     % load signals
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
@@ -18,9 +18,9 @@ function testMpcvarEC
     net = initMpcvarNetwork(si, exSignal, [], exControl, lags);
     net2 = initPpcvarNetwork(si, exSignal, [], exControl, lags);
     
-    % show multivaliate & pairwise PCVAR-EC
-    figure; mEC = plotMpcvarEC(net, [], exControl, 0);
-    figure; pEC = plotPpcvarEC(net2, [], exControl, 0);
+    % show multivaliate & pairwise PCVAR-DI
+    figure; mDI = plotMpcvarDI(net, [], exControl, 0);
+    figure; pDI = plotPpcvarDI(net2, [], exControl, 0);
     % show multivaliate & pairwise PCVAR-GC
     figure; mGC = plotMpcvarGCI(si, exSignal, [], exControl, net, 0);
     figure; pGC = plotPpcvarGCI(si, exSignal, [], exControl, net2, 0);
@@ -38,9 +38,9 @@ function testMpcvarEC
     net = initMpcvarNetwork(si, exSignal, [], exControl, lags);
     net2 = initPpcvarNetwork(si, exSignal, [], exControl, lags);
     
-    % show multivaliate & pairwise MVAR-EC
-    figure; mEC = plotMpcvarEC(net, [], exControl, 0, 1);
-    figure; pEC = plotPpcvarEC(net2, [], exControl, 0, 1);
+    % show multivaliate & pairwise MVAR-DI
+    figure; mDI = plotMpcvarDI(net, [], exControl, 0, 1);
+    figure; pDI = plotPpcvarDI(net2, [], exControl, 0, 1);
     % show multivaliate & pairwise PCVAR-GC
     figure; mGC = plotMpcvarGCI(si, exSignal, [], exControl, net, 0, 0.05, 1);
     figure; pGC = plotPpcvarGCI(si, exSignal, [], exControl, net2, 0, 0.05, 1);
