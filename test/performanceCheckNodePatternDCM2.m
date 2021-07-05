@@ -212,7 +212,7 @@ function [FC, dlEC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
 
     % show original signal FC
     figure; FC = plotFunctionalConnectivity(si);
-    % show original signal granger causality index (gc-EC)
+    % show original signal granger causality index (GCI)
     figure; gcI = plotMultivariateGCI_(si,[],[],[],3,0);
     % show original time shifted correlation (tsc-FC)
     %tscFC = plotTimeShiftedCorrelation(si);

@@ -129,7 +129,7 @@ function [FC, dlEC, gcI] = checkingPattern(si, idx)
     figure; PC = plotPartialCorrelation(si);
     % show original signal mWCS
     figure; mWCS = plotWaveletCoherence(si);
-    % show original signal granger causality index (gc-EC)
+    % show original signal granger causality index (GCI)
     figure; gcI = plotMultivariateGCI_(si, [], [], [], 3, 0);
     % show original time shifted correlation (tsc-FC)
     figure; tsCr = plotTimeShiftedCorrelation(si, [], [], [], 2);

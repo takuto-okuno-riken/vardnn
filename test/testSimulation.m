@@ -51,7 +51,7 @@ function testSimulation
     % show original & simulated signal FC
     figure; FC = plotFunctionalConnectivity(si);
     figure; FC = plotFunctionalConnectivity(S);
-    % show original & simulated signal granger causality index (gc-EC)
+    % show original & simulated signal granger causality index (GCI)
     figure; gcI = plotPairwiseGCI(si);
     figure; gcI = plotPairwiseGCI(S);
     % show VARDNN-GC

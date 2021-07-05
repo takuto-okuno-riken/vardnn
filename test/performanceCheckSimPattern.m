@@ -119,7 +119,7 @@ function checkingPattern(si, exSignal, exControl, idx)
     % show original & simulated signal FC
     figure; FC = plotFunctionalConnectivity(si, exSignal, [], exControl, 1);
     figure; FC = plotFunctionalConnectivity(S, exSignal, [], exControl, 1);
-    % show original & simulated signal granger causality index (gc-EC)
+    % show original & simulated signal granger causality index (GCI)
     figure; gcI = plotPairwiseGCI(si,exSignal,[],exControl,3,10,0.05,1);
     figure; gcI = plotPairwiseGCI(S,exSignal,[],exControl,3,10,0.05,1);
     % show original time shifted correlation (tsc-FC)
