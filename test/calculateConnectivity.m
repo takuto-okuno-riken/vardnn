@@ -60,6 +60,11 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
             case 'pc'
 %                mat = calcPartialCorrelation(signals{i});
                 mat = calcPartialCorrelation__(signals{i});
+            case 'pcpc'
+                mat = calcPcPartialCorrelation(signals{i});
+            case 'lsopc'
+                [lambda, alpha, errMat] = estimateLassoParamsForPC(signals{i}, [], [], [], 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
+                mat = calcLassoPartialCorrelation(signals{i}, [], [], [], lambda, alpha); % calc Lasso PC
             case 'plspc'
                 mat = calcPLSPartialCorrelation(signals{i});
             case 'wcs'
@@ -251,13 +256,9 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : Time shifted Functional Connectivity (Abs) (' num2str(lags) ')'];
-    case 'pc'
+    case {'pc','pcpc','lsopc','plspc'}
         clims = [-1,1];
-        titleStr = [group ' : Partial Correlation'];
-        sigWeights = meanWeights;
-    case 'plspc'
-        clims = [-1,1];
-        titleStr = [group ' : PLS Partial Correlation'];
+        titleStr = [group ' : ' algorithm];
         sigWeights = meanWeights;
     case 'wcs'
         clims = [-1,1];
