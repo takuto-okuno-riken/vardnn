@@ -251,11 +251,12 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         figure(pplsvargcRf); hold on; [pplsvargcROC{k,1}, pplsvargcROC{k,2}, pplsvargcAUC(k)] = plotROCcurve(pplsvarGC, pP.A, 100, 1, Gth); hold off;
         title('pPLSVAR-GC');
         % show result of pLassoVAR EC
-        fg = figure; EC = plotPlassovarEC(y2.', [], [], [], 3, 0.01); close(fg);
+        [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(y2.', [], [], [], 3, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
+        fg = figure; EC = plotPlassovarEC(y2.', [], [], [], 3, lambda, elaAlpha); close(fg);
         figure(plsoecRf); hold on; [plsoecROC{k,1}, plsoecROC{k,2}, plsoecAUC(k)] = plotROCcurve(EC, pP.A); hold off;
         title('pLassoVAR-EC');
         % show result of mLassoVAR EC
-        netLsoVAR = initMlassovarNetwork(y2.', [], [], [], 3, 0.01);
+        netLsoVAR = initMlassovarNetwork(y2.', [], [], [], 3, lambda, elaAlpha);
         fg = figure; EC = plotMlassovarEC(netLsoVAR, [], []); close(fg);
         figure(mlsoecRf); hold on; [mlsoecROC{k,1}, mlsoecROC{k,2}, mlsoecAUC(k)] = plotROCcurve(EC, pP.A); hold off;
         title('mLassoVAR-EC');

@@ -9,7 +9,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 11;
+    NumProcessors = 21;
 
     % constant value
     ROINUM = size(signals{1},1);
@@ -96,38 +96,55 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     mat = calcDirectLiNGAM(signals{i});
                     parsavemat(fName, mat);
                 end
-            case 'mvarec'
+            case {'mvarec', 'mvar'}
                 netMVAR = initMvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                mat = calcMvarEC(netMVAR, [], exControl); % |Zi-Zi\j| version
-            case 'mvar'
-                netMVAR = initMvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                [~, ~, mat] = calcMvarEC(netMVAR, [], exControl); % |Zi-Zi\j| version
-            case 'pvarec'
-                mat = calcPvarEC(signals{i}, exSignal, [], exControl, lags); % |Zi-Zi\j| version
-            case 'mpcvarec'
+                [ec,~,coeff] = calcMvarEC(netMVAR, [], exControl); % |Zi-Zi\j| version
+                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
+            case {'pvarec', 'pvar'}
+                [ec,~,coeff] = calcPvarEC(signals{i}, exSignal, [], exControl, lags); % |Zi-Zi\j| version
+                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
+            case {'mpcvarec', 'mpcvar'}
                 netMPCVAR = initMpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                mat = calcMpcvarEC(netMPCVAR, [], exControl);
+                [ec,~,coeff] = calcMpcvarEC(netMPCVAR, [], exControl);
+                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
             case 'mpcvargc'
                 netMPCVAR = initMpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 mat = calcMpcvarGCI(signals{i}, exSignal, [], exControl, netMPCVAR);
-            case 'ppcvarec'
+            case {'ppcvarec', 'ppcvar'}
                 netPPCVAR = initPpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                mat = calcPpcvarEC(netPPCVAR, [], exControl);
+                [ec,~,coeff] = calcPpcvarEC(netPPCVAR, [], exControl);
+                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
             case 'ppcvargc'
                 netPPCVAR = initPpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 mat = calcPpcvarGCI(signals{i}, exSignal, [], exControl, netPPCVAR);
-            case 'mplsvarec'
+            case {'mplsvarec', 'mplsvar'}
                 netMPLSVAR = initMplsvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                mat = calcMplsvarEC(netMPLSVAR, [], exControl);
+                [ec,~,coeff] = calcMplsvarEC(netMPLSVAR, [], exControl);
+                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
             case 'mplsvargc'
                 netMPLSVAR = initMplsvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 mat = calcMplsvarGCI(signals{i}, exSignal, [], exControl, netMPLSVAR);
-            case 'pplsvarec'
+            case {'pplsvarec', 'pplsvar'}
                 netPPLSVAR = initPplsvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                mat = calcPplsvarEC(netPPLSVAR, [], exControl);
+                [ec,~,coeff] = calcPplsvarEC(netPPLSVAR, [], exControl);
             case 'pplsvargc'
                 netPPLSVAR = initPplsvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 mat = calcPplsvarGCI(signals{i}, exSignal, [], exControl, netPPLSVAR);
+                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
+            case {'mlsovarec', 'mlsovar'}
+                [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(signals{i}, exSignal, [], exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
+                netMLSOVAR = initMlassovarNetwork(signals{i}, exSignal, [], exControl, lags, lambda, elaAlpha);
+                [ec,~,coeff] = calcMlassovarEC(netMLSOVAR, [], exControl);
+                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
+            case 'mlsovargc'
+                [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(signals{i}, exSignal, [], exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
+                netMLSOVAR = initMlassovarNetwork(signals{i}, exSignal, [], exControl, lags, lambda, elaAlpha);
+                mat = calcMlassovarGCI(signals{i}, exSignal, [], exControl, netMLSOVAR);
+            case {'plsovarec', 'plsovar'}
+                [ec,~,coeff] = calcPlassovarEC(signals{i}, exSignal, [], exControl, lags);
+            case 'plsovargc'
+                mat = calcPlassovarGCI(signals{i}, exSignal, [], exControl, lags);
+                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
             case {'dlcm', 'dlcmB'}
                 dlcmName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(dlcmName, 'file')
@@ -294,72 +311,24 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : DLCM(' num2str(lags) ') Weight Causality Index'];
-    case 'mvarec'
+    case {'mvarec','pvarec', 'mpcvarec','ppcvarec', 'mplsvarec','pplsvarec', 'mlsovarec','plsovarec'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : mVAR(' num2str(lags) ')-EC Index'];
-    case 'pvarec'
+        titleStr = [group ' : ' algorithm '(' num2str(lags) ') Index'];
+    case {'mvar','pvar' 'mpcvar','ppcvar', 'mplsvar','pplsvar', 'mlsovar','plsovar'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : pVAR(' num2str(lags) ')-EC Index'];
-    case 'mvar'
+        titleStr = [group ' : ' algorithm '(' num2str(lags) ') Index'];
+    case {'mpcvargc','ppcvargc', 'mplsvargc','pplsvargc', 'mlsovargc','plsovargc'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : mVAR(' num2str(lags) ') Index'];
-    case 'mpcvarec'
-        sigma = std(meanWeights(:),1,'omitnan');
-        avg = mean(meanWeights(:),'omitnan');
-        sigWeights = (meanWeights - avg) / sigma;
-        clims = [-3, 3];
-        titleStr = [group ' : mPCVAR(' num2str(lags) ')-EC Index'];
-    case 'mpcvargc'
-        sigma = std(meanWeights(:),1,'omitnan');
-        avg = mean(meanWeights(:),'omitnan');
-        sigWeights = (meanWeights - avg) / sigma;
-        clims = [-3, 3];
-        titleStr = [group ' : mPCVAR(' num2str(lags) ')-GC Index'];
-    case 'ppcvarec'
-        sigma = std(meanWeights(:),1,'omitnan');
-        avg = mean(meanWeights(:),'omitnan');
-        sigWeights = (meanWeights - avg) / sigma;
-        clims = [-3, 3];
-        titleStr = [group ' : pPCVAR(' num2str(lags) ')-EC Index'];
-    case 'ppcvargc'
-        sigma = std(meanWeights(:),1,'omitnan');
-        avg = mean(meanWeights(:),'omitnan');
-        sigWeights = (meanWeights - avg) / sigma;
-        clims = [-3, 3];
-        titleStr = [group ' : pPCVAR(' num2str(lags) ')-GC Index'];
-    case 'mplsvarec'
-        sigma = std(meanWeights(:),1,'omitnan');
-        avg = mean(meanWeights(:),'omitnan');
-        sigWeights = (meanWeights - avg) / sigma;
-        clims = [-3, 3];
-        titleStr = [group ' : mPLSVAR(' num2str(lags) ')-EC Index'];
-    case 'mplsvargc'
-        sigma = std(meanWeights(:),1,'omitnan');
-        avg = mean(meanWeights(:),'omitnan');
-        sigWeights = (meanWeights - avg) / sigma;
-        clims = [-3, 3];
-        titleStr = [group ' : mPLSVAR(' num2str(lags) ')-GC Index'];
-    case 'pplsvarec'
-        sigma = std(meanWeights(:),1,'omitnan');
-        avg = mean(meanWeights(:),'omitnan');
-        sigWeights = (meanWeights - avg) / sigma;
-        clims = [-3, 3];
-        titleStr = [group ' : pPLSVAR(' num2str(lags) ')-EC Index'];
-    case 'pplsvargc'
-        sigma = std(meanWeights(:),1,'omitnan');
-        avg = mean(meanWeights(:),'omitnan');
-        sigWeights = (meanWeights - avg) / sigma;
-        clims = [-3, 3];
-        titleStr = [group ' : pPLSVAR(' num2str(lags) ')-GC Index'];
+        titleStr = [group ' : ' algorithm '(' num2str(lags) ')-GC Index'];
     end
     imagesc(sigWeights,clims);
     daspect([1 1 1]);

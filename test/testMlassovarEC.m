@@ -4,8 +4,6 @@ function testMlassovarEC
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
     lags = 3;
-    lambda = 0.01;
-    elaAlpha = 0.5;
     nodeNum = 8;
     exNum = 0;
     sigLen = 200;
@@ -17,6 +15,7 @@ function testMlassovarEC
     si(4,2:end) = si(6,1:sigLen-1); % caution! node 2 & 4 is Multicollinearity case (correlated)
 
     %% test pattern 1 
+    [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(si, exSignal, [], exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
     netMVAR = initMlassovarNetwork(si, exSignal, [], exControl, lags, lambda, elaAlpha);
     
     % show multivaliate LassoVAR-EC
@@ -36,6 +35,7 @@ function testMlassovarEC
     si(3,2:end) = exSignal(1,1:sigLen-1);
 
     % init MLassoVAR network
+    [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(si, exSignal, [], exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
     netMVAR = initMlassovarNetwork(si, exSignal, [], exControl, lags, lambda, elaAlpha);
     
     % show multivaliate MVAR-EC
