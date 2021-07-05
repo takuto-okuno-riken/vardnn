@@ -309,44 +309,44 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         figure(tsfcaRf); hold on; [tsfcaROC{k,1}, tsfcaROC{k,2}, tsfcaAUC(k)] = plotROCcurve(tsFCa, weights, 100, 1, Gth); hold off;
         title(['ROC curve of tsFCa (pat=' num2str(i) ')']);
 
-        % show result of multivaliate Vector Auto-Regression EC
+        % show result of multivaliate Vector Auto-Regression DI
         netMVAR = initMvarNetwork(si, [], [], [], lag);
-        mvarEC = calcMvarEC(netMVAR, [], []);
-        figure(mvardiRf); hold on; [mvardiROC{k,1}, mvardiROC{k,2}, mvardiAUC(k)] = plotROCcurve(mvarEC, weights, 100, 1, Gth); hold off;
-        title(['ROC curve of mVAR-EC (pat=' num2str(i) ')']);
+        mvarDI = calcMvarDI(netMVAR, [], []);
+        figure(mvardiRf); hold on; [mvardiROC{k,1}, mvardiROC{k,2}, mvardiAUC(k)] = plotROCcurve(mvarDI, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of mVAR-DI (pat=' num2str(i) ')']);
 
-        % show result of pairwise Vector Auto-Regression EC
-        pvarEC = calcPvarEC(si, [], [], [], lag);
-        figure(pvardiRf); hold on; [pvardiROC{k,1}, pvardiROC{k,2}, pvardiAUC(k)] = plotROCcurve(pvarEC, weights, 100, 1, Gth); hold off;
-        title(['ROC curve of pVAR-EC (pat=' num2str(i) ')']);
+        % show result of pairwise Vector Auto-Regression DI
+        pvarDI = calcPvarDI(si, [], [], [], lag);
+        figure(pvardiRf); hold on; [pvardiROC{k,1}, pvardiROC{k,2}, pvardiAUC(k)] = plotROCcurve(pvarDI, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of pVAR-DI (pat=' num2str(i) ')']);
 
-        % show result of multivaliate PC Vector Auto-Regression EC
+        % show result of multivaliate PC Vector Auto-Regression DI
         netMPCVAR = initMpcvarNetwork(si, [], [], [], lag);
-        mpcvarEC = calcMpcvarDI(netMPCVAR, [], []);
-        figure(mpcvardiRf); hold on; [mpcvardiROC{k,1}, mpcvardiROC{k,2}, mpcvardiAUC(k)] = plotROCcurve(mpcvarEC, weights, 100, 1, Gth); hold off;
-        title(['ROC curve of mPCVAR-EC (pat=' num2str(i) ')']);
+        mpcvarDI = calcMpcvarDI(netMPCVAR, [], []);
+        figure(mpcvardiRf); hold on; [mpcvardiROC{k,1}, mpcvardiROC{k,2}, mpcvardiAUC(k)] = plotROCcurve(mpcvarDI, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of mPCVAR-DI (pat=' num2str(i) ')']);
 
         % show result of multivaliate PC Vector Auto-Regression GC
         mpcvarGC = calcMpcvarGCI(si, [], [], [], netMPCVAR);
         figure(mpcvargcRf); hold on; [mpcvargcROC{k,1}, mpcvargcROC{k,2}, mpcvargcAUC(k)] = plotROCcurve(mpcvarGC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of mPCVAR-GC (pat=' num2str(i) ')']);
 
-        % show result of pairwise PC Vector Auto-Regression EC
+        % show result of pairwise PC Vector Auto-Regression DI
         netPPCVAR = initPpcvarNetwork(si, [], [], [], lag);
-        ppcvarEC = calcPpcvarDI(netPPCVAR, [], []);
-        figure(ppcvardiRf); hold on; [ppcvardiROC{k,1}, ppcvardiROC{k,2}, ppcvardiAUC(k)] = plotROCcurve(ppcvarEC, weights, 100, 1, Gth); hold off;
-        title(['ROC curve of pPCVAR-EC (pat=' num2str(i) ')']);
+        ppcvarDI = calcPpcvarDI(netPPCVAR, [], []);
+        figure(ppcvardiRf); hold on; [ppcvardiROC{k,1}, ppcvardiROC{k,2}, ppcvardiAUC(k)] = plotROCcurve(ppcvarDI, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of pPCVAR-DI (pat=' num2str(i) ')']);
 
         % show result of pairwise PC Vector Auto-Regression GC
         ppcvarGC = calcPpcvarGCI(si, [], [], [], netPPCVAR);
         figure(ppcvargcRf); hold on; [ppcvargcROC{k,1}, ppcvargcROC{k,2}, ppcvargcAUC(k)] = plotROCcurve(ppcvarGC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pPCVAR-GC (pat=' num2str(i) ')']);
 
-        % show result of multivaliate PLS Vector Auto-Regression EC
+        % show result of multivaliate PLS Vector Auto-Regression DI
         netMPLSVAR = initMplsvarNetwork(si, [], [], [], lag);
-        mplsvarEC = calcMplsvarDI(netMPLSVAR, [], []);
-        figure(mplsdiRf); hold on; [mplsdiROC{k,1}, mplsdiROC{k,2}, mplsdiAUC(k)] = plotROCcurve(mplsvarEC, weights, 100, 1, Gth); hold off;
-        title(['ROC curve of mPLSVAR-EC (pat=' num2str(i) ')']);
+        mplsvarDI = calcMplsvarDI(netMPLSVAR, [], []);
+        figure(mplsdiRf); hold on; [mplsdiROC{k,1}, mplsdiROC{k,2}, mplsdiAUC(k)] = plotROCcurve(mplsvarDI, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of mPLSVAR-DI (pat=' num2str(i) ')']);
 
         % show result of multivaliate PLS Vector Auto-Regression GC
         mplsvarGC = calcMplsvarGCI(si, [], [], [], netMPLSVAR);
@@ -357,11 +357,11 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         Z = gcI - mplsvarGC; gcdiff=nanmean(abs(Z),'all'); disp(['mae of mvGC-mplsvarGC=' num2str(gcdiff) ' / ' num2str(max(max(gcI)))]);
         figure; clims = [-1 1]; imagesc(Z,clims); title('mvGC - mplsvarGC');
 
-        % show result of pairwise PLS Vector Auto-Regression EC
+        % show result of pairwise PLS Vector Auto-Regression DI
         netPPLSVAR = initPplsvarNetwork(si, [], [], [], lag);
-        pplsvarEC = calcPplsvarDI(netPPLSVAR, [], []);
-        figure(pplsdiRf); hold on; [pplsdiROC{k,1}, pplsdiROC{k,2}, pplsdiAUC(k)] = plotROCcurve(pplsvarEC, weights, 100, 1, Gth); hold off;
-        title(['ROC curve of pPLSVAR-EC (pat=' num2str(i) ')']);
+        pplsvarDI = calcPplsvarDI(netPPLSVAR, [], []);
+        figure(pplsdiRf); hold on; [pplsdiROC{k,1}, pplsdiROC{k,2}, pplsdiAUC(k)] = plotROCcurve(pplsvarDI, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of pPLSVAR-DI (pat=' num2str(i) ')']);
 
         % show result of pairwise PLS Vector Auto-Regression GC
         pplsvarGC = calcPplsvarGCI(si, [], [], [], netPPLSVAR);
@@ -369,12 +369,12 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of pPLSVAR-GC (pat=' num2str(i) ')']);
 
         % ---------
-        % (multivaliate Lasso Vector Auto-Regression EC) without exogenous signals
+        % (multivaliate Lasso Vector Auto-Regression DI) without exogenous signals
         [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(si, [], [], [], lag, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
         netMVAR = initMlassovarNetwork(si, [], [], [], lag, lambda, elaAlpha);
-        [mlsoEC,~,mlso] = calcMlassovarDI(netMVAR, [], []);
-        figure(mlsodiRf); hold on; [mlsodiROC{k,1}, mlsodiROC{k,2}, mlsodiAUC(k)] = plotROCcurve(mlsoEC, weights, 100, 1, Gth); hold off;
-        title(['ROC curve of pLSOVAR-EC (pat=' num2str(i) ')']);
+        [mlsoDI,~,mlso] = calcMlassovarDI(netMVAR, [], []);
+        figure(mlsodiRf); hold on; [mlsodiROC{k,1}, mlsodiROC{k,2}, mlsodiAUC(k)] = plotROCcurve(mlsoDI, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of pLSOVAR-DI (pat=' num2str(i) ')']);
 
         % (multivaliate Lasso Vector Auto-Regression GC) without exogenous signals
         mlsoGC = calcMlassovarGCI(si, [], [], [], netMVAR);

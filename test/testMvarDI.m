@@ -1,5 +1,5 @@
 
-function testMvarEC
+function testMvarDI
     % load signals
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
@@ -17,9 +17,9 @@ function testMvarEC
     %% test pattern 1 
     netMVAR = initMvarNetwork(si, exSignal, [], exControl, lags);
     
-    % show multivaliate VAR-EC
-    figure; pEC = plotPvarEC(si, exSignal, [], exControl, lags, 0);
-    figure; mEC = plotMvarEC(netMVAR, [], exControl, 0);
+    % show multivaliate VAR-DI
+    figure; pDI = plotPvarDI(si, exSignal, [], exControl, lags, 0);
+    figure; mDI = plotMvarDI(netMVAR, [], exControl, 0);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0);
 
@@ -33,9 +33,9 @@ function testMvarEC
     % init MVAR network
     netMVAR = initMvarNetwork(si, exSignal, [], exControl, lags);
     
-    % show multivaliate MVAR-EC
-    figure; pEC = plotPvarEC(si, exSignal, [], exControl, lags, 0, 1);
-    figure; mEC = plotMvarEC(netMVAR, [], exControl, 0, 1);
+    % show multivaliate MVAR-DI
+    figure; pDI = plotPvarDI(si, exSignal, [], exControl, lags, 0, 1);
+    figure; mDI = plotMvarDI(netMVAR, [], exControl, 0, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0, 0, 1);
 end

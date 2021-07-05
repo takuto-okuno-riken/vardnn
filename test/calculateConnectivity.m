@@ -103,10 +103,10 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 end
             case {'mvarec', 'mvar'}
                 netMVAR = initMvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                [ec,~,coeff] = calcMvarEC(netMVAR, [], exControl); % |Zi-Zi\j| version
+                [ec,~,coeff] = calcMvarDI(netMVAR, [], exControl); % |Zi-Zi\j| version
                 if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
             case {'pvarec', 'pvar'}
-                [ec,~,coeff] = calcPvarEC(signals{i}, exSignal, [], exControl, lags); % |Zi-Zi\j| version
+                [ec,~,coeff] = calcPvarDI(signals{i}, exSignal, [], exControl, lags); % |Zi-Zi\j| version
                 if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
             case {'mpcvarec', 'mpcvar'}
                 netMPCVAR = initMpcvarNetwork(signals{i}, exSignal, [], exControl, lags);

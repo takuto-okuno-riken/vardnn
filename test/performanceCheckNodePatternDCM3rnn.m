@@ -205,61 +205,61 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         fg = figure; PLSPC = plotFunctionalConnectivityAbs(y2.'); close(fg);
         figure(plspcRf); hold on; [plspcROC{k,1}, plspcROC{k,2}, plspcAUC(k)] = plotROCcurve(PLSPC, pP.A, 100, 1, Gth); hold off;
         title('PLS PC');
-        % extra tests (multivaliate Vector Auto-Regression EC)
+        % extra tests (multivaliate Vector Auto-Regression DI)
         netMVAR = initMvarNetwork(y2.', [], [], [], 3);
-        fg = figure; mvarEC = plotMvarEC(netMVAR, [], []); close(fg);
-        figure(mvarecRf); hold on; [mvarecROC{k,1}, mvarecROC{k,2}, mvarecAUC(k)] = plotROCcurve(mvarEC, pP.A, 100, 1, Gth); hold off;
-        title('mVAR-EC');
-        % extra tests (pairwised Vector Auto-Regression EC)
-        fg = figure; pvarEC = plotPvarEC(y2.', [], [], [], 3); close(fg);
-        figure(pvarecRf); hold on; [pvarecROC{k,1}, pvarecROC{k,2}, pvarecAUC(k)] = plotROCcurve(pvarEC, pP.A, 100, 1, Gth); hold off;
-        title('pVAR-EC');
-        % extra tests (multivaliate Principal Component Vector Auto-Regression EC)
+        fg = figure; mvarDI = plotMvarDI(netMVAR, [], []); close(fg);
+        figure(mvarecRf); hold on; [mvarecROC{k,1}, mvarecROC{k,2}, mvarecAUC(k)] = plotROCcurve(mvarDI, pP.A, 100, 1, Gth); hold off;
+        title('mVAR-DI');
+        % extra tests (pairwised Vector Auto-Regression DI)
+        fg = figure; pvarDI = plotPvarDI(y2.', [], [], [], 3); close(fg);
+        figure(pvarecRf); hold on; [pvarecROC{k,1}, pvarecROC{k,2}, pvarecAUC(k)] = plotROCcurve(pvarDI, pP.A, 100, 1, Gth); hold off;
+        title('pVAR-DI');
+        % extra tests (multivaliate Principal Component Vector Auto-Regression DI)
         netMPCVAR = initMpcvarNetwork(y2.', [], [], [], 3);
-        fg = figure; mpcvarEC = plotMpcvarDI(netMPCVAR, [], []); close(fg);
-        figure(mpcvarecRf); hold on; [mpcvarecROC{k,1}, mpcvarecROC{k,2}, mpcvarecAUC(k)] = plotROCcurve(mpcvarEC, pP.A, 100, 1, Gth); hold off;
-        title('mPCVAR-EC');
+        fg = figure; mpcvarDI = plotMpcvarDI(netMPCVAR, [], []); close(fg);
+        figure(mpcvarecRf); hold on; [mpcvarecROC{k,1}, mpcvarecROC{k,2}, mpcvarecAUC(k)] = plotROCcurve(mpcvarDI, pP.A, 100, 1, Gth); hold off;
+        title('mPCVAR-DI');
         % extra tests (multivaliate Principal Component Vector Auto-Regression GC)
         fg = figure; mpcvarGC = plotMpcvarGCI(y2.', [], [], [], netMPCVAR); close(fg);
         figure(mpcvargcRf); hold on; [mpcvargcROC{k,1}, mpcvargcROC{k,2}, mpcvargcAUC(k)] = plotROCcurve(mpcvarGC, pP.A, 100, 1, Gth); hold off;
         title('mPCVAR-GC');
-        % extra tests (pairwise Principal Component Vector Auto-Regression EC)
+        % extra tests (pairwise Principal Component Vector Auto-Regression DI)
         netPPCVAR = initPpcvarNetwork(y2.', [], [], [], 3);
-        fg = figure; ppcvarEC = plotPpcvarDI(netPPCVAR, [], []); close(fg);
-        figure(ppcvarecRf); hold on; [ppcvarecROC{k,1}, ppcvarecROC{k,2}, ppcvarecAUC(k)] = plotROCcurve(ppcvarEC, pP.A, 100, 1, Gth); hold off;
-        title('pPCVAR-EC');
+        fg = figure; ppcvarDI = plotPpcvarDI(netPPCVAR, [], []); close(fg);
+        figure(ppcvarecRf); hold on; [ppcvarecROC{k,1}, ppcvarecROC{k,2}, ppcvarecAUC(k)] = plotROCcurve(ppcvarDI, pP.A, 100, 1, Gth); hold off;
+        title('pPCVAR-DI');
         % extra tests (pairwise Principal Component Vector Auto-Regression GC)
         fg = figure; ppcvarGC = plotPpcvarGCI(y2.', [], [], [], netPPCVAR); close(fg);
         figure(ppcvargcRf); hold on; [ppcvargcROC{k,1}, ppcvargcROC{k,2}, ppcvargcAUC(k)] = plotROCcurve(ppcvarGC, pP.A, 100, 1, Gth); hold off;
         title('pPCVAR-GC');
-        % extra tests (multivaliate PLS Vector Auto-Regression EC)
+        % extra tests (multivaliate PLS Vector Auto-Regression DI)
         netMPLSVAR = initMplsvarNetwork(y2.', [], [], [], 3);
-        fg = figure; mplsvarEC = plotMplsvarDI(netMPLSVAR, [], []); close(fg);
-        figure(mplsvarecRf); hold on; [mplsvarecROC{k,1}, mplsvarecROC{k,2}, mplsvarecAUC(k)] = plotROCcurve(mplsvarEC, pP.A, 100, 1, Gth); hold off;
-        title('mPLSVAR-EC');
+        fg = figure; mplsvarDI = plotMplsvarDI(netMPLSVAR, [], []); close(fg);
+        figure(mplsvarecRf); hold on; [mplsvarecROC{k,1}, mplsvarecROC{k,2}, mplsvarecAUC(k)] = plotROCcurve(mplsvarDI, pP.A, 100, 1, Gth); hold off;
+        title('mPLSVAR-DI');
         % extra tests (multivaliate PLS Vector Auto-Regression GC)
         fg = figure; mplsvarGC = plotMplsvarGCI(y2.', [], [], [], netMPLSVAR); close(fg);
         figure(mplsvargcRf); hold on; [mplsvargcROC{k,1}, mplsvargcROC{k,2}, mplsvargcAUC(k)] = plotROCcurve(mplsvarGC, pP.A, 100, 1, Gth); hold off;
         title('mPLSVAR-GC');
-        % extra tests (pairwise PLS Vector Auto-Regression EC)
+        % extra tests (pairwise PLS Vector Auto-Regression DI)
         netPPLSVAR = initPplsvarNetwork(y2.', [], [], [], 3);
-        fg = figure; pplsvarEC = plotPplsvarDI(netPPLSVAR, [], []); close(fg);
-        figure(pplsvarecRf); hold on; [pplsvarecROC{k,1}, pplsvarecROC{k,2}, pplsvarecAUC(k)] = plotROCcurve(pplsvarEC, pP.A, 100, 1, Gth); hold off;
-        title('pPLSVAR-EC');
+        fg = figure; pplsvarDI = plotPplsvarDI(netPPLSVAR, [], []); close(fg);
+        figure(pplsvarecRf); hold on; [pplsvarecROC{k,1}, pplsvarecROC{k,2}, pplsvarecAUC(k)] = plotROCcurve(pplsvarDI, pP.A, 100, 1, Gth); hold off;
+        title('pPLSVAR-DI');
         % extra tests (pairwise PLS Vector Auto-Regression GC)
         fg = figure; pplsvarGC = plotPplsvarGCI(y2.', [], [], [], netPPLSVAR); close(fg);
         figure(pplsvargcRf); hold on; [pplsvargcROC{k,1}, pplsvargcROC{k,2}, pplsvargcAUC(k)] = plotROCcurve(pplsvarGC, pP.A, 100, 1, Gth); hold off;
         title('pPLSVAR-GC');
-        % show result of pLassoVAR EC
+        % show result of pLassoVAR DI
         [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(y2.', [], [], [], 3, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
-        fg = figure; EC = plotPlassovarDI(y2.', [], [], [], 3, lambda, elaAlpha); close(fg);
-        figure(plsoecRf); hold on; [plsoecROC{k,1}, plsoecROC{k,2}, plsoecAUC(k)] = plotROCcurve(EC, pP.A); hold off;
-        title('pLassoVAR-EC');
-        % show result of mLassoVAR EC
+        fg = figure; DI = plotPlassovarDI(y2.', [], [], [], 3, lambda, elaAlpha); close(fg);
+        figure(plsoecRf); hold on; [plsoecROC{k,1}, plsoecROC{k,2}, plsoecAUC(k)] = plotROCcurve(DI, pP.A); hold off;
+        title('pLassoVAR-DI');
+        % show result of mLassoVAR DI
         netLsoVAR = initMlassovarNetwork(y2.', [], [], [], 3, lambda, elaAlpha);
-        fg = figure; EC = plotMlassovarDI(netLsoVAR, [], []); close(fg);
-        figure(mlsoecRf); hold on; [mlsoecROC{k,1}, mlsoecROC{k,2}, mlsoecAUC(k)] = plotROCcurve(EC, pP.A); hold off;
-        title('mLassoVAR-EC');
+        fg = figure; DI = plotMlassovarDI(netLsoVAR, [], []); close(fg);
+        figure(mlsoecRf); hold on; [mlsoecROC{k,1}, mlsoecROC{k,2}, mlsoecAUC(k)] = plotROCcurve(DI, pP.A); hold off;
+        title('mLassoVAR-DI');
         % show result of pLassoVAR GC
         fg = figure; GC = plotPlassovarGCI(y2.', [], [], [], 3, 0.01); close(fg);
         figure(plsogcRf); hold on; [plsogcROC{k,1}, plsogcROC{k,2}, plsogcAUC(k)] = plotROCcurve(GC, pP.A); hold off;
