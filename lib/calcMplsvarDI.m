@@ -1,13 +1,13 @@
 %%
-% Caluclate mPLSVAR (multivaliate PLS Vector Auto-Regression) EC
-% returns mPLSVAR EC matrix (EC) and impaired node signals (ECsub)
+% Caluclate mPLSVAR (multivaliate PLS Vector Auto-Regression) DI
+% returns mPLSVAR DI matrix (DI) and impaired node signals (DIsub)
 % input:
 %  net          mPLSVAR network
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [EC, ECsub, coeff] = calcMplsvarEC(net, nodeControl, exControl, isFullNode)
+function [DI, DIsub, coeff] = calcMplsvarDI(net, nodeControl, exControl, isFullNode)
     if nargin < 4, isFullNode = 0; end
     if nargin < 3, exControl = []; end
     if nargin < 2, nodeControl = []; end
@@ -17,14 +17,14 @@ function [EC, ECsub, coeff] = calcMplsvarEC(net, nodeControl, exControl, isFullN
     lags = net.lags;
     if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
     
-    % calc mPLSVAR EC
-    EC = nan(nodeNum,nodeMax);
+    % calc mPLSVAR DI
+    DI = nan(nodeNum,nodeMax);
     coeff = nan(nodeNum,nodeMax);
-    ECsub = nan(nodeNum,nodeMax+1);
+    DIsub = nan(nodeNum,nodeMax+1);
     for i=1:nodeNum
         b = net.bvec{i};
         z = sum(b);
-        ECsub(i,1) = z;
+        DIsub(i,1) = z;
 
         nodeIdx = [1:nodeNum];
         if ~isempty(nodeControl)
@@ -49,9 +49,9 @@ function [EC, ECsub, coeff] = calcMplsvarEC(net, nodeControl, exControl, isFullN
                 zj = zj - b(1+bIdx+nlen*(k-1));
             end
 
-            EC(i,j) = abs(z - zj); % actually this is sum of b(bIdx+nlen*(k-1))
+            DI(i,j) = abs(z - zj); % actually this is sum of b(bIdx+nlen*(k-1))
             coeff(i,j) = z - zj;
-            ECsub(i,j+1) = zj;
+            DIsub(i,j+1) = zj;
         end
     end
 end

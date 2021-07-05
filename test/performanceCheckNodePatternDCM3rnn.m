@@ -234,7 +234,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         title('pPCVAR-GC');
         % extra tests (multivaliate PLS Vector Auto-Regression EC)
         netMPLSVAR = initMplsvarNetwork(y2.', [], [], [], 3);
-        fg = figure; mplsvarEC = plotMplsvarEC(netMPLSVAR, [], []); close(fg);
+        fg = figure; mplsvarEC = plotMplsvarDI(netMPLSVAR, [], []); close(fg);
         figure(mplsvarecRf); hold on; [mplsvarecROC{k,1}, mplsvarecROC{k,2}, mplsvarecAUC(k)] = plotROCcurve(mplsvarEC, pP.A, 100, 1, Gth); hold off;
         title('mPLSVAR-EC');
         % extra tests (multivaliate PLS Vector Auto-Regression GC)
@@ -243,7 +243,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         title('mPLSVAR-GC');
         % extra tests (pairwise PLS Vector Auto-Regression EC)
         netPPLSVAR = initPplsvarNetwork(y2.', [], [], [], 3);
-        fg = figure; pplsvarEC = plotPplsvarEC(netPPLSVAR, [], []); close(fg);
+        fg = figure; pplsvarEC = plotPplsvarDI(netPPLSVAR, [], []); close(fg);
         figure(pplsvarecRf); hold on; [pplsvarecROC{k,1}, pplsvarecROC{k,2}, pplsvarecAUC(k)] = plotROCcurve(pplsvarEC, pP.A, 100, 1, Gth); hold off;
         title('pPLSVAR-EC');
         % extra tests (pairwise PLS Vector Auto-Regression GC)

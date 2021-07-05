@@ -344,7 +344,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
         % show result of multivaliate PLS Vector Auto-Regression EC
         netMPLSVAR = initMplsvarNetwork(si, [], [], [], lag);
-        mplsvarEC = calcMplsvarEC(netMPLSVAR, [], []);
+        mplsvarEC = calcMplsvarDI(netMPLSVAR, [], []);
         figure(mplsdiRf); hold on; [mplsdiROC{k,1}, mplsdiROC{k,2}, mplsdiAUC(k)] = plotROCcurve(mplsvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of mPLSVAR-EC (pat=' num2str(i) ')']);
 
@@ -359,7 +359,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
         % show result of pairwise PLS Vector Auto-Regression EC
         netPPLSVAR = initPplsvarNetwork(si, [], [], [], lag);
-        pplsvarEC = calcPplsvarEC(netPPLSVAR, [], []);
+        pplsvarEC = calcPplsvarDI(netPPLSVAR, [], []);
         figure(pplsdiRf); hold on; [pplsdiROC{k,1}, pplsdiROC{k,2}, pplsdiAUC(k)] = plotROCcurve(pplsvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pPLSVAR-EC (pat=' num2str(i) ')']);
 
