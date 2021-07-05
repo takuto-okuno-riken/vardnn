@@ -19,7 +19,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
 
     global resultsPath;
     global resultsPrefix;
-%    lagpat = ["gc","pgc","te","tsfc","tsfca","mvarec","dlcm","dlw"];
+%    lagpat = ["gc","pgc","te","tsfc","tsfca","mvar","dlcm","dlw"];
 %    if lags>1 && contains(algorithm,lagpat), lagStr=num2str(lags); else lagStr=''; end
     if lags>1, lagStr=num2str(lags); else lagStr=''; end
     if isAutoExo>0, exoStr='_ex'; else exoStr=''; end
@@ -103,57 +103,57 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 end
             case {'mvarec', 'mvar'}
                 netMVAR = initMvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                [ec,~,coeff] = calcMvarDI(netMVAR, [], exControl); % |Zi-Zi\j| version
-                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
+                [di,~,coeff] = calcMvarDI(netMVAR, [], exControl); % |Zi-Zi\j| version
+                if contains(algorithm, 'ec'), mat=di; else mat=coeff; end
             case {'pvarec', 'pvar'}
-                [ec,~,coeff] = calcPvarDI(signals{i}, exSignal, [], exControl, lags); % |Zi-Zi\j| version
-                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
+                [di,~,coeff] = calcPvarDI(signals{i}, exSignal, [], exControl, lags); % |Zi-Zi\j| version
+                if contains(algorithm, 'ec'), mat=di; else mat=coeff; end
             case {'mpcvarec', 'mpcvar'}
                 netMPCVAR = initMpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                [ec,~,coeff] = calcMpcvarDI(netMPCVAR, [], exControl);
-                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
+                [di,~,coeff] = calcMpcvarDI(netMPCVAR, [], exControl);
+                if contains(algorithm, 'ec'), mat=di; else mat=coeff; end
             case 'mpcvargc'
                 netMPCVAR = initMpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 mat = calcMpcvarGCI(signals{i}, exSignal, [], exControl, netMPCVAR);
             case {'ppcvarec', 'ppcvar'}
                 netPPCVAR = initPpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                [ec,~,coeff] = calcPpcvarDI(netPPCVAR, [], exControl);
-                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
+                [di,~,coeff] = calcPpcvarDI(netPPCVAR, [], exControl);
+                if contains(algorithm, 'ec'), mat=di; else mat=coeff; end
             case 'ppcvargc'
                 netPPCVAR = initPpcvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 mat = calcPpcvarGCI(signals{i}, exSignal, [], exControl, netPPCVAR);
             case {'mplsvarec', 'mplsvar'}
                 netMPLSVAR = initMplsvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                [ec,~,coeff] = calcMplsvarDI(netMPLSVAR, [], exControl);
-                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
+                [di,~,coeff] = calcMplsvarDI(netMPLSVAR, [], exControl);
+                if contains(algorithm, 'ec'), mat=di; else mat=coeff; end
             case 'mplsvargc'
                 netMPLSVAR = initMplsvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 mat = calcMplsvarGCI(signals{i}, exSignal, [], exControl, netMPLSVAR);
             case {'pplsvarec', 'pplsvar'}
                 netPPLSVAR = initPplsvarNetwork(signals{i}, exSignal, [], exControl, lags);
-                [ec,~,coeff] = calcPplsvarDI(netPPLSVAR, [], exControl);
+                [di,~,coeff] = calcPplsvarDI(netPPLSVAR, [], exControl);
             case 'pplsvargc'
                 netPPLSVAR = initPplsvarNetwork(signals{i}, exSignal, [], exControl, lags);
                 mat = calcPplsvarGCI(signals{i}, exSignal, [], exControl, netPPLSVAR);
-                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
+                if contains(algorithm, 'ec'), mat=di; else mat=coeff; end
             case {'mlsovarec', 'mlsovar'}
                 [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(signals{i}, exSignal, [], exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
                 netMLSOVAR = initMlassovarNetwork(signals{i}, exSignal, [], exControl, lags, lambda, elaAlpha);
-                [ec,~,coeff] = calcMlassovarDI(netMLSOVAR, [], exControl);
-                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
+                [di,~,coeff] = calcMlassovarDI(netMLSOVAR, [], exControl);
+                if contains(algorithm, 'ec'), mat=di; else mat=coeff; end
             case 'mlsovargc'
                 [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(signals{i}, exSignal, [], exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
                 netMLSOVAR = initMlassovarNetwork(signals{i}, exSignal, [], exControl, lags, lambda, elaAlpha);
                 mat = calcMlassovarGCI(signals{i}, exSignal, [], exControl, netMLSOVAR);
             case {'plsovarec', 'plsovar'}
-                [ec,~,coeff] = calcPlassovarDI(signals{i}, exSignal, [], exControl, lags);
+                [di,~,coeff] = calcPlassovarDI(signals{i}, exSignal, [], exControl, lags);
             case 'plsovargc'
                 mat = calcPlassovarGCI(signals{i}, exSignal, [], exControl, lags);
-                if contains(algorithm, 'ec'), mat=ec; else mat=coeff; end
+                if contains(algorithm, 'ec'), mat=di; else mat=coeff; end
             case {'dlcm', 'dlcmB'}
-                dlcmName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
-                if exist(dlcmName, 'file')
-                    f = load(dlcmName);
+                netName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                if exist(netName, 'file')
+                    f = load(netName);
                     mat = f.mat;
                 else
                     if isRaw
@@ -184,7 +184,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     % calc VARDNN-GC
                     mat = calcMvarDnnGCI(si, exSignal, [], exControl, net);
                     
-                    parsavedlsm(dlcmName, net, si, exSignal, exControl, mat, sig, c, maxsi, minsi);
+                    parsavedlsm(netName, net, si, exSignal, exControl, mat, sig, c, maxsi, minsi);
                 end
             case 'dlcmrc' % should be called after dlcm
                 outName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
@@ -192,8 +192,8 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     f = load(outName);
                     mat = f.mat;
                 else
-                    dlcmName = [resultsPath '/' resultsPrefix '-dlcm' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
-                    f = load(dlcmName);
+                    netName = [resultsPath '/' resultsPrefix '-dlcm' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                    f = load(netName);
                     if isfield(f,'c'), c=f.c; else c=f.m; end % for compatibility
                     if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
                     if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
@@ -212,13 +212,13 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 end
             case {'dlw','dlwB','dlwrc'} % should be called after dlcm
                 if strcmp(algorithm, 'dlw')
-                    dlcmName = [resultsPath '/' resultsPrefix '-dlcm' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                    netName = [resultsPath '/' resultsPrefix '-dlcm' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 elseif strcmp(algorithm, 'dlwB')
-                    dlcmName = [resultsPath '/' resultsPrefix '-dlcmB' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                    netName = [resultsPath '/' resultsPrefix '-dlcmB' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 else
-                    dlcmName = [resultsPath '/' resultsPrefix '-dlcmrc' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                    netName = [resultsPath '/' resultsPrefix '-dlcmrc' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 end
-                f = load(dlcmName);
+                f = load(netName);
                 if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
                 [mat, subweights(:,:,i)] = calcMvarDnnDI(f.netDLCM, [], f.exControl);
             end
