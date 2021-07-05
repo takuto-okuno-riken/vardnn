@@ -4,7 +4,7 @@
 % https://www.di.ens.fr/~fbach/kernel-ica/index.htm
 % and add a path "kernel-ica1_2" and sub folders.
 
-function analyzeAlzheimerDLCM
+function analyzeAlzheimerVarDnn
     % CONN fmri data base path :
     base = '../fmri/';
 
