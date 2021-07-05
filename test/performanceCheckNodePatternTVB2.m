@@ -60,16 +60,18 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     fcaAUC = zeros(1,N);
     tsfcAUC = zeros(1,N);
     tsfcaAUC = zeros(1,N);
-    mvarecAUC = zeros(1,N);
-    pvarecAUC = zeros(1,N);
-    mpcvarecAUC = zeros(1,N);
+    mvardiAUC = zeros(1,N);
+    pvardiAUC = zeros(1,N);
+    mpcvardiAUC = zeros(1,N);
     mpcvargcAUC = zeros(1,N);
-    ppcvarecAUC = zeros(1,N);
+    ppcvardiAUC = zeros(1,N);
     ppcvargcAUC = zeros(1,N);
-    mplsvarecAUC = zeros(1,N);
-    mplsvargcAUC = zeros(1,N);
-    pplsvarecAUC = zeros(1,N);
-    pplsvargcAUC = zeros(1,N);
+    mplsdiAUC = zeros(1,N);
+    mplsgcAUC = zeros(1,N);
+    pplsdiAUC = zeros(1,N);
+    pplsgcAUC = zeros(1,N);
+    mlsodiAUC = zeros(1,N);
+    mlsogcAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
     pcpcROC = cell(N,2);
@@ -88,16 +90,18 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     fcaROC = cell(N,2);
     tsfcROC = cell(N,2);
     tsfcaROC = cell(N,2);
-    mvarecROC = cell(N,2);
-    pvarecROC = cell(N,2);
-    mpcvarecROC = cell(N,2);
+    mvardiROC = cell(N,2);
+    pvardiROC = cell(N,2);
+    mpcvardiROC = cell(N,2);
     mpcvargcROC = cell(N,2);
-    ppcvarecROC = cell(N,2);
+    ppcvardiROC = cell(N,2);
     ppcvargcROC = cell(N,2);
-    mplsvarecROC = cell(N,2);
-    mplsvargcROC = cell(N,2);
-    pplsvarecROC = cell(N,2);
-    pplsvargcROC = cell(N,2);
+    mplsdiROC = cell(N,2);
+    mplsgcROC = cell(N,2);
+    pplsdiROC = cell(N,2);
+    pplsgcROC = cell(N,2);
+    mlsodiROC = cell(N,2);
+    mlsogcROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
     pcpcRf = figure;
@@ -116,16 +120,18 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     fcaRf = figure;
     tsfcRf = figure;
     tsfcaRf = figure;
-    mvarecRf = figure;
-    pvarecRf = figure;
-    mpcvarecRf = figure;
+    mvardiRf = figure;
+    pvardiRf = figure;
+    mpcvardiRf = figure;
     mpcvargcRf = figure;
-    ppcvarecRf = figure;
+    ppcvardiRf = figure;
     ppcvargcRf = figure;
-    mplsvarecRf = figure;
-    mplsvargcRf = figure;
-    pplsvarecRf = figure;
-    pplsvargcRf = figure;
+    mplsdiRf = figure;
+    mplsgcRf = figure;
+    pplsdiRf = figure;
+    pplsgcRf = figure;
+    mlsodiRf = figure;
+    mlsogcRf = figure;
 
     origf = figure;
     origSigf = figure;
@@ -306,18 +312,18 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         % show result of multivaliate Vector Auto-Regression EC
         netMVAR = initMvarNetwork(si, [], [], [], lag);
         mvarEC = calcMvarEC(netMVAR, [], []);
-        figure(mvarecRf); hold on; [mvarecROC{k,1}, mvarecROC{k,2}, mvarecAUC(k)] = plotROCcurve(mvarEC, weights, 100, 1, Gth); hold off;
+        figure(mvardiRf); hold on; [mvardiROC{k,1}, mvardiROC{k,2}, mvardiAUC(k)] = plotROCcurve(mvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of mVAR-EC (pat=' num2str(i) ')']);
 
         % show result of pairwise Vector Auto-Regression EC
         pvarEC = calcPvarEC(si, [], [], [], lag);
-        figure(pvarecRf); hold on; [pvarecROC{k,1}, pvarecROC{k,2}, pvarecAUC(k)] = plotROCcurve(pvarEC, weights, 100, 1, Gth); hold off;
+        figure(pvardiRf); hold on; [pvardiROC{k,1}, pvardiROC{k,2}, pvardiAUC(k)] = plotROCcurve(pvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pVAR-EC (pat=' num2str(i) ')']);
 
         % show result of multivaliate PC Vector Auto-Regression EC
         netMPCVAR = initMpcvarNetwork(si, [], [], [], lag);
         mpcvarEC = calcMpcvarEC(netMPCVAR, [], []);
-        figure(mpcvarecRf); hold on; [mpcvarecROC{k,1}, mpcvarecROC{k,2}, mpcvarecAUC(k)] = plotROCcurve(mpcvarEC, weights, 100, 1, Gth); hold off;
+        figure(mpcvardiRf); hold on; [mpcvardiROC{k,1}, mpcvardiROC{k,2}, mpcvardiAUC(k)] = plotROCcurve(mpcvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of mPCVAR-EC (pat=' num2str(i) ')']);
 
         % show result of multivaliate PC Vector Auto-Regression GC
@@ -328,7 +334,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         % show result of pairwise PC Vector Auto-Regression EC
         netPPCVAR = initPpcvarNetwork(si, [], [], [], lag);
         ppcvarEC = calcPpcvarEC(netPPCVAR, [], []);
-        figure(ppcvarecRf); hold on; [ppcvarecROC{k,1}, ppcvarecROC{k,2}, ppcvarecAUC(k)] = plotROCcurve(ppcvarEC, weights, 100, 1, Gth); hold off;
+        figure(ppcvardiRf); hold on; [ppcvardiROC{k,1}, ppcvardiROC{k,2}, ppcvardiAUC(k)] = plotROCcurve(ppcvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pPCVAR-EC (pat=' num2str(i) ')']);
 
         % show result of pairwise PC Vector Auto-Regression GC
@@ -339,12 +345,12 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         % show result of multivaliate PLS Vector Auto-Regression EC
         netMPLSVAR = initMplsvarNetwork(si, [], [], [], lag);
         mplsvarEC = calcMplsvarEC(netMPLSVAR, [], []);
-        figure(mplsvarecRf); hold on; [mplsvarecROC{k,1}, mplsvarecROC{k,2}, mplsvarecAUC(k)] = plotROCcurve(mplsvarEC, weights, 100, 1, Gth); hold off;
+        figure(mplsdiRf); hold on; [mplsdiROC{k,1}, mplsdiROC{k,2}, mplsdiAUC(k)] = plotROCcurve(mplsvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of mPLSVAR-EC (pat=' num2str(i) ')']);
 
         % show result of multivaliate PLS Vector Auto-Regression GC
         mplsvarGC = calcMplsvarGCI(si, [], [], [], netMPLSVAR);
-        figure(mplsvargcRf); hold on; [mplsvargcROC{k,1}, mplsvargcROC{k,2}, mplsvargcAUC(k)] = plotROCcurve(mplsvarGC, weights, 100, 1, Gth); hold off;
+        figure(mplsgcRf); hold on; [mplsgcROC{k,1}, mplsgcROC{k,2}, mplsgcAUC(k)] = plotROCcurve(mplsvarGC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of mPLSVAR-GC (pat=' num2str(i) ')']);
 
         % mvGC and mPLSVARGC diff check
@@ -354,13 +360,26 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         % show result of pairwise PLS Vector Auto-Regression EC
         netPPLSVAR = initPplsvarNetwork(si, [], [], [], lag);
         pplsvarEC = calcPplsvarEC(netPPLSVAR, [], []);
-        figure(pplsvarecRf); hold on; [pplsvarecROC{k,1}, pplsvarecROC{k,2}, pplsvarecAUC(k)] = plotROCcurve(pplsvarEC, weights, 100, 1, Gth); hold off;
+        figure(pplsdiRf); hold on; [pplsdiROC{k,1}, pplsdiROC{k,2}, pplsdiAUC(k)] = plotROCcurve(pplsvarEC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pPLSVAR-EC (pat=' num2str(i) ')']);
 
         % show result of pairwise PLS Vector Auto-Regression GC
         pplsvarGC = calcPplsvarGCI(si, [], [], [], netPPLSVAR);
-        figure(pplsvargcRf); hold on; [pplsvargcROC{k,1}, pplsvargcROC{k,2}, pplsvargcAUC(k)] = plotROCcurve(pplsvarGC, weights, 100, 1, Gth); hold off;
+        figure(pplsgcRf); hold on; [pplsgcROC{k,1}, pplsgcROC{k,2}, pplsgcAUC(k)] = plotROCcurve(pplsvarGC, weights, 100, 1, Gth); hold off;
         title(['ROC curve of pPLSVAR-GC (pat=' num2str(i) ')']);
+
+        % ---------
+        % (multivaliate Lasso Vector Auto-Regression EC) without exogenous signals
+        [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(si, [], [], [], lag, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
+        netMVAR = initMlassovarNetwork(si, [], [], [], lag, lambda, elaAlpha);
+        [mlsoEC,~,mlso] = calcMlassovarEC(netMVAR, [], []);
+        figure(mlsodiRf); hold on; [mlsodiROC{k,1}, mlsodiROC{k,2}, mlsodiAUC(k)] = plotROCcurve(mlsoEC, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of pLSOVAR-EC (pat=' num2str(i) ')']);
+
+        % (multivaliate Lasso Vector Auto-Regression GC) without exogenous signals
+        mlsoGC = calcMlassovarGCI(si, [], [], [], netMVAR);
+        figure(mlsogcRf); hold on; [mlsogcROC{k,1}, mlsogcROC{k,2}, mlsogcAUC(k)] = plotROCcurve(mlsoGC, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of pLSOVAR-GC (pat=' num2str(i) ')']);
     end
     % show result AUC
     disp(['FC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(fcAUC))]);
@@ -377,8 +396,10 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
     % save result
     fname = ['results/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-result.mat'];
-    save(fname, 'fcAUC','pcAUC','pcpcAUC','lsopcAUC','plspcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC','mvarecAUC','mpcvarecAUC', ...
-        'fcROC','pcROC','pcpcROC','lsopcROC','plspcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC','mvarecROC','mpcvarecROC');
+    save(fname, 'fcAUC','pcAUC','pcpcAUC','lsopcAUC','plspcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC', ...
+        'mvardiAUC','mpcvardiAUC','mpcvargcAUC','pvardiAUC','ppcvardiAUC','ppcvargcAUC','mplsdiAUC','mplsgcAUC','mlsodiAUC','mlsogcAUC', ...
+        'fcROC','pcROC','pcpcROC','lsopcROC','plspcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC', ...
+        'mvardiROC','mpcvardiROC','mpcvargcROC','pvardiROC','ppcvardiROC','ppcvargcROC','mplsdiROC','mplsgcROC','mlsodiROC','mlsogcROC');
 
     % show average ROC curve of DCM
     figure; 
@@ -421,16 +442,18 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 %    plotAverageROCcurve(fcaROC, N, '-.', [0.8,0.2,0.2],0.5);
 %    plotAverageROCcurve(tsfcROC, N, '-', [0.6,0.2,0.2],1.2);
 %    plotAverageROCcurve(tsfcaROC, N, '-.', [0.6,0.2,0.2],1.2);
-    plotAverageROCcurve(mvarecROC, N, '-', [0.3,0.3,0.3],0.5);
-    plotAverageROCcurve(pvarecROC, N, '--', [0.3,0.3,0.3],0.5);
-    plotAverageROCcurve(mpcvarecROC, N, '-', [0.3,0.6,0.6],1.0);
+    plotAverageROCcurve(mvardiROC, N, '-', [0.3,0.3,0.3],0.5);
+    plotAverageROCcurve(pvardiROC, N, '--', [0.3,0.3,0.3],0.5);
+    plotAverageROCcurve(mpcvardiROC, N, '-', [0.3,0.6,0.6],1.0);
     plotAverageROCcurve(mpcvargcROC, N, '--', [0.3,0.6,0.6],0.8);
-    plotAverageROCcurve(ppcvarecROC, N, '-', [0.3,0.6,0.6],0.5);
+    plotAverageROCcurve(ppcvardiROC, N, '-', [0.3,0.6,0.6],0.5);
     plotAverageROCcurve(ppcvargcROC, N, '--', [0.3,0.6,0.6],0.5);
-    plotAverageROCcurve(mplsvarecROC, N, '-', [0.7,0.9,0.9],1.0);
-    plotAverageROCcurve(mplsvargcROC, N, '--', [0.7,0.9,0.9],0.8);
-    plotAverageROCcurve(pplsvarecROC, N, '-', [0.7,0.9,0.9],0.5);
-    plotAverageROCcurve(pplsvargcROC, N, '--', [0.7,0.9,0.9],0.5);
+    plotAverageROCcurve(mplsdiROC, N, '-', [0.7,0.9,0.9],1.0);
+    plotAverageROCcurve(mplsgcROC, N, '--', [0.7,0.9,0.9],0.8);
+    plotAverageROCcurve(pplsdiROC, N, '-', [0.7,0.9,0.9],0.5);
+    plotAverageROCcurve(pplsgcROC, N, '--', [0.7,0.9,0.9],0.5);
+    plotAverageROCcurve(mlsodiROC, N, '-.', [0.7,0.9,0.9],1.0);
+    plotAverageROCcurve(mlsogcROC, N, ':', [0.7,0.9,0.9],0.8);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);
