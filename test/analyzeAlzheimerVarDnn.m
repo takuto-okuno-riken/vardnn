@@ -180,7 +180,7 @@ function analyzeAlzheimerVarDnn
     cosSim(28) = getCosSimilarity(meanCNPlsPC+nanx, meanADPlsPC+nanx);
     cosSim(29) = getCosSimilarity(meanCNMLSOVARDI+nanx, meanADMLSOVARDI+nanx);
     cosSim(30) = getCosSimilarity(meanCNMLSOVARGC+nanx, meanADMLSOVARGC+nanx);
-    cosSim(28) = getCosSimilarity(meanCNPCGC+nanx, meanADPCGC+nanx);
+    cosSim(31) = getCosSimilarity(meanCNPCGC+nanx, meanADPCGC+nanx);
     X = categorical({'FC','PC','WCS','GC','PGC','TE','VARDNN-GC','DLW','dLiNG','PCS','CPC','FGES','FCa','tsFC','tsFCa', ...
         'mVAR-DI','pVAR-DI','mPCVAR-DI','mPCVAR-GC','pPCVAR-DI','pPCVAR-GC','mPLSVAR-DI','mPLSVAR-GC','pPLSVAR-DI','pPLSVAR-GC', ...
         'PCA-PC','Lasso-PC','PLS-PC','mLSOVAR-DI','mLSOVAR-GC','PC-GC'});
