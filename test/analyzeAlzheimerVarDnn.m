@@ -383,8 +383,8 @@ function analyzeAlzheimerVarDnn
     mpcvargcACC = cell(N,1);
     ppcvardiACC = cell(N,1);
     ppcvargcACC = cell(N,1);
-    mlsodiACC = cell(N,1);
-    mlsogcACC = cell(N,1);
+    mplsdiACC = cell(N,1);
+    mplsgcACC = cell(N,1);
     pplsdiACC = cell(N,1);
     pplsgcACC = cell(N,1);
     mlsodiACC = cell(N,1);
