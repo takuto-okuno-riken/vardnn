@@ -150,6 +150,8 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
             case 'plsovargc'
                 mat = calcPlassovarGCI(signals{i}, exSignal, [], exControl, lags);
                 if contains(algorithm, 'ec'), mat=di; else mat=coeff; end
+            case 'pcgc'
+                mat = calcPCGC(signals{i}, lags, 0.8);
             case {'dlcm', 'dlcmB'}
                 netName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(netName, 'file')
@@ -324,7 +326,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : ' algorithm '(' num2str(lags) ') Index'];
-    case {'mpcvargc','ppcvargc', 'mplsvargc','pplsvargc', 'mlsovargc','plsovargc'}
+    case {'mpcvargc','ppcvargc', 'mplsvargc','pplsvargc', 'mlsovargc','plsovargc', 'pcgc'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;

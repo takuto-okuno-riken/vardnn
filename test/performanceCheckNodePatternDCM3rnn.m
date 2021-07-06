@@ -2,6 +2,10 @@
 % https://www.fil.ion.ucl.ac.uk/spm/software/download/
 % and add a path "spm12" and sub folders, then remove "spm12/external" folder and sub folders.
 
+% Before using this function, download PartiallyConditionedGrangerCausality codes from
+% https://github.com/danielemarinazzo/PartiallyConditionedGrangerCausality
+% and add a path "PartiallyConditionedGrangerCausality-master" and sub folders. 
+
 % this script should run after performanceCheckNodePatternDCM3, performanceCheckNodePatternDCM3d and RNN-GC result
 function performanceCheckNodePatternDCM3rnn
     % -------------------------------------------------------------------------
@@ -343,6 +347,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plotAverageROCcurve(plsogcROC, N, '--', [0.9,0.6,0.9],0.5);
     plotAverageROCcurve(mlsoecROC, N, '-', [0.9,0.7,0.9],1.0);
     plotAverageROCcurve(mlsogcROC, N, '--', [0.9,0.7,0.9],0.8);
+    plotAverageROCcurve(pcgcROC, N, '-.', [0.3,0.6,0.6],0.5);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);

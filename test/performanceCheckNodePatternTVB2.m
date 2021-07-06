@@ -1,3 +1,7 @@
+% Before using this function, download PartiallyConditionedGrangerCausality codes from
+% https://github.com/danielemarinazzo/PartiallyConditionedGrangerCausality
+% and add a path "PartiallyConditionedGrangerCausality-master" and sub folders. 
+
 function performanceCheckNodePatternTVB2
     node_nums = [11,22,33,44,55,66];
     num_scan = 55;
@@ -72,6 +76,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     pplsgcAUC = zeros(1,N);
     mlsodiAUC = zeros(1,N);
     mlsogcAUC = zeros(1,N);
+    pcgcAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
     pcpcROC = cell(N,2);
@@ -102,6 +107,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     pplsgcROC = cell(N,2);
     mlsodiROC = cell(N,2);
     mlsogcROC = cell(N,2);
+    pcgcROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
     pcpcRf = figure;
@@ -132,6 +138,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     pplsgcRf = figure;
     mlsodiRf = figure;
     mlsogcRf = figure;
+    pcgcRf = figure;
 
     origf = figure;
     origSigf = figure;
@@ -374,12 +381,17 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         netMVAR = initMlassovarNetwork(si, [], [], [], lag, lambda, elaAlpha);
         [mlsoDI,~,mlso] = calcMlassovarDI(netMVAR, [], []);
         figure(mlsodiRf); hold on; [mlsodiROC{k,1}, mlsodiROC{k,2}, mlsodiAUC(k)] = plotROCcurve(mlsoDI, weights, 100, 1, Gth); hold off;
-        title(['ROC curve of pLSOVAR-DI (pat=' num2str(i) ')']);
+        title(['ROC curve of mLSOVAR-DI (pat=' num2str(i) ')']);
 
         % (multivaliate Lasso Vector Auto-Regression GC) without exogenous signals
         mlsoGC = calcMlassovarGCI(si, [], [], [], netMVAR);
         figure(mlsogcRf); hold on; [mlsogcROC{k,1}, mlsogcROC{k,2}, mlsogcAUC(k)] = plotROCcurve(mlsoGC, weights, 100, 1, Gth); hold off;
-        title(['ROC curve of pLSOVAR-GC (pat=' num2str(i) ')']);
+        title(['ROC curve of mLSOVAR-GC (pat=' num2str(i) ')']);
+
+        % ---------
+        pcGC = calcPCGC(si, lag, 0.8);
+        figure(pcgcRf); hold on; [pcgcROC{k,1}, pcgcROC{k,2}, pcgcAUC(k)] = plotROCcurve(pcGC, weights, 100, 1, Gth); hold off;
+        title(['ROC curve of PC-GC (pat=' num2str(i) ')']);
     end
     % show result AUC
     disp(['FC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(fcAUC))]);
@@ -397,9 +409,9 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     % save result
     fname = ['results/tvb-wongwang' num2str(node_num) 'x' num2str(num_scan) 'scan-pat' num2str(i) '-' num2str(hz) 'hz-result.mat'];
     save(fname, 'fcAUC','pcAUC','pcpcAUC','lsopcAUC','plspcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC', ...
-        'mvardiAUC','mpcvardiAUC','mpcvargcAUC','pvardiAUC','ppcvardiAUC','ppcvargcAUC','mplsdiAUC','mplsgcAUC','mlsodiAUC','mlsogcAUC', ...
+        'mvardiAUC','mpcvardiAUC','mpcvargcAUC','pvardiAUC','ppcvardiAUC','ppcvargcAUC','mplsdiAUC','mplsgcAUC','mlsodiAUC','mlsogcAUC','pcgcAUC', ...
         'fcROC','pcROC','pcpcROC','lsopcROC','plspcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC', ...
-        'mvardiROC','mpcvardiROC','mpcvargcROC','pvardiROC','ppcvardiROC','ppcvargcROC','mplsdiROC','mplsgcROC','mlsodiROC','mlsogcROC');
+        'mvardiROC','mpcvardiROC','mpcvargcROC','pvardiROC','ppcvardiROC','ppcvargcROC','mplsdiROC','mplsgcROC','mlsodiROC','mlsogcROC','pcgcROC');
 
     % show average ROC curve of DCM
     figure; 
@@ -454,6 +466,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     plotAverageROCcurve(pplsgcROC, N, '--', [0.7,0.9,0.9],0.5);
     plotAverageROCcurve(mlsodiROC, N, '-.', [0.7,0.9,0.9],1.0);
     plotAverageROCcurve(mlsogcROC, N, ':', [0.7,0.9,0.9],0.8);
+    plotAverageROCcurve(pcgcROC, N, '-.', [0.3,0.6,0.6],0.5);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);
