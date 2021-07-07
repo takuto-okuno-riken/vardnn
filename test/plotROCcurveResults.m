@@ -32,6 +32,12 @@ end
 function plotROCresuts(N,fname,idx)
     load(fname);
     
+    X = [fcAUC.', pcAUC.', pcpcAUC.', lsopcAUC.', plspcAUC.', pgcAUC.', gcAUC.', mpcvargcAUC.', mlsogcAUC.', mplsgcAUC.'];
+    if exist('rnnROC','var'), X = [X, rnnAUC.']; else X = [X, zeros(length(fcAUC),1)]; end
+    X = [X, pcgcAUC.', linueAUC.'];
+    if exist('nnnueROC','var'), X = [X, nnnueAUC.']; else X = [X, zeros(length(fcAUC),1)]; end
+    X = [X, dlAUC.', dlwAUC.'];
+    
     % show comparison ROC curves result
     figure; 
     hold on;
