@@ -284,47 +284,6 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         'mvarecROC','pvarecROC','mpcvarecROC','mpcvargcROC','ppcvarecROC','ppcvargcROC', ...
         'mplsecROC','mplsgcROC','pplsecROC','pplsgcROC', ...
         'plsoecROC','mlsoecROC','plsogcROC','mlsogcROC','pcgcROC');
-    
-    % show comparison ROC curves
-    figure; 
-    hold on;
-    plotErrorROCcurve(fcROC, N, [0.8,0.2,0.2]);
-    plotErrorROCcurve(pcROC, N, [0.5,0.1,0.1]);
-    plotErrorROCcurve(pcpcROC, N, [0.5,0.1,0.1]);
-    plotErrorROCcurve(lsopcROC, N, [0.5,0.1,0.1]); % SPC-EN
-    plotErrorROCcurve(plspcROC, N, [0.5,0.1,0.1]);
-    plotErrorROCcurve(pgcROC, N, [0.0,0.5,0.0]);
-    plotErrorROCcurve(gcROC, N, [0.1,0.8,0.1]);
-    plotErrorROCcurve(mpcvargcROC, N, [0.1,0.8,0.1]); % PCA-cGCM
-    plotErrorROCcurve(mlsogcROC, N, [0.1,0.8,0.1]);
-    plotErrorROCcurve(mplsgcROC, N, [0.1,0.8,0.1]);
-    plotErrorROCcurve(dlROC, N, [0.2,0.2,0.2]); % VARDNN-GC
-    plotErrorROCcurve(dlwROC, N, [0.2,0.2,0.2]); % VARDNN-DI
-    plotErrorROCcurve(pcgcROC, N, [0.3,0.6,0.6]); % PC-GC
-    plotAverageROCcurve(fcROC, N, '-', [0.8,0.2,0.2],0.5);
-    plotAverageROCcurve(pcROC, N, '-', [0.5,0.1,0.1],0.5);
-    plotAverageROCcurve(pcpcROC, N, '--', [0.5,0.1,0.1],0.5);
-    plotAverageROCcurve(lsopcROC, N, '-.', [0.5,0.1,0.1],0.5); % SPC-EN
-    plotAverageROCcurve(plspcROC, N, ':', [0.5,0.1,0.1],0.5);
-    plotAverageROCcurve(pgcROC, N, '-', [0.0,0.5,0.0],0.5);
-    plotAverageROCcurve(gcROC, N, '-', [0.1,0.8,0.1],0.5);
-    plotAverageROCcurve(mpcvargcROC, N, '--', [0.1,0.8,0.1],0.5); % PCA-cGCM
-    plotAverageROCcurve(mlsogcROC, N, '-.', [0.1,0.8,0.1],0.5);
-    plotAverageROCcurve(mplsgcROC, N, ':', [0.1,0.8,0.1],0.5);
-    plotAverageROCcurve(rnnROC, N, '--', [0.7,0.7,0.2],0.5); % RNN-GC
-    plotAverageROCcurve(pcgcROC, N, '-.', [0.3,0.6,0.6],0.5); % PC-GC
-    plotAverageROCcurve(linueROC, N, '-', [0.2,0.5,0.8],0.5); % LINUE-TE
-    plotAverageROCcurve(nnnueROC, N, '--', [0.2,0.5,0.8],0.5); % NNNUE-TE
-    plotAverageROCcurve(dlROC, N, '--', [0.2,0.2,0.2],0.8); % VARDNN-GC
-    plotAverageROCcurve(dlwROC, N, '-', [0.2,0.2,0.2],1.2); % VARDNN-DI
-    plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
-    hold off;
-    ylim([0 1]);
-    xlim([0 1]);
-    daspect([1 1 1]);
-    title(['averaged ROC curve idx' num2str(idx)]);
-    xlabel('False Positive Rate')
-    ylabel('True Positive Rate')
 
     % show all average ROC curves
     figure; 
