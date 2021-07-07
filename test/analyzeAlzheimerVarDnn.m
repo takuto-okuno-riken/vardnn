@@ -152,39 +152,38 @@ function analyzeAlzheimerVarDnn
     cosSim = zeros(algNum,1);
     cosSim(1) = getCosSimilarity(meanCNFC+nanx, meanADFC+nanx);
     cosSim(2) = getCosSimilarity(meanCNPC+nanx, meanADPC+nanx);
-    cosSim(3) = getCosSimilarity(meanCNWCS+nanx, meanADWCS+nanx);
-    cosSim(4) = getCosSimilarity(meanCNGC, meanADGC);
-    cosSim(5) = getCosSimilarity(meanCNPGC, meanADPGC);
-    cosSim(6) = getCosSimilarity(meanCNTE, meanADTE);
-    cosSim(7) = getCosSimilarity(meanCNDL, meanADDL);
-    cosSim(8) = getCosSimilarity(meanCNDLW, meanADDLW);
-    cosSim(9) = getCosSimilarity(meanCNDLG, meanADDLG);
-    cosSim(10) = getCosSimilarity(meanCNPCS+nanx, meanADPCS+nanx);
-    cosSim(11) = getCosSimilarity(meanCNCPC+nanx, meanADCPC+nanx);
-    cosSim(12) = getCosSimilarity(meanCNFGES+nanx, meanADFGES+nanx);
-    cosSim(13) = getCosSimilarity(meanCNFCA+nanx, meanADFCA+nanx);
-    cosSim(14) = getCosSimilarity(meanCNTSFC+nanx, meanADTSFC+nanx);
-    cosSim(15) = getCosSimilarity(meanCNTSFCA+nanx, meanADTSFCA+nanx);
-    cosSim(16) = getCosSimilarity(meanCNMVARDI+nanx, meanADMVARDI+nanx);
-    cosSim(17) = getCosSimilarity(meanCNPVARDI+nanx, meanADPVARDI+nanx);
-    cosSim(18) = getCosSimilarity(meanCNMPCVARDI+nanx, meanADMPCVARDI+nanx);
-    cosSim(19) = getCosSimilarity(meanCNMPCVARGC+nanx, meanADMPCVARGC+nanx);
-    cosSim(20) = getCosSimilarity(meanCNPPCVARDI+nanx, meanADPPCVARDI+nanx);
-    cosSim(21) = getCosSimilarity(meanCNPPCVARGC+nanx, meanADPPCVARGC+nanx);
-    cosSim(22) = getCosSimilarity(meanCNMPLSVARDI+nanx, meanADMPLSVARDI+nanx);
-    cosSim(23) = getCosSimilarity(meanCNMPLSVARGC+nanx, meanADMPLSVARGC+nanx);
-    cosSim(24) = getCosSimilarity(meanCNPPLSVARDI+nanx, meanADPPLSVARDI+nanx);
-    cosSim(25) = getCosSimilarity(meanCNPPLSVARGC+nanx, meanADPPLSVARGC+nanx);
-    cosSim(26) = getCosSimilarity(meanCNPcPC+nanx, meanADPcPC+nanx);
-    cosSim(27) = getCosSimilarity(meanCNLsoPC+nanx, meanADLsoPC+nanx);
-    cosSim(28) = getCosSimilarity(meanCNPlsPC+nanx, meanADPlsPC+nanx);
-    cosSim(29) = getCosSimilarity(meanCNMLSOVARDI+nanx, meanADMLSOVARDI+nanx);
-    cosSim(30) = getCosSimilarity(meanCNMLSOVARGC+nanx, meanADMLSOVARGC+nanx);
-    cosSim(31) = getCosSimilarity(meanCNPCGC+nanx, meanADPCGC+nanx);
-    X = categorical({'FC','PC','WCS','GC','PGC','TE','VARDNN-GC','DLW','dLiNG','PCS','CPC','FGES','FCa','tsFC','tsFCa', ...
-        'mVAR-DI','pVAR-DI','mPCVAR-DI','mPCVAR-GC','pPCVAR-DI','pPCVAR-GC','mPLSVAR-DI','mPLSVAR-GC','pPLSVAR-DI','pPLSVAR-GC', ...
-        'PCA-PC','Lasso-PC','PLS-PC','mLSOVAR-DI','mLSOVAR-GC','PC-GC'});
-    figure; bar(X, cosSim);
+    cosSim(3) = getCosSimilarity(meanCNPcPC+nanx, meanADPcPC+nanx);
+    cosSim(4) = getCosSimilarity(meanCNLsoPC+nanx, meanADLsoPC+nanx);
+    cosSim(5) = getCosSimilarity(meanCNPlsPC+nanx, meanADPlsPC+nanx);
+    cosSim(6) = getCosSimilarity(meanCNPGC, meanADPGC);
+    cosSim(7) = getCosSimilarity(meanCNGC, meanADGC);
+    cosSim(8) = getCosSimilarity(meanCNMPCVARGC+nanx, meanADMPCVARGC+nanx);
+    cosSim(9) = getCosSimilarity(meanCNMLSOVARGC+nanx, meanADMLSOVARGC+nanx);
+    cosSim(10) = getCosSimilarity(meanCNMPLSVARGC+nanx, meanADMPLSVARGC+nanx);
+    cosSim(11) = 0; % RNN-GC
+    cosSim(12) = getCosSimilarity(meanCNPCGC+nanx, meanADPCGC+nanx);
+    cosSim(13) = getCosSimilarity(meanCNTE, meanADTE); % LINUE-TE
+    cosSim(14) = 0; % NNNUE-TE
+    cosSim(15) = getCosSimilarity(meanCNDL, meanADDL); % VARDNN-GC
+    cosSim(16) = getCosSimilarity(meanCNDLW, meanADDLW);
+    cosSim(17) = getCosSimilarity(meanCNWCS+nanx, meanADWCS+nanx);
+    cosSim(18) = getCosSimilarity(meanCNDLG, meanADDLG); % dLINGAM
+    cosSim(19) = getCosSimilarity(meanCNPCS+nanx, meanADPCS+nanx);
+    cosSim(20) = getCosSimilarity(meanCNCPC+nanx, meanADCPC+nanx);
+    cosSim(21) = getCosSimilarity(meanCNFGES+nanx, meanADFGES+nanx);
+    cosSim(22) = getCosSimilarity(meanCNFCA+nanx, meanADFCA+nanx);
+    cosSim(23) = getCosSimilarity(meanCNTSFC+nanx, meanADTSFC+nanx);
+    cosSim(24) = getCosSimilarity(meanCNTSFCA+nanx, meanADTSFCA+nanx);
+    cosSim(25) = getCosSimilarity(meanCNMVARDI+nanx, meanADMVARDI+nanx);
+    cosSim(26) = getCosSimilarity(meanCNPVARDI+nanx, meanADPVARDI+nanx);
+    cosSim(27) = getCosSimilarity(meanCNMPCVARDI+nanx, meanADMPCVARDI+nanx);
+    cosSim(28) = getCosSimilarity(meanCNPPCVARDI+nanx, meanADPPCVARDI+nanx);
+    cosSim(29) = getCosSimilarity(meanCNPPCVARGC+nanx, meanADPPCVARGC+nanx);
+    cosSim(30) = getCosSimilarity(meanCNMPLSVARDI+nanx, meanADMPLSVARDI+nanx);
+    cosSim(31) = getCosSimilarity(meanCNPPLSVARDI+nanx, meanADPPLSVARDI+nanx);
+    cosSim(32) = getCosSimilarity(meanCNPPLSVARGC+nanx, meanADPPLSVARGC+nanx);
+    cosSim(33) = getCosSimilarity(meanCNMLSOVARDI+nanx, meanADMLSOVARDI+nanx);
+    figure; bar(cosSim);
     title('cos similarity between CN and AD by each algorithm');
     
     % normality test
