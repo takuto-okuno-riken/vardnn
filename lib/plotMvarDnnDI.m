@@ -1,5 +1,5 @@
 %%
-% plot multivariate VAR DNN effective connectivity matrix
+% plot multivariate VAR DNN Directional Influence matrix
 % input:
 %  net          trained multivariate VAR DNN network
 %  nodeControl  node control matrix (node x node) (optional)

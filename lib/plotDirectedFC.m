@@ -13,7 +13,7 @@ function plotDirectedFC(dFC, name, range, rowcut)
     if nargin < 3
         range = 0.5;
     end
-    % show effective connectivity
+    % show directed FC
     if range <= 0
         sigma = std(dFC(:),1,'omitnan');
         avg = mean(dFC(:),'omitnan');
