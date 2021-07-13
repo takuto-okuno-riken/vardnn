@@ -151,6 +151,8 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     dlAUC = zeros(1,N);
     dlwAUC = zeros(1,N);
     dlgAUC = zeros(1,N);
+    pcdlAUC = zeros(1,N);
+    pcdlwAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
     pcpcROC = cell(N,2);
@@ -162,6 +164,8 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     dlROC = cell(N,2);
     dlwROC = cell(N,2);
     dlgROC = cell(N,2);
+    pcdlROC = cell(N,2);
+    pcdlwROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
     pcpcRf = figure;
@@ -173,6 +177,8 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     dlRf = figure;
     dlwRf = figure;
     dlgRf = figure;
+    pcdlRf = figure;
+    pcdlwRf = figure;
 
     % calc input signal and node BOLD signals
     for k=1:N
@@ -289,12 +295,47 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         title('VARDNN-GC');
 
         % show result of VARDNN weight causality index (VARDNN-WCI) as VARDNN-DI
-        fg = figure; dlwGC = plotMvarDnnDI(netDLCM, [], exControl, 0); close(fg);
-        figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A); hold off;
+        fg = figure; dlw = plotMvarDnnDI(netDLCM, [], exControl, 0); close(fg);
+        figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlw, pP.A); hold off;
         title('VARDNN-DI');
+        
+        % train PC-VARDNN
+        pcvarFile = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) 'pcvar.mat'];
+        netMPC = [];
+        if exist(pcvarFile, 'file')
+            load(pcvarFile);
+        else
+            % layer parameters
+            netMPC = initMpcvarDnnNetwork(si, exSignal, [], exControl);
+            % training PC-VARDNN network
+            maxEpochs = 1000;
+            miniBatchSize = ceil(sigLen / 3);
+            options = trainingOptions('adam', ...
+                'ExecutionEnvironment','cpu', ...
+                'MaxEpochs',maxEpochs, ...
+                'MiniBatchSize',miniBatchSize, ...
+                'Shuffle','every-epoch', ...
+                'GradientThreshold',5,...
+                'L2Regularization',0.1, ...
+                'Verbose',false);
+
+            disp('start training');
+            netMPC = trainMpcvarDnnNetwork(si, exSignal, [], exControl, netMPC, options);
+            save(pcvarFile, 'netMPC');
+        end
+
+        % show result of PC-VARDNN-GC
+        fg = figure; dlGC = plotMpcvarDnnGCI(si, exSignal, [], exControl, netMPC, 0); close(fg);
+        figure(pcdlRf); hold on; [pcdlROC{k,1}, pcdlROC{k,2}, pcdlAUC(k)] = plotROCcurve(dlGC, pP.A); hold off;
+        title('PC-VARDNN-GC');
+
+        % show result of PC-VARDNN weight causality index (PC-VARDNN-WCI) as PC-VARDNN-DI
+        fg = figure; dlw = plotMpcvarDnnDI(netMPC, [], exControl, 0); close(fg);
+        figure(pcdlwRf); hold on; [pcdlwROC{k,1}, pcdlwROC{k,2}, pcdlwAUC(k)] = plotROCcurve(dlw, pP.A); hold off;
+        title('PC-VARDNN-DI');
     end
     fname = ['results/net-pat3-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
-    save(fname, 'fcAUC', 'pcAUC', 'pcpcAUC', 'plspcAUC', 'lsopcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlwAUC', 'dlgAUC', ...
-        'fcROC','pcROC','pcpcROC','plspcROC','lsopcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC');
+    save(fname, 'fcAUC', 'pcAUC', 'pcpcAUC', 'plspcAUC', 'lsopcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlwAUC', 'dlgAUC', 'pcdlAUC', 'pcdlwAUC', ...
+        'fcROC','pcROC','pcpcROC','plspcROC','lsopcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','pcdlROC','pcdlwROC');
 end
 

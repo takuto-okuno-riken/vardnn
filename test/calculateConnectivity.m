@@ -9,7 +9,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
 
     % if you want to use parallel processing, set NumProcessors more than 2
     % and change for loop to parfor loop
-    NumProcessors = 21;
+    NumProcessors = 16;
 
     % constant value
     ROINUM = size(signals{1},1);
@@ -186,7 +186,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     % calc VARDNN-GC
                     mat = calcMvarDnnGCI(si, exSignal, [], exControl, net);
                     
-                    parsavedlsm(netName, net, si, exSignal, exControl, mat, sig, c, maxsi, minsi);
+                    parsavenet(netName, net, si, exSignal, exControl, mat, sig, c, maxsi, minsi);
                 end
             case 'dlcmrc' % should be called after dlcm
                 outName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
@@ -210,7 +210,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                         'Verbose',false);
                     [net, time] = recoveryTrainMvarDnnNetwork(f.si, f.exSignal, [], f.exControl, f.netDLCM, options);
                     mat = calcMvarDnnGCI(f.si, f.exSignal, [], f.exControl, net);
-                    parsavedlsm(outName, net, f.si, f.exSignal, f.exControl, mat, f.sig, c, f.maxsi, f.minsi);
+                    parsavenet(outName, net, f.si, f.exSignal, f.exControl, mat, f.sig, c, f.maxsi, f.minsi);
                 end
             case {'dlw','dlwB','dlwrc'} % should be called after dlcm
                 if strcmp(algorithm, 'dlw')
@@ -223,6 +223,47 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 f = load(netName);
                 if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
                 [mat, subweights(:,:,i)] = calcMvarDnnDI(f.netDLCM, [], f.exControl);
+            case {'pcdl'}
+                netName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                if exist(netName, 'file')
+                    f = load(netName);
+                    mat = f.mat;
+                else
+                    if isRaw
+                        si = signals{i};
+                        sig=0; c=0; maxsi=0; minsi=0;
+                    else
+                        [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i},NaN,sigmoidAlpha);
+                    end
+                    % si = signals{i} - nanmin(signals{i}, [], 'all'); % simple linear transform
+                    net = initMpcvarDnnNetwork(si, exSignal, [], exControl, lags, activateFunc); 
+                    % training PC-VARDNN network
+                    maxEpochs = 1000;
+                    miniBatchSize = ceil(sigLen / 3);
+                    options = trainingOptions('adam', ...
+                        'ExecutionEnvironment','cpu', ...
+                        'MaxEpochs',maxEpochs, ...
+                        'MiniBatchSize',miniBatchSize, ...
+                        'Shuffle','every-epoch', ...
+                        'GradientThreshold',5,...
+                        'L2Regularization',0.05, ...
+                        'Verbose',false);
+                %            'Plots','training-progress');
+
+                    disp('start training');
+                    net = trainMpcvarDnnNetwork(si, exSignal, [], exControl, net, options);
+                    [time, loss, rsme] = getMvarDnnTrainingResult(net);
+                    disp(['end training : rsme=' num2str(rsme)]);
+                    % calc PC-VARDNN-GC
+                    mat = calcMpcvarDnnGCI(si, exSignal, [], exControl, net);
+                    
+                    parsavenet(netName, net, si, exSignal, exControl, mat, sig, c, maxsi, minsi);
+                end
+            case {'pcdlw'} % should be called after mpcdlcm
+                netName = [resultsPath '/' resultsPrefix '-pcdl' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                f = load(netName);
+                if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
+                [mat, subweights(:,:,i)] = calcMpcvarDnnDI(f.netDLCM, [], f.exControl);
             end
             weights(:,:,i) = mat;
         end
@@ -313,8 +354,8 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
-        titleStr = [group ' : VARDNN(' num2str(lags) ') Weight Causality Index'];
-    case {'mvarec','pvarec', 'mpcvarec','ppcvarec', 'mplsvarec','pplsvarec', 'mlsovarec','plsovarec'}
+        titleStr = [group ' : VARDNN(' num2str(lags) ') DI'];
+    case {'mvarec','pvarec', 'mpcvarec','ppcvarec', 'mplsvarec','pplsvarec', 'mlsovarec','plsovarec','pcdlw'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
@@ -326,7 +367,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : ' algorithm '(' num2str(lags) ') Index'];
-    case {'mpcvargc','ppcvargc', 'mplsvargc','pplsvargc', 'mlsovargc','plsovargc', 'pcgc'}
+    case {'mpcvargc','ppcvargc', 'mplsvargc','pplsvargc', 'mlsovargc','plsovargc', 'pcgc','pcdl'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
         sigWeights = (meanWeights - avg) / sigma;
@@ -348,6 +389,6 @@ function parsavemat(fName, mat)
     save(fName, 'mat');
 end
 
-function parsavedlsm(dlcmName, netDLCM, si, exSignal, exControl, mat, sig, c, maxsi, minsi)
+function parsavenet(dlcmName, netDLCM, si, exSignal, exControl, mat, sig, c, maxsi, minsi)
     save(dlcmName, 'netDLCM', 'si', 'exSignal', 'exControl', 'mat', 'sig', 'c', 'maxsi', 'minsi');
 end
