@@ -43,7 +43,7 @@ usage: vardnn [options] filename.csv ...
   --transform type    input signal transform <type> 0:raw, 1:sigmoid (default:0)
   --transopt num      signal transform option <num> (for type 1:centroid value)
   --lag num           time lag <num> for mvGC, pwGC, TE and mVAR (default:3)
-  --ex files          VARDNN exogenouse input signal <files> (file1.csv[:file2.csv:...])
+  --ex files          VARDNN exogenous input signal <files> (file1.csv[:file2.csv:...])
   --nctrl files       VARDNN node status control <files> (file1.csv[:file2.csv:...])
   --ectrl files       VARDNN exogenous input control <files> (file1.csv[:file2.csv:...])
   --epoch num         VARDNN training epoch number <num> (default:1000)

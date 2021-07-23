@@ -200,7 +200,7 @@ function showUsage()
     disp('  --transform type    input signal transform <type> 0:raw, 1:sigmoid (default:0)');
     disp('  --transopt num      signal transform option <num> (for type 1:centroid value)');
     disp('  --lag num           time lag <num> for mvGC, pwGC, TE and mVAR (default:3)');
-    disp('  --ex files          VARDNN exogenouse input signal <files> (file1.csv[:file2.csv:...])');
+    disp('  --ex files          VARDNN exogenous input signal <files> (file1.csv[:file2.csv:...])');
     disp('  --nctrl files       VARDNN node status control <files> (file1.csv[:file2.csv:...])');
     disp('  --ectrl files       VARDNN exogenous input control <files> (file1.csv[:file2.csv:...])');
     disp('  --epoch num         VARDNN training epoch number <num> (default:1000)');
