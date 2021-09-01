@@ -1,6 +1,6 @@
 % extract ROI BOLD signals from CONN data
 
-function [signals, roiNames] = connData2signalsFile(base, pathes, group, cachePath, prefix)
+function [signals, signalmeans, roiNames] = connData2signalsFile(base, pathes, group, cachePath, prefix)
     % constant value
     ROINUM = 132;
     START = 4;
@@ -8,6 +8,7 @@ function [signals, roiNames] = connData2signalsFile(base, pathes, group, cachePa
 
     % init values
     signals = {};
+    signalmeans = {};
     roiNames2 = cell(1,ROINUM);
     idx = 0;
     

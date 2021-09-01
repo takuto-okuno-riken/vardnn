@@ -21,17 +21,18 @@ function analyzeAlzheimerVarDnn
     pathesMCI = {'ADNI2_65-75_F_MCI_nii', 'ADNI2_65-75_M_MCI_nii'};
 
     % load each type signals
-    [cnSignals, roiNames] = connData2signalsFile(base, pathesCN, 'cn', 'data/ad', 'ad');
-    [adSignals] = connData2signalsFile(base, pathesAD, 'ad', 'data/ad', 'ad');
+    [cnSignals, cnSignalmeans, roiNames] = connData2signalsFile(base, pathesCN, 'cn', 'data/ad', 'ad');
+    [adSignals, adSignalmeans] = connData2signalsFile(base, pathesAD, 'ad', 'data/ad', 'ad');
     [mciSignals] = connData2signalsFile(base, pathesMCI, 'mci', 'data/ad', 'ad');
 
     global resultsPath;
     global resultsPrefix;
     resultsPath = 'results/ad';
     resultsPrefix = 'ad';
-
-    % check amplitude difference by ROI
-    [ampDiffROI,cnStds,adStds] = checkAmplitudeDiffROI(cnSignals, adSignals);
+return
+    % check amplitude difference by ROI (CONN doesn't return pixel intensity)
+%    [intROIp,intROIr,intROIm,intROIs,cnIntms,adIntms] = checkIntensityDiffROI(cnSignalmeans, adSignalmeans, roiNames);
+    [ampROIp,ampROIr,ampROIm,ampROIs,cnAmpStds,adAmpStds] = checkAmplitudeDiffROI(cnSignals, adSignals, roiNames);
 
     % calculate connectivity
     algNum = 31;
@@ -779,27 +780,68 @@ function analyzeAlzheimerVarDnn
     ylabel('True Positive Rate')
 end
 
-function [ampDiffROI,gAmpSigma,pAmpSigma] = checkAmplitudeDiffROI(si1, si2)
+function [intROIp,intROIr,intROIm,intROIs,intMean1,intMean2] = checkIntensityDiffROI(sm1, sm2, roiNames)
+    n = size(sm1{1},1);
+    intMean1 = nan(n,length(sm1));
+    intMean2 = nan(n,length(sm2));
+    for i=1:length(sm1)
+        intMean1(:,i) = sm1{i};
+    end
+    for i=1:length(sm2)
+        intMean2(:,i) = sm2{i};
+    end
+    intROIp = nan(n,1);
+    intROIr = nan(n,1);
+    intROIm = nan(n,2);
+    intROIs = nan(n,2);
+    for i=1:n
+        [intROIp(i), h, stats] = ranksum(intMean1(i,:),intMean2(i,:));
+        intROIr(i) = stats.zval / sqrt(length(sm1)+length(sm2));
+        intROIm(i,1) = mean(intMean1(i,:));
+        intROIm(i,2) = mean(intMean2(i,:));
+        intROIs(i,1) = std(intMean1(i,:),1) / sqrt(length(sm1));
+        intROIs(i,2) = std(intMean2(i,:),1) / sqrt(length(sm2));
+    end
+    figure; bar(intROIp); title(['intensityDiffROI : sm1 vs sm2 : P-value']);
+%%{
+    [B,I]=sort(intROIp);
+    for i=1:1
+        eg=[0:50:3000];
+        figure; hold on; histogram(intMean1(I(i),:),eg); histogram(intMean2(I(i),:),eg); hold off;
+        title(['intensityDiffROI top' num2str(i) ' ROI(' num2str(I(i)) ')' roiNames{I(i)}]);
+    end
+%%}
+end
+
+function [ampROIp,ampROIr,ampROIm,ampROIs,ampSigma1,ampSigma2] = checkAmplitudeDiffROI(si1, si2, roiNames)
     n = size(si1{1},1);
-    gAmpSigma = nan(n,length(si1));
-    pAmpSigma = nan(n,length(si2));
+    ampSigma1 = nan(n,length(si1));
+    ampSigma2 = nan(n,length(si2));
     for i=1:length(si1)
-        gAmpSigma(:,i) = std(si1{i},1,2);
+        ampSigma1(:,i) = std(si1{i},1,2);
     end
     for i=1:length(si2)
-        pAmpSigma(:,i) = std(si2{i},1,2);
+        ampSigma2(:,i) = std(si2{i},1,2);
     end
-    ampDiffROI = nan(n,1);
+    ampROIp = nan(n,1);
+    ampROIr = nan(n,1);
+    ampROIm = nan(n,2);
+    ampROIs = nan(n,2);
     for i=1:n
-        [ampDiffROI(i), h] = ranksum(gAmpSigma(i,:),pAmpSigma(i,:));
+        [ampROIp(i), h, stats] = ranksum(ampSigma1(i,:),ampSigma2(i,:));
+        ampROIr(i) = stats.zval / sqrt(length(si1)+length(si2));
+        ampROIm(i,1) = mean(ampSigma1(i,:));
+        ampROIm(i,2) = mean(ampSigma2(i,:));
+        ampROIs(i,1) = std(ampSigma1(i,:),1) / sqrt(length(si1));
+        ampROIs(i,2) = std(ampSigma2(i,:),1) / sqrt(length(si2));
     end
-    figure; bar(ampDiffROI); title(['ampDiffROI : si1 vs si2 : P-value']);
+    figure; bar(ampROIp); title(['ampDiffROI : si1 vs si2 : P-value']);
 %%{
-    [B,I]=sort(ampDiffROI);
+    [B,I]=sort(ampROIp);
     for i=1:1
         eg=[0:0.05:2];
-        figure; hold on; histogram(gAmpSigma(I(i),:),eg); histogram(pAmpSigma(I(i),:),eg); hold off;
-        title(['ampDiff top' num2str(i) ' ROI(' num2str(I(i)) ')']);
+        figure; hold on; histogram(ampSigma1(I(i),:),eg); histogram(ampSigma2(I(i),:),eg); hold off;
+        title(['ampDiff top' num2str(i) ' ROI(' num2str(I(i)) ')' roiNames{I(i)}]);
     end
 %%}
 end
