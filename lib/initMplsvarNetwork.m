@@ -35,6 +35,7 @@ function net = initMplsvarNetwork(X, exSignal, nodeControl, exControl, lags)
     ncomp = floor(nodeMax * p / 10);
     if ncomp < 5, ncomp = 5; end
     if ncomp > 50, ncomp = 50; end
+    if ncomp > (sigLen-p-1), ncomp = (sigLen-p-1); end
     
     % first, calculate PLS vector auto-regression (VAR) without target
     Yj = zeros(sigLen-p, p*nodeMax);
