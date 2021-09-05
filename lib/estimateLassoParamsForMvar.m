@@ -60,7 +60,7 @@ function [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(X, exSignal, no
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
 
-            % PLS vector auto-regression (VAR)
+            % lasso vector auto-regression (VAR)
             jIdx = idx;
             for k=p:-1:1
                 jIdx(j+nlen*(k-1)) = [];
@@ -91,15 +91,17 @@ function [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(X, exSignal, no
             % cross validation
             r1 = [];
             r2 = [];
-            for k=1:cv
-                data = trainSet{k};
-                [x, z, testX, testZ] = getkFoldDataSetOfLassoGC(data{2}, data{1}, k, cv);
+            for n=1:length(trainSet)
+                for k=1:cv
+                    data = trainSet{n};
+                    [x, z, testX, testZ] = getkFoldDataSetOfLassoGC(data{2}, data{1}, k, cv);
 
-                [b,info] = lasso(z,x,'Lambda',lambda,'Alpha',elaAlpha); % including Intercept
-                r = x - (z*b + info.Intercept);
-                r1 = [r1; r];
-                r = testX - (testZ*b + info.Intercept);
-                r2 = [r2; r];
+                    [b,info] = lasso(z,x,'Lambda',lambda,'Alpha',elaAlpha); % including Intercept
+                    r = x - (z*b + info.Intercept);
+                    r1 = [r1; r];
+                    r = testX - (testZ*b + info.Intercept);
+                    r2 = [r2; r];
+                end
             end
             rmse = sqrt(r2.'*r2 / length(r2));
             errMat(i,j) = rmse;

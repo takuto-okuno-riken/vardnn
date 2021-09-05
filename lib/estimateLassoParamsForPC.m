@@ -67,15 +67,17 @@ function [lambda, elaAlpha, errMat] = estimateLassoParamsForPC(X, exSignal, node
             % cross validation
             r1 = [];
             r2 = [];
-            for k=1:cv
-                data = trainSet{k};
-                [x, z, testX, testZ] = getkFoldDataSetOfLassoPC(data{2}, data{1}, k, cv);
+            for n=1:length(trainSet)
+                for k=1:cv
+                    data = trainSet{n};
+                    [x, z, testX, testZ] = getkFoldDataSetOfLassoPC(data{2}, data{1}, k, cv);
 
-                [b,info] = lasso(z,x,'Lambda',lambda,'Alpha',elaAlpha); % including Intercept
-                r = x - (z*b + info.Intercept);
-                r1 = [r1; r];
-                r = testX - (testZ*b + info.Intercept);
-                r2 = [r2; r];
+                    [b,info] = lasso(z,x,'Lambda',lambda,'Alpha',elaAlpha); % including Intercept
+                    r = x - (z*b + info.Intercept);
+                    r1 = [r1; r];
+                    r = testX - (testZ*b + info.Intercept);
+                    r2 = [r2; r];
+                end
             end
             rmse = sqrt(r2.'*r2 / length(r2));
             errMat(i,j) = rmse;

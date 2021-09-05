@@ -142,7 +142,7 @@ Z = PC3 - PC4;
 figure; clims = [-1 1]; imagesc(Z,clims); title(['PC3 - PC4 : sum err=' num2str(nansum(abs(Z),'all'))]);
 
 Z = PC3 - PC5;
-figure; clims = [-1 1]; imagesc(Z,clims); title(['PC3 - PC4 : sum err=' num2str(nansum(abs(Z),'all'))]);
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC3 - PC5 : sum err=' num2str(nansum(abs(Z),'all'))]);
 
 Z = PC3 - PC6;
 figure; clims = [-1 1]; imagesc(Z,clims); title(['PC3 - PC6 : sum err=' num2str(nansum(abs(Z),'all'))]);
