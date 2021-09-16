@@ -9,5 +9,10 @@ function s = getCosSimilarity(X, Y)
     Y2 = Y(:);
     X = X2(~isnan(X2) & ~isnan(Y2));
     Y = Y2(~isnan(Y2) & ~isnan(X2));
-    s = (X.'*Y)/sqrt((X.'*X)*(Y.'*Y));
+    c = (X.'*Y);
+    if any(X) && any(Y)
+        s = c/sqrt((X.'*X)*(Y.'*Y));
+    else
+        s = 0;
+    end
 end
