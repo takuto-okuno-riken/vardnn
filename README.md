@@ -19,6 +19,7 @@ then show output of causal relational matrix and save data in csv or mat file.
 ## Requirements: software
 * MATLAB R2019a or later
 * Deep Learning Toolbox ver12.1 or later
+* Fuzzy Logic Toolbox ver2.6 or later
 
 ## Command line tool
 ~~~
