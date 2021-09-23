@@ -20,6 +20,7 @@ function testMvarDI
     % show multivaliate VAR-DI
     figure; pDI = plotPvarDI(si, exSignal, [], exControl, lags, 0);
     figure; mDI = plotMvarDI(netMVAR, [], exControl, 0);
+    figure; mMIV = plotMvarMIV(si, exSignal, [], exControl, netMVAR, 0);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0);
 
@@ -36,6 +37,7 @@ function testMvarDI
     % show multivaliate MVAR-DI
     figure; pDI = plotPvarDI(si, exSignal, [], exControl, lags, 0, 1);
     figure; mDI = plotMvarDI(netMVAR, [], exControl, 0, 1);
+    figure; mMIV = plotMvarMIV(si, exSignal, [], exControl, netMVAR, 0, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0, 0, 1);
 end

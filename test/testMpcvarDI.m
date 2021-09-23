@@ -24,6 +24,7 @@ function testMpcvarDI
     % show multivaliate & pairwise PCVAR-GC
     figure; mGC = plotMpcvarGCI(si, exSignal, [], exControl, net, 0);
     figure; pGC = plotPpcvarGCI(si, exSignal, [], exControl, net2, 0);
+    figure; mMIV = plotMpcvarMIV(si, exSignal, [], exControl, net, 0);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0);
 
@@ -44,6 +45,7 @@ function testMpcvarDI
     % show multivaliate & pairwise PCVAR-GC
     figure; mGC = plotMpcvarGCI(si, exSignal, [], exControl, net, 0, 0.05, 1);
     figure; pGC = plotPpcvarGCI(si, exSignal, [], exControl, net2, 0, 0.05, 1);
+    figure; mMIV = plotMpcvarMIV(si, exSignal, [], exControl, net, 0, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0, 0.05, 1);
 end
