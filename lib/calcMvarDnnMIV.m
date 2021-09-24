@@ -1,6 +1,6 @@
 %%
-% Caluclate multivariate VAR DNN Mean Inpact Value (MIV)
-% returns multivariate VAR DNN MIV
+% Caluclate multivariate VAR DNN Mean Impact Value (MIV)
+% returns multivariate VAR DNN Mean Impact Value matrix (MIV) and Mean Absolute Impact Value matrix (MAIV)
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -9,7 +9,7 @@
 %  net          trained multivariate VAR DNN network
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function MIV = calcMvarDnnMIV(X, exSignal, nodeControl, exControl, net, isFullNode)
+function [MIV, MAIV] = calcMvarDnnMIV(X, exSignal, nodeControl, exControl, net, isFullNode)
     if nargin < 6, isFullNode = 0; end
 
     nodeNum = size(X,1);
@@ -25,6 +25,7 @@ function MIV = calcMvarDnnMIV(X, exSignal, nodeControl, exControl, net, isFullNo
 
     % calc mVAR DNN MIV
     MIV = nan(nodeNum, nodeMax);
+    MAIV = nan(nodeNum, nodeMax);
     for i=1:nodeNum
         nodeInput = nodeInputOrg;
         if ~isempty(nodeControl)
@@ -51,6 +52,7 @@ function MIV = calcMvarDnnMIV(X, exSignal, nodeControl, exControl, net, isFullNo
             N1 = predict(net.nodeNetwork{i}, Xj1, 'ExecutionEnvironment', 'cpu');
             N2 = predict(net.nodeNetwork{i}, Xj2, 'ExecutionEnvironment', 'cpu');
             MIV(i,j) = mean(N1 - N2);
+            MAIV(i,j) = mean(abs(N1 - N2));
         end
     end
 end

@@ -1,6 +1,6 @@
 %%
-% Caluclate mPLSVAR (multivaliate PLS Vector Auto-Regression) Mean Inpact Value (MIV)
-% returns Mean Inpact Value matrix (MIV)
+% Caluclate mPLSVAR (multivaliate PLS Vector Auto-Regression) Mean Impact Value (MIV)
+% returns Mean Impact Value matrix (MIV) and Mean Absolute Impact Value matrix (MAIV)
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -9,7 +9,7 @@
 %  net          mPLSVAR network
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function MIV = calcMplsvarMIV(X, exSignal, nodeControl, exControl, net, isFullNode)
+function [MIV, MAIV] = calcMplsvarMIV(X, exSignal, nodeControl, exControl, net, isFullNode)
     if nargin < 6, isFullNode = 0; end
     if nargin < 4, exControl = []; end
     if nargin < 3, nodeControl = []; end
@@ -30,6 +30,7 @@ function MIV = calcMplsvarMIV(X, exSignal, nodeControl, exControl, net, isFullNo
     end
 
     MIV = nan(nodeNum,nodeMax);
+    MAIV = nan(nodeNum,nodeMax);
     for i=1:nodeNum
         nodeIdx = [1:nodeNum];
         if ~isempty(nodeControl)
@@ -64,6 +65,7 @@ function MIV = calcMplsvarMIV(X, exSignal, nodeControl, exControl, net, isFullNo
             IV2 = [ones(size(Xtj2,1),1), Xtj2] * net.bvec{i};
 
             MIV(i,j) = mean(IV1 - IV2);
+            MAIV(i,j) = mean(abs(IV1 - IV2));
         end
     end
 end

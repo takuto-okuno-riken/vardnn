@@ -1,5 +1,5 @@
 %%
-% Caluclate mVAR (multivaliate Vector Auto-Regression) Mean Inpact Value (MIV)
+% Caluclate mVAR (multivaliate Vector Auto-Regression) Mean Impact Value (MIV)
 % returns mVAR MIV matrix (MIV)
 % input:
 %  X            multivariate time series matrix (node x time series)
@@ -9,7 +9,7 @@
 %  net          trained multivariate VAR network
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function MIV = calcMvarMIV(X, exSignal, nodeControl, exControl, net, isFullNode)
+function [MIV, MAIV] = calcMvarMIV(X, exSignal, nodeControl, exControl, net, isFullNode)
     if nargin < 6, isFullNode = 0; end
     nodeNum = size(X,1);
     sigLen = size(X,2);
@@ -28,8 +28,9 @@ function MIV = calcMvarMIV(X, exSignal, nodeControl, exControl, net, isFullNode)
         Yj(:,1+nodeMax*(k-1):nodeMax*k) = Y(1+k:sigLen-p+k,:);
     end
 
-    % calc mVAR DI
+    % calc mVAR MIV
     MIV = nan(nodeNum,nodeMax);
+    MAIV = nan(nodeNum,nodeMax);
     for i=1:nodeNum
         nodeIdx = [1:nodeNum];
         if ~isempty(nodeControl)
@@ -60,6 +61,7 @@ function MIV = calcMvarMIV(X, exSignal, nodeControl, exControl, net, isFullNode)
             IV1 = Xti1 * net.bvec{i};
             IV2 = Xti2 * net.bvec{i};
             MIV(i,j) = mean(IV1 - IV2);
+            MAIV(i,j) = mean(abs(IV1 - IV2));
         end
     end
 end

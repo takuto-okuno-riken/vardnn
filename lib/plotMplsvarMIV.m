@@ -1,6 +1,6 @@
 %%
-% Plotting mPLSVAR (multivaliate PLS Vector Auto-Regression) Mean Inpact Value (MIV)
-% returns Mean Inpact Value matrix (MIV)
+% Plotting mPLSVAR (multivaliate PLS Vector Auto-Regression) Mean Impact Value (MIV)
+% returns Mean Impact Value matrix (MIV)
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -30,7 +30,7 @@ function MIV = plotMplsvarMIV(X, exSignal, nodeControl, exControl, net, range, i
     clims = [-range, range];
     imagesc(MIV2,clims);
     daspect([1 1 1]);
-    title('mPLSVAR Mean Inpact Value');
+    title('mPLSVAR Mean Impact Value');
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;

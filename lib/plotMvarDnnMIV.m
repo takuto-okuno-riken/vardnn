@@ -1,5 +1,5 @@
 %%
-% Plotting multivariate VAR DNN Mean Inpact Value (MIV) matrix
+% Plotting multivariate VAR DNN Mean Impact Value (MIV) matrix
 % returns multivariate VAR DNN MIV matrix (MIV)
 % input:
 %  X            multivariate time series matrix (node x time series)
@@ -27,7 +27,7 @@ function MIV = plotMvarDnnMIV(X, exSignal, nodeControl, exControl, net, range, i
     clims = [-range, range];
     imagesc(MIV2,clims);
     daspect([1 1 1]);
-    title('multivariate VAR DNN Mean Inpact Value');
+    title('multivariate VAR DNN Mean Impact Value');
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;

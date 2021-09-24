@@ -1,6 +1,6 @@
 %%
-% Plotting mPCVAR (multivaliate Principal Component Vector Auto-Regression) Mean Inpact Value (MIV)
-% returns Mean Inpact Value matrix (MIV)
+% Plotting mPCVAR (multivaliate Principal Component Vector Auto-Regression) Mean Impact Value (MIV)
+% returns Mean Impact Value matrix (MIV)
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -30,7 +30,7 @@ function MIV = plotMpcvarMIV(X, exSignal, nodeControl, exControl, net, range, is
     clims = [-range, range];
     imagesc(MIV2,clims);
     daspect([1 1 1]);
-    title('mPCVAR Mean Inpact Value');
+    title('mPCVAR Mean Impact Value');
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;

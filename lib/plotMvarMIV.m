@@ -1,5 +1,5 @@
 %%
-% Plotting mVAR (multivaliate Vector Auto-Regression) Mean Inpact Value (MIV)
+% Plotting mVAR (multivaliate Vector Auto-Regression) Mean Impact Value (MIV)
 % returns mVAR MIV matrix (MIV) input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -29,7 +29,7 @@ function MIV = plotMvarMIV(X, exSignal, nodeControl, exControl, net, range, isFu
     clims = [-range, range];
     imagesc(MIV2,clims);
     daspect([1 1 1]);
-    title('mVAR Mean Inpact Value');
+    title('mVAR Mean Impact Value');
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;
