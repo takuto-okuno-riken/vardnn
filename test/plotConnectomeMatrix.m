@@ -78,6 +78,12 @@ function plotConnectomeMatrix(meanWeights, algorithm, group, lags)
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : VARDNN(' num2str(lags) ') DI'];
+    case {'dlm','dlma'}
+        sigma = std(meanWeights(:),1,'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : VARDNN(' num2str(lags) ') MIV'];
     case {'mvarec','pvarec', 'mpcvarec','ppcvarec', 'mplsvarec','pplsvarec', 'mlsovarec','plsovarec','pcdlw'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');

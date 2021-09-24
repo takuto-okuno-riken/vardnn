@@ -151,6 +151,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     pgcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
     dlwAUC = zeros(1,N);
+    dlmAUC = zeros(1,N);
     dlgAUC = zeros(1,N);
     pcdlAUC = zeros(1,N);
     pcdlwAUC = zeros(1,N);
@@ -164,6 +165,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     pgcROC = cell(N,2);
     dlROC = cell(N,2);
     dlwROC = cell(N,2);
+    dlmROC = cell(N,2);
     dlgROC = cell(N,2);
     pcdlROC = cell(N,2);
     pcdlwROC = cell(N,2);
@@ -177,6 +179,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
     pgcRf = figure;
     dlRf = figure;
     dlwRf = figure;
+    dlmRf = figure;
     dlgRf = figure;
     pcdlRf = figure;
     pcdlwRf = figure;
@@ -287,9 +290,14 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         title('VARDNN-GC');
 
         % show result of VARDNN weight causality index (VARDNN-WCI) as VARDNN-DI
-        fg = figure; dlwGC = plotMvarDnnDI(netDLCM, [], exControl, 0); close(fg);
-        figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, pP.A, 100, 1, 0.2); hold off;
+        fg = figure; dlw = plotMvarDnnDI(netDLCM, [], exControl, 0); close(fg);
+        figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlw, pP.A, 100, 1, 0.2); hold off;
         title('VARDNN-DI');
+
+        % show result of VARDNN mean impact value (VARDNN-MIV)
+        fg = figure; [~,dlm] = calcMvarDnnMIV(si, exSignal, [], exControl, netDLCM, 0); close(fg);
+        figure(dlmRf); hold on; [dlmROC{k,1}, dlmROC{k,2}, dlmAUC(k)] = plotROCcurve(dlm, pP.A, 100, 1, 0.2); hold off;
+        title('VARDNN-MIV');
         
         % train PC-VARDNN
         pcvarFile = ['results/net-pat4-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) 'pcvar.mat'];
@@ -327,7 +335,7 @@ function [FC, dlGC, gcI] = checkingPattern(pP,M,U,N,T,n,TR,options,idx)
         title('PC-VARDNN-DI');
     end
     fname = ['results/net-pat4-'  num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
-    save(fname, 'fcAUC', 'pcAUC', 'pcpcAUC', 'plspcAUC', 'lsopcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlwAUC', 'dlgAUC', 'pcdlAUC', 'pcdlwAUC', ...
-        'fcROC','pcROC','pcpcROC','plspcROC','lsopcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlgROC','pcdlROC','pcdlwROC');
+    save(fname, 'fcAUC', 'pcAUC', 'pcpcAUC', 'plspcAUC', 'lsopcAUC', 'wcsAUC', 'gcAUC', 'pgcAUC', 'dlAUC', 'dlwAUC', 'dlmAUC', 'dlgAUC', 'pcdlAUC', 'pcdlwAUC', ...
+        'fcROC','pcROC','pcpcROC','plspcROC','lsopcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlmROC','dlgROC','pcdlROC','pcdlwROC');
 end
 

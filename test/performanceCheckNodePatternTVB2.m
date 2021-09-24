@@ -56,6 +56,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     pgcAUC = zeros(1,N);
     dlAUC = zeros(1,N);
     dlwAUC = zeros(1,N);
+    dlmAUC = zeros(1,N);
     pcdlAUC = zeros(1,N);
     pcdlwAUC = zeros(1,N);
     dlgAUC = zeros(1,N);
@@ -89,6 +90,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     pgcROC = cell(N,2);
     dlROC = cell(N,2);
     dlwROC = cell(N,2);
+    dlmROC = cell(N,2);
     pcdlROC = cell(N,2);
     pcdlwROC = cell(N,2);
     dlgROC = cell(N,2);
@@ -122,6 +124,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     pgcRf = figure;
     dlRf = figure;
     dlwRf = figure;
+    dlmRf = figure;
     pcdlRf = figure;
     pcdlwRf = figure;
     dlgRf = figure;
@@ -285,9 +288,15 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         end
         % show result of VARDNN weight causality index (VARDNN-WCI) as VARDNN-DI
         if isempty(dlwROC{k,1})
-            fg = figure; dlwGC = plotMvarDnnDI(netDLCM, [], exControl); close(fg);
-            figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlwGC, weights, 100, 1, Gth); hold off;
+            fg = figure; dlw = plotMvarDnnDI(netDLCM, [], exControl); close(fg);
+            figure(dlwRf); hold on; [dlwROC{k,1}, dlwROC{k,2}, dlwAUC(k)] = plotROCcurve(dlw, weights, 100, 1, Gth); hold off;
             title(['ROC curve of VARDNN-WCI (pat=' num2str(i) ')']);
+        end
+        % show result of VARDNN mean impact value (VARDNN-MIV)
+        if isempty(dlmROC{k,1})
+            fg = figure; [~,dlm] = calcMvarDnnMIV(Y, exSignal, [], exControl, netDLCM); close(fg);
+            figure(dlmRf); hold on; [dlmROC{k,1}, dlmROC{k,2}, dlmAUC(k)] = plotROCcurve(dlm, weights, 100, 1, Gth); hold off;
+            title(['ROC curve of VARDNN-MIV (pat=' num2str(i) ')']);
         end
 %%}
         % calcurate and show PC-VARDNN
@@ -473,14 +482,15 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     disp(['pwGC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(pgcAUC))]);
     disp(['VARDNN-GC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlAUC))]);
     disp(['VARDNN-WCI AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlwAUC))]);
+    disp(['VARDNN-MIV AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlmAUC))]);
     disp(['LINUE-TE AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(linueAUC))]);
     disp(['DirectLiNGAM AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(dlgAUC))]);
     disp(['PC-sm AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(pcsAUC))]);
 
     % save result
-    save(resfname, 'fcAUC','pcAUC','pcpcAUC','lsopcAUC','plspcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','pcdlAUC','pcdlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC', ...
+    save(resfname, 'fcAUC','pcAUC','pcpcAUC','lsopcAUC','plspcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlmAUC','pcdlAUC','pcdlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC', ...
         'mvardiAUC','mpcvardiAUC','mpcvargcAUC','pvardiAUC','ppcvardiAUC','ppcvargcAUC','mplsdiAUC','mplsgcAUC','pplsdiAUC','pplsgcAUC','mlsodiAUC','mlsogcAUC','pcgcAUC', ...
-        'fcROC','pcROC','pcpcROC','lsopcROC','plspcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','pcdlROC','pcdlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC', ...
+        'fcROC','pcROC','pcpcROC','lsopcROC','plspcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlmROC','pcdlROC','pcdlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC', ...
         'mvardiROC','mpcvardiROC','mpcvargcROC','pvardiROC','ppcvardiROC','ppcvargcROC','mplsdiROC','mplsgcROC','pplsdiROC','pplsgcROC','mlsodiROC','mlsogcROC','pcgcROC');
 
     % show average ROC curve of DCM

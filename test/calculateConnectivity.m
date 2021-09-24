@@ -223,6 +223,15 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 f = load(netName);
                 if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
                 [mat, subweights(:,:,i)] = calcMvarDnnDI(f.netDLCM, [], f.exControl);
+            case {'dlm','dlma'} % should be called after dlcm
+                netName = [resultsPath '/' resultsPrefix '-dlcm' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                f = load(netName);
+                if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+                if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
+                [mat,mat2] = calcMvarDnnMIV(f.si, f.exSignal, [], f.exControl, f.netDLCM);
+                if strcmp(algorithm, 'dlma')
+                    mat = mat2;
+                end
             case {'pcdl'}
                 netName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(netName, 'file')
