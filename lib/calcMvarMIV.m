@@ -11,52 +11,45 @@
 
 function [MIV, MAIV] = calcMvarMIV(X, exSignal, nodeControl, exControl, net, isFullNode)
     if nargin < 6, isFullNode = 0; end
+
     nodeNum = size(X,1);
     sigLen = size(X,2);
     exNum = size(exSignal,1);
+    inputNum = nodeNum + exNum;
+    lags = net.lags;
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeNum + exNum; end
 
     % set node input
     Y = [X; exSignal];
-    nodeMax = nodeNum + exNum;
 
-    p = net.lags;
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+
     Y = flipud(Y.'); % need to flip signal
 
     % first, calculate vector auto-regression (VAR) without target
-    Yj = zeros(sigLen-p, p*nodeMax);
-    for k=1:p
-        Yj(:,1+nodeMax*(k-1):nodeMax*k) = Y(1+k:sigLen-p+k,:);
+    Yj = zeros(sigLen-lags, lags*inputNum);
+    for k=1:lags
+        Yj(:,1+inputNum*(k-1):inputNum*k) = Y(1+k:sigLen-lags+k,:);
     end
 
     % calc mVAR MIV
     MIV = nan(nodeNum,nodeMax);
     MAIV = nan(nodeNum,nodeMax);
     for i=1:nodeNum
-        nodeIdx = [1:nodeNum];
-        if ~isempty(nodeControl)
-            [~,nodeIdx] = find(nodeControl(i,:)==1);
-        end
-        exIdx = [nodeNum+1:nodeNum+exNum];
-        if ~isempty(exControl)
-            [~,exIdx] = find(exControl(i,:)==1);
-            exIdx = exIdx + nodeNum;
-        end
-        idx = [];
-        for k=1:p
-            idx = [idx, nodeIdx+nodeMax*(k-1), exIdx+nodeMax*(k-1)];
-        end
+        [~,idx] = find(control(i,:,:)==1);
 
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
-            if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
+            if j<=nodeNum && nodeControl(i,j,1) == 0, continue; end
+            if j>nodeNum && exControl(i,j-nodeNum,1) == 0, continue; end
             Yj1 = Yj; Yj2 = Yj;
-            for k=1:p
+            for k=1:lags
                 Yj1(:,j+nodeMax*(k-1)) = Yj(:,j+nodeMax*(k-1)) * 1.1;
                 Yj2(:,j+nodeMax*(k-1)) = Yj(:,j+nodeMax*(k-1)) * 0.9;
             end
-            Xti1 = [Yj1(:,idx), ones(sigLen-p,1)];
-            Xti2 = [Yj2(:,idx), ones(sigLen-p,1)];
+            Xti1 = [Yj1(:,idx), ones(sigLen-lags,1)];
+            Xti2 = [Yj2(:,idx), ones(sigLen-lags,1)];
 
             IV1 = Xti1 * net.bvec{i};
             IV2 = Xti2 * net.bvec{i};

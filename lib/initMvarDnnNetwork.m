@@ -22,12 +22,17 @@ function net = initMvarDnnNetwork(X, exSignal, nodeControl, exControl, lags, act
     if nargin < 4, exControl = []; end
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end
+
     nodeNum = size(X,1);
     sigLen = size(X,2);
     exNum = size(exSignal,1);
 
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,~] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+    inputNums = ceil((sum(nodeControl,'all') + sum(exControl,'all')) / nodeNum);
+
     % estimate neuron number of hidden layers
-    hiddenNums = estimateHiddenNeurons((nodeNum+exNum)*lags, sigLen);
+    hiddenNums = estimateHiddenNeurons(inputNums, sigLen);
     
     % layer parameters
     net = createMvarDnnNetwork(nodeNum, exNum, hiddenNums, lags, nodeControl, exControl, activateFunc, initWeightFunc, initWeightParam, initBias);

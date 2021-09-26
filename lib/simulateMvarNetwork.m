@@ -1,5 +1,5 @@
 %%
-% Simulate node signals by VAR (Vector Auto-Regression) and exogenous input
+% multi-step ahead forecasting (recursive) node signals by VAR (Vector Auto-Regression) and exogenous input
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -9,35 +9,31 @@
 
 function [S, time] = simulateMvarNetwork(X, exSignal, nodeControl, exControl, net)
     nodeNum = size(X,1);
-    sigLen = size(X,2); % TODO:
-    p = net.lags;
+    sigLen = size(X,2);
+    exNum = size(exSignal,1);
+    lags = net.lags;
 
     % set node input
     S = [X; exSignal];
 
-    % set node control index
+    % set control 3D matrix (node x node x lags)
+    [~,~,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+    
     idxs = {};
     for i=1:nodeNum
-        nodeIdx = [1:nodeNum];
-        if ~isempty(nodeControl)
-            [~,nodeIdx] = find(nodeControl(i,:)==1);
+        for k=1:lags
+            [~,idxs{i,k}] = find(control(i,:,k)==1);
         end
-        exIdx = [nodeNum+1:nodeNum+net.exNum];
-        if ~isempty(exControl)
-            [~,exIdx] = find(exControl(i,:)==1);
-            exIdx = exIdx + nodeNum;
-        end
-        idxs{i} = [nodeIdx, exIdx];
     end
 
-    disp('start simulation whole mVAR network');
+    disp('start multi-step ahead forecasting (recursive) by mVAR network');
     ticH = tic;
-    for t=p:sigLen-1
+    for t=lags:sigLen-1
         if mod(t,10)==0, disp(['step : ' num2str(t)]); end
         for i=1:nodeNum
             S2 = [];
-            for k=1:p
-                S2 = [S2; S(idxs{i},t-(k-1))];
+            for k=1:lags
+                S2 = [S2; S(idxs{i,k},t-(k-1))];
             end
             S2 = [S2; 1]; % might not be good to add bias
 
@@ -52,5 +48,5 @@ function [S, time] = simulateMvarNetwork(X, exSignal, nodeControl, exControl, ne
     end
     S = S(1:nodeNum,:);
     time = toc(ticH);
-    disp(['finish simulation whole mVAR network! t = ' num2str(time) 's']);
+    disp(['finish multi-step ahead forecasting (recursive) by mVAR network! t = ' num2str(time) 's']);
 end

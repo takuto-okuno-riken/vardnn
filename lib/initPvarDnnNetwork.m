@@ -1,5 +1,5 @@
 %%
-% Estimate hidden neurons and initial weight and create pairwised VAR DNN
+% Estimate hidden neurons and initial weight and create pairwise VAR DNN
 % input:
 %  X               multivariate time series matrix (node x time series)
 %  exSignal        multivariate time series matrix (exogenous input x time series) (default:[])
@@ -25,9 +25,13 @@ function net = initPvarDnnNetwork(X, exSignal, nodeControl, exControl, lags, ini
     sigLen = size(X,2);
     exNum = size(exSignal,1);
 
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,~] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+    inputNums = ceil(sum(nodeControl,'all') / (nodeNum * nodeNum)) * 2;
+
     % estimate neuron number of hidden layers
     hiddenNums = zeros(2,1);
-    hiddenNums(1) = ceil(16 + (sigLen-100)*0.12/(1+2*lags*0.01));
+    hiddenNums(1) = ceil(16 + (sigLen-100)*0.12/(1+inputNums*0.01));
     hiddenNums(2) = ceil(hiddenNums(1)*2/3);
     
     % set initial bias for each neuron

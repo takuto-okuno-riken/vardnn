@@ -23,14 +23,19 @@ function net = createMvarDnnNetwork(nodeNum, exNum, hiddenNums, lags, nodeContro
     if nargin < 5, nodeControl = []; end
     if nargin < 4, lags = 1; end
 
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,~] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+
+    % create layers
     nodeLayers = cell(nodeNum,1);
     for i=1:nodeNum
-        nNodeControl = [];
-        if ~isempty(nodeControl), nNodeControl = nodeControl(i,:); end
-        nExControl = [];
-        if ~isempty(exControl), nExControl = exControl(i,:); end
-        nodeLayers{i} = createMvarDnnLayers(nodeNum, exNum, hiddenNums, lags, nNodeControl, nExControl, activateFunc, initWeightFunc, initWeightParam, initBias, i);
+        nNodeControl = nodeControl(i,:,:);
+        nExControl = exControl(i,:,:);
+        nodeLayers{i} = createMvarDnnLayers(hiddenNums, nNodeControl, nExControl, activateFunc, initWeightFunc, initWeightParam, initBias, i);
     end
+
+    % set structure
+    net.version = 1.1;
     net.nodeNum = nodeNum;
     net.exNum = exNum;
     net.lags = lags;

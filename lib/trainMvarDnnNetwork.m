@@ -11,16 +11,29 @@
 function trainedNet = trainMvarDnnNetwork(X, exSignal, nodeControl, exControl, net, options)
     global dnnInitWeights;
     nodeNum = size(X,1);
+    sigLen = size(X,2);
     exNum = size(exSignal,1);
     trainedNet = net;
     if isfield(net, 'lags'), lags = net.lags; else lags = 1; end
 
+    % set node input
+    Y = [X; exSignal];
+    inputNum = nodeNum + exNum;
+
+    % set control 3D matrix (node x node x lags)
+    [~,~,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+
+    Y = flipud(Y.'); % need to flip signal
+
     % training whole multivariate VAR DNN network
     disp('start training whole multivariate VAR DNN network');
     ticH = tic;
-    nodeInputOrg = [];
-    for i=1:lags, nodeInputOrg = [nodeInputOrg; X(:,i:end-(lags-i+1))]; end
-    for i=1:lags, nodeInputOrg = [nodeInputOrg; exSignal(:,i:end-(lags-i+1))]; end
+
+    % set training data
+    Yj = zeros(sigLen-lags, lags*inputNum);
+    for p=1:lags
+        Yj(:,1+inputNum*(p-1):inputNum*p) = Y(1+p:sigLen-lags+p,:);
+    end
     
     nodeLayers = trainedNet.nodeLayers;
     nodeNetwork = cell(nodeNum,1);
@@ -29,17 +42,13 @@ function trainedNet = trainMvarDnnNetwork(X, exSignal, nodeControl, exControl, n
     for i=1:nodeNum
 %    parfor i=1:nodeNum    % for parallel processing
         disp(['training node ' num2str(i)]);
-        nodeTeach = X(i,1+lags:end);
-        nodeInput = nodeInputOrg;
-        if ~isempty(nodeControl)
-            filter = repmat(nodeControl(i,:).', lags, size(nodeInput,2));
-            nodeInput(1:nodeNum*lags,:) = nodeInput(1:nodeNum*lags,:) .* filter;
-        end
-        if ~isempty(exControl)
-            filter = repmat(exControl(i,:).', lags, size(nodeInput,2));
-            nodeInput(nodeNum*lags+1:end,:) = nodeInput(nodeNum*lags+1:end,:) .* filter;
-        end
-        [nodeNetwork{i}, trainInfo{i}] = trainNetwork(nodeInput, nodeTeach, nodeLayers{i}, options);
+        [~,idx] = find(control(i,:,:)==1);
+        
+        Xt = Y(1:sigLen-lags,i);
+        Xti = Yj(:,idx);
+
+        % training network
+        [nodeNetwork{i}, trainInfo{i}] = trainNetwork(Xti.', Xt.', nodeLayers{i}, options);
         initWeights{i} = dnnInitWeights;
     end
     time = toc(ticH);

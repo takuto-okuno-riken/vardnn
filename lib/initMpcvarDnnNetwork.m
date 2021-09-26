@@ -75,7 +75,7 @@ function net = initMpcvarDnnNetwork(X, exSignal, nodeControl, exControl, lags, a
         [coeff{i},score{i},latent{i},~,explained{i},mu{i}] = pca(Xti); % relation : Xti == score{i} * coeff{i}.' + repmat(mu{i},size(score{i},1),1);
 
         % init DNN layers
-        nodeLayers{i} = createMvarDnnLayers(size(score{i},2), 0, hiddenNums, 1, [], [], activateFunc, initWeightFunc, initWeightParam, initBias, i);
+        nodeLayers{i} = createMvarDnnLayers(hiddenNums, ones(1,size(score{i},2)), [], activateFunc, initWeightFunc, initWeightParam, initBias, i);
     end
     net.nodeNum = nodeNum;
     net.pcNodeNum = pcNodeNum;

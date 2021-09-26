@@ -21,21 +21,23 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI(
     if nargin < 2, exSignal = []; end
 
     nodeNum = size(X,1);
-    nodeMax = nodeNum + size(exSignal,1);
-    
-    % set node input
-    if ~isempty(exSignal)
-        X = [X; exSignal];
-    end
+    sigLen = size(X,2);
+    exNum = size(exSignal,1);
+    inputNum = nodeNum + exNum;
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeNum + exNum; end
 
-    len = size(X,2);
-    p = lags;
-    Y = flipud(X.'); % need to flip signal
+    % set node input
+    Y = [X; exSignal];
+
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+
+    Y = flipud(Y.'); % need to flip signal
 
     % first, calculate vector auto-regression (VAR) without target
-    Yj = zeros(len-p, p*nodeMax);
-    for k=1:p
-        Yj(:,1+nodeMax*(k-1):nodeMax*k) = Y(1+k:len-p+k,:);
+    Yj = zeros(sigLen-lags, lags*inputNum);
+    for k=1:lags
+        Yj(:,1+inputNum*(k-1):inputNum*k) = Y(1+k:sigLen-lags+k,:);
     end
 
     nodeAIC = zeros(nodeNum,1);
@@ -48,31 +50,17 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI(
     AIC = nan(nodeNum,nodeMax);
     BIC = nan(nodeNum,nodeMax);
     for i=1:nodeNum
-        nodeDel = [];
-        if ~isempty(nodeControl)
-            [~,idx] = find(nodeControl(i,:)==0);
-            if ~isempty(idx)
-                for a=1:p, nodeDel = [nodeDel idx+nodeMax*(a-1)]; end
-            end
-        end
-        exDel = [];
-        if ~isempty(exControl) && ~isempty(exSignal)
-            [~,idx] = find(exControl(i,:)==0);
-            if ~isempty(idx)
-                for a=1:p, exDel = [exDel idx+(nodeNum+nodeMax*(a-1))]; end
-            end
-        end
-
+        [~,idx] = find(control(i,:,:)==1);
+        
         % vector auto-regression (VAR)
-        Xt = Y(1:len-p,i);
-        Xti = Yj; %[Yj, ones(len-p,1)]; % might not be good to add bias
-        Xti(:,[nodeDel, exDel]) = [];
+        Xt = Y(1:sigLen-lags,i);
+        Xti = Yj(:,idx); %, ones(sigLen-lags,1)]; % might not be good to add bias
         % apply the regress function
         [b,bint,r] = regress(Xt,Xti);
         Vxt = var(r,1);
 
         % AIC and BIC of this node (assuming residuals are gausiann distribution)
-        T = len-p;
+        T = sigLen-lags;
         RSS = r'*r;
         k = size(Xti,2);
         nodeAIC(i) = T*log(RSS/T) + 2 * k;
@@ -80,12 +68,12 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI(
 
         for j=1:nodeMax
             if i==j, continue; end
-            delrow = [];
-            for a=1:p, delrow = [delrow j+nodeMax*(a-1)]; end
+            control2 = control;
+            control2(i,j,:) = 0;
+            [~,idx2] = find(control2(i,:,:)==1);
             
-            Yt = Yj; %[Yj, ones(len-p,1)]; % might not be good to add bias
-            Yt(:,[nodeDel, exDel, delrow]) = [];
-            [b,bint,r] = regress(Xt,Yt);
+            Xtj = Yj(:,idx2); %, ones(sigLen-lags,1)]; % might not be good to add bias
+            [b,bint,r] = regress(Xt,Xtj);
             Vyt = var(r,1);
 
             gcI(i,j) = log(Vyt / Vxt);
@@ -93,7 +81,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI(
             % AIC and BIC (assuming residuals are gausiann distribution)
             % BIC = n*ln(RSS/n)+k*ln(n)
             RSS1 = r'*r;
-            k1 = size(Yt,2);
+            k1 = size(Xtj,2);
             AIC(i,j) = T*log(RSS1/T) + 2 * k1;
             BIC(i,j) = T*log(RSS1/T) + k1*log(T);
 
@@ -102,9 +90,9 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI(
             % F = ((RSS1 - RSS2) / (p2 - p1)) / (RSS2 / n - p2)
             %RSS1 = r'*r;  % p1 = p*nn1;
             RSS2 = RSS;   % p2 = p*nodeNum;
-            F(i,j) = ((RSS1 - RSS2)/p) / (RSS2 / (len - k));
-            P(i,j) = 1 - fcdf(F(i,j),p,(len-k));
-            cvFd(i,j) = finv(1-alpha,p,(len-k));
+            F(i,j) = ((RSS1 - RSS2)/lags) / (RSS2 / (sigLen - k));
+            P(i,j) = 1 - fcdf(F(i,j),lags,(sigLen-k));
+            cvFd(i,j) = finv(1-alpha,lags,(sigLen-k));
             h(i,j) = F(i,j) > cvFd(i,j);
         end
     end
@@ -119,7 +107,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI(
         BIC = BIC(:,1:nodeNum);
     end
     if ~isempty(nodeControl)
-        nodeControl=double(nodeControl); nodeControl(nodeControl==0) = nan;
+        nodeControl=double(nodeControl(:,:,1)); nodeControl(nodeControl==0) = nan;
         gcI(:,1:nodeNum) = gcI(:,1:nodeNum) .* nodeControl;
         F(:,1:nodeNum) = F(:,1:nodeNum) .* nodeControl;
         P(:,1:nodeNum) = P(:,1:nodeNum) .* nodeControl;
@@ -129,7 +117,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMultivariateGCI(
         BIC(:,1:nodeNum) = BIC(:,1:nodeNum) .* nodeControl;
     end
     if ~isempty(exControl) && ~isempty(exControl) && isFullNode > 0
-        exControl=double(exControl); exControl(exControl==0) = nan;
+        exControl=double(exControl(:,:,1)); exControl(exControl==0) = nan;
         gcI(:,nodeNum+1:end) = gcI(:,nodeNum+1:end) .* exControl;
         F(:,nodeNum+1:end) = F(:,nodeNum+1:end) .* exControl;
         P(:,nodeNum+1:end) = P(:,nodeNum+1:end) .* exControl;

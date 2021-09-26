@@ -1,5 +1,5 @@
 %%
-% Create pairwised VAR DNN layers for single node
+% Create pairwise VAR DNN layers for single node
 % input:
 %  nodeNum        pairwised VAR DNN node number
 %  hiddenNums     hidden layer (next of input) neuron numbers of single unit (vector)
@@ -7,7 +7,7 @@
 %  initialWeight  weight initialize matrix of hidden1 layer (optional)
 %  initialBias    bias initialize matrix of hidden1 layer (optional)
 
-function layers = createPvarDnnLayers(nodeNum, hiddenNums, lags, initWeightFunc, initWeightParam, initBias)
+function layers = createPvarDnnLayers(inputNums, hiddenNums, initWeightFunc, initWeightParam, initBias)
     if nargin < 5, initWeightFunc = []; initWeightParam = []; initBias = []; end
 
     % init first fully connected layer
@@ -29,7 +29,7 @@ function layers = createPvarDnnLayers(nodeNum, hiddenNums, lags, initWeightFunc,
     %
     inLayers = [
         % input layer
-        sequenceInputLayer(nodeNum*lags);
+        sequenceInputLayer(inputNums);
         % Add a fully connected layer
         firstFCLayer;
         % Add an ReLU non-linearity.

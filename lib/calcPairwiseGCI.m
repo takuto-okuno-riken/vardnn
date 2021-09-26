@@ -21,12 +21,15 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, exSignal, nodeContr
     if nargin < 2, exSignal = []; end
 
     nodeNum = size(X,1);
-    nodeMax = nodeNum + size(exSignal,1);
-    
+    sigLen = size(X,2);
+    exNum = size(exSignal,1);
+    nodeMax = nodeNum + exNum;
+
     % set node input
-    if ~isempty(exSignal)
-        X = [X; exSignal];
-    end
+    Y = [X; exSignal];
+
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
     
     gcI = nan(nodeNum,nodeMax);
     h = nan(nodeNum,nodeMax);
@@ -36,18 +39,9 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, exSignal, nodeContr
     AIC = nan(nodeNum,nodeMax);
     BIC = nan(nodeNum,nodeMax);
     for i=1:nodeNum
-        Y = X;
-        if ~isempty(nodeControl)
-            filter = nodeControl(i,:).';
-            Y(1:nodeNum,:) = Y(1:nodeNum,:) .* filter;
-        end
-        if ~isempty(exControl)
-            filter = exControl(i,:).';
-            Y(nodeNum+1:end,:) = Y(nodeNum+1:end,:) .* filter;
-        end
         for j=1:nodeMax
             if i==j, continue; end
-            [gcI(i,j), h(i,j), P(i,j), F(i,j), cvFd(i,j), AIC(i,j), BIC(i,j)] = calcPairGrangerCausality(Y(i,:), Y(j,:), lags, alpha);
+            [gcI(i,j), h(i,j), P(i,j), F(i,j), cvFd(i,j), AIC(i,j), BIC(i,j)] = calcPairGrangerCausality(Y(i,:), Y(j,:), lags, alpha, control(i,i,:),control(i,j,:));
         end
     end
     % output control
@@ -61,7 +55,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, exSignal, nodeContr
         BIC = BIC(:,1:nodeNum);
     end
     if ~isempty(nodeControl)
-        nodeControl=double(nodeControl); nodeControl(nodeControl==0) = nan;
+        nodeControl=double(nodeControl(:,:,1)); nodeControl(nodeControl==0) = nan;
         gcI(:,1:nodeNum) = gcI(:,1:nodeNum) .* nodeControl;
         F(:,1:nodeNum) = F(:,1:nodeNum) .* nodeControl;
         P(:,1:nodeNum) = P(:,1:nodeNum) .* nodeControl;
@@ -71,7 +65,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairwiseGCI(X, exSignal, nodeContr
         BIC(:,1:nodeNum) = BIC(:,1:nodeNum) .* nodeControl;
     end
     if ~isempty(exControl) && ~isempty(exControl) && isFullNode > 0
-        exControl=double(exControl); exControl(exControl==0) = nan;
+        exControl=double(exControl(:,:,1)); exControl(exControl==0) = nan;
         gcI(:,nodeNum+1:end) = gcI(:,nodeNum+1:end) .* exControl;
         F(:,nodeNum+1:end) = F(:,nodeNum+1:end) .* exControl;
         P(:,nodeNum+1:end) = P(:,nodeNum+1:end) .* exControl;

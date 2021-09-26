@@ -7,45 +7,36 @@
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  net          trained mVAR DNN network
 
-function [S, time] = simulateMvarDnnNetwork(X, exSignal, nodeControl, exControl, net)
+function [S, time] = simulateMvarDnnNetwork_(X, exSignal, nodeControl, exControl, net)
     nodeNum = size(X,1);
-    sigLen = size(X,2);
-    exNum = size(exSignal,1);
+    sigLen = size(X,2); % TODO:
     if isfield(net, 'lags'), lags = net.lags; else lags = 1; end
-    if isfield(net, 'version'), version = net.version; else version = 1; end
 
-    % check compatibility
-    if version == 1
-        [S, time] = simulateMvarDnnNetwork_(X, exSignal, nodeControl, exControl, net);
-        return;
-    end
+    % set first signal
+    S = X;
 
-    % set node input
-    S = [X; exSignal];
-
-    % set control 3D matrix (node x node x lags)
-    [~,~,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
-    
-    idxs = {};
-    for i=1:nodeNum
-        for k=1:lags
-            [~,idxs{i,k}] = find(control(i,:,k)==1);
-        end
-    end
-    
-    % multi-step ahead forecasting (recursive)
     disp('start multi-step ahead forecasting (recursive) by mVAR DNN network');
     ticH = tic;
 
     for t=lags:sigLen-1
         if mod(t,10)==0, disp(['step : ' num2str(t)]); end
+        nodeInputOrg = [];
+        for i=1:lags, nodeInputOrg = [nodeInputOrg; S(:,t-lags+i)]; end
+        if ~isempty(exSignal)
+            for i=1:lags, nodeInputOrg = [nodeInputOrg; exSignal(:,t-lags+i)]; end
+        end
         for i=1:nodeNum
-            S2 = [];
-            for k=1:lags
-                S2 = [S2; S(idxs{i,k},t-(k-1))];
+            nodeInput = nodeInputOrg;
+            if ~isempty(nodeControl)
+                filter = repmat(nodeControl(i,:).', lags, size(nodeInput,2));
+                nodeInput(1:nodeNum*lags,:) = nodeInput(1:nodeNum*lags,:) .* filter;
+            end
+            if ~isempty(exControl)
+                filter = repmat(exControl(i,:).', lags, size(nodeInput,2));
+                nodeInput(nodeNum*lags+1:end,:) = nodeInput(nodeNum*lags+1:end,:) .* filter;
             end
             % predict next time step
-            S(i,t+1) = predict(net.nodeNetwork{i}, S2, 'ExecutionEnvironment', 'cpu');
+            S(i,t+1) = predict(net.nodeNetwork{i}, nodeInput, 'ExecutionEnvironment', 'cpu');
         end
         % fixed over shoot values
         idx = find(S(:,t+1) > 1.2);
@@ -53,7 +44,6 @@ function [S, time] = simulateMvarDnnNetwork(X, exSignal, nodeControl, exControl,
         idx = find(S(:,t+1) < -0.2);
         S(idx,t+1) = -0.2;
     end
-    S = S(1:nodeNum,:);
     time = toc(ticH);
     disp(['finish multi-step ahead forecasting (recursive) by mVAR DNN network! t = ' num2str(time) 's']);
 end

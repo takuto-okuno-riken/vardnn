@@ -17,13 +17,17 @@ function [DI, DIsub, coeff] = calcPvarDI(X, exSignal, nodeControl, exControl, la
     if nargin < 2, exSignal = []; end
     nodeNum = size(X,1);
     sigLen = size(X,2);
+    exNum = size(exSignal,1);
     p = lags;
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeNum + size(exSignal,1); end
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeNum + exNum; end
     
     % set node input
     Y = [X; exSignal];
     Y = flipud(Y.'); % need to flip signal
-    
+
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+
     % calc Pairwise VAR
     DI = nan(nodeNum, nodeMax);
     coeff = nan(nodeNum, nodeMax);
@@ -31,8 +35,8 @@ function [DI, DIsub, coeff] = calcPvarDI(X, exSignal, nodeControl, exControl, la
     for i=1:nodeNum
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
-            if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
+            if j<=nodeNum && nodeControl(i,j,1) == 0, continue; end
+            if j>nodeNum && exControl(i,j-nodeNum,1) == 0, continue; end
 
             % autoregression plus other regression
             Yt = Y(1:(sigLen-p),i); % target

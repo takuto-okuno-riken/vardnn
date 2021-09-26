@@ -1,6 +1,6 @@
 %%
-% Caluclate Pairwised VAR DNN Granger Causality
-% returns Pairwised VAR DNN Granger causality index matrix (gcI), significance (h=1 or 0)
+% Caluclate Pairwise VAR DNN Granger Causality
+% returns Pairwise VAR DNN Granger causality index matrix (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
 % and AIC, BIC (of node vector)
 % input:
@@ -17,13 +17,17 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPvarDnnGCI(X, exSignal, nodeContro
     if nargin < 6, alpha = 0.05; end
 
     nodeNum = net.nodeNum;
-    nodeInNum = nodeNum + net.exNum;
     sigLen = size(X,2);
     lags = net.lags;
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
-    
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeNum + net.exNum; end
+
     % set node input
-    X = [X; exSignal];
+    Y = [X; exSignal];
+
+    % set control 3D matrix (node x node x lags)
+    [nodeControl, exControl, control] = getControl3DMatrix(nodeControl, exControl, nodeNum, net.exNum, lags);
+
+    Y = flipud(Y.'); % need to flip signal
 
     % calc Pairwised VAR DNN granger causality
     gcI = nan(nodeNum, nodeMax);
@@ -34,20 +38,25 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPvarDnnGCI(X, exSignal, nodeContro
     AIC = nan(nodeNum,nodeMax);
     BIC = nan(nodeNum,nodeMax);
     for i=1:nodeNum
+        [~,idx] = find(control(i,i,:)==1);
+        Xt = Y(1:sigLen-lags,i);
+        Yi = zeros(sigLen-lags, lags);
+        for k=1:lags, Yi(:,k) = Y(1+k:sigLen-lags+k,i); end
+        Xti = Yi(:,idx);
+
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
-            if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
+            if j<=nodeNum && nodeControl(i,j,1) == 0, continue; end
+            if j>nodeNum && exControl(i,j-nodeNum,1) == 0, continue; end
 
-            nodeInput = nan(2*lags,sigLen-lags);
-            for k=1:lags, nodeInput(k,:) = X(i,k:end-lags+(k-1)); end
-            for k=1:lags, nodeInput(lags+k,:) = X(j,k:end-lags+(k-1)); end
-
-            nodeTeach = X(i,lags+1:end);
+            [~,idx] = find(control(i,j,:)==1);
+            Yj = zeros(sigLen-lags, lags);
+            for k=1:lags, Yj(:,k) = Y(1+k:sigLen-lags+k,j); end
+            Xtj = Yj(:,idx);
 
             % predict 
-            Si = predict(net.nodeNetwork{i,j}, nodeInput);
-            err = Si - nodeTeach;
+            Si = predict(net.nodeNetwork{i,j}, [Xti,Xtj].');
+            err = Si - Xt.';
             VarEi = var(err,1);
 
             % AIC and BIC of this node (assuming residuals are gausiann distribution)
@@ -56,12 +65,12 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPvarDnnGCI(X, exSignal, nodeContro
             k = 2*lags + 1; % input + bias
 
             % imparement node signals
-            impInput = nodeInput;
-            impInput(lags+1:end,:) = 0;
+            Yj(:) = 0;
+            Xtj = Yj(:,idx);
 
             % predict 
-            Sj = predict(net.nodeNetwork{i,j}, impInput);
-            err = Sj - nodeTeach;
+            Sj = predict(net.nodeNetwork{i,j}, [Xti,Xtj].');
+            err = Sj - Xt.';
             VarEj = var(err,1);
             gcI(i,j) = log(VarEj / VarEi);
 

@@ -8,11 +8,13 @@
 %  Y      time series vector (1 x time series)
 %  p      number of lags for autoregression
 %  alpha  the significance level of F-statistic (default:0.05)
+%  X      X lag input control
+%  Y      Y lag input control
 
-function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairGrangerCausality(X, Y, p, alpha)
-    if nargin < 4
-        alpha = 0.05;
-    end
+function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairGrangerCausality(X, Y, p, alpha, Xcontrol, Ycontrol)
+    if nargin < 6, Ycontrol = ones(1,1,p); end
+    if nargin < 5, Xcontrol = ones(1,1,p); end
+    if nargin < 4, alpha = 0.05; end
     % input signal is time [1 ... last]
     % need to inversion signal
     X = flipud(X(:));
@@ -25,18 +27,19 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairGrangerCausality(X, Y, p, alph
     for i=1:p
         Xti(:,i+1) = X(i+1:n-p+i);
     end
+    Xti = Xti .* repmat([1; Xcontrol(:)].',n-p,1);
     % apply the regress function
     [b,bint,Xr] = regress(Xt,Xti);
     Vxt = var(Xr,1);
 
     % autoregression plus other regression
-    Yt = X(1:n-p);
     Yti = ones(n-p, p*2+1);
     for i=1:p
         Yti(:,i+1) = X(i+1:n-p+i);
         Yti(:,p+i+1) = Y(i+1:n-p+i);
     end
-    [b,bint,Yr] = regress(Yt,Yti);
+    Yti = Yti .* repmat([1; Xcontrol(:); Ycontrol(:)].',n-p,1);
+    [b,bint,Yr] = regress(Xt,Yti);
     Vyt = var(Yr,1);
     if Vyt == 0
          Vyt = 1.0e-50; % TODO: dummy to avoid inf return

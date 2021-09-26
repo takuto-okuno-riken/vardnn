@@ -20,17 +20,28 @@ function net = createPvarDnnNetwork(nodeNum, exNum, hiddenNums, lags, nodeContro
     if nargin < 6, exControl = []; end
     if nargin < 5, nodeControl = []; end
     if nargin < 4, lags = 3; end
-    
+
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,~] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+
     nodeMax = nodeNum + exNum;
     nodeLayers = cell(nodeNum,nodeMax);
     for i=1:nodeNum
+        selfNum = sum(nodeControl(i,i,:),'all');
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
-            if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
-            nodeLayers{i,j} = createPvarDnnLayers(2, hiddenNums, lags, initWeightFunc, initWeightParam, initBias);
+            if j<=nodeNum && nodeControl(i,j,1) == 0, continue; end
+            if j>nodeNum && exControl(i,j-nodeNum,1) == 0, continue; end
+            
+            if j<=nodeNum
+                inputNums = selfNum + sum(nodeControl(i,j,:),'all');
+            else
+                inputNums = selfNum + sum(exControl(i,j-nodeNum,:),'all');
+            end
+            nodeLayers{i,j} = createPvarDnnLayers(inputNums, hiddenNums, initWeightFunc, initWeightParam, initBias);
         end
     end
+    net.version = 1.1;
     net.nodeNum = nodeNum;
     net.exNum = exNum;
     net.lags = lags;

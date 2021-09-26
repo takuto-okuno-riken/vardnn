@@ -1,22 +1,16 @@
 %%
 % Create multivaliate VAR DNN layers for single node
 % input:
-%  nodeNum        node number
-%  exNum          exogenous input number
 %  hiddenNums     hidden layer (next of input) neuron numbers of single unit (vector)
-%  lags           number of lags for autoregression
-%  nNodeControl   node control matrix (1 x node) (optional)
-%  nExControl     exogenous input control (1 x exogenous input) (optional)
-%  activateFunc    activation function for each layer (default:@reluLayer)
-%  activateFunc   activation function for each layer (optional)
+%  nNodeControl   node control matrix (1 x node)
+%  nExControl     exogenous input control (1 x exogenous input)
+%  activateFunc   activation function for each layer (default:@reluLayer)
 %  initialWeight  weight initialize matrix of hidden1 layer (optional)
 %  initialBias    bias initialize matrix of hidden1 layer (optional)
 
-function layers = createMvarDnnLayers(nodeNum, exNum, hiddenNums, lags, nNodeControl, nExControl, activateFunc, initWeightFunc, initWeightParam, initBias, currentNode)
-    if nargin < 8, initWeightFunc = []; initWeightParam = []; initBias = []; currentNode = 0; end
-    if nargin < 7, activateFunc = @reluLayer; end
-    if nargin < 6, nExControl = []; end
-    if nargin < 5, nNodeControl = []; end
+function layers = createMvarDnnLayers(hiddenNums, nNodeControl, nExControl, activateFunc, initWeightFunc, initWeightParam, initBias, currentNode)
+    if nargin < 5, initWeightFunc = []; initWeightParam = []; initBias = []; currentNode = 0; end
+    if nargin < 4, activateFunc = @reluLayer; end
 
     % init first fully connected layer
     v = ver('nnet');
@@ -26,7 +20,7 @@ function layers = createMvarDnnLayers(nodeNum, exNum, hiddenNums, lags, nNodeCon
     else
         if isempty(initBias)
             firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
-                'WeightsInitializer', @(sz) weightInitializer(sz, lags, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode));
+                'WeightsInitializer', @(sz) weightInitializer(sz, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode));
         else
             % set initial bias for each neuron
             if length(initBias) > 1
@@ -35,15 +29,16 @@ function layers = createMvarDnnLayers(nodeNum, exNum, hiddenNums, lags, nNodeCon
                 initBias1 = ones(hiddenNums(1),1) * initBias;
             end
             firstFCLayer = fullyConnectedLayer(hiddenNums(1), ...
-                'WeightsInitializer', @(sz) weightInitializer(sz, lags, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode), ...
+                'WeightsInitializer', @(sz) weightInitializer(sz, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode), ...
                 'Bias', initBias1);
         end
     end
     
     %
+    inputNums = sum(nNodeControl,'all') + sum(nExControl,'all');
     inLayers = [
         % input layer
-        sequenceInputLayer((nodeNum+exNum)*lags);
+        sequenceInputLayer(inputNums);
         % Add a fully connected layer
         firstFCLayer;
         % Add an ReLU non-linearity.
@@ -94,7 +89,7 @@ end
 %%
 % weight initializer
 % Returns He distribution + user specified weight
-function weights = weightInitializer(sz, lags, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode)
+function weights = weightInitializer(sz, nNodeControl, nExControl, initWeightFunc, initWeightParam, currentNode)
     global dnnInitWeights;
 
     if ~isempty(initWeightFunc)
@@ -106,16 +101,6 @@ function weights = weightInitializer(sz, lags, nNodeControl, nExControl, initWei
 
         varWeights = 2 / ((1 + scale^2) * numIn);
         weights = randn(sz) * sqrt(varWeights);
-    end
-    if ~isempty(nNodeControl)
-        nodeNum = length(nNodeControl);
-        filter = repmat(nNodeControl, size(weights,1), 1);
-        weights(:, 1:nodeNum) = weights(:, 1:nodeNum) .* filter;
-    end
-    if ~isempty(nExControl)
-        nodeNum = sz(2) - length(nExControl);
-        filter = repmat(nExControl, size(weights,1), 1);
-        weights(:, nodeNum+1:sz(2)) = weights(:, nodeNum+1:sz(2)) .* filter;
     end
     dnnInitWeights = weights;
 end

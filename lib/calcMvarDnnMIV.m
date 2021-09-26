@@ -13,44 +13,48 @@ function [MIV, MAIV] = calcMvarDnnMIV(X, exSignal, nodeControl, exControl, net, 
     if nargin < 6, isFullNode = 0; end
 
     nodeNum = size(X,1);
-    nodeInNum = nodeNum + size(exSignal,1);
+    exNum = size(exSignal,1);
     sigLen = size(X,2);
+    inputNum = nodeNum + exNum;
     if isfield(net, 'lags'), lags = net.lags; else lags = 1; end
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeNum + exNum; end
 
     % set node input
-    nodeInputOrg = [];
-    for i=1:lags, nodeInputOrg = [nodeInputOrg; X(:,i:end-(lags-i+1))]; end
-    for i=1:lags, nodeInputOrg = [nodeInputOrg; exSignal(:,i:end-(lags-i+1))]; end
+    Y = [X; exSignal];
+
+    % set control 3D matrix (node x node x lags)
+    [nodeControl, exControl, control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+
+    Y = flipud(Y.'); % need to flip signal
+
+    % set training data
+    Yj = zeros(sigLen-lags, lags*inputNum);
+    for p=1:lags
+        Yj(:,1+inputNum*(p-1):inputNum*p) = Y(1+p:sigLen-lags+p,:);
+    end
 
     % calc mVAR DNN MIV
     MIV = nan(nodeNum, nodeMax);
     MAIV = nan(nodeNum, nodeMax);
     for i=1:nodeNum
-        nodeInput = nodeInputOrg;
-        if ~isempty(nodeControl)
-            filter = repmat(nodeControl(i,:).', lags, size(nodeInput,2));
-            nodeInput(1:nodeNum*lags,:) = nodeInput(1:nodeNum*lags,:) .* filter;
-        end
-        if ~isempty(exControl)
-            filter = repmat(exControl(i,:).', lags, size(nodeInput,2));
-            nodeInput(nodeNum*lags+1:end,:) = nodeInput(nodeNum*lags+1:end,:) .* filter;
-        end
-        nodeTeach = X(i,1+lags:end);
-
+        [~,idx] = find(control(i,:,:)==1);
+        
         % imparement node signals
         for j=1:nodeMax
             if i==j, continue; end
-            Xj1 = nodeInput;
-            Xj2 = nodeInput;
+            Xj1 = Yj;
+            Xj2 = Yj;
             for p=1:lags
-                Xj1(j+nodeNum*(p-1),:) = Xj1(j+nodeNum*(p-1),:) * 1.1; 
-                Xj2(j+nodeNum*(p-1),:) = Xj2(j+nodeNum*(p-1),:) * 0.9; 
+                n = j + (nodeNum + exNum) * (p-1);
+                Xj1(:,n) = Xj1(:,n) * 1.1; 
+                Xj2(:,n) = Xj2(:,n) * 0.9; 
             end
+            Xj1 = Xj1(:,idx);
+            Xj2 = Xj2(:,idx);
 
             % predict 
-            N1 = predict(net.nodeNetwork{i}, Xj1, 'ExecutionEnvironment', 'cpu');
-            N2 = predict(net.nodeNetwork{i}, Xj2, 'ExecutionEnvironment', 'cpu');
+            N1 = predict(net.nodeNetwork{i}, Xj1.', 'ExecutionEnvironment', 'cpu');
+            N2 = predict(net.nodeNetwork{i}, Xj2.', 'ExecutionEnvironment', 'cpu');
             MIV(i,j) = mean(N1 - N2);
             MAIV(i,j) = mean(abs(N1 - N2));
         end

@@ -12,37 +12,20 @@
 %  alpha        the significance level of F-statistic (optional)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMvarDnnGCI(X, exSignal, nodeControl, exControl, net, alpha, isFullNode)
+function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMvarDnnGCI_(X, exSignal, nodeControl, exControl, net, alpha, isFullNode)
     if nargin < 7, isFullNode = 0; end
     if nargin < 6, alpha = 0.05; end
-    if isfield(net, 'lags'), lags = net.lags; else lags = 1; end
-    if isfield(net, 'version'), version = net.version; else version = 1; end
-
-    % check compatibility
-    if version == 1
-        [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMvarDnnGCI_(X, exSignal, nodeControl, exControl, net, alpha, isFullNode);
-        return;
-    end
 
     nodeNum = size(X,1);
-    exNum = size(exSignal,1);
+    nodeInNum = nodeNum + size(exSignal,1);
     sigLen = size(X,2);
-    inputNum = nodeNum + exNum;
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeNum + exNum; end
+    if isfield(net, 'lags'), lags = net.lags; else lags = 1; end
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
 
     % set node input
-    Y = [X; exSignal];
-
-    % set control 3D matrix (node x node x lags)
-    [nodeControl, exControl, control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
-
-    Y = flipud(Y.'); % need to flip signal
-
-    % set training data
-    Yj = zeros(sigLen-lags, lags*inputNum);
-    for p=1:lags
-        Yj(:,1+inputNum*(p-1):inputNum*p) = Y(1+p:sigLen-lags+p,:);
-    end
+    nodeInputOrg = [];
+    for i=1:lags, nodeInputOrg = [nodeInputOrg; X(:,i:end-(lags-i+1))]; end
+    for i=1:lags, nodeInputOrg = [nodeInputOrg; exSignal(:,i:end-(lags-i+1))]; end
 
     % calc mVAR DNN granger causality
     nodeAIC = zeros(nodeNum,1);
@@ -55,14 +38,19 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMvarDnnGCI(X, ex
     AIC = nan(nodeNum,nodeMax);
     BIC = nan(nodeNum,nodeMax);
     for i=1:nodeNum
-        [~,idx] = find(control(i,:,:)==1);
-        
-        Xt = Y(1:sigLen-lags,i);
-        Xti = Yj(:,idx);
-
+        nodeInput = nodeInputOrg;
+        if ~isempty(nodeControl)
+            filter = repmat(nodeControl(i,:).', lags, size(nodeInput,2));
+            nodeInput(1:nodeNum*lags,:) = nodeInput(1:nodeNum*lags,:) .* filter;
+        end
+        if ~isempty(exControl)
+            filter = repmat(exControl(i,:).', lags, size(nodeInput,2));
+            nodeInput(nodeNum*lags+1:end,:) = nodeInput(nodeNum*lags+1:end,:) .* filter;
+        end
+        nodeTeach = X(i,1+lags:end);
         % predict 
-        Si = predict(net.nodeNetwork{i}, Xti.', 'ExecutionEnvironment', 'cpu');
-        err = Si - Xt.';
+        Si = predict(net.nodeNetwork{i}, nodeInput, 'ExecutionEnvironment', 'cpu');
+        err = Si - nodeTeach;
         VarEi = var(err,1);
 
         % AIC and BIC of this node (assuming residuals are gausiann distribution)
@@ -78,14 +66,12 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMvarDnnGCI(X, ex
         % imparement node signals
         for j=1:nodeMax
             if i==j, continue; end
-            
-            Xtj = Yj;
-            for p=1:lags, Xtj(:,j+(nodeNum + exNum)*(p-1)) = 0; end
-            Xtj = Xtj(:,idx);
+            impInput = nodeInput;
+            for p=1:lags, impInput(j+nodeNum*(p-1),:) = 0; end
 
             % predict 
-            Sj = predict(net.nodeNetwork{i}, Xtj.', 'ExecutionEnvironment', 'cpu');
-            err = Sj - Xt.';
+            Sj = predict(net.nodeNetwork{i}, impInput, 'ExecutionEnvironment', 'cpu');
+            err = Sj - nodeTeach;
             VarEj = var(err,1);
             gcI(i,j) = log(VarEj / VarEi);
 

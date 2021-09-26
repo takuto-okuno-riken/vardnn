@@ -3,7 +3,6 @@ function testPvarDnnGC
     % load signals
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
-    lags = 3;
     nodeNum = 6;
     exNum = 0;
     sigLen = 200;
@@ -30,45 +29,73 @@ function testPvarDnnGC
 %            'Plots','training-progress');
 
     %% test pattern 1 
-    % do training or load Pairwised VAR DNN network
-    pvardnnFile = ['results/pvardnn-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
+    % do training or load pairwise VAR DNN network
+    lags = 1;
+    pvardnnFile = ['results/pvardnn' num2str(lags) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
     if exist(pvardnnFile, 'file')
         load(pvardnnFile);
     else
-        % init Pairwised VAR DNN network
+        % init pairwise VAR DNN network
         netPvarDNN = initPvarDnnNetwork(si, exSignal, [], exControl, lags);
-        % training Pairwised VAR DNN network
+        % training pairwise VAR DNN network
         netPvarDNN = trainPvarDnnNetwork(si, exSignal, [], exControl, netPvarDNN, options);
         save(pvardnnFile, 'netPvarDNN');
     end
     
-    % show Pairwised DNN-GC
+    % show pairwise DNN-GC
     figure; dnGC = plotPvarDnnGCI(si, exSignal, [], exControl, netPvarDNN, 0);
-    % show Pairwised DNN-DI
+    % show pairwise DNN-DI
     figure; dnDI = plotPvarDnnDI(netPvarDNN, [], exControl);
 
     %% test pattern 2
+    lags = 3;
     exNum = 2;
     exSignal = siOrg(nodeNum+1:nodeNum+exNum,1:sigLen);
     % control is all positive input
     exControl = ones(nodeNum,exNum);
     si(3,2:end) = exSignal(1,1:sigLen-1);
 
-    % do training or load Pairwised VAR DNN network
-    pvardnnFile = ['results/pvardnn-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
+    % do training or load pairwise VAR DNN network
+    pvardnnFile = ['results/pvardnn' num2str(lags) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
     if exist(pvardnnFile, 'file')
         load(pvardnnFile);
     else
-        % init Pairwised VAR DNN network
+        % init pairwise VAR DNN network
         netPvarDNN = initPvarDnnNetwork(si, exSignal, [], exControl, lags);
-        % training Pairwised VAR DNN network
+        % training pairwise VAR DNN network
         netPvarDNN = trainPvarDnnNetwork(si, exSignal, [], exControl, netPvarDNN, options);
         save(pvardnnFile, 'netPvarDNN');
     end
     
-    % show Pairwised VAR DNN-GC
+    % show pairwise VAR DNN-GC
     figure; dnGC = plotPvarDnnGCI(si, exSignal, [], exControl, netPvarDNN, 0, 0.05, 1);
-    % show Pairwised VAR DNN-DI
+    % show pairwise VAR DNN-DI
     figure; dnDI = plotPvarDnnDI(netPvarDNN, [], exControl, 0, 1);
+
+    %% test pattern 3
+    exNum = 3;
+    exSignal = siOrg(nodeNum+1:nodeNum+exNum,1:sigLen);
+    % control is all positive input
+    nodeControl = ones(nodeNum,nodeNum,lags);
+    for i=1:nodeNum, nodeControl(i,i,2) = 0; end
+    exControl = ones(nodeNum,exNum);
+    si(3,2:end) = exSignal(1,1:sigLen-1);
+
+    % do training or load pairwise VAR DNN network
+    pvardnnFile = ['results/pvardnn' num2str(lags) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
+    if exist(pvardnnFile, 'file')
+        load(pvardnnFile);
+    else
+        % init pairwise VAR DNN network
+        netPvarDNN = initPvarDnnNetwork(si, exSignal, nodeControl, exControl, lags);
+        % training pairwise VAR DNN network
+        netPvarDNN = trainPvarDnnNetwork(si, exSignal, nodeControl, exControl, netPvarDNN, options);
+        save(pvardnnFile, 'netPvarDNN');
+    end
+    
+    % show pairwise VAR DNN-GC
+    figure; dnGC = plotPvarDnnGCI(si, exSignal, nodeControl, exControl, netPvarDNN, 0, 0.05, 1);
+    % show pairwise VAR DNN-DI
+    figure; dnDI = plotPvarDnnDI(netPvarDNN, nodeControl, exControl, 0, 1);
 end
 
