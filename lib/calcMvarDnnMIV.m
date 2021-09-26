@@ -45,7 +45,7 @@ function [MIV, MAIV] = calcMvarDnnMIV(X, exSignal, nodeControl, exControl, net, 
             Xj1 = Yj;
             Xj2 = Yj;
             for p=1:lags
-                n = j + (nodeNum + exNum) * (p-1);
+                n = j + inputNum * (p-1);
                 Xj1(:,n) = Xj1(:,n) * 1.1; 
                 Xj2(:,n) = Xj2(:,n) * 0.9; 
             end

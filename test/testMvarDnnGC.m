@@ -60,6 +60,7 @@ function testMvarDnnGC
     exControl = ones(nodeNum,exNum);
     si(3,2:end) = exSignal(1,1:sigLen-1);
     for i=1:5
+    exControl = ones(nodeNum,exNum);
         mvardnnFile = ['results/mvardnn' num2str(i) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
         if exist(mvardnnFile, 'file')
             load(mvardnnFile);
@@ -105,6 +106,39 @@ function testMvarDnnGC
         figure; mvdnnDI = plotMvarDnnDI(net, [], exControl, 0, 1);
         figure; mvdnnMIV = plotMvarDnnMIV(si, exSignal, [], exControl, net, 0, 1);
         figure; gcI = plotMultivariateGCI(si, exSignal, [], exControl, i, 0, 0, 1);
+    end
+
+    %% test pattern 4 -- exogenous signals
+    % do training or load multivariate VAR DNN network
+    exNum = 4;
+    exSignal = siOrg(nodeNum+1:nodeNum+exNum,1:sigLen);
+    % control is all positive input
+    nodeControl = [];
+    exControl = ones(nodeNum,exNum);
+    si(3,2:end) = exSignal(1,1:sigLen-1);
+    for i=1:5
+        if i>1
+            nodeControl = ones(nodeNum,nodeNum,i);
+            for j=1:nodeNum, nodeControl(j,j,2)=0; end
+        end
+        mvardnnFile = ['results/mvardnn' num2str(i) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
+        if exist(mvardnnFile, 'file')
+            load(mvardnnFile);
+        else
+            % init multivariate VAR DNN network
+            net = initMvarDnnNetwork(si, exSignal, nodeControl, exControl, i);
+            % training multivariate VAR DNN network
+            net = trainMvarDnnNetwork(si, exSignal, nodeControl, exControl, net, options);
+            [time, loss, rsme] = getMvarDnnTrainingResult(net);
+            disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
+            save(mvardnnFile, 'net');
+        end
+
+        % show mVAR-DNN-GC
+        figure; mvdnnGC = plotMvarDnnGCI(si, exSignal, nodeControl, exControl, net, 0, 0, 1);
+        figure; mvdnnDI = plotMvarDnnDI(net, nodeControl, exControl, 0, 1);
+        figure; mvdnnMIV = plotMvarDnnMIV(si, exSignal, nodeControl, exControl, net, 0, 1);
+        figure; gcI = plotMultivariateGCI(si, exSignal, nodeControl, exControl, i, 0, 0, 1);
     end
 end
 

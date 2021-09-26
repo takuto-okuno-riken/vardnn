@@ -14,11 +14,12 @@ function net = initMvarNetwork(X, exSignal, nodeControl, exControl, lags)
     nodeNum = size(X,1);
     sigLen = size(X,2);
     exNum = size(exSignal,1);
+    inputNum = nodeNum + exNum;
 
     % set node input
     Y = [X; exSignal];
-    inputNum = nodeNum + exNum;
-    
+    Y = flipud(Y.'); % need to flip signal
+
     % set control 3D matrix (node x node x lags)
     [~,~,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
 
@@ -27,8 +28,6 @@ function net = initMvarNetwork(X, exSignal, nodeControl, exControl, lags)
     r = cell(nodeNum,1);
     rint = cell(nodeNum,1);
     stats = cell(nodeNum,1);
-
-    Y = flipud(Y.'); % need to flip signal
 
     % first, calculate vector auto-regression (VAR) without target
     Yj = zeros(sigLen-lags, lags*inputNum);

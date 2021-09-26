@@ -14,11 +14,15 @@ function net = initMplsvarNetwork(X, exSignal, nodeControl, exControl, lags)
     nodeNum = size(X,1);
     sigLen = size(X,2);
     exNum = size(exSignal,1);
+    inputNum = nodeNum + exNum;
 
     % set node input
     Y = [X; exSignal];
-    nodeMax = nodeNum + exNum;
-    
+    Y = flipud(Y.'); % need to flip signal
+
+    % set control 3D matrix (node x node x lags)
+    [~,~,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+
     b = cell(nodeNum,1);
     XL = cell(nodeNum,1);
     YL = cell(nodeNum,1);
@@ -28,37 +32,22 @@ function net = initMplsvarNetwork(X, exSignal, nodeControl, exControl, lags)
     MSE = cell(nodeNum,1);
     stats = cell(nodeNum,1);
 
-    p = lags;
-    Y = flipud(Y.'); % need to flip signal
-    
     % find component number
-    ncomp = floor(nodeMax * p / 10);
+    ncomp = floor(inputNum * lags / 10);
     if ncomp < 5, ncomp = 5; end
     if ncomp > 50, ncomp = 50; end
-    if ncomp > (sigLen-p-1), ncomp = (sigLen-p-1); end
+    if ncomp > (sigLen-lags-1), ncomp = (sigLen-lags-1); end
     
     % first, calculate PLS vector auto-regression (VAR) without target
-    Yj = zeros(sigLen-p, p*nodeMax);
-    for k=1:p
-        Yj(:,1+nodeMax*(k-1):nodeMax*k) = Y(1+k:sigLen-p+k,:);
+    Yj = zeros(sigLen-lags, lags*inputNum);
+    for k=1:lags
+        Yj(:,1+inputNum*(k-1):inputNum*k) = Y(1+k:sigLen-lags+k,:);
     end
     for i=1:nodeNum
-        nodeIdx = [1:nodeNum];
-        if ~isempty(nodeControl)
-            [~,nodeIdx] = find(nodeControl(i,:)==1);
-        end
-        exIdx = [nodeNum+1:nodeNum+exNum];
-        if ~isempty(exControl)
-            [~,exIdx] = find(exControl(i,:)==1);
-            exIdx = exIdx + nodeNum;
-        end
-        idx = [];
-        for k=1:p
-            idx = [idx, nodeIdx+nodeMax*(k-1), exIdx+nodeMax*(k-1)];
-        end
-
+        [~,idx] = find(control(i,:,:)==1);
+        
         % PLS vector auto-regression (VAR)
-        Xt = Y(1:sigLen-p,i);
+        Xt = Y(1:sigLen-lags,i);
         Xti = Yj(:,idx);
         % apply the PLS regress function
         [XL{i},YL{i},XS{i},YS{i},b{i},PCTVAR{i},MSE{i},stats{i}] = plsregress(Xti,Xt,ncomp);

@@ -19,39 +19,28 @@ function net = initMlassovarNetwork(X, exSignal, nodeControl, exControl, lags, l
     nodeNum = size(X,1);
     sigLen = size(X,2);
     exNum = size(exSignal,1);
+    inputNum = nodeNum + exNum;
 
     % set node input
     Y = [X; exSignal];
-    nodeMax = nodeNum + exNum;
-    
+    Y = flipud(Y.'); % need to flip signal
+
+    % set control 3D matrix (node x node x lags)
+    [~,~,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+
     b = cell(nodeNum,1);
     info = cell(nodeNum,1);
 
-    p = lags;
-    Y = flipud(Y.'); % need to flip signal
-
     % first, calculate vector auto-regression (VAR) without target
-    Yj = zeros(sigLen-p, p*nodeMax);
-    for k=1:p
-        Yj(:,1+nodeMax*(k-1):nodeMax*k) = Y(1+k:sigLen-p+k,:);
+    Yj = zeros(sigLen-lags, lags*inputNum);
+    for k=1:lags
+        Yj(:,1+inputNum*(k-1):inputNum*k) = Y(1+k:sigLen-lags+k,:);
     end
     for i=1:nodeNum
-        nodeIdx = [1:nodeNum];
-        if ~isempty(nodeControl)
-            [~,nodeIdx] = find(nodeControl(i,:)==1);
-        end
-        exIdx = [nodeNum+1:nodeNum+exNum];
-        if ~isempty(exControl)
-            [~,exIdx] = find(exControl(i,:)==1);
-            exIdx = exIdx + nodeNum;
-        end
-        idx = [];
-        for k=1:p
-            idx = [idx, nodeIdx+nodeMax*(k-1), exIdx+nodeMax*(k-1)];
-        end
+        [~,idx] = find(control(i,:,:)==1);
 
         % vector auto-regression (VAR)
-        Xt = Y(1:sigLen-p,i);
+        Xt = Y(1:sigLen-lags,i);
         Xti = Yj(:,idx);
         % apply the regress function
         [b{i}, info{i}] = lasso(Xti,Xt,'Lambda',lambda,'Alpha',elaAlpha); % including Intercept

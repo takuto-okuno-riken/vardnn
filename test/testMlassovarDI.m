@@ -3,7 +3,7 @@ function testMlassovarDI
     % load signals
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
-    lags = 3;
+    lags = 1;
     nodeNum = 8;
     exNum = 0;
     sigLen = 200;
@@ -15,9 +15,14 @@ function testMlassovarDI
     si(4,2:end) = si(6,1:sigLen-1); % caution! node 2 & 4 is Multicollinearity case (correlated)
 
     %% test pattern 1 
-    [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(si, exSignal, [], exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
-    netMVAR = initMlassovarNetwork(si, exSignal, [], exControl, lags, lambda, elaAlpha);
-    
+    lassoFile = ['results/mlasso' num2str(lags) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
+    if exist(lassoFile, 'file')
+        load(lassoFile);
+    else
+        [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(si, exSignal, [], exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
+        netMVAR = initMlassovarNetwork(si, exSignal, [], exControl, lags, lambda, elaAlpha);
+        save(lassoFile, 'netMVAR', 'lambda', 'elaAlpha');
+    end
     % show multivaliate LassoVAR-DI
     figure; pDI = plotPlassovarDI(si, exSignal, [], exControl, lags, lambda, elaAlpha, 0);
     figure; mDI = plotMlassovarDI(netMVAR, [], exControl, 0);
@@ -28,6 +33,7 @@ function testMlassovarDI
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0);
 
     %% test pattern 2
+    lags = 3;
     exNum = 2;
     exSignal = siOrg(nodeNum+1:nodeNum+exNum,1:sigLen);
     % control is all positive input
@@ -35,9 +41,14 @@ function testMlassovarDI
     si(3,2:end) = exSignal(1,1:sigLen-1);
 
     % init MLassoVAR network
-    [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(si, exSignal, [], exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
-    netMVAR = initMlassovarNetwork(si, exSignal, [], exControl, lags, lambda, elaAlpha);
-    
+    lassoFile = ['results/mlasso' num2str(lags) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
+    if exist(lassoFile, 'file')
+        load(lassoFile);
+    else
+        [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(si, exSignal, [], exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
+        netMVAR = initMlassovarNetwork(si, exSignal, [], exControl, lags, lambda, elaAlpha);
+        save(lassoFile, 'netMVAR', 'lambda', 'elaAlpha');
+    end
     % show multivaliate MVAR-DI
     figure; pDI = plotPlassovarDI(si, exSignal, [], exControl, lags, lambda, elaAlpha, 0, 1);
     figure; mDI = plotMlassovarDI(netMVAR, [], exControl, 0, 1);
@@ -46,5 +57,33 @@ function testMlassovarDI
     figure; mGC = plotMlassovarGCI(si, exSignal, [], exControl, netMVAR, 0, 0.05, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0, 0, 1);
+
+    %% test pattern 2
+    lags = 3;
+    exNum = 4;
+    exSignal = siOrg(nodeNum+1:nodeNum+exNum,1:sigLen);
+    % control is all positive input
+    nodeControl = ones(nodeNum,nodeNum,lags);
+    for i=1:nodeNum, nodeControl(i,i,2)=0; end
+    exControl = ones(nodeNum,exNum);
+    si(3,2:end) = exSignal(1,1:sigLen-1);
+
+    % init MLassoVAR network
+    lassoFile = ['results/mlasso' num2str(lags) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
+    if exist(lassoFile, 'file')
+        load(lassoFile);
+    else
+        [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(si, exSignal, nodeControl, exControl, lags, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
+        netMVAR = initMlassovarNetwork(si, exSignal, nodeControl, exControl, lags, lambda, elaAlpha);
+        save(lassoFile, 'netMVAR', 'lambda', 'elaAlpha');
+    end
+    % show multivaliate MVAR-DI
+    figure; pDI = plotPlassovarDI(si, exSignal, nodeControl, exControl, lags, lambda, elaAlpha, 0, 1);
+    figure; mDI = plotMlassovarDI(netMVAR, nodeControl, exControl, 0, 1);
+    % show multivaliate & pairwise LassoVAR-GC
+    figure; pGC = plotPlassovarGCI(si, exSignal, nodeControl, exControl, lags, lambda, elaAlpha, 0, 0.05, 1);
+    figure; mGC = plotMlassovarGCI(si, exSignal, nodeControl, exControl, netMVAR, 0, 0.05, 1);
+    % compare to mvGC
+    figure; GC = plotMultivariateGCI(si, exSignal, nodeControl, exControl, lags, 0, 0, 1);
 end
 

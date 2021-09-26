@@ -41,8 +41,8 @@ function [MIV, MAIV] = calcMvarMIV(X, exSignal, nodeControl, exControl, net, isF
 
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && nodeControl(i,j,1) == 0, continue; end
-            if j>nodeNum && exControl(i,j-nodeNum,1) == 0, continue; end
+            if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
+            if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
             Yj1 = Yj; Yj2 = Yj;
             for k=1:lags
                 Yj1(:,j+nodeMax*(k-1)) = Yj(:,j+nodeMax*(k-1)) * 1.1;

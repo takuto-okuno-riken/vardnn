@@ -21,7 +21,12 @@ function net = initMpcvarNetwork(X, exSignal, nodeControl, exControl, lags, expl
 
     % set node input
     Y = [X; exSignal];
-    nodeMax = nodeNum + exNum;
+    inputNum = nodeNum + exNum;
+    
+    % set control 3D matrix (node x node x lags)
+    [~,~,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+
+    Y = flipud(Y.'); % need to flip signal
     
     coeff = cell(nodeNum,1);
     score = cell(nodeNum,1);
@@ -35,31 +40,16 @@ function net = initMpcvarNetwork(X, exSignal, nodeControl, exControl, lags, expl
     rint = cell(nodeNum,1);
     stats = cell(nodeNum,1);
 
-    p = lags;
-    Y = flipud(Y.'); % need to flip signal
-
     % first, calculate vector auto-regression (VAR) without target
-    Yj = zeros(sigLen-p, p*nodeMax);
-    for k=1:p
-        Yj(:,1+nodeMax*(k-1):nodeMax*k) = Y(1+k:sigLen-p+k,:);
+    Yj = zeros(sigLen-lags, lags*inputNum);
+    for k=1:lags
+        Yj(:,1+inputNum*(k-1):inputNum*k) = Y(1+k:sigLen-lags+k,:);
     end
     for i=1:nodeNum
-        nodeIdx = [1:nodeNum];
-        if ~isempty(nodeControl)
-            [~,nodeIdx] = find(nodeControl(i,:)==1);
-        end
-        exIdx = [nodeNum+1:nodeNum+exNum];
-        if ~isempty(exControl)
-            [~,exIdx] = find(exControl(i,:)==1);
-            exIdx = exIdx + nodeNum;
-        end
-        idx = [];
-        for k=1:p
-            idx = [idx, nodeIdx+nodeMax*(k-1), exIdx+nodeMax*(k-1)];
-        end
+        [~,idx] = find(control(i,:,:)==1);
 
         % vector auto-regression (VAR)
-        Xt = Y(1:sigLen-p,i);
+        Xt = Y(1:sigLen-lags,i);
         Xti = Yj(:,idx);
 
         % apply the Principal Component Regress function
@@ -75,7 +65,7 @@ function net = initMpcvarNetwork(X, exSignal, nodeControl, exControl, lags, expl
                 break;
             end
         end
-        pcXti = [score{i}(:,1:maxComp{i}), ones(sigLen-p,1)]; % might not be good to add bias
+        pcXti = [score{i}(:,1:maxComp{i}), ones(sigLen-lags,1)]; % might not be good to add bias
         [b{i},bint{i},r{i},rint{i},stats{i}] = regress(Xt, pcXti);
     end
     net.nodeNum = nodeNum;

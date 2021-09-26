@@ -11,7 +11,9 @@
 %  elaAlpha  Elastic Net Alpha for the Lasso (default:1)
 %  alpha     the significance level of F-statistic (default:0.05)
 
-function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairLassoGrangerCausality(X, Y, p, lambda, elaAlpha, alpha)
+function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairLassoGrangerCausality(X, Y, p, lambda, elaAlpha, alpha, Xcontrol, Ycontrol)
+    if nargin < 8, Ycontrol = ones(1,1,p); end
+    if nargin < 7, Xcontrol = ones(1,1,p); end
     if nargin < 6, alpha = 0.05; end
     if nargin < 5, elaAlpha = 1; end
     if nargin < 4, lambda = 0.01; end
@@ -28,6 +30,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairLassoGrangerCausality(X, Y, p,
     for i=1:p
         Xti(:,i) = X(i+1:n-p+i);
     end
+    Xti = Xti .* repmat(Xcontrol(:).',n-p,1);
     % apply the regress function
     [b,info] = lasso(Xti,Xt,'Lambda',lambda,'Alpha',elaAlpha); % including Intercept
     Xr = Xt - (Xti*b + info.Intercept);
@@ -41,6 +44,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairLassoGrangerCausality(X, Y, p,
         Yti(:,i) = X(i+1:n-p+i);
         Yti(:,p+i) = Y(i+1:n-p+i);
     end
+    Yti = Yti .* repmat([Xcontrol(:); Ycontrol(:)].',n-p,1);
     [b,info] = lasso(Yti,Yt,'Lambda',lambda,'Alpha',elaAlpha); % including Intercept
     Yr = Yt - (Yti*b + info.Intercept);
 %    [b,bint,Yr2] = regress(Yt,Yti);

@@ -20,52 +20,42 @@ function [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(X, exSignal, no
     nodeNum = size(X,1);
     sigLen = size(X,2);
     exNum = size(exSignal,1);
-    nodeMax = nodeNum + exNum;
-    p = lags;
+    inputNum = nodeNum + exNum;
 
     % set node input
     Y = [X; exSignal];
     Y = flipud(Y.'); % need to flip signal
 
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+
     % first, calculate vector auto-regression (VAR) without target
-    Yj = zeros(sigLen-p, p*nodeMax);
-    for k=1:p
-        Yj(:,1+nodeMax*(k-1):nodeMax*k) = Y(1+k:sigLen-p+k,:);
+    Yj = zeros(sigLen-lags, lags*inputNum);
+    for k=1:lags
+        Yj(:,1+inputNum*(k-1):inputNum*k) = Y(1+k:sigLen-lags+k,:);
     end
 
     % get full training & test set for lasso regression
     trainFullSet = {};
     for i=1:nodeNum
-        nodeIdx = [1:nodeNum];
-        if ~isempty(nodeControl)
-            [~,nodeIdx] = find(nodeControl(i,:)==1);
-        end
-        exIdx = [nodeNum+1:nodeMax];
-        if ~isempty(exControl)
-            [~,exIdx] = find(exControl(i,:)==1);
-            exIdx = exIdx + nodeNum;
-        end
-        idx = [];
-        for k=1:p
-            idx = [idx, nodeIdx+nodeMax*(k-1), exIdx+nodeMax*(k-1)];
-        end
-        idxList = [nodeIdx, exIdx];
-        nlen = length(idxList);
-        Xt = Y(1:sigLen-p,i);
+        [~,idx] = find(control(i,:,:)==1);
+        
+        % PLS vector auto-regression (VAR)
+        Xt = Y(1:sigLen-lags,i);
         Xti = Yj(:,idx);
         trainFullSet{end+1} = {Xti, Xt};
 
-        for j=1:nodeMax
+        for j=1:inputNum
             if i==j, continue; end
-            if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
-            if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
+            if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
+            if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
 
             % lasso vector auto-regression (VAR)
-            jIdx = idx;
-            for k=p:-1:1
-                jIdx(j+nlen*(k-1)) = [];
-            end
-            Xtj = Yj(:,jIdx);
+            control2 = control;
+            control2(i,j,:) = 0;
+            [~,idx2] = find(control2(i,:,:)==1);
+            Xtj = Yj(:,idx2);
+
             trainFullSet{end+1} = {Xtj, Xt};
         end
     end

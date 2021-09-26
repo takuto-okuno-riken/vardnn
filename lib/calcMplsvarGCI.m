@@ -20,17 +20,21 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMplsvarGCI(X, ex
     if nargin < 2, exSignal = []; end
     nodeNum = size(X,1);
     sigLen = size(X,2);
-    nodeInNum = nodeNum + net.exNum;
-    p = net.lags;
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
+    inputNum = nodeNum + net.exNum;
+    lags = net.lags;
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = inputNum; end
 
+    % set node input
     Y = [X; exSignal];
     Y = flipud(Y.'); % need to flip signal
 
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, net.exNum, lags);
+
     % first, calculate vector auto-regression (VAR) without target
-    Yj = zeros(sigLen-p, p*nodeInNum);
-    for k=1:p
-        Yj(:,1+nodeInNum*(k-1):nodeInNum*k) = Y(1+k:sigLen-p+k,:);
+    Yj = zeros(sigLen-lags, lags*inputNum);
+    for k=1:lags
+        Yj(:,1+inputNum*(k-1):inputNum*k) = Y(1+k:sigLen-lags+k,:);
     end
 
     nodeAIC = zeros(nodeNum,1);
@@ -43,23 +47,10 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMplsvarGCI(X, ex
     AIC = nan(nodeNum,nodeMax);
     BIC = nan(nodeNum,nodeMax);
     for i=1:nodeNum
-        nodeIdx = [1:nodeNum];
-        if ~isempty(nodeControl)
-            [~,nodeIdx] = find(nodeControl(i,:)==1);
-        end
-        exIdx = [nodeNum+1:nodeInNum];
-        if ~isempty(exControl)
-            [~,exIdx] = find(exControl(i,:)==1);
-            exIdx = exIdx + nodeNum;
-        end
-        idx = [];
-        for k=1:p
-            idx = [idx, nodeIdx+nodeInNum*(k-1), exIdx+nodeInNum*(k-1)];
-        end
-        idxList = [nodeIdx, exIdx];
-        nlen = length(idxList);
-        Xt = Y(1:sigLen-p,i);
-        Xti = Yj(:,idx);
+        [~,idx] = find(control(i,:,:)==1);
+        
+        % PLS vector auto-regression (VAR)
+        Xt = Y(1:sigLen-lags,i);
         mc = net.ncomp;
 
         % var of residuals of node
@@ -68,7 +59,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMplsvarGCI(X, ex
         Vxt = var(r,1);
 
         % AIC and BIC of this node (assuming residuals are gausiann distribution)
-        T = sigLen-p;
+        T = sigLen-lags;
         RSS = r'*r;
         k = mc+1;
         nodeAIC(i) = T*log(RSS/T) + 2 * k;
@@ -76,15 +67,15 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMplsvarGCI(X, ex
 
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
-            if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
+            if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
+            if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
 
             % PLS vector auto-regression (VAR)
-            jIdx = idx;
-            for k=p:-1:1
-                jIdx(j+nlen*(k-1)) = [];
-            end
-            Xtj = Yj(:,jIdx);
+            control2 = control;
+            control2(i,j,:) = 0;
+            [~,idx2] = find(control2(i,:,:)==1);
+            Xtj = Yj(:,idx2);
+
             % apply the PLS regress function
             [XL,YL,XS,YS,b,PCTVAR,MSE,stats] = plsregress(Xtj,Xt,mc);
             r = stats.Yresiduals;
@@ -104,9 +95,9 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMplsvarGCI(X, ex
             % F = ((RSS1 - RSS2) / (p2 - p1)) / (RSS2 / n - p2)
             %RSS1 = r'*r;  % p1 = p*nn1;
             RSS2 = RSS;   % p2 = p*nodeNum;
-            F(i,j) = ((RSS1 - RSS2)/p) / (RSS2 / (sigLen - k));
-            P(i,j) = 1 - fcdf(F(i,j),p,(sigLen-k));
-            cvFd(i,j) = finv(1-alpha,p,(sigLen-k));
+            F(i,j) = ((RSS1 - RSS2)/lags) / (RSS2 / (sigLen - k));
+            P(i,j) = 1 - fcdf(F(i,j),lags,(sigLen-k));
+            cvFd(i,j) = finv(1-alpha,lags,(sigLen-k));
             h(i,j) = F(i,j) > cvFd(i,j);
         end
     end

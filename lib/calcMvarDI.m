@@ -14,9 +14,9 @@ function [DI, DIsub, coeff] = calcMvarDI(net, nodeControl, exControl, isFullNode
     if nargin < 2, nodeControl = []; end
 
     nodeNum = net.nodeNum;
-    nodeInNum = nodeNum + net.exNum;
+    inputNum = nodeNum + net.exNum;
     lags = net.lags;
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeNum + net.exNum; end
 
     % set control 3D matrix (node x node x lags)
     [nodeControl,exControl,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, net.exNum, lags);
@@ -29,17 +29,17 @@ function [DI, DIsub, coeff] = calcMvarDI(net, nodeControl, exControl, isFullNode
         b = net.bvec{i};
         z = sum(b);
         DIsub(i,1) = z;
-        [~,idxList] = find(control(i,:,:)==1);
+        [~,idx] = find(control(i,:,:)==1);
 
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && nodeControl(i,j,1) == 0, continue; end
-            if j>nodeNum && exControl(i,j-nodeNum,1) == 0, continue; end
+            if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
+            if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
 
             zj = z;
             for k=1:lags
-                s = j + (k-1)*nodeMax;
-                bIdx = find(idxList==s);
+                s = j + (k-1)*inputNum;
+                bIdx = find(idx==s);
                 if ~isempty(bIdx)
                     zj = zj - b(bIdx);
                 end

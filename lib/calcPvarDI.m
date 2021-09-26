@@ -18,9 +18,8 @@ function [DI, DIsub, coeff] = calcPvarDI(X, exSignal, nodeControl, exControl, la
     nodeNum = size(X,1);
     sigLen = size(X,2);
     exNum = size(exSignal,1);
-    p = lags;
     if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeNum + exNum; end
-    
+
     % set node input
     Y = [X; exSignal];
     Y = flipud(Y.'); % need to flip signal
@@ -33,21 +32,26 @@ function [DI, DIsub, coeff] = calcPvarDI(X, exSignal, nodeControl, exControl, la
     coeff = nan(nodeNum, nodeMax);
     DIsub = nan(nodeNum, nodeMax, 2);
     for i=1:nodeNum
+        [~,idx] = find(control(i,i,:)==1);
+        Xt = Y(1:sigLen-lags,i);
+        Yi = zeros(sigLen-lags, lags);
+        for k=1:lags, Yi(:,k) = Y(1+k:sigLen-lags+k,i); end
+        Xti = Yi(:,idx);
+
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && nodeControl(i,j,1) == 0, continue; end
-            if j>nodeNum && exControl(i,j-nodeNum,1) == 0, continue; end
+            if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
+            if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
 
             % autoregression plus other regression
-            Yt = Y(1:(sigLen-p),i); % target
-            Yti = ones(sigLen-p, p*2+1);
-            for k=1:p
-                Yti(:,1+k) = Y(k+1:sigLen-p+k,i); % target
-                Yti(:,1+p+k) = Y(k+1:sigLen-p+k,j); % source
-            end
-            [b,bint,Yr] = regress(Yt,Yti);
+            [~,idx] = find(control(i,j,:)==1);
+            Yj = zeros(sigLen-lags, lags);
+            for k=1:lags, Yj(:,k) = Y(1+k:sigLen-lags+k,j); end
+            Xtj = [ones(size(Xti,1),1), Xti, Yj(:,idx)];
+
+            [b,bint,Yr] = regress(Xt,Xtj);
             DIsub(i,j,1) = sum(b);
-            DIsub(i,j,2) = sum(b(1:p+1));
+            DIsub(i,j,2) = sum(b(1:size(Xti,2)+1));
             coeff(i,j) = DIsub(i,j,1)-DIsub(i,j,2); % actually this is sum of b(p+2:end)
             DI(i,j) = abs(coeff(i,j));
         end

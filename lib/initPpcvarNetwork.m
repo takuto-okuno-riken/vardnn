@@ -18,12 +18,15 @@ function net = initPpcvarNetwork(X, exSignal, nodeControl, exControl, lags, expl
     sigLen = size(X,2);
     exNum = size(exSignal,1);
     expTh = explainedTh * 100;
-    p = lags;
+    nodeMax = nodeNum + exNum;
 
     % set node input
     Y = [X; exSignal];
-    nodeMax = nodeNum + exNum;
-    
+    Y = flipud(Y.'); % need to flip signal
+
+    % set control 3D matrix (node x node x lags)
+    [nodeControl, exControl, control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
+
     coeff = cell(nodeNum,nodeMax);
     score = cell(nodeNum,nodeMax);
     latent = cell(nodeNum,nodeMax);
@@ -37,36 +40,38 @@ function net = initPpcvarNetwork(X, exSignal, nodeControl, exControl, lags, expl
     stats = cell(nodeNum,nodeMax);
 
     for i=1:nodeNum
+        [~,idx] = find(control(i,i,:)==1);
+        Xt = Y(1:sigLen-lags,i);
+        Yi = zeros(sigLen-lags, lags);
+        for k=1:lags, Yi(:,k) = Y(1+k:sigLen-lags+k,i); end
+        Xti = Yi(:,idx);
+
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
-            if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
-            Y1 = flipud(Y(i,:));
-            Y2 = flipud(Y(j,:));
+            if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
+            if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
 
             % autoregression plus other regression
-            Yt = Y2(1:sigLen-p).'; % TODO: X1 & X2 opposite ??
-            Yti = ones(sigLen-p, p*2);
-            for k=1:p
-                Yti(:,k) = Y2(k+1:sigLen-p+k);
-                Yti(:,p+k) = Y1(k+1:sigLen-p+k);
-            end
+            [~,idx] = find(control(i,j,:)==1);
+            Yj = zeros(sigLen-lags, lags);
+            for k=1:lags, Yj(:,k) = Y(1+k:sigLen-lags+k,j); end
+            Xtj = [Xti, Yj(:,idx)];
 
             % apply the Principal Component Regress function
-            [coeff{i,j},score{i,j},latent{i,j},~,explained{i,j},mu{i,j}] = pca(Yti); % relation : Xti == score{i} * coeff{i}.' + repmat(mu{i},size(score{i},1),1);
+            [coeff{i,j},score{i,j},latent{i,j},~,explained{i,j},mu{i,j}] = pca(Xtj); % relation : Xtj == score{i} * coeff{i}.' + repmat(mu{i},size(score{i},1),1);
 
             % find 99% component range
             expTotal = 0;
-            maxComp{i,j} = size(score,2);
-            for k=1:size(Yti,2)
+            maxComp{i,j} = size(Xtj,2);
+            for k=1:size(Xtj,2)
                 expTotal = expTotal + explained{i,j}(k);
                 if expTotal >= expTh
                     maxComp{i,j} = k;
                     break;
                 end
             end
-            pcXti = [score{i,j}(:,1:maxComp{i,j}), ones(sigLen-p,1)]; % might not be good to add bias
-            [b{i,j},bint{i,j},r{i,j},rint{i,j},stats{i,j}] = regress(Yt, pcXti);
+            pcXtj = [score{i,j}(:,1:maxComp{i,j}), ones(sigLen-lags,1)]; % might not be good to add bias
+            [b{i,j},bint{i,j},r{i,j},rint{i,j},stats{i,j}] = regress(Xt, pcXtj);
         end
     end
     net.nodeNum = nodeNum;

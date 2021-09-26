@@ -13,11 +13,15 @@ function [DI, DIsub, coeff] = calcMplsvarDI(net, nodeControl, exControl, isFullN
     if nargin < 2, nodeControl = []; end
 
     nodeNum = net.nodeNum;
-    nodeInNum = nodeNum + net.exNum;
+    inputNum = nodeNum + net.exNum;
     lags = net.lags;
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
-    
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = inputNum; end
+
+    % set control 3D matrix (node x node x lags)
+    [nodeControl, exControl, control] = getControl3DMatrix(nodeControl, exControl, nodeNum, net.exNum, lags);
+
     % calc mPLSVAR DI
+    Yj = ones(1,lags*inputNum);
     DI = nan(nodeNum,nodeMax);
     coeff = nan(nodeNum,nodeMax);
     DIsub = nan(nodeNum,nodeMax+1);
@@ -25,28 +29,20 @@ function [DI, DIsub, coeff] = calcMplsvarDI(net, nodeControl, exControl, isFullN
         b = net.bvec{i};
         z = sum(b);
         DIsub(i,1) = z;
-
-        nodeIdx = [1:nodeNum];
-        if ~isempty(nodeControl)
-            [~,nodeIdx] = find(nodeControl(i,:)==1);
-        end
-        exIdx = [nodeNum+1:nodeNum+net.exNum];
-        if ~isempty(exControl)
-            [~,exIdx] = find(exControl(i,:)==1);
-            exIdx = exIdx + nodeNum;
-        end
-        idxList = [nodeIdx, exIdx];
-        nlen = length(idxList);
+        [~,idx] = find(control(i,:,:)==1);
 
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
-            if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
+            if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
+            if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
 
             zj = z;
-            bIdx = find(idxList==j);
             for k=1:lags
-                zj = zj - b(1+bIdx+nlen*(k-1));
+                s = j + (k-1)*inputNum;
+                bIdx = find(idx==s);
+                if ~isempty(bIdx)
+                    zj = zj - b(1+bIdx);
+                end
             end
 
             DI(i,j) = abs(z - zj); % actually this is sum of b(bIdx+nlen*(k-1))

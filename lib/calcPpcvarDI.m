@@ -13,31 +13,42 @@ function [DI, DIsub, coeff] = calcPpcvarDI(net, nodeControl, exControl, isFullNo
     if nargin < 2, nodeControl = []; end
 
     nodeNum = net.nodeNum;
-    nodeInNum = nodeNum + net.exNum;
     lags = net.lags;
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
-    
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeNum + net.exNum; end
+
+    % set control 3D matrix (node x node x lags)
+    [nodeControl, exControl, control] = getControl3DMatrix(nodeControl, exControl, nodeNum, net.exNum, lags);
+
     % calc pairwise PCVAR
     DI = nan(nodeNum, nodeMax);
     coeff = nan(nodeNum, nodeMax);
     DIsub = nan(nodeNum, nodeMax, 2);
     for i=1:nodeNum
+        [~,idx] = find(control(i,i,:)==1);
+        Yi = ones(1, lags);
+        Xti = Yi(:,idx);
+
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
-            if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
+            if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
+            if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
 
             mc = net.maxComp{i,j};
             mu = net.mu{i,j};
 
-            Xti = ones(1,lags*2);
-            score = (Xti - mu) / net.coeff{i,j}.';
+            % autoregression plus other regression
+            [~,idx] = find(control(i,j,:)==1);
+            Yj = ones(1, lags);
+            Xtj = [Xti, Yj(:,idx)];
+
+            score = (Xtj - mu) / net.coeff{i,j}.';
             subScore = [score(:,1:mc), 1];
             DIsub(i,j,1) = subScore * net.bvec{i,j};
         
             % autoregression plus other regression
-            Xti(:,lags+1:end) = 0;
-            score = (Xti - mu) / net.coeff{i,j}.';
+            Yj(:) = 0;
+            Xtj = [Xti, Yj(:,idx)];
+            score = (Xtj - mu) / net.coeff{i,j}.';
             subScore = [score(:,1:mc), 1];
             DIsub(i,j,2) = subScore * net.bvec{i,j};
             coeff(i,j) = DIsub(i,j,1)-DIsub(i,j,2); % actually this is sum of b(p+2:end)

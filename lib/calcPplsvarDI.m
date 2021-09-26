@@ -13,10 +13,13 @@ function [DI, DIsub, coeff] = calcPplsvarDI(net, nodeControl, exControl, isFullN
     if nargin < 2, nodeControl = []; end
 
     nodeNum = net.nodeNum;
-    nodeInNum = nodeNum + net.exNum;
-    p = net.lags;
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
-    
+    inputNum = nodeNum + net.exNum;
+    lags = net.lags;
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeNum + net.exNum; end
+
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, net.exNum, lags);
+
     % calc pairwise PCVAR
     DI = nan(nodeNum, nodeMax);
     coeff = nan(nodeNum, nodeMax);
@@ -24,11 +27,24 @@ function [DI, DIsub, coeff] = calcPplsvarDI(net, nodeControl, exControl, isFullN
     for i=1:nodeNum
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
-            if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
-            DIsub(i,j,1) = sum(net.bvec{i,j});
-            DIsub(i,j,2) = sum(net.bvec{i,j}(1:p+1));
-            coeff(i,j) = DIsub(i,j,1)-DIsub(i,j,2); % actually this is sum of b(p+2:end)
+            if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
+            if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
+
+            b = net.bvec{i,j};
+            z = sum(b);
+            DIsub(i,j,1) = z;
+            [~,idx] = find(control(i,j,:)==1);
+
+            zj = z;
+            for k=1:lags
+                s = j + (k-1)*inputNum;
+                bIdx = find(idx==s);
+                if ~isempty(bIdx)
+                    zj = zj - b(1+bIdx);
+                end
+            end
+            DIsub(i,j,2) = z - zj;
+            coeff(i,j) = zj; % actually this is sum of b(p+2:end)
             DI(i,j) = abs(coeff(i,j));
         end
     end

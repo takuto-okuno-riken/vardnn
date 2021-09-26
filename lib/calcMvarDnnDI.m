@@ -39,8 +39,8 @@ function [DI, DIsub] = calcMvarDnnDI(net, nodeControl, exControl, isFullNode)
         % imparement node signals
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && nodeControl(i,j,1) == 0, continue; end
-            if j>nodeNum && exControl(i,j-nodeNum,1) == 0, continue; end
+            if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
+            if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
 
             nodeInput = nodeInputOrg;
             for p=1:lags, nodeInput(j+(nodeNum + exNum)*(p-1),:) = 0; end

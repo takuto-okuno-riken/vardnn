@@ -46,8 +46,8 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPvarDnnGCI(X, exSignal, nodeContro
 
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && nodeControl(i,j,1) == 0, continue; end
-            if j>nodeNum && exControl(i,j-nodeNum,1) == 0, continue; end
+            if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
+            if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
 
             [~,idx] = find(control(i,j,:)==1);
             Yj = zeros(sigLen-lags, lags);
