@@ -13,6 +13,7 @@ function net = createMvarLstmNetwork(nodeNum, exNum, hiddenNums, lags)
     for i=1:nodeNum
         nodeLayers{i} = createMvarLstmLayers(nodeNum, exNum, hiddenNums);
     end
+    net.version = 1.1;
     net.nodeNum = nodeNum;
     net.exNum = exNum;
     net.lags = lags;
