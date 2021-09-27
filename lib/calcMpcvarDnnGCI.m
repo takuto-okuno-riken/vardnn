@@ -17,19 +17,21 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMpcvarDnnGCI(X, 
     if nargin < 6, alpha = 0.05; end
 
     nodeNum = net.nodeNum;
-    nodeInNum = nodeNum + net.exNum;
+    inputNum = nodeNum + net.exNum;
     sigLen = size(X,2);
     if isfield(net, 'lags'), lags = net.lags; else lags = 1; end
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
-    p = net.lags;
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = inputNum; end
+
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, net.exNum, lags);
 
     Y = [X; exSignal];
     Y = flipud(Y.'); % need to flip signal
 
     % first, calculate vector auto-regression (VAR) without target
-    Yj = zeros(sigLen-p, p*nodeInNum);
-    for k=1:p
-        Yj(:,1+nodeInNum*(k-1):nodeInNum*k) = Y(1+k:sigLen-p+k,:);
+    Yj = zeros(sigLen-lags, lags*inputNum);
+    for k=1:lags
+        Yj(:,1+inputNum*(k-1):inputNum*k) = Y(1+k:sigLen-lags+k,:);
     end
 
     % calc multivariate PC VAR DNN DI
@@ -47,26 +49,16 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMpcvarDnnGCI(X, 
     AIC = nan(nodeNum,nodeMax);
     BIC = nan(nodeNum,nodeMax);
     for i=1:nodeNum
-        nodeIdx = [1:nodeNum];
-        if ~isempty(nodeControl)
-            [~,nodeIdx] = find(nodeControl(i,:)==1);
-        end
-        exIdx = [nodeNum+1:nodeInNum];
-        if ~isempty(exControl)
-            [~,exIdx] = find(exControl(i,:)==1);
-            exIdx = exIdx + nodeNum;
-        end
-        idx = [];
-        for k=1:p
-            idx = [idx, nodeIdx+nodeInNum*(k-1), exIdx+nodeInNum*(k-1)];
-        end
-        nodeTeach = Y(1:sigLen-p,i);
-        nodeInput = Yj(:,idx);
+        [~,idx] = find(control(i,:,:)==1);
         
-        Z = (nodeInput - repmat(mu{i},size(nodeInput,1),1)) / coeff{i}.';
+        % vector auto-regression (VAR)
+        Xt = Y(1:sigLen-lags,i);
+        Xti = Yj(:,idx);
+        
+        Z = (Xti - repmat(mu{i},size(Xti,1),1)) / coeff{i}.';
         % predict 
         Si = predict(nodeNetwork{i}, Z.', 'ExecutionEnvironment', 'cpu');
-        err = Si - nodeTeach.';
+        err = Si - Xt.';
         VarEi = var(err,1);
 
         % AIC and BIC of this node (assuming residuals are gausiann distribution)
@@ -82,13 +74,14 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMpcvarDnnGCI(X, 
         % imparement node signals
         for j=1:nodeMax
             if i==j, continue; end
-            impInput = nodeInput;
-            for p=1:lags, impInput(:,j+nodeInNum*(p-1)) = 0; end
+            Ytj = Yj;
+            for k=1:lags, Ytj(:,j+inputNum*(k-1)) = 0; end
+            Xtj = Ytj(:,idx);
 
             % predict 
-            Z = (impInput - repmat(mu{i},size(nodeInput,1),1)) / coeff{i}.';
+            Z = (Xtj - repmat(mu{i},size(Xti,1),1)) / coeff{i}.';
             Sj = predict(nodeNetwork{i}, Z.', 'ExecutionEnvironment', 'cpu');
-            err = Sj - nodeTeach.';
+            err = Sj - Xt.';
             VarEj = var(err,1);
             gcI(i,j) = log(VarEj / VarEi);
 

@@ -1,5 +1,5 @@
 
-function testMpcvarDnnDI
+function testMvarLstmDI
     % load signals
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
@@ -23,28 +23,28 @@ function testMpcvarDnnDI
         'ExecutionEnvironment','cpu', ...
         'MaxEpochs',maxEpochs, ...
         'MiniBatchSize',miniBatchSize, ...
-        'Shuffle','every-epoch', ...
-        'L2Regularization',0.05, ...
+        'SequenceLength','longest', ...
+        'Shuffle','never', ...
         'GradientThreshold',5,...
         'Verbose',false);
 %            'Plots','training-progress');
 
     %% test pattern 1 
-    netFile = ['results/mpcvardnn' num2str(lags) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
+    netFile = ['results/mvarlstm' num2str(lags) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
     if exist(netFile, 'file')
         load(netFile);
     else
-        net = initMpcvarDnnNetwork(si, exSignal, [], exControl, lags);
-        % training multivariate VAR DNN network
-        net = trainMpcvarDnnNetwork(si, exSignal, [], exControl, net, options);
+        net = initMvarLstmNetwork(si, exSignal, [], exControl, lags);
+        % training multivariate VAR LSTM network
+        net = trainMvarLstmNetwork(si, exSignal, [], exControl, net, options);
         [time, loss, rsme] = getMvarDnnTrainingResult(net);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
         save(netFile, 'net');
     end
-    % show multivaliate PCVARDNN-DI
-    figure; mDI = plotMpcvarDnnDI(net, [], exControl, 0);
-    % show multivaliate PCVARDNN-GC
-    figure; mGC = plotMpcvarDnnGCI(si, exSignal, [], exControl, net, 0);
+    % show multivaliate VARLSTM-DI
+    figure; mDI = plotMvarLstmDI(net, [], exControl, 0);
+    % show multivaliate VARLSTM-GC
+    figure; mGC = plotMvarLstmGCI(si, exSignal, [], exControl, net, 0);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0);
 
@@ -57,22 +57,22 @@ function testMpcvarDnnDI
     exControl = ones(nodeNum,exNum);
     si(3,2:end) = exSignal(1,1:sigLen-1);
 
-    % init PCVARDNN network
-    netFile = ['results/mpcvardnn' num2str(lags) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
+    % init VARLSTM network
+    netFile = ['results/mvarlstm' num2str(lags) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
     if exist(netFile, 'file')
         load(netFile);
     else
-        net = initMpcvarDnnNetwork(si, exSignal, [], exControl, lags);
-        % training multivariate VAR DNN network
-        net = trainMpcvarDnnNetwork(si, exSignal, [], exControl, net, options);
+        net = initMvarLstmNetwork(si, exSignal, [], exControl, lags);
+        % training multivariate VAR LSTM network
+        net = trainMvarLstmNetwork(si, exSignal, [], exControl, net, options);
         [time, loss, rsme] = getMvarDnnTrainingResult(net);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
         save(netFile, 'net');
     end
-    % show multivaliate PCVARDNN-DI
-    figure; mDI = plotMpcvarDnnDI(net, [], exControl, 0, 1);
-    % show multivaliate PCVARDNN-GC
-    figure; mGC = plotMpcvarDnnGCI(si, exSignal, [], exControl, net, 0, 0.05, 1);
+    % show multivaliate VARLSTM-DI
+    figure; mDI = plotMvarLstmDI(net, [], exControl, 0, 1);
+    % show multivaliate VARLSTM-GC
+    figure; mGC = plotMvarLstmGCI(si, exSignal, [], exControl, net, 0, 0.05, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0, 0.05, 1);
 
@@ -89,22 +89,22 @@ function testMpcvarDnnDI
     si(7,3:end) = exSignal(2,1:sigLen-2); % lag=2, this will be blocked by exControl
     exControl(7,2,2) = 0; % <= comment out and check control effect
 
-    % init PCVARDNN network
-    netFile = ['results/mpcvardnn' num2str(lags) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
+    % init VARLSTM network
+    netFile = ['results/mvarlstm' num2str(lags) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
     if exist(netFile, 'file')
         load(netFile);
     else
-        net = initMpcvarDnnNetwork(si, exSignal, nodeControl, exControl, lags);
-        % training multivariate VAR DNN network
-        net = trainMpcvarDnnNetwork(si, exSignal, nodeControl, exControl, net, options);
+        net = initMvarLstmNetwork(si, exSignal, nodeControl, exControl, lags);
+        % training multivariate VAR LSTM network
+        net = trainMvarLstmNetwork(si, exSignal, nodeControl, exControl, net, options);
         [time, loss, rsme] = getMvarDnnTrainingResult(net);
         disp(['train result time=' num2str(time) ', loss=' num2str(loss) ', rsme=' num2str(rsme)]);
         save(netFile, 'net');
     end
-    % show multivaliate PCVARDNN-DI
-    figure; mDI = plotMpcvarDnnDI(net, nodeControl, exControl, 0, 1);
-    % show multivaliate PCVARDNN-GC
-    figure; mGC = plotMpcvarDnnGCI(si, exSignal, nodeControl, exControl, net, 0, 0.05, 1);
+    % show multivaliate VARLSTM-DI
+    figure; mDI = plotMvarLstmDI(net, nodeControl, exControl, 0, 1);
+    % show multivaliate VARLSTM-GC
+    figure; mGC = plotMvarLstmGCI(si, exSignal, nodeControl, exControl, net, 0, 0.05, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, nodeControl, exControl, lags, 0, 0.05, 1);
 end

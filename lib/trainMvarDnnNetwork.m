@@ -15,26 +15,25 @@ function trainedNet = trainMvarDnnNetwork(X, exSignal, nodeControl, exControl, n
     exNum = size(exSignal,1);
     trainedNet = net;
     if isfield(net, 'lags'), lags = net.lags; else lags = 1; end
+    inputNum = nodeNum + exNum;
 
     % set node input
     Y = [X; exSignal];
-    inputNum = nodeNum + exNum;
-
+    Y = flipud(Y.'); % need to flip signal
+    
     % set control 3D matrix (node x node x lags)
     [~,~,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
 
-    Y = flipud(Y.'); % need to flip signal
+    % set input signals
+    Yj = zeros(sigLen-lags, lags*inputNum);
+    for p=1:lags
+        Yj(:,1+inputNum*(p-1):inputNum*p) = Y(1+p:sigLen-lags+p,:);
+    end
 
     % training whole multivariate VAR DNN network
     disp('start training whole multivariate VAR DNN network');
     ticH = tic;
 
-    % set training data
-    Yj = zeros(sigLen-lags, lags*inputNum);
-    for p=1:lags
-        Yj(:,1+inputNum*(p-1):inputNum*p) = Y(1+p:sigLen-lags+p,:);
-    end
-    
     nodeLayers = trainedNet.nodeLayers;
     nodeNetwork = cell(nodeNum,1);
     trainInfo = cell(nodeNum,1);

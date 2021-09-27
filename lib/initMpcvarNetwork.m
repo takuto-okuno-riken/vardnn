@@ -18,16 +18,15 @@ function net = initMpcvarNetwork(X, exSignal, nodeControl, exControl, lags, expl
     sigLen = size(X,2);
     exNum = size(exSignal,1);
     expTh = explainedTh * 100;
+    inputNum = nodeNum + exNum;
 
     % set node input
     Y = [X; exSignal];
-    inputNum = nodeNum + exNum;
+    Y = flipud(Y.'); % need to flip signal
     
     % set control 3D matrix (node x node x lags)
     [~,~,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
 
-    Y = flipud(Y.'); % need to flip signal
-    
     coeff = cell(nodeNum,1);
     score = cell(nodeNum,1);
     latent = cell(nodeNum,1);

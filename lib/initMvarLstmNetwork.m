@@ -17,6 +17,7 @@ function net = initMvarLstmNetwork(X, exSignal, nodeControl, exControl, lags)
     exNum = size(exSignal,1);
 
     % estimate neuron number of hidden layers
+    % LSTM takes time lag inputs with one neuron. Then, not doing input pruning.
     hiddenNums = estimateHiddenNeurons((nodeNum+exNum)*lags, sigLen);
     
     % layer parameters

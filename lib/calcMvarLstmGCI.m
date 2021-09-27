@@ -17,14 +17,18 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMvarLstmGCI(X, e
     if nargin < 6, alpha = 0.05; end
 
     nodeNum = size(X,1);
-    nodeInNum = nodeNum + size(exSignal,1);
+    exNum = size(exSignal,1);
     sigLen = size(X,2);
     if isfield(net, 'lags'), lags = net.lags; else lags = 1; end
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeNum + exNum; end
 
     % set node input
     Y = [X; exSignal];
+    Y = flipud(Y.'); % need to flip signal
     seqLen = sigLen-lags;
+    
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
 
     % calc mVAR LSTM granger causality
     nodeAIC = zeros(nodeNum,1);
@@ -38,18 +42,16 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMvarLstmGCI(X, e
     BIC = nan(nodeNum,nodeMax);
     for i=1:nodeNum
         XTrain = cell(seqLen,1);
-        YTrain = X(i,1+lags:end).';
-        nodeInput = Y;
-        if ~isempty(nodeControl)
-            filter = repmat(nodeControl(i,:).', 1, size(nodeInput,2));
-            nodeInput(1:nodeNum,:) = nodeInput(1:nodeNum,:) .* filter;
-        end
-        if ~isempty(exControl)
-            filter = repmat(exControl(i,:).', 1, size(nodeInput,2));
-            nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
-        end
-        for ii=1:seqLen
-            XTrain{ii} = nodeInput(:,ii:ii+(lags-1));
+        YTrain = Y(1:seqLen,i);
+        iNodeControl = squeeze(nodeControl(i,:,:));
+        iExControl = squeeze(exControl(i,:,:));
+        if size(nodeControl,3)<=1, iNodeControl = iNodeControl.'; end
+        if size(exControl,3)<=1, iExControl = iExControl.'; end
+        for j=1:seqLen
+            Xj = Y(j+1:j+lags,:).';
+            Xj(1:nodeNum,:) = Xj(1:nodeNum,:) .* iNodeControl;
+            Xj(nodeNum+1:end,:) = Xj(nodeNum+1:end,:) .* iExControl;
+            XTrain{j} = Xj;
         end
         % predict 
         Si = predict(net.nodeNetwork{i}, XTrain, 'ExecutionEnvironment', 'cpu');

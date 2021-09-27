@@ -17,7 +17,11 @@ function trainedNet = trainMvarLstmNetwork(X, exSignal, nodeControl, exControl, 
 
     % set node input
     Y = [X; exSignal];
+    Y = flipud(Y.'); % need to flip signal
     seqLen = sigLen-lags;
+    
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
 
     % training whole multivariate VAR LSTM network
     disp('start training whole multivariate VAR LSTM network');
@@ -31,18 +35,16 @@ function trainedNet = trainMvarLstmNetwork(X, exSignal, nodeControl, exControl, 
 %    parfor i=1:nodeNum    % for parallel processing
         disp(['training node ' num2str(i)]);
         XTrain = cell(seqLen,1);
-        YTrain = X(i,1+lags:end).';
-        nodeInput = Y;
-        if ~isempty(nodeControl)
-            filter = repmat(nodeControl(i,:).', 1, size(nodeInput,2));
-            nodeInput(1:nodeNum,:) = nodeInput(1:nodeNum,:) .* filter;
-        end
-        if ~isempty(exControl)
-            filter = repmat(exControl(i,:).', 1, size(nodeInput,2));
-            nodeInput(nodeNum+1:end,:) = nodeInput(nodeNum+1:end,:) .* filter;
-        end
+        YTrain = Y(1:seqLen,i);
+        iNodeControl = squeeze(nodeControl(i,:,:));
+        iExControl = squeeze(exControl(i,:,:));
+        if size(nodeControl,3)<=1, iNodeControl = iNodeControl.'; end
+        if size(exControl,3)<=1, iExControl = iExControl.'; end
         for j=1:seqLen
-            XTrain{j} = nodeInput(:,j:j+(lags-1));
+            Xj = Y(j+1:j+lags,:).';
+            Xj(1:nodeNum,:) = Xj(1:nodeNum,:) .* iNodeControl;
+            Xj(nodeNum+1:end,:) = Xj(nodeNum+1:end,:) .* iExControl;
+            XTrain{j} = Xj;
         end
         [nodeNetwork{i}, trainInfo{i}] = trainNetwork(XTrain, YTrain, nodeLayers{i}, options);
     end

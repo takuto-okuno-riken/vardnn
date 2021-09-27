@@ -27,7 +27,7 @@ function [DI, DIsub] = plotPvarDnnDI(net, nodeControl, exControl, range, isFullN
     clims = [-range, range];
     imagesc(DI2,clims);
     daspect([1 1 1]);
-    title('Pairwised VAR DNN Directional Influence');
+    title('pairwise VAR DNN Directional Influence');
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;

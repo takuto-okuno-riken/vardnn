@@ -16,37 +16,23 @@ function [DI, DIsub] = calcMpcvarDnnDI(net, nodeControl, exControl, isFullNode)
 
     % set input control indexes
     nodeNum = net.nodeNum;
-    nodeInNum = nodeNum + net.exNum;
-    if isFullNode==0, nodeMax = nodeNum; else nodeMax = nodeInNum; end
+    inputNum = nodeNum + net.exNum;
+    if isFullNode==0, nodeMax = nodeNum; else nodeMax = inputNum; end
 
-    idxs = {};
-    for i=1:nodeNum
-        nodeIdx = [1:nodeNum];
-        if ~isempty(nodeControl)
-            [~,nodeIdx] = find(nodeControl(i,:)==1);
-        end
-        exIdx = [nodeNum+1:nodeInNum];
-        if ~isempty(exControl)
-            [~,exIdx] = find(exControl(i,:)==1);
-            exIdx = exIdx + nodeNum;
-        end
-        idx = [];
-        for k=1:lags
-            idx = [idx, nodeIdx+nodeInNum*(k-1), exIdx+nodeInNum*(k-1)];
-        end
-        idxs{i} = idx;
-    end
+    % set control 3D matrix (node x node x lags)
+    [nodeControl,exControl,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, net.exNum, lags);
 
     % calc multivariate PC VAR DNN DI
     mu = net.mu;
     coeff = net.coeff;
     nodeNetwork = net.nodeNetwork;
 
-    S1 = ones(nodeInNum*lags, 1);
+    S1 = ones(inputNum*lags, 1);
     DI = nan(nodeNum,nodeMax);
     DIsub = nan(nodeNum,nodeMax+1);
     for i=1:nodeNum
-        S2 = S1(idxs{i},1);
+        [~,idx] = find(control(i,:,:)==1);
+        S2 = S1(idx,1);
         Z = (S2.' - mu{i}) / coeff{i}.';
         % predict
         DIsub(i,1) = predict(nodeNetwork{i}, Z.', 'ExecutionEnvironment', 'cpu');
@@ -54,12 +40,12 @@ function [DI, DIsub] = calcMpcvarDnnDI(net, nodeControl, exControl, isFullNode)
         % imparement node signals
         for j=1:nodeMax
             if i==j, continue; end
-            if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
-            if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
+            if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
+            if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
 
             S3 = S1;
-            for p=1:lags, S3(j+nodeInNum*(p-1),:) = 0; end
-            S3 = S3(idxs{i},1);
+            for p=1:lags, S3(j+inputNum*(p-1),:) = 0; end
+            S3 = S3(idx,1);
             Z = (S3.' - mu{i}) / coeff{i}.';
 
             % predict 
