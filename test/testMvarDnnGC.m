@@ -114,12 +114,17 @@ function testMvarDnnGC
     exSignal = siOrg(nodeNum+1:nodeNum+exNum,1:sigLen);
     % control is all positive input
     nodeControl = [];
-    exControl = ones(nodeNum,exNum);
+    exControl = [];
     si(3,2:end) = exSignal(1,1:sigLen-1);
     for i=1:5
         if i>1
             nodeControl = ones(nodeNum,nodeNum,i);
             for j=1:nodeNum, nodeControl(j,j,2)=0; end
+            exControl = ones(nodeNum,exNum,i);
+            si(5,3:end) = si(1,1:sigLen-2); % lag=2, this will be blocked by nodeControl
+            nodeControl(5,1,2) = 0; % <= comment out and check control effect
+            si(7,3:end) = exSignal(2,1:sigLen-2); % lag=2, this will be blocked by exControl
+            exControl(7,2,2) = 0; % <= comment out and check control effect
         end
         mvardnnFile = ['results/mvardnn' num2str(i) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
         if exist(mvardnnFile, 'file')

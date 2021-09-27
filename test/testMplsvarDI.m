@@ -57,8 +57,12 @@ function testMplsvarDI
     % control is all positive input
     nodeControl = ones(nodeNum,nodeNum,lags);
     for i=1:nodeNum, nodeControl(i,i,2)=0; end
-    exControl = ones(nodeNum,exNum);
+    exControl = ones(nodeNum,exNum,lags);
     si(3,2:end) = exSignal(1,1:sigLen-1);
+    si(5,3:end) = si(1,1:sigLen-2); % lag=2, this will be blocked by nodeControl
+    nodeControl(5,1,2) = 0; % <= comment out and check control effect
+    si(7,3:end) = exSignal(2,1:sigLen-2); % lag=2, this will be blocked by exControl
+    exControl(7,2,2) = 0; % <= comment out and check control effect
 
     % init PCVAR network
     net = initMplsvarNetwork(si, exSignal, nodeControl, exControl, lags);

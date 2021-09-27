@@ -78,8 +78,12 @@ function testPvarDnnGC
     % control is all positive input
     nodeControl = ones(nodeNum,nodeNum,lags);
     for i=1:nodeNum, nodeControl(i,i,2) = 0; end
-    exControl = ones(nodeNum,exNum);
+    exControl = ones(nodeNum,exNum,lags);
     si(3,2:end) = exSignal(1,1:sigLen-1);
+    si(1,3:end) = exSignal(2,1:sigLen-2); % lag=2, this will be blocked by exControl
+    exControl(1,2,2) = 0; % <= comment out and check control effect
+    si(5,4:end) = si(1,1:sigLen-3); % lag=3, this will be blocked by nodeControl
+    nodeControl(5,1,3) = 0; % <= comment out and check control effect
 
     % do training or load pairwise VAR DNN network
     pvardnnFile = ['results/pvardnn' num2str(lags) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
