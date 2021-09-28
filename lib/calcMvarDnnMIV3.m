@@ -1,6 +1,6 @@
 %%
-% Caluclate multivariate VAR DNN Mean Impact Value (MIV)
-% returns multivariate VAR DNN Mean Impact Value matrix (MIV) and Mean Absolute Impact Value matrix (MAIV)
+% Caluclate multivariate VAR DNN Mean Impact Value of 3D matrix (Full Input)
+% returns multivariate VAR DNN Mean Impact Value 3D matrix (MIV) and Mean Absolute Impact Value 3D matrix (MAIV)
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -9,7 +9,7 @@
 %  net          trained multivariate VAR DNN network
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [MIV, MAIV] = calcMvarDnnMIV(X, exSignal, nodeControl, exControl, net, isFullNode)
+function [MIV, MAIV] = calcMvarDnnMIV3(X, exSignal, nodeControl, exControl, net, isFullNode)
     if nargin < 6, isFullNode = 0; end
 
     nodeNum = size(X,1);
@@ -34,30 +34,29 @@ function [MIV, MAIV] = calcMvarDnnMIV(X, exSignal, nodeControl, exControl, net, 
     end
 
     % calc mVAR DNN MIV
-    MIV = nan(nodeNum, nodeMax);
-    MAIV = nan(nodeNum, nodeMax);
+    MIV = nan(nodeNum, nodeMax, lags);
+    MAIV = nan(nodeNum, nodeMax, lags);
     for i=1:nodeNum
         if isempty(net.nodeNetwork{i}), continue; end
         [~,idx] = find(control(i,:,:)==1);
         
         % imparement node signals
         for j=1:nodeMax
-            if i==j, continue; end
-            Xj1 = Yj;
-            Xj2 = Yj;
             for p=1:lags
+                Xj1 = Yj;
+                Xj2 = Yj;
                 n = j + inputNum * (p-1);
                 Xj1(:,n) = Xj1(:,n) * 1.1; 
                 Xj2(:,n) = Xj2(:,n) * 0.9; 
-            end
-            Xj1 = Xj1(:,idx);
-            Xj2 = Xj2(:,idx);
+                Xj1 = Xj1(:,idx);
+                Xj2 = Xj2(:,idx);
 
-            % predict 
-            N1 = predict(net.nodeNetwork{i}, Xj1.', 'ExecutionEnvironment', 'cpu');
-            N2 = predict(net.nodeNetwork{i}, Xj2.', 'ExecutionEnvironment', 'cpu');
-            MIV(i,j) = mean(N1 - N2);
-            MAIV(i,j) = mean(abs(N1 - N2));
+                % predict 
+                N1 = predict(net.nodeNetwork{i}, Xj1.', 'ExecutionEnvironment', 'cpu');
+                N2 = predict(net.nodeNetwork{i}, Xj2.', 'ExecutionEnvironment', 'cpu');
+                MIV(i,j,p) = mean(N1 - N2);
+                MAIV(i,j,p) = mean(abs(N1 - N2));
+            end
         end
     end
 end

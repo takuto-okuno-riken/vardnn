@@ -4,12 +4,8 @@
 %  dFC          directed FC matrix
 %  name         directed FC name for graph title
 %  range        plotting minimum and maximum range of dFC (default:0.5)
-%  rowcut       cut bottom rows of result CI matrix (default:0)
 
-function plotDirectedFC(dFC, name, range, rowcut)
-    if nargin < 4
-        rowcut = 0;
-    end
+function plotDirectedFC(dFC, name, range)
     if nargin < 3
         range = 0.5;
     end
@@ -20,7 +16,6 @@ function plotDirectedFC(dFC, name, range, rowcut)
         dFC = (dFC - avg) / sigma;
         range = 3;
     end
-    if rowcut>0, dFC(end-rowcut+1:end,:) = []; end
     clims = [-range, range];
     imagesc(dFC,clims);
     daspect([1 1 1]);

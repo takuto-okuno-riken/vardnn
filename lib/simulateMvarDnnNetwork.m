@@ -40,6 +40,7 @@ function [S, time] = simulateMvarDnnNetwork(X, exSignal, nodeControl, exControl,
     for t=lags:sigLen-1
         if mod(t,10)==0, disp(['step : ' num2str(t)]); end
         for i=1:nodeNum
+            if isempty(net.nodeNetwork{i}), S(i,t+1)=S(i,t); continue; end
             S2 = [];
             for k=1:lags
                 S2 = [S2; S(idxs{i,k},t-(k-1))];

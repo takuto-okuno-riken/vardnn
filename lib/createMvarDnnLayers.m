@@ -12,6 +12,13 @@ function layers = createMvarDnnLayers(hiddenNums, nNodeControl, nExControl, acti
     if nargin < 5, initWeightFunc = []; initWeightParam = []; initBias = []; currentNode = 0; end
     if nargin < 4, activateFunc = @reluLayer; end
 
+    % check input number. if nothing return empty.
+    inputNums = sum(nNodeControl,'all') + sum(nExControl,'all');
+    if inputNums <= 0
+        layers = [];
+        return;
+    end
+
     % init first fully connected layer
     v = ver('nnet');
     nnetver = str2num(v.Version);
@@ -35,7 +42,6 @@ function layers = createMvarDnnLayers(hiddenNums, nNodeControl, nExControl, acti
     end
     
     %
-    inputNums = sum(nNodeControl,'all') + sum(nExControl,'all');
     inLayers = [
         % input layer
         sequenceInputLayer(inputNums);

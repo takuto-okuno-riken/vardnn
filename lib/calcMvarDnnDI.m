@@ -30,6 +30,7 @@ function [DI, DIsub] = calcMvarDnnDI(net, nodeControl, exControl, isFullNode)
     DIsub = nan(nodeNum,nodeMax+1);
     nodeInputOrg = ones((nodeNum + exNum)*lags, 1);
     for i=1:nodeNum
+        if isempty(net.nodeNetwork{i}), continue; end
         [~,idx] = find(control(i,:,:)==1);
         nodeInput = nodeInputOrg(idx,1);
 

@@ -40,6 +40,7 @@ function trainedNet = trainMvarDnnNetwork(X, exSignal, nodeControl, exControl, n
     initWeights = cell(nodeNum,1);
     for i=1:nodeNum
 %    parfor i=1:nodeNum    % for parallel processing
+        if isempty(nodeLayers{i}), continue; end
         disp(['training node ' num2str(i)]);
         [~,idx] = find(control(i,:,:)==1);
         

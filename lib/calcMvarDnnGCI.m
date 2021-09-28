@@ -55,6 +55,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMvarDnnGCI(X, ex
     AIC = nan(nodeNum,nodeMax);
     BIC = nan(nodeNum,nodeMax);
     for i=1:nodeNum
+        if isempty(net.nodeNetwork{i}), continue; end
         [~,idx] = find(control(i,:,:)==1);
         
         Xt = Y(1:sigLen-lags,i);

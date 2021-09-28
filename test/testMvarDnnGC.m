@@ -60,7 +60,6 @@ function testMvarDnnGC
     exControl = ones(nodeNum,exNum);
     si(3,2:end) = exSignal(1,1:sigLen-1);
     for i=1:5
-    exControl = ones(nodeNum,exNum);
         mvardnnFile = ['results/mvardnn' num2str(i) '-gc-test' num2str(nodeNum) '-' num2str(exNum) '.mat'];
         if exist(mvardnnFile, 'file')
             load(mvardnnFile);
