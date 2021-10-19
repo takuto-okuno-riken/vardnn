@@ -7,8 +7,9 @@ Based on VARDNN framework, two types of directed FC are defined, such as VARDNN-
 <img src="data/figure1.jpg">
 </div>
 
-This toolbox includes several causal analysis algorithms, such as VARDNN-DI, VARDNN-GC, multivariate Granger Causality, pairwise Granger Causality,
-linear Transfer Entropy, Functional Connectivity (Correlation), Partial Correlation and Wavelet Coherence to estimate conectivity from multiple node signals.
+This toolbox includes several causal analysis algorithms, such as VARDNN-DI, VARDNN-GC, VARLSTM-GC, multivariate Granger Causality (GC), pairwise GC,
+multivariate Principal Component (PC)-GC, multivariate Partial Least Squares (PLS)-GC, multivariate Elastic Net (EN)-GC, linear Transfer Entropy, 
+Functional Connectivity (Correlation), Partial Correlation, PC-PC, PLS-PC, EN-PC and Wavelet Coherence to estimate conectivity from multiple node signals.
 <div align="center">
 <img src="data/figure3b.jpg">
 </div>
