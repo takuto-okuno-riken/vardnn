@@ -273,6 +273,40 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 f = load(netName);
                 if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
                 [mat, subweights(:,:,i)] = calcMpcvarDnnDI(f.netDLCM, [], f.exControl);
+            case {'dls'}
+                netName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                if exist(netName, 'file')
+                    f = load(netName);
+                    mat = f.mat;
+                else
+                    if isRaw
+                        si = signals{i};
+                        sig=0; c=0; maxsi=0; minsi=0;
+                    else
+                        [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i},NaN,sigmoidAlpha);
+                    end
+                    net = initMvarLstmNetwork(si, exSignal, [], exControl, lags);
+                    % training VARLSTM network
+                    maxEpochs = 1000;
+                    miniBatchSize = ceil(sigLen / 3);
+                    options = trainingOptions('adam', ...
+                        'ExecutionEnvironment','cpu', ...
+                        'MaxEpochs',maxEpochs, ...
+                        'MiniBatchSize',miniBatchSize, ...
+                        'SequenceLength','longest', ...
+                        'Shuffle','never', ...
+                        'GradientThreshold',5,...
+                        'Verbose',false);
+
+                    disp('start training');
+                    net = trainMvarLstmNetwork(si, exSignal, [], exControl, net, options);
+                    [time, loss, rsme] = getMvarDnnTrainingResult(net);
+                    disp(['end training : rsme=' num2str(rsme)]);
+                    % calc VARLSTM-GC
+                    mat = calcMvarLstmGCI(si, exSignal, [], exControl, net);
+                    
+                    parsavenet(netName, net, si, exSignal, exControl, mat, sig, c, maxsi, minsi);
+                end
             end
             weights(:,:,i) = mat;
         end

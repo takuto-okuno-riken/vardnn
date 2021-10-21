@@ -75,6 +75,8 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plsogcAUC = zeros(1,N);
     mlsogcAUC = zeros(1,N);
     pcgcAUC = zeros(1,N);
+    dls1AUC = zeros(1,N);
+    dls3AUC = zeros(1,N);
     rnnROC = cell(N,2);
     linueROC = cell(N,2);
     nnnueROC = cell(N,2);
@@ -99,6 +101,8 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plsogcROC = cell(N,2);
     mlsogcROC = cell(N,2);
     pcgcROC = cell(N,2);
+    dls1ROC = cell(N,2);
+    dls3ROC = cell(N,2);
     rnnRf = figure;
     linueRf = figure;
     nnnueRf = figure;
@@ -123,6 +127,8 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plsogcRf = figure;
     mlsogcRf = figure;
     pcgcRf = figure;
+    dls1Rf = figure;
+    dls3Rf = figure;
     
     origf = figure;
     rnnTrial = 8;
@@ -264,7 +270,13 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         end
         % show result of pLassoVAR DI
         if isempty(plsoecROC{k,1})
-            [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(y2.', [], [], [], 3, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
+            lsoFile = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) 'lso.mat'];
+            if exist(lsoFile, 'file')
+                load(lsoFile);
+            else
+                [lambda, elaAlpha, errMat] = estimateLassoParamsForMvar(y2.', [], [], [], 3, 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
+                save(lsoFile, 'lambda','elaAlpha','errMat');
+            end
             fg = figure; DI = plotPlassovarDI(y2.', [], [], [], 3, lambda, elaAlpha); close(fg);
             figure(plsoecRf); hold on; [plsoecROC{k,1}, plsoecROC{k,2}, plsoecAUC(k)] = plotROCcurve(DI, pP.A, 100, 1, Gth); hold off;
             title('pLassoVAR-DI');
@@ -288,18 +300,57 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
             figure(pcgcRf); hold on; [pcgcROC{k,1}, pcgcROC{k,2}, pcgcAUC(k)] = plotROCcurve(GC, pP.A, 100, 1, Gth); hold off;
             title('PC-GC');
         end
+        % VARLSTM-GC
+        netFile = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) 'ls1.mat'];
+        if exist(netFile, 'file')
+            load(netFile);
+        else
+            [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(y2.', 0);
+            [exSignal, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(u2.', 0);
+            exControl = eye(n,n);
+            % layer parameters
+            net1 = initMvarLstmNetwork(si, exSignal, [], exControl,1);
+            net3 = initMvarLstmNetwork(si, exSignal, [], exControl,3);
+            % training PC-VARDNN network
+            maxEpochs = 1000;
+            miniBatchSize = ceil(size(si,2) / 3);
+            options = trainingOptions('adam', ...
+                'ExecutionEnvironment','cpu', ...
+                'MaxEpochs',maxEpochs, ...
+                'MiniBatchSize',miniBatchSize, ...
+                'SequenceLength','longest', ...
+                'Shuffle','never', ...
+                'GradientThreshold',5,...
+                'Verbose',false);
+
+            disp('start training');
+            net1 = trainMvarLstmNetwork(si, exSignal, [], exControl, net1, options);
+            net3 = trainMvarLstmNetwork(si, exSignal, [], exControl, net3, options);
+            save(netFile, 'si','exSignal','exControl','net1', 'net3');
+        end
+        % show result of VARLSTM-GC
+        if isempty(dls1ROC{k,1})
+            fg = figure; dlGC = plotMvarLstmGCI(si, exSignal, [], exControl, net1, 0); close(fg);
+            figure(dls1Rf); hold on; [dls1ROC{k,1}, dls1ROC{k,2}, dls1AUC(k)] = plotROCcurve(dlGC, pP.A, 100, 1, Gth); hold off;
+            title('VARLSTM(1)-GC');
+        end
+%        if isempty(dls3ROC{k,1})
+            fg = figure; dlGC = plotMvarLstmGCI(si, exSignal, [], exControl, net3, 0); close(fg);
+            figure(dls3Rf); hold on; [dls3ROC{k,1}, dls3ROC{k,2}, dls3AUC(k)] = plotROCcurve(dlGC, pP.A, 100, 1, Gth); hold off;
+            title('VARLSTM(3)-GC');
+%        end
     end
     % save result
     save(fname, 'fcAUC','pcAUC','pcpcAUC','plspcAUC','lsopcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlmAUC','dlgAUC','pcdlAUC','pcdlwAUC','dcmAUC', ...
         'rnnAUC','linueAUC','nnnueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC', ...
         'mvarecAUC','pvarecAUC','mpcvarecAUC','mpcvargcAUC','ppcvarecAUC','ppcvargcAUC',...
         'mplsecAUC','mplsgcAUC','pplsecAUC','pplsgcAUC',...
-        'plsoecAUC','mlsoecAUC','plsogcAUC','mlsogcAUC','pcgcAUC',...
+        'plsoecAUC','mlsoecAUC','plsogcAUC','mlsogcAUC','pcgcAUC','dls1AUC','dls3AUC',...
         'fcROC','pcROC','pcpcROC','plspcROC','lsopcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlmROC','dlgROC','pcdlROC','pcdlwROC','dcmROC', ...
         'rnnROC','linueROC','nnnueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC', ...
         'mvarecROC','pvarecROC','mpcvarecROC','mpcvargcROC','ppcvarecROC','ppcvargcROC', ...
         'mplsecROC','mplsgcROC','pplsecROC','pplsgcROC', ...
-        'plsoecROC','mlsoecROC','plsogcROC','mlsogcROC','pcgcROC');
+        'plsoecROC','mlsoecROC','plsogcROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC');
 
     % show all average ROC curves
     figure; 

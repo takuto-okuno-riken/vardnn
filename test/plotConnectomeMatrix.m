@@ -84,6 +84,12 @@ function plotConnectomeMatrix(meanWeights, algorithm, group, lags)
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : VARDNN(' num2str(lags) ') MIV'];
+    case {'dls'}
+        sigma = std(meanWeights(:),1,'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : VARLSTM(' num2str(lags) ') Granger Causality Index'];
     case {'mvarec','pvarec', 'mpcvarec','ppcvarec', 'mplsvarec','pplsvarec', 'mlsovarec','plsovarec','pcdlw'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
