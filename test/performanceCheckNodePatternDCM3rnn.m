@@ -77,8 +77,10 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     pcgcAUC = zeros(1,N);
     dls1AUC = zeros(1,N);
     dls3AUC = zeros(1,N);
-    msvmecAUC = zeros(1,N);
+    msvmdiAUC = zeros(1,N);
     msvmgcAUC = zeros(1,N);
+    mgpdiAUC = zeros(1,N);
+    mgpgcAUC = zeros(1,N);
     rnnROC = cell(N,2);
     linueROC = cell(N,2);
     nnnueROC = cell(N,2);
@@ -105,8 +107,10 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     pcgcROC = cell(N,2);
     dls1ROC = cell(N,2);
     dls3ROC = cell(N,2);
-    msvmecROC = cell(N,2);
+    msvmdiROC = cell(N,2);
     msvmgcROC = cell(N,2);
+    mgpdiROC = cell(N,2);
+    mgpgcROC = cell(N,2);
     rnnRf = figure;
     linueRf = figure;
     nnnueRf = figure;
@@ -133,8 +137,10 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     pcgcRf = figure;
     dls1Rf = figure;
     dls3Rf = figure;
-    msvmecRf = figure;
+    msvmdiRf = figure;
     msvmgcRf = figure;
+    mgpdiRf = figure;
+    mgpgcRf = figure;
     
     origf = figure;
     rnnTrial = 8;
@@ -346,15 +352,26 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
             title('VARLSTM(3)-GC');
         end
         % extra tests (multivaliate SVM Vector Auto-Regression DI)
-        if isempty(msvmecROC{k,1})
+        if isempty(msvmdiROC{k,1})
             netMVAR = initMsvmvarNetwork(y2.', [], [], [], 3);
             fg = figure; msvmvarDI = plotMsvmvarDI(netMVAR, [], []); close(fg);
-            figure(msvmecRf); hold on; [msvmecROC{k,1}, msvmecROC{k,2}, msvmecAUC(k)] = plotROCcurve(msvmvarDI, pP.A, 100, 1, Gth); hold off;
+            figure(msvmdiRf); hold on; [msvmdiROC{k,1}, msvmdiROC{k,2}, msvmdiAUC(k)] = plotROCcurve(msvmvarDI, pP.A, 100, 1, Gth); hold off;
             title('mSVMVAR-DI');
             % extra tests (multivaliate SVM Vector Auto-Regression GC)
             fg = figure; msvmvarGC = plotMsvmvarGCI(y2.', [], [], [], netMVAR); close(fg);
             figure(msvmgcRf); hold on; [msvmgcROC{k,1}, msvmgcROC{k,2}, msvmgcAUC(k)] = plotROCcurve(msvmvarGC, pP.A, 100, 1, Gth); hold off;
             title('mSVMVAR-GC');
+        end
+        % extra tests (multivaliate GP Vector Auto-Regression DI)
+        if isempty(mgpdiROC{k,1})
+            netMVAR = initMgpvarNetwork(y2.', [], [], [], 3);
+            fg = figure; mgpvarDI = plotMgpvarDI(netMVAR, [], []); close(fg);
+            figure(mgpdiRf); hold on; [mgpdiROC{k,1}, mgpdiROC{k,2}, mgpdiAUC(k)] = plotROCcurve(mgpvarDI, pP.A, 100, 1, Gth); hold off;
+            title('mGPVAR-DI');
+            % extra tests (multivaliate GP Vector Auto-Regression GC)
+            fg = figure; mgpvarGC = plotMgpvarGCI(y2.', [], [], [], netMVAR); close(fg);
+            figure(mgpgcRf); hold on; [mgpgcROC{k,1}, mgpgcROC{k,2}, mgpgcAUC(k)] = plotROCcurve(mgpvarGC, pP.A, 100, 1, Gth); hold off;
+            title('mGPVAR-GC');
         end
     end
     % save result
@@ -362,12 +379,12 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         'rnnAUC','linueAUC','nnnueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC', ...
         'mvarecAUC','pvarecAUC','mpcvarecAUC','mpcvargcAUC','ppcvarecAUC','ppcvargcAUC',...
         'mplsecAUC','mplsgcAUC','pplsecAUC','pplsgcAUC',...
-        'plsoecAUC','mlsoecAUC','plsogcAUC','mlsogcAUC','pcgcAUC','dls1AUC','dls3AUC','msvmecAUC','msvmgcAUC',...
+        'plsoecAUC','mlsoecAUC','plsogcAUC','mlsogcAUC','pcgcAUC','dls1AUC','dls3AUC','msvmdiAUC','msvmgcAUC','mgpdiAUC','mgpgcAUC',...
         'fcROC','pcROC','pcpcROC','plspcROC','lsopcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlmROC','dlgROC','pcdlROC','pcdlwROC','dcmROC', ...
         'rnnROC','linueROC','nnnueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC', ...
         'mvarecROC','pvarecROC','mpcvarecROC','mpcvargcROC','ppcvarecROC','ppcvargcROC', ...
         'mplsecROC','mplsgcROC','pplsecROC','pplsgcROC', ...
-        'plsoecROC','mlsoecROC','plsogcROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC','msvmecROC','msvmgcROC');
+        'plsoecROC','mlsoecROC','plsogcROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC','msvmdiROC','msvmgcROC','mgpdiROC','mgpgcROC');
 
     % show all average ROC curves
     figure; 

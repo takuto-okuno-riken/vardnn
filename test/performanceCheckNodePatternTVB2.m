@@ -84,6 +84,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     dls3AUC = zeros(1,N);
     msvmdiAUC = zeros(1,N);
     msvmgcAUC = zeros(1,N);
+    mgpdiAUC = zeros(1,N);
+    mgpgcAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
     pcpcROC = cell(N,2);
@@ -122,6 +124,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     dls3ROC = cell(N,2);
     msvmdiROC = cell(N,2);
     msvmgcROC = cell(N,2);
+    mgpdiROC = cell(N,2);
+    mgpgcROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
     pcpcRf = figure;
@@ -160,6 +164,8 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     dls3Rf = figure;
     msvmdiRf = figure;
     msvmgcRf = figure;
+    mgpdiRf = figure;
+    mgpgcRf = figure;
 
     origf = figure;
     origSigf = figure;
@@ -539,6 +545,18 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             figure(msvmgcRf); hold on; [msvmgcROC{k,1}, msvmgcROC{k,2}, msvmgcAUC(k)] = plotROCcurve(msvmGC, weights, 100, 1, Gth); hold off;
             title(['ROC curve of mSVMVAR-GC (pat=' num2str(i) ')']);
         end
+        % (multivaliate GP Vector Auto-Regression DI) without exogenous signals
+        if isempty(mgpdiROC{k,1})
+            netMVAR = initMgpvarNetwork(si, [], [], [], lag);
+            [mgpDI] = calcMgpvarDI(netMVAR, [], []);
+            figure(mgpdiRf); hold on; [mgpdiROC{k,1}, mgpdiROC{k,2}, mgpdiAUC(k)] = plotROCcurve(mgpDI, weights, 100, 1, Gth); hold off;
+            title(['ROC curve of mGPVAR-DI (pat=' num2str(i) ')']);
+
+            % (multivaliate GP Vector Auto-Regression GC) without exogenous signals
+            mgpGC = calcMgpvarGCI(si, [], [], [], netMVAR);
+            figure(mgpgcRf); hold on; [mgpgcROC{k,1}, mgpgcROC{k,2}, mgpgcAUC(k)] = plotROCcurve(mgpGC, weights, 100, 1, Gth); hold off;
+            title(['ROC curve of mGPVAR-GC (pat=' num2str(i) ')']);
+        end
     end
     % show result AUC
     disp(['FC AUC (' num2str(i) ', node=' num2str(node_num) ', density=' num2str(density) ') : ' num2str(mean(fcAUC))]);
@@ -556,9 +574,9 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
     % save result
     save(resfname, 'fcAUC','pcAUC','pcpcAUC','lsopcAUC','plspcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlmAUC','pcdlAUC','pcdlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC', ...
-        'mvardiAUC','mpcvardiAUC','mpcvargcAUC','pvardiAUC','ppcvardiAUC','ppcvargcAUC','mplsdiAUC','mplsgcAUC','pplsdiAUC','pplsgcAUC','mlsodiAUC','mlsogcAUC','pcgcAUC','dls1AUC','dls3AUC','msvmdiAUC','msvmgcAUC', ...
+        'mvardiAUC','mpcvardiAUC','mpcvargcAUC','pvardiAUC','ppcvardiAUC','ppcvargcAUC','mplsdiAUC','mplsgcAUC','pplsdiAUC','pplsgcAUC','mlsodiAUC','mlsogcAUC','pcgcAUC','dls1AUC','dls3AUC','msvmdiAUC','msvmgcAUC','mgpdiAUC','mgpgcAUC', ...
         'fcROC','pcROC','pcpcROC','lsopcROC','plspcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlmROC','pcdlROC','pcdlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC', ...
-        'mvardiROC','mpcvardiROC','mpcvargcROC','pvardiROC','ppcvardiROC','ppcvargcROC','mplsdiROC','mplsgcROC','pplsdiROC','pplsgcROC','mlsodiROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC','msvmdiROC','msvmgcROC');
+        'mvardiROC','mpcvardiROC','mpcvargcROC','pvardiROC','ppcvardiROC','ppcvargcROC','mplsdiROC','mplsgcROC','pplsdiROC','pplsgcROC','mlsodiROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC','msvmdiROC','msvmgcROC','mgpdiROC','mgpgcROC');
 
     % show average ROC curve of DCM
     figure; 

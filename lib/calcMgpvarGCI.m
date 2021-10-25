@@ -1,5 +1,5 @@
 %%
-% Caluclate mSvmVAR (multivaliate SVM Vector Auto-Regression) Granger Causality
+% Caluclate mGPVAR (multivaliate Gaussian Processes Vector Auto-Regression) Granger Causality
 % returns Granger causality index matrix (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
 % and AIC, BIC (of node vector)
@@ -8,11 +8,11 @@
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
-%  net          mSvmVAR network
+%  net          mGPVAR network
 %  alpha        the significance level of F-statistic (default:0.05)
 %  isFullNode   return both node & exogenous causality matrix (default:0)
 
-function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMsvmvarGCI(X, exSignal, nodeControl, exControl, net, alpha, isFullNode)
+function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMgpvarGCI(X, exSignal, nodeControl, exControl, net, alpha, isFullNode)
     if nargin < 7, isFullNode = 0; end
     if nargin < 6, alpha = 0.05; end
     if nargin < 4, exControl = []; end
@@ -69,16 +69,26 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcMsvmvarGCI(X, ex
             if i==j, continue; end
             if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
             if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
-
-            % SVM vector auto-regression (VAR)
+%{
+            % this does not work well
+            % GP vector auto-regression (VAR)
             control2 = control;
             control2(i,j,:) = 0;
             [~,idx2] = find(control2(i,:,:)==1);
             Xtj = Yj(:,idx2);
 
-            % apply the SVM regress function
-            mdl = fitrsvm(Xtj,Xt,'KernelFunction',net.kernel,'KernelScale',net.kernelScale); %,'Standardize',true); % bias will be calcurated
+            % apply the GP regress function
+            mdl = fitrgp(Xtj,Xt,'Basis',net.basis,'FitMethod','exact','PredictMethod','exact',...
+                'KernelFunction',net.kernel); %,'Standardize',true); % bias will be calcurated
             Si = predict(mdl, Xtj);
+%}
+            % just set 0 pattern
+            Xtj = Yj; idx2 = idx;
+            for p=1:lags, Xtj(:,j+(nodeNum + net.exNum)*(p-1)) = 0; end
+            Xtj = Xtj(:,idx);
+
+            % predict 
+            Si = predict(net.mdl{i}, Xtj);
             r = Si - Xt;
 
             Vyt = var(r,1);
