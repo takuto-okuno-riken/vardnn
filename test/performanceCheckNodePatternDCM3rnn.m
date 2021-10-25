@@ -47,9 +47,6 @@ end
 
 %% 
 function checkingPattern(N,T,n,prefix,Gth,idx)
-    fname = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
-    load(fname);
-
     % init
     rnnAUC = zeros(1,N);
     linueAUC = zeros(1,N);
@@ -81,6 +78,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     msvmgcAUC = zeros(1,N);
     mgpdiAUC = zeros(1,N);
     mgpgcAUC = zeros(1,N);
+    mgpediAUC = zeros(1,N);
     rnnROC = cell(N,2);
     linueROC = cell(N,2);
     nnnueROC = cell(N,2);
@@ -111,6 +109,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     msvmgcROC = cell(N,2);
     mgpdiROC = cell(N,2);
     mgpgcROC = cell(N,2);
+    mgpediROC = cell(N,2);
     rnnRf = figure;
     linueRf = figure;
     nnnueRf = figure;
@@ -141,9 +140,13 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     msvmgcRf = figure;
     mgpdiRf = figure;
     mgpgcRf = figure;
+    mgpediRf = figure;
     
     origf = figure;
     rnnTrial = 8;
+
+    fname = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) 'result.mat'];
+    load(fname);
 
     % reading RNN-GC, TE(LIN UE), TE(BIN NUE), TETRAD algorithms results
     for k=1:N
@@ -372,6 +375,10 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
             fg = figure; mgpvarGC = plotMgpvarGCI(y2.', [], [], [], netMVAR); close(fg);
             figure(mgpgcRf); hold on; [mgpgcROC{k,1}, mgpgcROC{k,2}, mgpgcAUC(k)] = plotROCcurve(mgpvarGC, pP.A, 100, 1, Gth); hold off;
             title('mGPVAR-GC');
+            netMVAR = initMgpvarNetwork(y2.', [], [], [], 3, 'ardsquaredexponential', 'constant');
+            fg = figure; mgpevarDI = plotMgpvarDI(netMVAR, [], []); close(fg);
+            figure(mgpediRf); hold on; [mgpediROC{k,1}, mgpediROC{k,2}, mgpediAUC(k)] = plotROCcurve(mgpevarDI, pP.A, 100, 1, Gth); hold off;
+            title('mGPeVAR-DI');
         end
     end
     % save result
@@ -379,12 +386,12 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         'rnnAUC','linueAUC','nnnueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC', ...
         'mvarecAUC','pvarecAUC','mpcvarecAUC','mpcvargcAUC','ppcvarecAUC','ppcvargcAUC',...
         'mplsecAUC','mplsgcAUC','pplsecAUC','pplsgcAUC',...
-        'plsoecAUC','mlsoecAUC','plsogcAUC','mlsogcAUC','pcgcAUC','dls1AUC','dls3AUC','msvmdiAUC','msvmgcAUC','mgpdiAUC','mgpgcAUC',...
+        'plsoecAUC','mlsoecAUC','plsogcAUC','mlsogcAUC','pcgcAUC','dls1AUC','dls3AUC','msvmdiAUC','msvmgcAUC','mgpdiAUC','mgpgcAUC','mgpediAUC',...
         'fcROC','pcROC','pcpcROC','plspcROC','lsopcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlmROC','dlgROC','pcdlROC','pcdlwROC','dcmROC', ...
         'rnnROC','linueROC','nnnueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC', ...
         'mvarecROC','pvarecROC','mpcvarecROC','mpcvargcROC','ppcvarecROC','ppcvargcROC', ...
         'mplsecROC','mplsgcROC','pplsecROC','pplsgcROC', ...
-        'plsoecROC','mlsoecROC','plsogcROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC','msvmdiROC','msvmgcROC','mgpdiROC','mgpgcROC');
+        'plsoecROC','mlsoecROC','plsogcROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC','msvmdiROC','msvmgcROC','mgpdiROC','mgpgcROC','mgpediROC');
 
     % show all average ROC curves
     figure; 

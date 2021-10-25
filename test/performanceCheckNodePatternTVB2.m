@@ -86,6 +86,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     msvmgcAUC = zeros(1,N);
     mgpdiAUC = zeros(1,N);
     mgpgcAUC = zeros(1,N);
+    mgpediAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
     pcpcROC = cell(N,2);
@@ -126,6 +127,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     msvmgcROC = cell(N,2);
     mgpdiROC = cell(N,2);
     mgpgcROC = cell(N,2);
+    mgpediROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
     pcpcRf = figure;
@@ -166,6 +168,7 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     msvmgcRf = figure;
     mgpdiRf = figure;
     mgpgcRf = figure;
+    mgpediRf = figure;
 
     origf = figure;
     origSigf = figure;
@@ -556,6 +559,11 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             mgpGC = calcMgpvarGCI(si, [], [], [], netMVAR);
             figure(mgpgcRf); hold on; [mgpgcROC{k,1}, mgpgcROC{k,2}, mgpgcAUC(k)] = plotROCcurve(mgpGC, weights, 100, 1, Gth); hold off;
             title(['ROC curve of mGPVAR-GC (pat=' num2str(i) ')']);
+
+            netMVAR = initMgpvarNetwork(si, [], [], [], lag, 'ardsquaredexponential', 'constant');
+            [mgpeDI] = calcMgpvarDI(netMVAR, [], []);
+            figure(mgpediRf); hold on; [mgpediROC{k,1}, mgpediROC{k,2}, mgpediAUC(k)] = plotROCcurve(mgpeDI, weights, 100, 1, Gth); hold off;
+            title(['ROC curve of mGPeVAR-DI (pat=' num2str(i) ')']);
         end
     end
     % show result AUC
@@ -574,9 +582,9 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
 
     % save result
     save(resfname, 'fcAUC','pcAUC','pcpcAUC','lsopcAUC','plspcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlmAUC','pcdlAUC','pcdlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC', ...
-        'mvardiAUC','mpcvardiAUC','mpcvargcAUC','pvardiAUC','ppcvardiAUC','ppcvargcAUC','mplsdiAUC','mplsgcAUC','pplsdiAUC','pplsgcAUC','mlsodiAUC','mlsogcAUC','pcgcAUC','dls1AUC','dls3AUC','msvmdiAUC','msvmgcAUC','mgpdiAUC','mgpgcAUC', ...
+        'mvardiAUC','mpcvardiAUC','mpcvargcAUC','pvardiAUC','ppcvardiAUC','ppcvargcAUC','mplsdiAUC','mplsgcAUC','pplsdiAUC','pplsgcAUC','mlsodiAUC','mlsogcAUC','pcgcAUC','dls1AUC','dls3AUC','msvmdiAUC','msvmgcAUC','mgpdiAUC','mgpgcAUC','mgpediAUC', ...
         'fcROC','pcROC','pcpcROC','lsopcROC','plspcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlmROC','pcdlROC','pcdlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC', ...
-        'mvardiROC','mpcvardiROC','mpcvargcROC','pvardiROC','ppcvardiROC','ppcvargcROC','mplsdiROC','mplsgcROC','pplsdiROC','pplsgcROC','mlsodiROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC','msvmdiROC','msvmgcROC','mgpdiROC','mgpgcROC');
+        'mvardiROC','mpcvardiROC','mpcvargcROC','pvardiROC','ppcvardiROC','ppcvargcROC','mplsdiROC','mplsgcROC','pplsdiROC','pplsgcROC','mlsodiROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC','msvmdiROC','msvmgcROC','mgpdiROC','mgpgcROC','mgpediROC');
 
     % show average ROC curve of DCM
     figure; 

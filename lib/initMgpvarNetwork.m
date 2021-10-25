@@ -7,10 +7,10 @@
 %  exControl       exogenous input control matrix for each node (node x exogenous input) (default:[])
 %  lags            number of lags for autoregression (default:3)
 %  kernel          kernel for GP (default:'squaredexponential', 'ardsquaredexponential', ... please see https://jp.mathworks.com/help/stats/fitrgp.html )
-%  kernelScale     basis for GP (default:'constant', 'linear')
+%  kernelScale     basis for GP (default:'linear', 'none', 'constant')
 
 function net = initMgpvarNetwork(X, exSignal, nodeControl, exControl, lags, kernel, basis)
-    if nargin < 7, basis = 'constant'; end
+    if nargin < 7, basis = 'linear'; end
     if nargin < 6, kernel = 'squaredexponential'; end
     if nargin < 5, lags = 3; end
     if nargin < 4, exControl = []; end
