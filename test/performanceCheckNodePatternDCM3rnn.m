@@ -77,6 +77,8 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     pcgcAUC = zeros(1,N);
     dls1AUC = zeros(1,N);
     dls3AUC = zeros(1,N);
+    msvmecAUC = zeros(1,N);
+    msvmgcAUC = zeros(1,N);
     rnnROC = cell(N,2);
     linueROC = cell(N,2);
     nnnueROC = cell(N,2);
@@ -103,6 +105,8 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     pcgcROC = cell(N,2);
     dls1ROC = cell(N,2);
     dls3ROC = cell(N,2);
+    msvmecROC = cell(N,2);
+    msvmgcROC = cell(N,2);
     rnnRf = figure;
     linueRf = figure;
     nnnueRf = figure;
@@ -129,6 +133,8 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     pcgcRf = figure;
     dls1Rf = figure;
     dls3Rf = figure;
+    msvmecRf = figure;
+    msvmgcRf = figure;
     
     origf = figure;
     rnnTrial = 8;
@@ -334,23 +340,34 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
             figure(dls1Rf); hold on; [dls1ROC{k,1}, dls1ROC{k,2}, dls1AUC(k)] = plotROCcurve(dlGC, pP.A, 100, 1, Gth); hold off;
             title('VARLSTM(1)-GC');
         end
-%        if isempty(dls3ROC{k,1})
+        if isempty(dls3ROC{k,1})
             fg = figure; dlGC = plotMvarLstmGCI(si, exSignal, [], exControl, net3, 0); close(fg);
             figure(dls3Rf); hold on; [dls3ROC{k,1}, dls3ROC{k,2}, dls3AUC(k)] = plotROCcurve(dlGC, pP.A, 100, 1, Gth); hold off;
             title('VARLSTM(3)-GC');
-%        end
+        end
+        % extra tests (multivaliate SVM Vector Auto-Regression DI)
+        if isempty(msvmecROC{k,1})
+            netMVAR = initMsvmvarNetwork(y2.', [], [], [], 3);
+            fg = figure; msvmvarDI = plotMsvmvarDI(netMVAR, [], []); close(fg);
+            figure(msvmecRf); hold on; [msvmecROC{k,1}, msvmecROC{k,2}, msvmecAUC(k)] = plotROCcurve(msvmvarDI, pP.A, 100, 1, Gth); hold off;
+            title('mSVMVAR-DI');
+            % extra tests (multivaliate SVM Vector Auto-Regression GC)
+            fg = figure; msvmvarGC = plotMsvmvarGCI(y2.', [], [], [], netMVAR); close(fg);
+            figure(msvmgcRf); hold on; [msvmgcROC{k,1}, msvmgcROC{k,2}, msvmgcAUC(k)] = plotROCcurve(msvmvarGC, pP.A, 100, 1, Gth); hold off;
+            title('mSVMVAR-GC');
+        end
     end
     % save result
     save(fname, 'fcAUC','pcAUC','pcpcAUC','plspcAUC','lsopcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlmAUC','dlgAUC','pcdlAUC','pcdlwAUC','dcmAUC', ...
         'rnnAUC','linueAUC','nnnueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC', ...
         'mvarecAUC','pvarecAUC','mpcvarecAUC','mpcvargcAUC','ppcvarecAUC','ppcvargcAUC',...
         'mplsecAUC','mplsgcAUC','pplsecAUC','pplsgcAUC',...
-        'plsoecAUC','mlsoecAUC','plsogcAUC','mlsogcAUC','pcgcAUC','dls1AUC','dls3AUC',...
+        'plsoecAUC','mlsoecAUC','plsogcAUC','mlsogcAUC','pcgcAUC','dls1AUC','dls3AUC','msvmecAUC','msvmgcAUC',...
         'fcROC','pcROC','pcpcROC','plspcROC','lsopcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlmROC','dlgROC','pcdlROC','pcdlwROC','dcmROC', ...
         'rnnROC','linueROC','nnnueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC', ...
         'mvarecROC','pvarecROC','mpcvarecROC','mpcvargcROC','ppcvarecROC','ppcvargcROC', ...
         'mplsecROC','mplsgcROC','pplsecROC','pplsgcROC', ...
-        'plsoecROC','mlsoecROC','plsogcROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC');
+        'plsoecROC','mlsoecROC','plsogcROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC','msvmecROC','msvmgcROC');
 
     % show all average ROC curves
     figure; 
