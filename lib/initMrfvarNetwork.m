@@ -1,17 +1,15 @@
 %%
-% calculate multivariate SVM(support vector machine) Vector Auto-Regression weights and Create mSvmVAR network
+% calculate multivariate Random Forest Vector Auto-Regression weights and Create mTreeVAR network
 % input:
 %  X               multivariate time series matrix (node x time series)
 %  exSignal        multivariate time series matrix (exogenous input x time series) (default:[])
 %  nodeControl     node control matrix (node x node) (default:[])
 %  exControl       exogenous input control matrix for each node (node x exogenous input) (default:[])
 %  lags            number of lags for autoregression (default:3)
-%  kernel          kernel for SVM (default:'linear', 'gaussian', 'rbf')
-%  kernelScale     kernelScale for SVM (default:'auto', 1)
+%  numTrees        number of trees for random forest (default:30)
 
-function net = initMsvmvarNetwork(X, exSignal, nodeControl, exControl, lags, kernel, kernelScale)
-    if nargin < 7, kernelScale = 'auto'; end
-    if nargin < 6, kernel = 'linear'; end
+function net = initMrfvarNetwork(X, exSignal, nodeControl, exControl, lags, numTrees)
+    if nargin < 6, numTrees = 30; end
     if nargin < 5, lags = 3; end
     if nargin < 4, exControl = []; end
     if nargin < 3, nodeControl = []; end
@@ -30,7 +28,7 @@ function net = initMsvmvarNetwork(X, exSignal, nodeControl, exControl, lags, ker
 
     mdl = cell(nodeNum,1);
 
-    % first, calculate SVM vector auto-regression (VAR) without target
+    % first, calculate Random Forest vector auto-regression (VAR)
     Yj = zeros(sigLen-lags, lags*inputNum);
     for k=1:lags
         Yj(:,1+inputNum*(k-1):inputNum*k) = Y(1+k:sigLen-lags+k,:);
@@ -39,16 +37,14 @@ function net = initMsvmvarNetwork(X, exSignal, nodeControl, exControl, lags, ker
         [~,idx] = find(control(i,:,:)==1);
         if isempty(idx), continue; end
 
-        % vector auto-regression (SVM VAR)
+        % vector auto-regression (Random Forest VAR)
         Xt = Y(1:sigLen-lags,i);
         Xti = Yj(:,idx);
-        % apply the regress function
-        mdl{i} = fitrsvm(Xti,Xt,'KernelFunction',kernel,'KernelScale',kernelScale); %,'Standardize',true); % bias will be calcurated
+        % apply the fitting function
+        mdl{i} = TreeBagger(numTrees,Xti,Xt,'Method','regression');
     end
     net.nodeNum = nodeNum;
     net.exNum = exNum;
     net.lags = lags;
     net.mdl = mdl;
-    net.kernel = kernel;
-    net.kernelScale = kernelScale;
 end
