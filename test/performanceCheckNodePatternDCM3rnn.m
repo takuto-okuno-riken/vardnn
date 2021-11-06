@@ -79,6 +79,12 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     mgpdiAUC = zeros(1,N);
     mgpgcAUC = zeros(1,N);
     mgpediAUC = zeros(1,N);
+    nvdiAUC = zeros(1,N);
+    nvmiAUC = zeros(1,N);
+    trdiAUC = zeros(1,N);
+    trmiAUC = zeros(1,N);
+    rfdiAUC = zeros(1,N);
+    rfmiAUC = zeros(1,N);
     rnnROC = cell(N,2);
     linueROC = cell(N,2);
     nnnueROC = cell(N,2);
@@ -110,6 +116,12 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     mgpdiROC = cell(N,2);
     mgpgcROC = cell(N,2);
     mgpediROC = cell(N,2);
+    nvdiROC = cell(N,2);
+    nvmiROC = cell(N,2);
+    trdiROC = cell(N,2);
+    trmiROC = cell(N,2);
+    rfdiROC = cell(N,2);
+    rfmiROC = cell(N,2);
     rnnRf = figure;
     linueRf = figure;
     nnnueRf = figure;
@@ -141,6 +153,12 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     mgpdiRf = figure;
     mgpgcRf = figure;
     mgpediRf = figure;
+    nvdiRf = figure;
+    nvmiRf = figure;
+    trdiRf = figure;
+    trmiRf = figure;
+    rfdiRf = figure;
+    rfmiRf = figure;
     
     origf = figure;
     rnnTrial = 8;
@@ -380,6 +398,63 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
             figure(mgpediRf); hold on; [mgpediROC{k,1}, mgpediROC{k,2}, mgpediAUC(k)] = plotROCcurve(mgpevarDI, pP.A, 100, 1, Gth); hold off;
             title('mGPeVAR-DI');
         end
+        % extra tests (nVARNN DI)
+        netFile = ['results/' prefix num2str(n) 'x' num2str(T) '-idx' num2str(idx) '-' num2str(k) 'nvnn.mat'];
+        if exist(netFile, 'file')
+            load(netFile);
+        else
+            [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(y2.', 0);
+            [exSignal, sig2, c2, maxsi2, minsi2] = convert2SigmoidSignal(u2.', 0);
+            exControl = ones(1,n);
+            % layer parameters
+            nvNN = initNvarnnNetwork(si, exSignal, [], exControl,1);
+            % training NVARNN network
+            maxEpochs = 2000;
+            miniBatchSize = ceil(size(si,2) / 3);
+
+            options = trainingOptions('adam', ...
+                'ExecutionEnvironment','cpu', ...
+                'MaxEpochs',maxEpochs, ...
+                'MiniBatchSize',miniBatchSize, ...
+                'Shuffle','every-epoch', ...
+                'GradientThreshold',5,...
+                'L2Regularization',0.01, ...
+                'Verbose',true);
+
+            nvNN = trainNvarnnNetwork(si, exSignal, [], exControl, nvNN, options);
+            save(netFile, 'si','exSignal','exControl','nvNN');
+        end
+        if isempty(nvdiROC{k,1})
+            fg = figure; varDI = plotNvarnnDI(nvNN, [], exControl); close(fg);
+            figure(nvdiRf); hold on; [nvdiROC{k,1}, nvdiROC{k,2}, nvdiAUC(k)] = plotROCcurve(varDI, pP.A, 100, 1, Gth); hold off;
+            title('nVARNN-DI');
+            % extra tests (nVARNN MIV)
+            [~,varMAIV] = calcNvarnnMIV(y2.', exSignal,  [], exControl, nvNN);
+            figure(nvmiRf); hold on; [nvmiROC{k,1}, nvmiROC{k,2}, nvmiAUC(k)] = plotROCcurve(varMAIV, pP.A, 100, 1, Gth); hold off;
+            title('nVARNN-MAIV');
+        end
+        % extra tests (mTreeVAR DI)
+        if isempty(trdiROC{k,1})
+            netMVAR = initMtreevarNetwork(y2.', [], [], [], 3);
+            fg = figure; varDI = plotMtreevarDI(netMVAR, [], []); close(fg);
+            figure(trdiRf); hold on; [trdiROC{k,1}, trdiROC{k,2}, trdiAUC(k)] = plotROCcurve(varDI, pP.A, 100, 1, Gth); hold off;
+            title('mTreeVAR-DI');
+            % extra tests (mTreeVAR MIV)
+            [~,trvarMAIV] = calcMtreevarMIV(y2.', [], [], [], netMVAR);
+            figure(trmiRf); hold on; [trmiROC{k,1}, trmiROC{k,2}, trmiAUC(k)] = plotROCcurve(trvarMAIV, pP.A, 100, 1, Gth); hold off;
+            title('mTreeVAR-MAIV');
+        end
+        % extra tests (mRFVAR DI)
+        if isempty(rfdiROC{k,1})
+            netMVAR = initMrfvarNetwork(y2.', [], [], [], 3);
+            fg = figure; varDI = plotMrfvarDI(netMVAR, [], []); close(fg);
+            figure(rfdiRf); hold on; [rfdiROC{k,1}, rfdiROC{k,2}, rfdiAUC(k)] = plotROCcurve(varDI, pP.A, 100, 1, Gth); hold off;
+            title('mRFVAR-DI');
+            % extra tests (mRFVAR MIV)
+            [~,varMAIV] = calcMrfvarMIV(y2.', [], [], [], netMVAR);
+            figure(rfmiRf); hold on; [rfmiROC{k,1}, rfmiROC{k,2}, rfmiAUC(k)] = plotROCcurve(varMAIV, pP.A, 100, 1, Gth); hold off;
+            title('mRFVAR-MAIV');
+        end
     end
     % save result
     save(fname, 'fcAUC','pcAUC','pcpcAUC','plspcAUC','lsopcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlmAUC','dlgAUC','pcdlAUC','pcdlwAUC','dcmAUC', ...
@@ -387,11 +462,13 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         'mvarecAUC','pvarecAUC','mpcvarecAUC','mpcvargcAUC','ppcvarecAUC','ppcvargcAUC',...
         'mplsecAUC','mplsgcAUC','pplsecAUC','pplsgcAUC',...
         'plsoecAUC','mlsoecAUC','plsogcAUC','mlsogcAUC','pcgcAUC','dls1AUC','dls3AUC','msvmdiAUC','msvmgcAUC','mgpdiAUC','mgpgcAUC','mgpediAUC',...
+        'nvdiAUC','nvmiAUC','trdiAUC','trmiAUC','rfdiAUC','rfmiAUC', ...
         'fcROC','pcROC','pcpcROC','plspcROC','lsopcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlmROC','dlgROC','pcdlROC','pcdlwROC','dcmROC', ...
         'rnnROC','linueROC','nnnueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC', ...
         'mvarecROC','pvarecROC','mpcvarecROC','mpcvargcROC','ppcvarecROC','ppcvargcROC', ...
         'mplsecROC','mplsgcROC','pplsecROC','pplsgcROC', ...
-        'plsoecROC','mlsoecROC','plsogcROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC','msvmdiROC','msvmgcROC','mgpdiROC','mgpgcROC','mgpediROC');
+        'plsoecROC','mlsoecROC','plsogcROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC','msvmdiROC','msvmgcROC','mgpdiROC','mgpgcROC','mgpediROC', ...
+        'nvdiROC','nvmiROC','trdiROC','trmiROC','rfdiROC','rfmiROC');
 
     % show all average ROC curves
     figure; 
