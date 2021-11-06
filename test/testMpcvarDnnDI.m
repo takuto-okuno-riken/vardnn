@@ -45,6 +45,7 @@ function testMpcvarDnnDI
     figure; mDI = plotMpcvarDnnDI(net, [], exControl, 0);
     % show multivaliate PCVARDNN-GC
     figure; mGC = plotMpcvarDnnGCI(si, exSignal, [], exControl, net, 0);
+    figure; MIV = plotMpcvarDnnMIV(si, exSignal, [], exControl, net, 0);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0);
 
@@ -73,6 +74,7 @@ function testMpcvarDnnDI
     figure; mDI = plotMpcvarDnnDI(net, [], exControl, 0, 1);
     % show multivaliate PCVARDNN-GC
     figure; mGC = plotMpcvarDnnGCI(si, exSignal, [], exControl, net, 0, 0.05, 1);
+    figure; MIV = plotMpcvarDnnMIV(si, exSignal, [], exControl, net, 0, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0, 0.05, 1);
 
@@ -105,6 +107,7 @@ function testMpcvarDnnDI
     figure; mDI = plotMpcvarDnnDI(net, nodeControl, exControl, 0, 1);
     % show multivaliate PCVARDNN-GC
     figure; mGC = plotMpcvarDnnGCI(si, exSignal, nodeControl, exControl, net, 0, 0.05, 1);
+    figure; MIV = plotMpcvarDnnMIV(si, exSignal, nodeControl, exControl, net, 0, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, nodeControl, exControl, lags, 0, 0.05, 1);
 end
