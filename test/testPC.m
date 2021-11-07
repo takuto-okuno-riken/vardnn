@@ -45,6 +45,18 @@ PC6 = calcPcPartialCorrelation(X); % calc PCA+PC
 Z = PC - PC6;
 figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC6 : sum err=' num2str(nansum(abs(Z),'all'))]);
 
+PC7 = calcSvPartialCorrelation(X); % calc SVR(linear)+PC
+Z = PC - PC7;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC7 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+PC8 = calcSvPartialCorrelation(X,[],[],[],'gaussian'); % calc SVR(gaussian)+PC
+Z = PC - PC8;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC8 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+PC9 = calcSvPartialCorrelation(X,[],[],[],'rbf'); % calc SVR(rbf)+PC
+Z = PC - PC9;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC9 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
 %% test pattern 2 -- one step
 exNum = 2;
 exSignal = si(nodeNum+1:nodeNum+exNum,1:sigLen);
@@ -61,6 +73,9 @@ PC3 = calcPartialCorrelation__(X, exSignal, [], exControl, 1);
 figure; PC4 = plotPLSPartialCorrelation(X, exSignal, [], exControl, 1); % calc PLS PC
 figure; PC5 = plotLassoPartialCorrelation(X, exSignal, [], exControl, 0.01, 1, 1); % calc Lasso PC
 figure; PC6 = plotPcPartialCorrelation(X, exSignal, [], exControl, 1, 1); % calc PCA+PC
+figure; PC7 = plotSvPartialCorrelation(X, exSignal, [], exControl, 'linear', 'auto', 1); % calc SVR(linber)+PC
+figure; PC8 = plotSvPartialCorrelation(X, exSignal, [], exControl, 'gaussian', 'auto', 1); % calc SVR(gaussian)+PC
+figure; PC9 = plotSvPartialCorrelation(X, exSignal, [], exControl, 'rbf', 'auto', 1); % calc SVR(rbf)+PC
 
 Z = PC - PC3;
 figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC3 : sum err=' num2str(nansum(abs(Z),'all'))]);
@@ -73,6 +88,13 @@ figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC5 : sum err=' num2str(n
 
 Z = PC - PC6;
 figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC6 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+Z = PC - PC7;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC7 : sum err=' num2str(nansum(abs(Z),'all'))]);
+Z = PC - PC8;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC8 : sum err=' num2str(nansum(abs(Z),'all'))]);
+Z = PC - PC9;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC9 : sum err=' num2str(nansum(abs(Z),'all'))]);
 
 
 %% test pattern 3 -- one step
@@ -91,6 +113,9 @@ PC3 = calcPartialCorrelation__(X, exSignal, [], exControl, 1);
 figure; PC4 = plotPLSPartialCorrelation(X, exSignal, [], exControl, 1); % calc PLS PC
 figure; PC5 = plotLassoPartialCorrelation(X, exSignal, [], exControl, 0.01, 1, 1); % calc Lasso PC
 figure; PC6 = plotPcPartialCorrelation(X, exSignal, [], exControl, 1, 1); % calc PCA+PC
+figure; PC7 = plotSvPartialCorrelation(X, exSignal, [], exControl, 'linear', 'auto', 1); % calc SVR(linber)+PC
+figure; PC8 = plotSvPartialCorrelation(X, exSignal, [], exControl, 'gaussian', 'auto', 1); % calc SVR(gaussian)+PC
+figure; PC9 = plotSvPartialCorrelation(X, exSignal, [], exControl, 'rbf', 'auto', 1); % calc SVR(rbf)+PC
 
 Z = PC - PC3;
 figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC3 : sum err=' num2str(nansum(abs(Z),'all'))]);
@@ -104,6 +129,12 @@ figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC5 : sum err=' num2str(n
 Z = PC - PC6;
 figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC6 : sum err=' num2str(nansum(abs(Z),'all'))]);
 
+Z = PC - PC7;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC7 : sum err=' num2str(nansum(abs(Z),'all'))]);
+Z = PC - PC8;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC8 : sum err=' num2str(nansum(abs(Z),'all'))]);
+Z = PC - PC9;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC9 : sum err=' num2str(nansum(abs(Z),'all'))]);
 
 %% test pattern 4 -- rank down
 % synchronize signal 6 == 2, 7 invert 3
@@ -118,6 +149,9 @@ PC3 = calcPartialCorrelation__(X); % calc PC
 figure; PC4 = plotPLSPartialCorrelation(X); % calc PLS PC
 figure; PC5 = plotLassoPartialCorrelation(X, [], [], [], 0.01, 1); % calc Lasso PC
 figure; PC6 = plotPcPartialCorrelation(X, [], [], [], 1); % calc PCA+PC
+figure; PC7 = plotSvPartialCorrelation(X, [], [], [], 'linear', 'auto', 1); % calc SVR(linber)+PC
+figure; PC8 = plotSvPartialCorrelation(X, [], [], [], 'gaussian', 'auto', 1); % calc SVR(gaussian)+PC
+figure; PC9 = plotSvPartialCorrelation(X, [], [], [], 'rbf', 'auto', 1); % calc SVR(rbf)+PC
 
 [lambda, alpha, errMat] = estimateLassoParamsForPC(X, [], [], [], 0.5, 5, [0.01:0.02:0.99],[1:-0.1:0.1]);
 PC5b = calcLassoPartialCorrelation(X, [], [], [], lambda, alpha); % calc Lasso PC
@@ -146,3 +180,10 @@ figure; clims = [-1 1]; imagesc(Z,clims); title(['PC3 - PC5 : sum err=' num2str(
 
 Z = PC3 - PC6;
 figure; clims = [-1 1]; imagesc(Z,clims); title(['PC3 - PC6 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+Z = PC3 - PC7;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC3 - PC7 : sum err=' num2str(nansum(abs(Z),'all'))]);
+Z = PC3 - PC8;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC3 - PC8 : sum err=' num2str(nansum(abs(Z),'all'))]);
+Z = PC3 - PC9;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC3 - PC9 : sum err=' num2str(nansum(abs(Z),'all'))]);
