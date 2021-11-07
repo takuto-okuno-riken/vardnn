@@ -1,19 +1,19 @@
 %%
-% Caluclate Support Vector Partial Correlation
-% returns Support Vector Partial Correlation (PC)
+% Caluclate Gaussian Processes Partial Correlation
+% returns Gaussian Processes Partial Correlation (PC)
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
 %  nodeControl  node control matrix (node x node) (optional)
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
-%  kernel          kernel for SVM (default:'linear', 'gaussian', 'rbf')
-%  kernelScale     kernelScale for SVM (default:'auto', 1)
+%  kernel          kernel for GP (default:'squaredexponential', 'ardsquaredexponential', ... please see https://jp.mathworks.com/help/stats/fitrgp.html )
+%  basis           basis for GP (default:'linear', 'none', 'constant')
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [PC] = calcSvPartialCorrelation(X, exSignal, nodeControl, exControl, kernel, kernelScale, isFullNode)
+function [PC] = calcGpPartialCorrelation(X, exSignal, nodeControl, exControl, kernel, basis, isFullNode)
     if nargin < 7, isFullNode = 0; end
-    if nargin < 6, kernelScale = 'auto'; end
-    if nargin < 5, kernel = 'linear'; end
+    if nargin < 6, basis = 'linear'; end
+    if nargin < 5, kernel = 'squaredexponential'; end
     if nargin < 4, exControl = []; end
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end
@@ -22,7 +22,7 @@ function [PC] = calcSvPartialCorrelation(X, exSignal, nodeControl, exControl, ke
     sigLen = size(X,2);
     exNum = size(exSignal,1);
     nodeMax = nodeNum + exNum;
-
+    
     % set node input
     Y = [X; exSignal];
     
@@ -44,11 +44,11 @@ function [PC] = calcSvPartialCorrelation(X, exSignal, nodeControl, exControl, ke
             idx = setdiff(nodeIdx,j);
             z = Y(idx,:).';
 
-            mdl = fitrsvm(z,x,'KernelFunction',kernel,'KernelScale',kernelScale); %,'Standardize',true); % bias will be calcurated
+            mdl = fitrgp(z,x,'Basis',basis,'FitMethod','exact','PredictMethod','exact','KernelFunction',kernel); %,'Standardize',true); % bias will be calcurated
             Si = predict(mdl, z);
             r1 = Si - x;
 
-            mdl = fitrsvm(z,y,'KernelFunction',kernel,'KernelScale',kernelScale); %,'Standardize',true); % bias will be calcurated
+            mdl = fitrgp(z,y,'Basis',basis,'FitMethod','exact','PredictMethod','exact','KernelFunction',kernel); %,'Standardize',true); % bias will be calcurated
             Si = predict(mdl, z);
             r2 = Si - y;
 

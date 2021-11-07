@@ -1,5 +1,5 @@
 %%
-% calculate multivariate Random Forest Vector Auto-Regression weights and Create mTreeVAR network
+% calculate multivariate Random Forest Vector Auto-Regression weights and Create mRFVAR network
 % input:
 %  X               multivariate time series matrix (node x time series)
 %  exSignal        multivariate time series matrix (exogenous input x time series) (default:[])
