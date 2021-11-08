@@ -68,6 +68,7 @@ function [lambda, elaAlpha, errMat] = estimateLassoParamsForPC(X, exSignal, node
             r1 = [];
             r2 = [];
             for n=1:length(trainSet)
+%            parfor n=1:length(trainSet)
                 for k=1:cv
                     data = trainSet{n};
                     [x, z, testX, testZ] = getkFoldDataSetOfLassoPC(data{2}, data{1}, k, cv);

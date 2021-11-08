@@ -35,6 +35,7 @@ function [PC] = calcPLSPartialCorrelation(X, exSignal, nodeControl, exControl, i
         nodeIdx = setdiff(fullIdx,[nidx, eidx, i]);
 
         for j=i:nodeMax
+%        parfor j=i:nodeMax
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
             
@@ -48,8 +49,10 @@ function [PC] = calcPLSPartialCorrelation(X, exSignal, nodeControl, exControl, i
             r1 = stats1.Yresiduals;
             r2 = stats2.Yresiduals;
             PC(i,j) = (r1.'*r2) / (sqrt(r1.'*r1)*sqrt(r2.'*r2));
-            PC(j,i) = PC(i,j);
         end
+    end
+    for i=1:nodeNum
+        for j=i:nodeMax, PC(j,i) = PC(i,j); end
     end
 
     % output control

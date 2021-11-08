@@ -34,6 +34,7 @@ function [PC] = calcPcPartialCorrelation(X, exSignal, nodeControl, exControl, ex
         nodeIdx = setdiff(fullIdx,[nidx, eidx, i]);
             
         for j=i:nodeMax
+%        parfor j=i:nodeMax
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
             
@@ -59,10 +60,12 @@ function [PC] = calcPcPartialCorrelation(X, exSignal, nodeControl, exControl, ex
             [b2,bint2,r2] = regress(y, pcXti);
             
             PC(i,j) = (r1.'*r2) / (sqrt(r1.'*r1)*sqrt(r2.'*r2));
-            PC(j,i) = PC(i,j);
         end
     end
-
+    for i=1:nodeNum
+        for j=i:nodeMax, PC(j,i) = PC(i,j); end
+    end
+    
     % output control
     PC = PC(1:nodeNum,:);
     if isFullNode == 0
