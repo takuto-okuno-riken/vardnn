@@ -93,6 +93,12 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     trmiAUC = zeros(1,N);
     rfdiAUC = zeros(1,N);
     rfmiAUC = zeros(1,N);
+    svlpcAUC = zeros(1,N);
+    svgpcAUC = zeros(1,N);
+    svrpcAUC = zeros(1,N);
+    gppcAUC = zeros(1,N);
+    trpcAUC = zeros(1,N);
+    rfpcAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
     pcpcROC = cell(N,2);
@@ -140,6 +146,12 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     trmiROC = cell(N,2);
     rfdiROC = cell(N,2);
     rfmiROC = cell(N,2);
+    svlpcROC = cell(N,2);
+    svgpcROC = cell(N,2);
+    svrpcROC = cell(N,2);
+    gppcROC = cell(N,2);
+    trpcROC = cell(N,2);
+    rfpcROC = cell(N,2);
     fcRf = figure;
     pcRf = figure;
     pcpcRf = figure;
@@ -187,6 +199,12 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     trmiRf = figure;
     rfdiRf = figure;
     rfmiRf = figure;
+    svlpcRf = figure;
+    svgpcRf = figure;
+    svrpcRf = figure;
+    gppcRf = figure;
+    trpcRf = figure;
+    rfpcRf = figure;
 
     origf = figure;
     origSigf = figure;
@@ -240,6 +258,41 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
             figure(lsopcRf); hold on; [lsopcROC{k,1}, lsopcROC{k,2}, lsopcAUC(k)] = plotROCcurve(PC2, weights, 100, 1, Gth); hold off;
             title(['ROC curve of Lasso PC (pat=' num2str(i) ')']);
         end
+        % show result of SVR-PC
+        if isempty(svlpcROC{k,1})
+            PC2 = calcSvPartialCorrelation(si,[], [], [], 'linear');
+            figure(svlpcRf); hold on; [svlpcROC{k,1}, svlpcROC{k,2}, svlpcAUC(k)] = plotROCcurve(PC2, weights, 100, 1, Gth); hold off;
+            title('SVl-PC');
+        end
+        if isempty(svgpcROC{k,1})
+            PC2 = calcSvPartialCorrelation(si,[], [], [], 'gaussian');
+            figure(svgpcRf); hold on; [svgpcROC{k,1}, svgpcROC{k,2}, svgpcAUC(k)] = plotROCcurve(PC2, weights, 100, 1, Gth); hold off;
+            title('SVg-PC');
+        end
+        if isempty(svrpcROC{k,1})
+            PC2 = calcSvPartialCorrelation(si,[], [], [], 'rbf');
+            figure(svrpcRf); hold on; [svrpcROC{k,1}, svrpcROC{k,2}, svrpcAUC(k)] = plotROCcurve(PC2, weights, 100, 1, Gth); hold off;
+            title('SVr-PC');
+        end
+        % show result of GP-PC
+        if isempty(gppcROC{k,1})
+            PC2 = calcGpPartialCorrelation(si);
+            figure(gppcRf); hold on; [gppcROC{k,1}, gppcROC{k,2}, gppcAUC(k)] = plotROCcurve(PC2, weights, 100, 1, Gth); hold off;
+            title('GP-PC');
+        end
+        % show result of Tree-PC
+        if isempty(trpcROC{k,1})
+            PC2 = calcTreePartialCorrelation(si);
+            figure(trpcRf); hold on; [trpcROC{k,1}, trpcROC{k,2}, trpcAUC(k)] = plotROCcurve(PC2, weights, 100, 1, Gth); hold off;
+            title('Tree-PC');
+        end
+        % show result of RF-PC
+        if isempty(rfpcROC{k,1})
+            PC2 = calcRfPartialCorrelation(si);
+            figure(rfpcRf); hold on; [rfpcROC{k,1}, rfpcROC{k,2}, rfpcAUC(k)] = plotROCcurve(PC2, weights, 100, 1, Gth); hold off;
+            title('RF-PC');
+        end
+
         % show result of WCS
         wcsFile = ['results/wcs-patrww-'  num2str(nodeNum) 'x' num2str(num_scan) '-idx' num2str(i) '-' num2str(k) '.mat'];
         if exist(wcsFile, 'file')
@@ -252,10 +305,11 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
         title(['ROC curve of WCS (pat=' num2str(i) ')']);
 
         % show result of granger causality index (mvGC)
-        gcI = calcMultivariateGCI_(si,[],[],[],lag);
-        figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, weights, 100, 1, Gth); hold off;
-        title(['ROC curve of mvGC (pat=' num2str(i) ')']);
-
+        if isempty(gcROC{k,1})
+            gcI = calcMultivariateGCI_(si,[],[],[],lag);
+            figure(gcRf); hold on; [gcROC{k,1}, gcROC{k,2}, gcAUC(k)] = plotROCcurve(gcI, weights, 100, 1, Gth); hold off;
+            title(['ROC curve of mvGC (pat=' num2str(i) ')']);
+        end
         % show result of granger causality index (pwGC)
         if isempty(pgcROC{k,1})
             pgcI = calcPairwiseGCI(si,[],[],[],lag);
@@ -658,9 +712,11 @@ function checkingPattern(node_num, num_scan, hz, Gth, N, i)
     save(resfname, 'fcAUC','pcAUC','pcpcAUC','lsopcAUC','plspcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlmAUC','pcdlAUC','pcdlwAUC','dlgAUC','linueAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC', ...
         'mvardiAUC','mpcvardiAUC','mpcvargcAUC','pvardiAUC','ppcvardiAUC','ppcvargcAUC','mplsdiAUC','mplsgcAUC','pplsdiAUC','pplsgcAUC','mlsodiAUC','mlsogcAUC','pcgcAUC','dls1AUC','dls3AUC','msvmdiAUC','msvmgcAUC','mgpdiAUC','mgpgcAUC','mgpediAUC', ...
         'nvdiAUC','nvmiAUC','trdiAUC','trmiAUC','rfdiAUC','rfmiAUC', ...
+        'svlpcAUC','svgpcAUC','svrpcAUC','gppcAUC','trpcAUC','rfpcAUC', ...
         'fcROC','pcROC','pcpcROC','lsopcROC','plspcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlmROC','pcdlROC','pcdlwROC','dlgROC','linueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC', ...
         'mvardiROC','mpcvardiROC','mpcvargcROC','pvardiROC','ppcvardiROC','ppcvargcROC','mplsdiROC','mplsgcROC','pplsdiROC','pplsgcROC','mlsodiROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC','msvmdiROC','msvmgcROC','mgpdiROC','mgpgcROC','mgpediROC', ...
-        'nvdiROC','nvmiROC','trdiROC','trmiROC','rfdiROC','rfmiROC');
+        'nvdiROC','nvmiROC','trdiROC','trmiROC','rfdiROC','rfmiROC', ...
+        'svlpcROC','svgpcROC','svrpcROC','gppcROC','trpcROC','rfpcROC');
 
     % show average ROC curve of DCM
     figure; 

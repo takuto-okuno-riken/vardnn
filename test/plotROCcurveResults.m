@@ -43,7 +43,8 @@ function plotROCresuts(N,fname,idx)
     if exist('nnnueROC','var'), X = [X, nnnueAUC.']; else X = [X, nan(length(fcAUC),1)]; end
     X = [X, dlAUC.', dlwAUC.', dlmAUC.', pcdlAUC.', pcdlwAUC.'];
     if exist('nvdiAUC','var'), X = [X, nvdiAUC.', nvmiAUC.', trdiAUC.', trmiAUC.', rfdiAUC.', rfmiAUC.']; end
-    kruskalwallis(X);
+    if exist('svlpcAUC','var'), X = [X, svlpcAUC.', svgpcAUC.', svrpcAUC.', gppcAUC.', trpcAUC.', rfpcAUC.']; end
+    kruskalwallis(X); title(fname);
 
     % show comparison ROC curves result
     figure; 
