@@ -15,10 +15,19 @@ function [PC, P] = calcPartialCorrelation(X, exSignal, nodeControl, exControl, i
     if nargin < 2, exSignal = []; end
 
     nodeNum = size(X,1);
+    sigLen = size(X,2);
     nodeMax = nodeNum + size(exSignal,1);
     
     % set node input
     Y = [X; exSignal];
+
+    % check all same value or not
+    for i=1:nodeMax
+        A = unique(Y(i,:));
+        if length(A)==1
+            Y(i,mod(i,sigLen)) = A + 1.0e-8;
+        end
+    end
 
     if isempty(nodeControl) && isempty(exControl)
         [PC, P] = partialcorr(Y.');

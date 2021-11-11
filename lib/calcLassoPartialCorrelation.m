@@ -25,7 +25,15 @@ function [PC] = calcLassoPartialCorrelation(X, exSignal, nodeControl, exControl,
 
     % set node input
     Y = [X; exSignal];
-    
+
+    % check all same value or not
+    for i=1:nodeMax
+        A = unique(Y(i,:));
+        if length(A)==1
+            Y(i,mod(i,sigLen)) = A + 1.0e-8;
+        end
+    end
+
     fullIdx = 1:nodeMax;
     PC = nan(nodeNum,nodeMax);
     for i=1:nodeNum
