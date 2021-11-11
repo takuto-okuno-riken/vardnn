@@ -14,17 +14,24 @@ function [FC, P] = calcFunctionalConnectivity(X, exSignal, nodeControl, exContro
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end
     nodeNum = size(X,1);
-    
+    sigLen = size(X,2);
+    exNum = size(exSignal,1);
+
     % set node input
-    if ~isempty(exSignal)
-        X = [X; exSignal];
+    X = [X; exSignal];
+
+    % check all same value or not
+    for i=1:nodeNum+exNum
+        A = unique(X(i,:));
+        if length(A)==1
+            X(i,mod(i,sigLen)) = A + 1.0e-8;
+        end
     end
+    
     [FC, P] = corr(X.', X.');
 
     % output control
-    if ~isempty(exSignal)
-        FC = FC(1:nodeNum,:); P = P(1:nodeNum,:); 
-    end
+    FC = FC(1:nodeNum,:); P = P(1:nodeNum,:); 
     if isFullNode == 0
         FC = FC(:,1:nodeNum); P = P(:,1:nodeNum); 
     end

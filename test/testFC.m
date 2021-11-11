@@ -26,4 +26,19 @@ function testFC
     figure; FCa = plotFunctionalConnectivityAbs(X, exSignal, [], [], 1); % calc FC (Abs)
     figure; tsCr = plotTimeShiftedCorrelation(X, exSignal, [], [], lags, 0, 1);
     figure; tsCra = plotTimeShiftedCorrelationAbs(X, exSignal, [], [], lags, 0, 1);
+    
+    % all zero
+    X = zeros(nodeNum, sigLen); 
+    figure; FC = plotFunctionalConnectivity(X); % calc FC
+    
+    % all 0.9
+    X = ones(nodeNum, sigLen) * 0.9; 
+    figure; FC = plotFunctionalConnectivity(X); % calc FC
+    
+    % random Intercept
+    X = ones(nodeNum, sigLen);
+    for i=1:nodeNum
+        X(i,:) = rand();
+    end
+    figure; FC = plotFunctionalConnectivity(X); % calc FC
 end
