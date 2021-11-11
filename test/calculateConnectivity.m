@@ -67,6 +67,18 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 mat = calcLassoPartialCorrelation(signals{i}, [], [], [], lambda, alpha); % calc Lasso PC
             case 'plspc'
                 mat = calcPLSPartialCorrelation(signals{i});
+            case 'svlpc'
+                mat = calcSvPartialCorrelation(signals{i},[], [], [], 'linear');
+            case 'svgpc'
+                mat = calcSvPartialCorrelation(signals{i},[], [], [], 'gaussian');
+            case 'svrpc'
+                mat = calcSvPartialCorrelation(signals{i},[], [], [], 'rbf');
+            case 'gppc'
+                mat = calcGpPartialCorrelation(signals{i});
+            case 'trpc'
+                mat = calcTreePartialCorrelation(signals{i});
+            case 'rfpc'
+                mat = calcRfPartialCorrelation(signals{i});
             case 'wcs'
                 fName = ['results/ad-' algorithm '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
                 if exist(fName, 'file')
@@ -306,6 +318,47 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     mat = calcMvarLstmGCI(si, exSignal, [], exControl, net);
                     
                     parsavenet(netName, net, si, exSignal, exControl, mat, sig, c, maxsi, minsi);
+                end
+            case {'nvw'}
+                netName = [resultsPath '/' resultsPrefix '-' algorithm lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                if exist(netName, 'file')
+                    f = load(netName);
+                    mat = f.mat;
+                else
+                    if isRaw
+                        si = signals{i};
+                        sig=0; c=0; maxsi=0; minsi=0;
+                    else
+                        [si, sig, c, maxsi, minsi] = convert2SigmoidSignal(signals{i},NaN,sigmoidAlpha);
+                    end
+                    net = initNvarnnNetwork(si, exSignal, [], [], lags);
+                    % training NVARNN network
+                    maxEpochs = 2000;
+                    miniBatchSize = ceil(sigLen / 3);
+                    options = trainingOptions('adam', ...
+                        'ExecutionEnvironment','cpu', ...
+                        'MaxEpochs',maxEpochs, ...
+                        'MiniBatchSize',miniBatchSize, ...
+                        'Shuffle','every-epoch', ...
+                        'GradientThreshold',5,...
+                        'L2Regularization',0.01, ...
+                        'Verbose',true);
+
+                    disp('start training');
+                    net = trainNvarnnNetwork(si, exSignal, [], [], net, options);
+                    % calc NVARNN-GC
+                    mat = calcNvarnnDI(net, [], []);
+                    
+                    parsavenet(netName, net, si, exSignal, exControl, mat, sig, c, maxsi, minsi);
+                end
+            case {'nvm','nvma'} % should be called after dlcm
+                netName = [resultsPath '/' resultsPrefix '-nvw' lagStr exoStr linStr '-' group '-roi' num2str(ROINUM) '-net' num2str(i) '.mat'];
+                f = load(netName);
+                if isfield(f,'inSignal'), f.exSignal = f.inSignal; end % for compatibility
+                if isfield(f,'inControl'), f.exControl = f.inControl; end % for compatibility
+                [mat,mat2] = calcNvarnnMIV(f.si, f.exSignal, [], [], f.netDLCM);
+                if strcmp(algorithm, 'nvma')
+                    mat = mat2;
                 end
             end
             weights(:,:,i) = mat;

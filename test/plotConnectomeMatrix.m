@@ -22,7 +22,7 @@ function plotConnectomeMatrix(meanWeights, algorithm, group, lags)
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : Time shifted Functional Connectivity (Abs) (' num2str(lags) ')'];
-    case {'pc','pcpc','lsopc','plspc'}
+    case {'pc','pcpc','lsopc','plspc','svlpc','svgpc','svrpc','gppc','trpc','rfpc'}
         clims = [-1,1];
         titleStr = [group ' : ' algorithm];
         sigWeights = meanWeights;
@@ -90,6 +90,18 @@ function plotConnectomeMatrix(meanWeights, algorithm, group, lags)
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : VARLSTM(' num2str(lags) ') Granger Causality Index'];
+    case {'nvw'}
+        sigma = std(meanWeights(:),1,'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : NVARNN(' num2str(lags) ') DI'];
+    case {'nvm','nvma'}
+        sigma = std(meanWeights(:),1,'omitnan');
+        avg = mean(meanWeights(:),'omitnan');
+        sigWeights = (meanWeights - avg) / sigma;
+        clims = [-3, 3];
+        titleStr = [group ' : NVARNN(' num2str(lags) ') MIV'];
     case {'mvarec','pvarec', 'mpcvarec','ppcvarec', 'mplsvarec','pplsvarec', 'mlsovarec','plsovarec','pcdlw'}
         sigma = std(meanWeights(:),1,'omitnan');
         avg = mean(meanWeights(:),'omitnan');
