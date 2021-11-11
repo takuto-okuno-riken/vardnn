@@ -37,12 +37,14 @@ function plotROCresuts(N,fname,idx)
     load(fname);
     
     if exist('teAUC','var'), linueAUC=teAUC; linueROC=teROC; end
+
     X = [fcAUC.', pcAUC.', pcpcAUC.', lsopcAUC.', plspcAUC.', pgcAUC.', gcAUC.', mpcvargcAUC.', mlsogcAUC.', mplsgcAUC.'];
     if exist('rnnROC','var'), X = [X, rnnAUC.']; else X = [X, nan(length(fcAUC),1)]; end
     X = [X, pcgcAUC.', linueAUC.'];
     if exist('nnnueROC','var'), X = [X, nnnueAUC.']; else X = [X, nan(length(fcAUC),1)]; end
     X = [X, dlAUC.', dlwAUC.', dlmAUC.', pcdlAUC.', pcdlwAUC.'];
     if exist('nvdiAUC','var'), X = [X, nvdiAUC.', nvmiAUC.', trdiAUC.', trmiAUC.', rfdiAUC.', rfmiAUC.']; end
+    if exist('nvwAUC','var'), X = [X, nvwAUC.', nvmAUC.']; end
     if exist('svlpcAUC','var'), X = [X, svlpcAUC.', svgpcAUC.', svrpcAUC.', gppcAUC.', trpcAUC.', rfpcAUC.']; end
     kruskalwallis(X); title(fname);
 
