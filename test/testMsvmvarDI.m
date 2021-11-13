@@ -16,10 +16,13 @@ function testMsvmvarDI
 
     %% test pattern 1 
     netMVAR = initMsvmvarNetwork(si, exSignal, [], exControl, lags);
+    netMVAR2 = initMsvmvarNetwork(si, exSignal, [], exControl, lags, 'gaussian');
     % show multivaliate SvmVAR-DI
     figure; mDI = plotMsvmvarDI(netMVAR, [], exControl, 0);
+    figure; mDI = plotMsvmvarDI(netMVAR2, [], exControl, 0);
     % show multivaliate & pairwise SvmVAR-GC
     figure; mGC = plotMsvmvarGCI(si, exSignal, [], exControl, netMVAR, 0);
+    figure; mGC = plotMsvmvarGCI(si, exSignal, [], exControl, netMVAR2, 0);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0);
 
@@ -33,10 +36,13 @@ function testMsvmvarDI
 
     % init MSvmVAR network
     netMVAR = initMsvmvarNetwork(si, exSignal, [], exControl, lags);
+    netMVAR2 = initMsvmvarNetwork(si, exSignal, [], exControl, lags, 'gaussian');
     % show multivaliate MVAR-DI
     figure; mDI = plotMsvmvarDI(netMVAR, [], exControl, 0, 1);
+    figure; mDI = plotMsvmvarDI(netMVAR2, [], exControl, 0, 1);
     % show multivaliate & pairwise SvmVAR-GC
     figure; mGC = plotMsvmvarGCI(si, exSignal, [], exControl, netMVAR, 0, 0.05, 1);
+    figure; mGC = plotMsvmvarGCI(si, exSignal, [], exControl, netMVAR2, 0, 0.05, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0, 0, 1);
 
@@ -56,10 +62,13 @@ function testMsvmvarDI
 
     % init MSvmVAR network
     netMVAR = initMsvmvarNetwork(si, exSignal, nodeControl, exControl, lags);
+    netMVAR2 = initMsvmvarNetwork(si, exSignal, nodeControl, exControl, lags, 'gaussian');
     % show multivaliate MVAR-DI
     figure; mDI = plotMsvmvarDI(netMVAR, nodeControl, exControl, 0, 1);
+    figure; mDI = plotMsvmvarDI(netMVAR2, nodeControl, exControl, 0, 1);
     % show multivaliate & pairwise SvmVAR-GC
     figure; mGC = plotMsvmvarGCI(si, exSignal, nodeControl, exControl, netMVAR, 0, 0.05, 1);
+    figure; mGC = plotMsvmvarGCI(si, exSignal, nodeControl, exControl, netMVAR2, 0, 0.05, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, nodeControl, exControl, lags, 0, 0, 1);
 end

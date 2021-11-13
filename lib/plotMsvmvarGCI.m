@@ -34,7 +34,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = plotMsvmvarGCI(X, ex
     clims = [-range, range];
     imagesc(gcI2,clims);
     daspect([1 1 1]);
-    title('mSvmVAR Granger Causality Index');
+    title(['mSvmVAR(' net.kernel ') Granger Causality Index']);
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;

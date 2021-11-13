@@ -27,7 +27,7 @@ function [DI, DIsub] = plotMsvmvarDI(net, nodeControl, exControl, range, isFullN
     clims = [-range, range];
     imagesc(DI2,clims);
     daspect([1 1 1]);
-    title('mSvmVAR Directional Influence');
+    title(['mSvmVAR(' net.kernel ') Directional Influence']);
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;
