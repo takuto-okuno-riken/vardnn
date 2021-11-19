@@ -135,5 +135,5 @@ Example results of causal relation matrix graphs of human fMRI signals (132 ROI)
 ## Citing VARDNN toolbox
 If you find VARDNN useful in your research, please consider citing:  
 Takuto Okuno, Alexander Woodward,
-["VARDNN: A Data-Driven Deep Learning-Based directed Functional Connectivity Estimation Toolbox"](https://yahoo.com/), under reviewing.
+["VARDNN: A Data-Driven Deep Learning-Based directed Functional Connectivity Estimation Toolbox"](https://www.frontiersin.org/articles/10.3389/fnins.2021.764796/abstract), in press.
 
