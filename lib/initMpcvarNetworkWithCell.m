@@ -37,50 +37,58 @@ function net = initMpcvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, 
     r = cell(nodeNum,1);
     stats = cell(nodeNum,1);
     
-    % init response variables
-    for n=1:nodeNum, Xt{n} = []; Xti{n} = []; end
-
     % set vector auto-regression (VAR) inputs
     idxs = cell(nodeNum,1);
     for n=1:nodeNum
         [~,idxs{n}] = find(control(n,:,:)==1);
     end
+    allInLen = 0;
     for i=1:cxNum
-        % set node input
-        Y = single(CX{i});
-        if exNum > 0
-            Y = [Y; single(CexSignal{i})];
-        end
-        Y = flipud(Y.'); % need to flip signal
-
-        sLen = size(Y,1);
-        Yj = single(zeros(sLen-lags, lags*inputNum));
-        for p=1:lags
-            Yj(:,1+inputNum*(p-1):inputNum*p) = Y(1+p:sLen-lags+p,:);
-        end
-        for n=1:nodeNum
-            Xt{n} = [Xt{n}; Y(1:sLen-lags,n)];
-            Xti{n} = cat(1,Xti{n},Yj(:,idxs{n}));
-        end
+        allInLen = allInLen + size(CX{i},2) - lags;
     end
 
     % apply the Principal Component Regress function
     for n=1:nodeNum
 %    parfor n=1:nodeNum
-        [coeff{n},score,latent{n},~,explained{n},mu{n}] = pca(Xti{n}); % relation : Xti == score{i} * coeff{i}.' + repmat(mu{i},size(score{i},1),1);
+        Xt = single(nan(allInLen,1));
+        Xti = single(nan(allInLen,length(idxs{n})));
+        xts = 1;
+
+        % this is redundant for every node. but it is necessary to avoid
+        % too much memory consumption
+        for i=1:cxNum
+            % set node input
+            Y = single(CX{i});
+            if exNum > 0
+                Y = [Y; single(CexSignal{i})];
+            end
+            Y = flipud(Y.'); % need to flip signal
+
+            sLen = size(Y,1);
+            sl = sLen-lags;
+            Yj = single(zeros(sl, lags*inputNum));
+            for p=1:lags
+                Yj(:,1+inputNum*(p-1):inputNum*p) = Y(1+p:sl+p,:);
+            end
+            Xt(xts:xts+sl-1,:) = Y(1:sl,n);
+            Xti(xts:xts+sl-1,:) = Yj(:,idxs{n});
+            xts = xts + sl;
+        end
+    
+        [coeff{n},score,latent{n},~,explained{n},mu{n}] = pca(Xti); % relation : Xti == score{i} * coeff{i}.' + repmat(mu{i},size(score{i},1),1);
 
         % find 99% component range
         expTotal = 0;
         maxComp{n} = size(score,2);
-        for j=1:size(Xti{n},2)
+        for j=1:size(Xti,2)
             expTotal = expTotal + explained{n}(j);
             if expTotal >= expTh
                 maxComp{n} = j;
                 break;
             end
         end
-        pcXti = [score(:,1:maxComp{n}), ones(size(Xti{n},1),1)]; % might not be good to add bias
-        [b{n},~,r{n},~,stats{n}] = regress(Xt{n}, pcXti);
+        pcXti = [score(:,1:maxComp{n}), ones(size(Xti,1),1)]; % might not be good to add bias
+        [b{n},~,r{n},~,stats{n}] = regress(Xt, pcXti);
         b{n} = single(b{n});
     end
     net.nodeNum = nodeNum;
