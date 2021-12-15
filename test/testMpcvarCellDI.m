@@ -16,7 +16,7 @@ function testMpcvarCellDI
 
     %% test pattern 1 
     lags = 1;
-    net = initMpcvarNetworkWithCell(CS, {}, [], exControl, lags);
+    net = initMpcvarNetworkWithCell(CS, {}, [], exControl, lags, 0.99, 0.01);
     
     % show multivaliate & pairwise PCVAR-DI
     figure; mDI = plotMpcvarDI(net, [], exControl, 0);
@@ -31,7 +31,7 @@ function testMpcvarCellDI
     for i=1:8, CS{i}=si; Cex{i}=exSignal; end
 
     % init PCVAR network
-    net = initMpcvarNetworkWithCell(CS, Cex, [], exControl, lags);
+    net = initMpcvarNetworkWithCell(CS, Cex, [], exControl, lags, 0.99, 0.01);
     
     % show multivaliate & pairwise MVAR-DI
     figure; mDI = plotMpcvarDI(net, [], exControl, 0, 1);
@@ -51,7 +51,7 @@ function testMpcvarCellDI
     for i=1:8, CS{i}=si; Cex{i}=exSignal; end
 
     % init PCVAR network
-    net = initMpcvarNetworkWithCell(CS, Cex, nodeControl, exControl, lags);
+    net = initMpcvarNetworkWithCell(CS, Cex, nodeControl, exControl, lags, 0.99, 0.01);
     
     % show multivaliate & pairwise MVAR-DI
     figure; mDI = plotMpcvarDI(net, nodeControl, exControl, 0, 1);

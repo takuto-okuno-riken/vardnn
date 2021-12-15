@@ -6,8 +6,10 @@
 %  nodeControl     node control matrix (node x node) (default:[])
 %  exControl       exogenous input control matrix for each node (node x exogenous input) (default:[])
 %  lags            number of lags for autoregression (default:3)
+%  uniqueDecimal   taking unique value from conjuncted time series (option)
 
-function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, lags)
+function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, lags, uniqueDecimal)
+    if nargin < 6, uniqueDecimal = 0; end
     if nargin < 5, lags = 3; end
     if nargin < 4, exControl = []; end
     if nargin < 3, nodeControl = []; end
@@ -64,6 +66,16 @@ function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, la
             Xt(xts:xts+sl-1,:) = Y(1:sl,n);
             Xti(xts:xts+sl-1,:) = Yj(:,idxs{n});
             xts = xts + sl;
+        end
+        Y = [];  % clear memory
+        Yj = []; % clear memory
+        
+        if uniqueDecimal > 0
+            A = int32([Xt, Xti] / uniqueDecimal);
+            A = unique(A,'rows');
+            Xt = single(A(:,1)) * uniqueDecimal;
+            Xti = single(A(:,2:end)) * uniqueDecimal;
+            A = []; % clear memory
         end
 
         Xti = [Xti, ones(size(Xti,1),1)]; % add bias

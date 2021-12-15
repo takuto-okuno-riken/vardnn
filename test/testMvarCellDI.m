@@ -17,7 +17,7 @@ function testMvarCellDI
     for i=1:8, CS{i}=si; end
     
     %% test pattern 1 
-    netMVAR = initMvarNetworkWithCell(CS, {}, [], exControl, lags);
+    netMVAR = initMvarNetworkWithCell(CS, {}, [], exControl, lags, 0.01);
     
     % show multivaliate VAR-DI
     figure; mDI = plotMvarDI(netMVAR, [], exControl, 0);
@@ -32,7 +32,7 @@ function testMvarCellDI
     for i=1:8, CS{i}=si; Cex{i}=exSignal; end
 
     % init MVAR network
-    netMVAR = initMvarNetworkWithCell(CS, Cex, nodeControl, exControl, lags);
+    netMVAR = initMvarNetworkWithCell(CS, Cex, nodeControl, exControl, lags, 0.01);
     
     % show multivaliate MVAR-DI
     figure; mDI = plotMvarDI(netMVAR, nodeControl, exControl, 0, 1);
@@ -53,7 +53,7 @@ function testMvarCellDI
     for i=1:8, CS{i}=si; Cex{i}=exSignal; end
 
     % init MVAR network
-    netMVAR = initMvarNetworkWithCell(CS, Cex, nodeControl, exControl, lags);
+    netMVAR = initMvarNetworkWithCell(CS, Cex, nodeControl, exControl, lags, 0.01);
     
     % show multivaliate MVAR-DI
     figure; mDI = plotMvarDI(netMVAR, nodeControl, exControl, 0, 1);

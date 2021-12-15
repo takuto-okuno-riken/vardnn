@@ -7,8 +7,10 @@
 %  exControl       exogenous input control matrix for each node (node x exogenous input) (default:[])
 %  lags            number of lags for autoregression (default:3)
 %  explainedTh     explained threshold for PCA components (default:0.99)
+%  uniqueDecimal   taking unique value from conjuncted time series (option)
 
-function net = initMpcvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, lags, explainedTh)
+function net = initMpcvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, lags, explainedTh, uniqueDecimal)
+    if nargin < 7, uniqueDecimal = 0; end
     if nargin < 6, explainedTh = 0.99; end
     if nargin < 5, lags = 3; end
     if nargin < 4, exControl = []; end
@@ -74,7 +76,17 @@ function net = initMpcvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, 
             Xti(xts:xts+sl-1,:) = Yj(:,idxs{n});
             xts = xts + sl;
         end
-    
+        Y = [];  % clear memory
+        Yj = []; % clear memory
+        
+        if uniqueDecimal > 0
+            A = int32([Xt, Xti] / uniqueDecimal);
+            A = unique(A,'rows');
+            Xt = single(A(:,1)) * uniqueDecimal;
+            Xti = single(A(:,2:end)) * uniqueDecimal;
+            A = []; % clear memory
+        end
+
         [coeff{n},score,latent{n},~,explained{n},mu{n}] = pca(Xti); % relation : Xti == score{i} * coeff{i}.' + repmat(mu{i},size(score{i},1),1);
 
         % find 99% component range
@@ -90,6 +102,7 @@ function net = initMpcvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, 
         pcXti = [score(:,1:maxComp{n}), ones(size(Xti,1),1)]; % might not be good to add bias
         [b{n},~,r{n},~,stats{n}] = regress(Xt, pcXti);
         b{n} = single(b{n});
+        pcXti = [];  % clear memory
     end
     net.nodeNum = nodeNum;
     net.exNum = exNum;
