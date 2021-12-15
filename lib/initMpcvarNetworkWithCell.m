@@ -41,6 +41,10 @@ function net = initMpcvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, 
     for n=1:nodeNum, Xt{n} = []; Xti{n} = []; end
 
     % set vector auto-regression (VAR) inputs
+    idxs = cell(nodeNum,1);
+    for n=1:nodeNum
+        [~,idxs{n}] = find(control(n,:,:)==1);
+    end
     for i=1:cxNum
         % set node input
         Y = single(CX{i});
@@ -55,14 +59,14 @@ function net = initMpcvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, 
             Yj(:,1+inputNum*(p-1):inputNum*p) = Y(1+p:sLen-lags+p,:);
         end
         for n=1:nodeNum
-            [~,idx] = find(control(n,:,:)==1);
             Xt{n} = [Xt{n}; Y(1:sLen-lags,n)];
-            Xti{n} = cat(1,Xti{n},Yj(:,idx));
+            Xti{n} = cat(1,Xti{n},Yj(:,idxs{n}));
         end
     end
 
     % apply the Principal Component Regress function
     for n=1:nodeNum
+%    parfor n=1:nodeNum
         [coeff{n},score,latent{n},~,explained{n},mu{n}] = pca(Xti{n}); % relation : Xti == score{i} * coeff{i}.' + repmat(mu{i},size(score{i},1),1);
 
         % find 99% component range

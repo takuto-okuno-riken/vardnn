@@ -32,6 +32,10 @@ function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, la
     for n=1:nodeNum, Xt{n} = []; Xti{n} = []; end
 
     % set vector auto-regression (VAR) inputs
+    idxs = cell(nodeNum,1);
+    for n=1:nodeNum
+        [~,idxs{n}] = find(control(n,:,:)==1);
+    end
     for i=1:cxNum
         % set node input
         Y = single(CX{i});
@@ -46,14 +50,14 @@ function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, la
             Yj(:,1+inputNum*(p-1):inputNum*p) = Y(1+p:sLen-lags+p,:);
         end
         for n=1:nodeNum
-            [~,idx] = find(control(n,:,:)==1);
             Xt{n} = [Xt{n}; Y(1:sLen-lags,n)];
-            Xti{n} = cat(1,Xti{n},Yj(:,idx));
+            Xti{n} = cat(1,Xti{n},Yj(:,idxs{n}));
         end
     end
     
     % apply the regress function
     for n=1:nodeNum
+%    parfor n=1:nodeNum
         Xti{n} = [Xti{n}, ones(size(Xti{n},1),1)]; % add bias
         [b{n},~,r{n},~,stats{n}] = regress(Xt{n},Xti{n});
         b{n} = single(b{n});
