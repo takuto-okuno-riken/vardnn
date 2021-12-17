@@ -38,7 +38,7 @@ function testMvarDnnDICell
             load(mvardnnFile);
         else
             % init multivariate VAR DNN network
-            net = initMvarDnnNetworkWithCell(CS, {}, [], exControl, i, 0.01);
+            net = initMvarDnnNetworkWithCell(CS, {}, [], exControl, i, 60, 0.01);
             % training multivariate VAR DNN network
             net = trainMvarDnnNetworkWithCell(CS, {}, [], exControl, net, options);
             [time, loss, rsme] = getMvarDnnTrainingResult(net);
@@ -64,7 +64,7 @@ function testMvarDnnDICell
             load(mvardnnFile);
         else
             % init multivariate VAR DNN network
-            net = initMvarDnnNetworkWithCell(CS, Cex, [], exControl, i, 0.01);
+            net = initMvarDnnNetworkWithCell(CS, Cex, [], exControl, i, 60, 0.01);
             % training multivariate VAR DNN network
             net = trainMvarDnnNetworkWithCell(CS, Cex, [], exControl, net, options);
             [time, loss, rsme] = getMvarDnnTrainingResult(net);
@@ -89,7 +89,7 @@ function testMvarDnnDICell
             load(mvardnnFile);
         else
             % init multivariate VAR DNN network. no activation function
-            net = initMvarDnnNetworkWithCell(CS, Cex, [], exControl, i, 0.01, []);
+            net = initMvarDnnNetworkWithCell(CS, Cex, [], exControl, i, 60, 0.01, []);
             % training multivariate VAR DNN network
             net = trainMvarDnnNetworkWithCell(CS, Cex, [], exControl, net, options);
             [time, loss, rsme] = getMvarDnnTrainingResult(net);
@@ -126,7 +126,7 @@ function testMvarDnnDICell
             load(mvardnnFile);
         else
             % init multivariate VAR DNN network
-            net = initMvarDnnNetworkWithCell(CS, Cex, nodeControl, exControl, i, 0.01);
+            net = initMvarDnnNetworkWithCell(CS, Cex, nodeControl, exControl, i, 60, 0.01);
             % training multivariate VAR DNN network
             net = trainMvarDnnNetworkWithCell(CS, Cex, nodeControl, exControl, net, options);
             [time, loss, rsme] = getMvarDnnTrainingResult(net);

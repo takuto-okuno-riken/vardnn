@@ -6,6 +6,7 @@
 %  nodeControl     node control matrix (node x node) (default:[])
 %  exControl       exogenous input control matrix for each node (node x exogenous input) (default:[])
 %  lags            number of lags for autoregression (default:1)
+%  maxNeuronNum    maximum neuron number of a hidden layer (default:NaN)
 %  uniqueDecimal   taking unique value from conjuncted time series (option)
 %  activateFunc    activation function for each layer (default:@reluLayer)
 %  initWeightFunc  initializing weight function (default:[])
@@ -14,12 +15,13 @@
 %             For uniform distribution, bias = 0 and empty initial weight is better
 %             For fMRI BOLD signal, bias = 0.5 and rough initial weight is better
 
-function net = initMvarDnnNetworkWithCell(CX, CexSignal, nodeControl, exControl, lags, uniqueDecimal, activateFunc, initWeightFunc, initWeightParam, initBias)
-    if nargin < 10, initBias = 0; end
-    if nargin < 9, initWeightParam = []; end
-    if nargin < 8, initWeightFunc = []; end
-    if nargin < 7, activateFunc = @reluLayer; end
-    if nargin < 6, uniqueDecimal = 0; end
+function net = initMvarDnnNetworkWithCell(CX, CexSignal, nodeControl, exControl, lags, maxNeuronNum, uniqueDecimal, activateFunc, initWeightFunc, initWeightParam, initBias)
+    if nargin < 11, initBias = 0; end
+    if nargin < 10, initWeightParam = []; end
+    if nargin < 9, initWeightFunc = []; end
+    if nargin < 8, activateFunc = @reluLayer; end
+    if nargin < 7, uniqueDecimal = 0; end
+    if nargin < 6, maxNeuronNum = nan; end
     if nargin < 5, lags = 1; end
     if nargin < 4, exControl = []; end
     if nargin < 3, nodeControl = []; end
@@ -90,7 +92,7 @@ function net = initMvarDnnNetworkWithCell(CX, CexSignal, nodeControl, exControl,
     end
     
     % estimate neuron number of hidden layers
-    hiddenNums = estimateHiddenNeurons(estimateInNum, nanmean(sigLens));
+    hiddenNums = estimateHiddenNeurons(estimateInNum, nanmean(sigLens), maxNeuronNum);
     
     % layer parameters
     net = createMvarDnnNetwork(nodeNum, exNum, hiddenNums, lags, nodeControl, exControl, activateFunc, initWeightFunc, initWeightParam, initBias);
