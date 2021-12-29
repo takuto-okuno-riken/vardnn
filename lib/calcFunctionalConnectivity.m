@@ -24,7 +24,7 @@ function [FC, P] = calcFunctionalConnectivity(X, exSignal, nodeControl, exContro
     for i=1:nodeNum+exNum
         A = unique(X(i,:));
         if length(A)==1
-            X(i,mod(i,sigLen)) = A + 1.0e-8;
+            X(i,mod(i,sigLen)+1) = A + 1.0e-8;
         end
     end
     
