@@ -25,12 +25,9 @@ function [NPCC, lags] = calcPartialCrossCorrelation(X, exSignal, nodeControl, ex
 
     % check all same value or not
     for i=1:nodeMax
-        A = unique(Y(i,:));
-        if length(A)==1
-            Y(i,mod(i,sigLen)) = A + 1.0e-8;
-        end
+        Ulen(i) = length(unique(Y(i,:)));
     end
-
+    
     NPCC = nan(nodeNum,nodeMax,maxlag*2+1);
     fullIdx = 1:nodeMax;
     for i=1:nodeNum
@@ -43,15 +40,20 @@ function [NPCC, lags] = calcPartialCrossCorrelation(X, exSignal, nodeControl, ex
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
             
-            x = Y(i,:).';
-            y = Y(j,:).';
-            idx = setdiff(nodeIdx,j);
-            z = [Y(idx,:).', ones(sigLen,1)];
+            if Ulen(i)==1 && Ulen(j)==1
+                NPCC(i,j,:) = 0;
+                lags = -maxlag:maxlag;
+            else
+                x = Y(i,:).';
+                y = Y(j,:).';
+                idx = setdiff(nodeIdx,j);
+                z = [Y(idx,:).', ones(sigLen,1)];
 
-            [b1,bint1,r1] = regress(x, z);
-            [b2,bint2,r2] = regress(y, z);
+                [b1,bint1,r1] = regress(x, z);
+                [b2,bint2,r2] = regress(y, z);
 
-            [NPCC(i,j,:), lags] = xcov(r1,r2,maxlag,'normalized');
+                [NPCC(i,j,:), lags] = xcov(r1,r2,maxlag,'normalized');
+            end
             NPCC(j,i,:) = NPCC(i,j,:);
         end
     end

@@ -37,5 +37,31 @@ function testMSCoherence
 
     figure; PC = plotPartialCorrelation(si, exSignal, [], exControl, 1);
     figure; [PMSC, f] = plotPartialMSCoherence(si, exSignal, [], exControl, 20, 1);
+
+    %% test pattern 3
+    n = 8;
+    load(['results/simsc/sin-' num2str(n) 'x2000-idx6-1-1-result.mat']);
+    plotTwoSignals(S(:,:,1),S(:,:,2),0,[0, 1]);
+    figure; [MSC1, lags] = plotMSCoherence(S(:,:,1), [], [], [], 20);
+    figure; [MSC2, lags] = plotMSCoherence(S(:,:,2), [], [], [], 20);
+    U = tril(nan(n));
+    MSC1(:,:,6)=[]; MSC2(:,:,6)=[];
+    getCosSimilarity(MSC1+U, MSC2+U)
+    figure; [PMSC1, lags] = plotPartialMSCoherence(S(:,:,1), [], [], [], 20);
+    figure; [PMSC2, lags] = plotPartialMSCoherence(S(:,:,2), [], [], [], 20);
+    PMSC1(:,:,6)=[]; PMSC2(:,:,6)=[];
+    getCosSimilarity(PMSC1+U, PMSC2+U)
+    
+    load(['results/simsc/v09-' num2str(n) 'x2000-idx6-1-1-result.mat']);
+    plotTwoSignals(S(:,:,1),S(:,:,2),0,[0, 1]);
+    figure; [MSC1, lags] = plotMSCoherence(S(:,:,1), [], [], [], 20);
+    figure; [MSC2, lags] = plotMSCoherence(S(:,:,2), [], [], [], 20);
+    U = tril(nan(n));
+    MSC1(:,:,6)=[]; MSC2(:,:,6)=[];
+    getCosSimilarity(MSC1+U, MSC2+U)
+    figure; [PMSC1, lags] = plotPartialMSCoherence(S(:,:,1), [], [], [], 20);
+    figure; [PMSC2, lags] = plotPartialMSCoherence(S(:,:,2), [], [], [], 20);
+    PMSC1(:,:,6)=[]; PMSC2(:,:,6)=[];
+    getCosSimilarity(PMSC1+U, PMSC2+U)
 end
 

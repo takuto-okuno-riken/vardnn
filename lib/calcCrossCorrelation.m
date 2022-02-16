@@ -25,10 +25,7 @@ function [NCC, lags] = calcCrossCorrelation(X, exSignal, nodeControl, exControl,
 
     % check all same value or not
     for i=1:nodeMax
-        A = unique(Y(i,:));
-        if length(A)==1
-            Y(i,mod(i,sigLen)) = A + 1.0e-8;
-        end
+        Ulen(i) = length(unique(Y(i,:)));
     end
 
     NCC = nan(nodeNum,nodeMax,maxlag*2+1);
@@ -37,9 +34,14 @@ function [NCC, lags] = calcCrossCorrelation(X, exSignal, nodeControl, exControl,
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
             
-            x = Y(i,:).';
-            y = Y(j,:).';
-            [NCC(i,j,:), lags] = xcov(x,y,maxlag,'normalized');
+            if Ulen(i)==1 && Ulen(j)==1
+                NCC(i,j,:) = 0;
+                lags = -maxlag:maxlag;
+            else
+                x = Y(i,:).';
+                y = Y(j,:).';
+                [NCC(i,j,:), lags] = xcov(x,y,maxlag,'normalized');
+            end
             NCC(j,i,:) = NCC(i,j,:);
         end
     end

@@ -38,5 +38,31 @@ function testCrossCorrelation
 
     figure; plotPartialCorrelation(si, exSignal, [], exControl, 1);
     figure; [NCC, lags] = plotPartialCrossCorrelation(si, exSignal, [], exControl, 5, 1);
+
+    %% test pattern 3
+    n = 8;
+    load(['results/simsc/sin-' num2str(n) 'x2000-idx6-1-1-result.mat']);
+    plotTwoSignals(S(:,:,1),S(:,:,2),0,[0, 1]);
+    figure; [NCC1, lags] = plotCrossCorrelation(S(:,:,1), [], [], [], 5);
+    figure; [NCC2, lags] = plotCrossCorrelation(S(:,:,2), [], [], [], 5);
+    U = tril(nan(n));
+    NCC1(:,:,6)=[]; NCC2(:,:,6)=[];
+    getCosSimilarity(NCC1+U, NCC2+U)
+    figure; [PNCC1, lags] = plotPartialCrossCorrelation(S(:,:,1), [], [], [], 5);
+    figure; [PNCC2, lags] = plotPartialCrossCorrelation(S(:,:,2), [], [], [], 5);
+    PNCC1(:,:,6)=[]; PNCC2(:,:,6)=[];
+    getCosSimilarity(PNCC1+U, PNCC2+U)
+    
+    load(['results/simsc/v09-' num2str(n) 'x2000-idx6-1-1-result.mat']);
+    plotTwoSignals(S(:,:,1),S(:,:,2),0,[0, 1]);
+    figure; [NCC1, lags] = plotCrossCorrelation(S(:,:,1), [], [], [], 5);
+    figure; [NCC2, lags] = plotCrossCorrelation(S(:,:,2), [], [], [], 5);
+    U = tril(nan(n));
+    NCC1(:,:,6)=[]; NCC2(:,:,6)=[];
+    getCosSimilarity(NCC1+U, NCC2+U)
+    figure; [PNCC1, lags] = plotPartialCrossCorrelation(S(:,:,1), [], [], [], 5);
+    figure; [PNCC2, lags] = plotPartialCrossCorrelation(S(:,:,2), [], [], [], 5);
+    PNCC1(:,:,6)=[]; PNCC2(:,:,6)=[];
+    getCosSimilarity(PNCC1+U, PNCC2+U)
 end
 
