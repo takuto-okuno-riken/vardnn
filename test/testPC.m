@@ -23,6 +23,26 @@ sigma = cov(X.');
 B = inv(sigma);
 pc5 = -B(1,2) / sqrt(B(1,1)*B(2,2));
 
+%% cos similarity original vs. sin, v09, mFT
+%{
+n = 8;
+U = tril(nan(n));
+load(['results/simsc/sin-' num2str(n) 'x2000-idx6-1-1-result.mat']);
+plotTwoSignals(S(:,:,1),S(:,:,2),0,[0, 1]);
+figure; [NC1] = plotPartialCorrelation(S(:,:,1), [], [], []);
+figure; [NC2] = plotPartialCorrelation(S(:,:,2), [], [], []);
+getCosSimilarity(NC1+U, NC2+U)
+figure; [PNC1] = plotSvPartialCorrelation(S(:,:,1), [], [], [], 'gaussian');
+figure; [PNC2] = plotSvPartialCorrelation(S(:,:,2), [], [], [], 'gaussian');
+getCosSimilarity(PNC1+U, PNC2+U)
+load(['results/simsc/v09-' num2str(n) 'x2000-idx6-1-1-result.mat']);
+figure; [PNC2] = plotSvPartialCorrelation(S(:,:,2), [], [], [], 'gaussian');
+getCosSimilarity(PNC1+U, PNC2+U)
+load(['results/simsc/mft-' num2str(n) 'x2000-idx6-1-1-result.mat']);
+figure; [PNC2] = plotSvPartialCorrelation(S(:,:,2), [], [], [], 'gaussian');
+getCosSimilarity(PNC1+U, PNC2+U)
+%}
+
 %% test pattern 1 -- just random
 % regression version
 PC3 = calcPartialCorrelation__(X);

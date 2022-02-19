@@ -37,10 +37,10 @@ function [PC] = calcPartialCorrelation__(X, exSignal, nodeControl, exControl, is
             x = Y(i,:).';
             y = Y(j,:).';
             idx = setdiff(nodeIdx,j);
-            z = Y(idx,:).';
+            z = [Y(idx,:).', ones(sigLen,1)]; % add intercept
 
-            [b1,bint1,r1] = regress(x,[z, ones(sigLen,1)]);
-            [b2,bint2,r2] = regress(y,[z, ones(sigLen,1)]);
+            [b1,bint1,r1] = regress(x, z);
+            [b2,bint2,r2] = regress(y, z);
             PC(i,j) = (r1.'*r2) / (sqrt(r1.'*r1)*sqrt(r2.'*r2));
             PC(j,i) = PC(i,j);
         end

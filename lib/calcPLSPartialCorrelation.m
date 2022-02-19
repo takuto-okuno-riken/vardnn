@@ -52,8 +52,8 @@ function [PC] = calcPLSPartialCorrelation(X, exSignal, nodeControl, exControl, i
             idx = setdiff(nodeIdx,j);
             z = Y(idx,:).';
 
-            [XL,YL,XS,YS,b,PCTVAR,MSE,stats1] = plsregress(z,x,ncomp);
-            [XL,YL,XS,YS,b,PCTVAR,MSE,stats2] = plsregress(z,y,ncomp);
+            [XL,YL,XS,YS,b,PCTVAR,MSE,stats1] = plsregress(z,x,ncomp); % bias is included
+            [XL,YL,XS,YS,b,PCTVAR,MSE,stats2] = plsregress(z,y,ncomp); % bias is included
             r1 = stats1.Yresiduals;
             r2 = stats2.Yresiduals;
             PC(i,j) = (r1.'*r2) / (sqrt(r1.'*r1)*sqrt(r2.'*r2));
