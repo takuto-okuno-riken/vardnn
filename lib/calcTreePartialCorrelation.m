@@ -26,7 +26,7 @@ function [PC] = calcTreePartialCorrelation(X, exSignal, nodeControl, exControl, 
     for i=1:nodeMax
         A = unique(Y(i,:));
         if length(A)==1
-            Y(i,mod(i,sigLen)) = A + 1.0e-8;
+            Y(i,mod(i,sigLen)+1) = A + 1.0e-8;
         end
     end
 
