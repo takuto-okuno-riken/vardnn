@@ -35,7 +35,7 @@ function [PC] = calcSvPartialCorrelation(X, exSignal, nodeControl, exControl, ke
     % each pool have each own gloval value.
 %   setSvPCCFlag(false); % init global value for 'for loop'
 %%{
-    p = gcp('nocreate');
+    p = gcp; % If no pool, create new
     parfor i=1:p.NumWorkers
         setSvPCFlag(false); % init global value for 'parfor'
     end
