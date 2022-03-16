@@ -11,6 +11,7 @@
 function trainedNet = trainMvarDnnNetworkWithCell(CX, CexSignal, nodeControl, exControl, net, options)
     cxNum = length(CX);
     nodeNum = size(CX{1},1);
+    sigLen = size(CX{1},2);
     if ~isempty(CexSignal)
         exNum = size(CexSignal{1},1);
     else
@@ -37,13 +38,20 @@ function trainedNet = trainMvarDnnNetworkWithCell(CX, CexSignal, nodeControl, ex
         allInLen = allInLen + size(CX{i},2) - lags;
     end
 
+    % calculate mean and covariance of each node
+    Y = [];
+    for i=1:cxNum, Y = [Y, CX{i}]; end
+    cxM = mean(Y.');
+    cxCov = cov(Y.');
+    Y = []; % memory clear
+
     nodeLayers = net.nodeLayers;
     nodeNetwork = cell(nodeNum,1);
     trainInfo = cell(nodeNum,1);
     rvec = cell(nodeNum,1);
 
-    for n=1:nodeNum
-%    parfor n=1:nodeNum    % for parallel processing
+%    for n=1:nodeNum
+    parfor n=1:nodeNum    % for parallel processing
         if isempty(nodeLayers{n}), continue; end
         disp(['training node ' num2str(n)]);
         Xt = single(nan(allInLen,1));
@@ -94,6 +102,9 @@ function trainedNet = trainMvarDnnNetworkWithCell(CX, CexSignal, nodeControl, ex
     trainedNet = net;
     trainedNet.nodeNum = nodeNum; % for compatibility
     trainedNet.exNum = exNum; % for compatibility
+    trainedNet.sigLen = sigLen;
+    trainedNet.cxM = cxM;
+    trainedNet.cxCov = cxCov;
     trainedNet.nodeNetwork = nodeNetwork;
     trainedNet.trainInfo = trainInfo;
     trainedNet.trainTime = time;

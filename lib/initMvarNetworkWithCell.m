@@ -16,6 +16,7 @@ function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, la
     if nargin < 2, CexSignal = {}; end
     cxNum = length(CX);
     nodeNum = size(CX{1},1);
+    sigLen = size(CX{1},2);
     if ~isempty(CexSignal)
         exNum = size(CexSignal{1},1);
     else
@@ -39,10 +40,17 @@ function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, la
     for i=1:cxNum
         allInLen = allInLen + size(CX{i},2) - lags;
     end
-    
+
+    % calculate mean and covariance of each node
+    Y = [];
+    for i=1:cxNum, Y = [Y, CX{i}]; end
+    cxM = mean(Y.');
+    cxCov = cov(Y.');
+    Y = []; % memory clear
+
     % apply the regress function
-    for n=1:nodeNum
-%    parfor n=1:nodeNum
+%    for n=1:nodeNum
+    parfor n=1:nodeNum
         Xt = single(nan(allInLen,1));
         Xti = single(nan(allInLen,length(idxs{n})));
         xts = 1;
@@ -84,6 +92,9 @@ function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, la
     end
     net.nodeNum = nodeNum;
     net.exNum = exNum;
+    net.sigLen = sigLen;
+    net.cxM = cxM;
+    net.cxCov = cxCov;
     net.lags = lags;
     net.bvec = b;
     net.rvec = r;
