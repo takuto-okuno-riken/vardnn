@@ -146,7 +146,7 @@ function vardnn(varargin)
             case {'-h','--help'}
                 showUsage();
                 return;
-            case {'-v','--version'}
+            case {'--version'}
                 disp([exeName ' version : ' num2str(versionNumber)]);
                 return;
             otherwise
@@ -212,7 +212,7 @@ function showUsage()
     disp('  --showcg            show circle graph of VARDNN-DI, VARDNN-GC, mVAR, mvGC, pwGC, TE, FC, PC and WC');
     disp('  --showroc           show ROC curve (by GroundTruth) of VARDNN-DI, VARDNN-GC, mVAR, mvGC, pwGC, TE, FC, PC and WC');
     disp('  --nocache           do not use cache file for VARDNN training');
-    disp('  -v, --version       show version number');
+    disp('  --version           show version number');
     disp('  -h, --help          show command line help');
 end
 
