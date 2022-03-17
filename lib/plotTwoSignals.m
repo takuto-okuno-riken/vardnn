@@ -17,7 +17,7 @@ function [mae, maeerr, errs] = plotTwoSignals(X, Y, showEach, yRange)
     for i=1:nodeNum
         Xi = X(i,:);
         Yi = Y(i,:);
-        mat = [Yi.', Xi.'];
+        mat = [Xi.', Yi.'];
         if showEach~=0
             figure;
         else
