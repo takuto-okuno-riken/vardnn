@@ -1,14 +1,14 @@
 %%
-% get range value [min, max, mean, std] of whole group
+% get range struct [min, max, mean, std] of whole group
 % input:
 %  CX              cells of multivariate time series matrix {node x time series}
-function [gMin, gMax, gM, gStd] = getGroupRange(CX)
+function gRange = getGroupRange(CX)
     A = [];
     for i=1:length(CX)
         A = [A, CX{i}];
     end
-    gMin = min(A(:));
-    gMax = max(A(:));
-    gM = nanmean(A(:));
-    gStd = nanstd(A(:),1);
+    gRange.min = min(A(:));
+    gRange.max = max(A(:));
+    gRange.m = nanmean(A(:));
+    gRange.s = nanstd(A(:),1);
 end
