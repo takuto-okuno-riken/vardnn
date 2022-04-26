@@ -360,6 +360,8 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                 if strcmp(algorithm, 'nvma')
                     mat = mat2;
                 end
+            case 'ccm'
+                mat = calcConvCrossMap(signals{i}, [], [], [], lags);
             end
             weights(:,:,i) = mat;
         end

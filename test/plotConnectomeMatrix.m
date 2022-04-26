@@ -120,6 +120,10 @@ function plotConnectomeMatrix(meanWeights, algorithm, group, lags)
         sigWeights = (meanWeights - avg) / sigma;
         clims = [-3, 3];
         titleStr = [group ' : ' algorithm '(' num2str(lags) ')-GC Index'];
+    case 'ccm'
+        clims = [-1,1];
+        titleStr = [group ' : Convergent Cross Mapping(' num2str(lags) ')'];
+        sigWeights = meanWeights;
     end
     imagesc(sigWeights,clims);
     daspect([1 1 1]);

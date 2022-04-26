@@ -35,7 +35,7 @@ function analyzeAlzheimerVarDnn
     [ampROIp,ampROIr,ampROIm,ampROIs,cnAmpStds,adAmpStds] = checkAmplitudeDiffROI(cnSignals, adSignals, roiNames);
 
     % calculate connectivity
-    algNum = 31;
+    algNum = 32;
     [cnFCs, meanCNFC, stdCNFC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'fc');
     [adFCs, meanADFC, stdADFC] = calculateConnectivity(adSignals, roiNames, 'ad', 'fc');
     [mciFCs, meanMCIFC, stdMCIFC] = calculateConnectivity(mciSignals, roiNames, 'mci', 'fc');
@@ -185,6 +185,9 @@ function analyzeAlzheimerVarDnn
     [cnPCGCs, meanCNPCGC, stdCNPCGC] = calculateConnectivity(cnSignals, roiNames, 'cn', 'pcgc', 0, 3);
     [adPCGCs, meanADPCGC, stdADPCGC] = calculateConnectivity(adSignals, roiNames, 'ad', 'pcgc', 0, 3);
 
+    [cnCCMs, meanCNCCM, stdCNCCM] = calculateConnectivity(cnSignals, roiNames, 'cn', 'ccm', 0, 3);
+    [adCCMs, meanADCCM, stdADCCM] = calculateConnectivity(adSignals, roiNames, 'ad', 'ccm', 0, 3);
+
     % plot correlation and cos similarity
     nanx = eye(size(meanADFC,1),size(meanADFC,2));
     nanx(nanx==1) = NaN;
@@ -239,6 +242,7 @@ function analyzeAlzheimerVarDnn
     cosSim(i) = getCosSimilarity(meanCNRfPC+nanx, meanADRfPC+nanx); i=i+1;
     cosSim(i) = getCosSimilarity(meanCNNVW, meanADNVW); i=i+1;
     cosSim(i) = getCosSimilarity(meanCNNVM, meanADNVM); i=i+1;
+    cosSim(i) = getCosSimilarity(meanCNCCM, meanADCCM); i=i+1;
     figure; bar(cosSim);
     title('cos similarity between CN and AD by each algorithm');
     
@@ -337,6 +341,7 @@ function analyzeAlzheimerVarDnn
     [cnadMlsovarDIsUt, cnadMlsovarDIsUtP, cnadMlsovarDIsUtP2] = calculateAlzWilcoxonTest(cnMLSOVARDIs, adMLSOVARDIs, roiNames, 'cn', 'ad', 'mlsovarec');
     [cnadMlsovarGCsUt, cnadMlsovarGCsUtP, cnadMlsovarGCsUtP2] = calculateAlzWilcoxonTest(cnMLSOVARGCs, adMLSOVARGCs, roiNames, 'cn', 'ad', 'mlsovargc');
     [cnadPCGCsUt, cnadPCGCsUtP, cnadPCGCsUtP2] = calculateAlzWilcoxonTest(cnPCGCs, adPCGCs, roiNames, 'cn', 'ad', 'pcgc');
+    [cnadCCMsUt, cnadCCMsUtP, cnadCCMsUtP2] = calculateAlzWilcoxonTest(cnCCMs, adCCMs, roiNames, 'cn', 'ad', 'ccm');
     
     % show top 100 most different relations
     topNum = 100;
@@ -428,6 +433,7 @@ function analyzeAlzheimerVarDnn
     mlsodiAUC = zeros(1,N);
     mlsogcAUC = zeros(1,N);
     pcgcAUC = zeros(1,N);
+    ccmAUC = zeros(1,N);
     fcROC = cell(N,2);
     pcROC = cell(N,2);
     pcpcROC = cell(N,2);
@@ -472,6 +478,7 @@ function analyzeAlzheimerVarDnn
     mlsodiROC = cell(N,2);
     mlsogcROC = cell(N,2);
     pcgcROC = cell(N,2);
+    ccmROC = cell(N,2);
     fcACC = cell(N,1);
     pcACC = cell(N,1);
     pcpcACC = cell(N,1);
@@ -516,6 +523,7 @@ function analyzeAlzheimerVarDnn
     mlsodiACC = cell(N,1);
     mlsogcACC = cell(N,1);
     pcgcACC = cell(N,1);
+    ccmACC = cell(N,1);
 
     nodeNum = size(cnFCs,1);
     pvList = nan(nodeNum*nodeNum,algNum);
@@ -835,6 +843,13 @@ function analyzeAlzheimerVarDnn
             sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
             [pcgcROC{k,1}, pcgcROC{k,2}, pcgcAUC(k), pcgcACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
+
+            i = i + 1;
+            [control, target, meanTarget, stdTarget, meanControl] = getkFoldDataSet(cnCCMs, adCCMs, 1, 1);
+            [pvList(:,i), I, X] = sortAndPairPValues(control, target, cnadCCMsUtP, topNum);
+            sigCntCN{k,i} = calcAlzSigmaSubjects(control, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            sigCntAD{k,i} = calcAlzSigmaSubjects(target, meanTarget, stdTarget, meanControl, I, topNum, sigTh);
+            [ccmROC{k,1}, ccmROC{k,2}, ccmAUC(k), ccmACC{k}] = calcAlzROCcurve(sigCntCN{k,i}, sigCntAD{k,i}, topNum);
         end
     end
 %    figure; boxplot(X);
@@ -842,11 +857,11 @@ function analyzeAlzheimerVarDnn
     % save result
     fname = [resultsPath '/' resultsPrefix '-cn-ad-roi' num2str(132) '-result.mat'];
     save(fname, 'cosSim', 'fcAUC','pcAUC','pcpcAUC','lsopcAUC','plspcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlmAUC','pcdlAUC','pcdlwAUC','dls1AUC','dls3AUC','dlgAUC','teAUC','pcsAUC','cpcAUC','fgesAUC','fcaAUC','tsfcAUC','tsfcaAUC','mvardiAUC','mpcvardiAUC','mplsdiAUC','mlsodiAUC','mpcvargcAUC','mplsgcAUC','mlsogcAUC','pcgcAUC', ...
-        'svlpcAUC','svgpcAUC','svrpcAUC','gppcAUC','trpcAUC','rfpcAUC','nvwAUC','nvmAUC', ...
+        'svlpcAUC','svgpcAUC','svrpcAUC','gppcAUC','trpcAUC','rfpcAUC','nvwAUC','nvmAUC','ccmAUC', ...
         'fcROC','pcROC','pcpcROC','lsopcROC','plspcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlmROC','pcdlROC','pcdlwROC','dls1ROC','dls3ROC','dlgROC','teROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC','mvardiROC','mpcvardiROC','mplsdiROC','mlsodiROC','mpcvargcROC','mplsgcROC','mlsogcROC','pcgcROC', ...
-        'svlpcROC','svgpcROC','svrpcROC','gppcROC','trpcROC','rfpcROC','nvwROC','nvmROC', ...
+        'svlpcROC','svgpcROC','svrpcROC','gppcROC','trpcROC','rfpcROC','nvwROC','nvmROC','ccmROC', ...
         'fcACC','pcACC','pcpcACC','lsopcACC','plspcACC','wcsACC','gcACC','pgcACC','dlACC','dlwACC','dlmACC','pcdlACC','pcdlwACC','dls1ACC','dls3ACC','dlgACC','teACC','pcsACC','cpcACC','fgesACC','fcaACC','tsfcACC','tsfcaACC','mvardiACC','mpcvardiACC','mplsdiACC','mlsodiACC','mpcvargcACC','mplsgcACC','mlsogcACC','pcgcACC', ...
-        'svlpcACC','svgpcACC','svrpcACC','gppcACC','trpcACC','rfpcACC','nvwACC','nvmACC', ...
+        'svlpcACC','svgpcACC','svrpcACC','gppcACC','trpcACC','rfpcACC','nvwACC','nvmACC','ccmACC', ...
         'sigCntCN', 'sigCntAD');
     disp('AUCs');
     mean(dlAUC) % show result AUC
@@ -873,6 +888,7 @@ function analyzeAlzheimerVarDnn
     mean(mlsodiAUC) % show result AUC
     mean(mlsogcAUC) % show result AUC
     mean(pcgcAUC) % show result AUC
+    mean(ccmAUC) % show result AUC
     
     % show accuracy
     disp('ACCs');
@@ -941,6 +957,7 @@ function analyzeAlzheimerVarDnn
     plotAverageROCcurve(mlsodiROC, N, '-.', [0.7,0.9,0.9],1.0);
     plotAverageROCcurve(mlsogcROC, N, ':', [0.7,0.9,0.9],0.8);
     plotAverageROCcurve(pcgcROC, N, '-.', [0.3,0.6,0.6],0.5);
+    plotAverageROCcurve(ccmROC, N, '--', [0.9,0.2,0.2],0.8);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);
