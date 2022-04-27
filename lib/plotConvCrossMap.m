@@ -18,7 +18,7 @@ function [CCM, P] = plotConvCrossMap(X, exSignal, nodeControl, exControl, E, tau
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end
 
-    [CCM, P] = calcConvCrossMap_(X, exSignal, nodeControl, exControl, E, tau, isFullNode);
+    [CCM, P] = calcConvCrossMap(X, exSignal, nodeControl, exControl, E, tau, isFullNode);
     clims = [-1,1];
     imagesc(CCM,clims);
     daspect([1 1 1]);

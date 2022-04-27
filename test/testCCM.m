@@ -22,7 +22,7 @@ function testCCM
     for lags=1:3
         % show Convergent Cross Mapping
         figure; [CCM, P] = plotConvCrossMap(si, exSignal, [], exControl, lags);
-        CCM2 = calcConvCrossMap(si, exSignal, [], exControl, lags);
+        CCM2 = calcConvCrossMap_(si, exSignal, [], exControl, lags);
         if ~isequaln(CCM,CCM2)
             disp('error : CCM1 != CCM2 !');
             return;
@@ -43,7 +43,7 @@ function testCCM
 
     % show Convergent Cross Mapping
     figure; CCM = plotConvCrossMap(si, exSignal, [], exControl, lags, 1, 1);
-    CCM2 = calcConvCrossMap(si, exSignal, [], exControl, lags, 1, [], 'linear', 1);
+    CCM2 = calcConvCrossMap_(si, exSignal, [], exControl, lags, 1, [], 'linear', 1);
     if ~isequaln(CCM,CCM2)
         disp('error : CCM1 != CCM2 !');
         return;

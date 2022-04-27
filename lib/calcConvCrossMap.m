@@ -1,6 +1,6 @@
 %%
 % Caluclate Convergent Cross Mapping
-% returns CCM causality index (CCM).
+% returns CCM causality index (CCM) and p-values (P).
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -8,18 +8,10 @@
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  E            embedding dimension (default:3)
 %  tau          time delay used in the phase-space reconstruction (default:1)
-%  L            library of L points from the shadow manifolds (default:[]);
-%  sampling     'linear' or 'random' (default:'linear')
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-% Before using this function, download xmap codes from
-% https://github.com/danm0nster/xmap
-% and add a path "xmap-master" folder.
-
-function [CCM] = calcConvCrossMap(X, exSignal, nodeControl, exControl, E, tau, L, sampling, isFullNode)
-    if nargin < 9, isFullNode = 0; end
-    if nargin < 8, sampling = 'linear'; end
-    if nargin < 7, L = []; end
+function [CCM, P] = calcConvCrossMap(X, exSignal, nodeControl, exControl, E, tau, isFullNode)
+    if nargin < 7, isFullNode = 0; end
     if nargin < 6, tau = 1; end
     if nargin < 5, E = 3; end
     if nargin < 4, exControl = []; end
@@ -27,6 +19,7 @@ function [CCM] = calcConvCrossMap(X, exSignal, nodeControl, exControl, E, tau, L
     if nargin < 2, exSignal = []; end
     
     nodeNum = size(X,1);
+    sigLen = size(X,2);
     exNum = size(exSignal,1);
     inputNum = nodeNum + exNum;
     if isFullNode==0, nodeMax = nodeNum; else nodeMax = inputNum; end
@@ -38,22 +31,42 @@ function [CCM] = calcConvCrossMap(X, exSignal, nodeControl, exControl, E, tau, L
     [nodeControl, exControl, control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, E);
 
     % calc CCM
-    MYs = cell(nodeMax,1);
+    Midx = cell(nodeMax,1);
+    Mdist = cell(nodeMax,1);
+    embtLen = sigLen - (E-1)*tau;
+    Z = zeros(embtLen,E);
     for i=1:nodeMax
-        MYs{i} = psembed(Y(i,:),E,tau);
+        for j=1:E
+            Z(:,E-(j-1)) = Y(i,j:embtLen+(j-1));
+        end
+        % find K nearest neighbors of each Y time point on shadow manifold j
+        [Midx{i}, Mdist{i}] = knnsearch(Z,Z,'K',E+2,'distance','euclidean');
     end
     
     CCM = nan(nodeNum, nodeMax);
+    P = nan(nodeNum, nodeMax);
     for i=1:nodeNum
-        for j=i+1:nodeMax
+        for j=1:nodeMax
+            if i==j, continue; end
             if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
             if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
 
-            [ X_MY, Y_MX, X1, Y1] = xmap(Y(i,:), Y(j,:), MYs{i}, MYs{j}, E, tau, L, sampling);
-            CCM(i,j) = corr(X_MY, X1');
-            if j<=nodeNum && any(nodeControl(i,j,:),'all')
-                CCM(j,i) = corr(Y_MX, Y1');
-            end
+            % find K nearest neighbors on Yi from shadow manifold j
+            MjIdx = Midx{j};
+            Mjd = Mdist{j};
+            Yi = Y(i,:);
+            Yinn = Yi(MjIdx(:,2:E+2)+(E-1)*tau);
+
+            % predict Yi feature points
+            W = exp(-Mjd(:,2:E+2) ./ (Mjd(:,2) + 1e-8));
+            W = W ./ sum(W, 2);
+            Ypred = W .* Yinn;
+            Ypred = sum(Ypred,2);
+
+            % compare original Yi vs. predicted Yi
+            % if it correlated well, j CCM cause i.
+            Y1 = Y(i, 1+(E-1)*tau:end);
+            [CCM(i,j), P(i,j)] = corr(Ypred, Y1');
         end
     end
 end

@@ -29,7 +29,7 @@ function [CCM, Pfc, Pccm] = calcConvCrossMapSubFC(X, exSignal, nodeControl, exCo
     % set control 3D matrix (node x node x lags)
     [nodeControl, exControl, control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, E);
 
-    [CCM, Pccm] = calcConvCrossMap_(X, exSignal, nodeControl, exControl, E, tau, isFullNode);
+    [CCM, Pccm] = calcConvCrossMap(X, exSignal, nodeControl, exControl, E, tau, isFullNode);
     [FC, Pfc] = corr(Y.', Y.');
 
     for i=1:nodeNum
