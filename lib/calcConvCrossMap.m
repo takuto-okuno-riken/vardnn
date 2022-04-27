@@ -31,6 +31,9 @@ function [CCM, P] = calcConvCrossMap(X, exSignal, nodeControl, exControl, E, tau
     [nodeControl, exControl, control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, E);
 
     % calc CCM
+    stepAhead = (E-1)*tau;
+    Knn = E+2;
+%    if stepAhead>1, stepAhead=1; end % this affects a lot
     Midx = cell(nodeMax,1);
     Mdist = cell(nodeMax,1);
     embtLen = sigLen - (E-1)*tau;
@@ -40,7 +43,7 @@ function [CCM, P] = calcConvCrossMap(X, exSignal, nodeControl, exControl, E, tau
             Z(:,E-(j-1)) = Y(i,j:embtLen+(j-1));
         end
         % find K nearest neighbors of each Y time point on shadow manifold j
-        [Midx{i}, Mdist{i}] = knnsearch(Z,Z,'K',E+2,'distance','euclidean');
+        [Midx{i}, Mdist{i}] = knnsearch(Z,Z,'K',Knn,'distance','euclidean');
     end
     
     CCM = nan(nodeNum, nodeMax);
@@ -52,20 +55,22 @@ function [CCM, P] = calcConvCrossMap(X, exSignal, nodeControl, exControl, E, tau
             if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
 
             % find K nearest neighbors on Yi from shadow manifold j
+            % and get N step ahead points
             MjIdx = Midx{j};
             Mjd = Mdist{j};
             Yi = Y(i,:);
-            Yinn = Yi(MjIdx(:,2:E+2)+(E-1)*tau);
+            Aidx = MjIdx(:,2:Knn) + stepAhead;
+            Yinn = Yi(Aidx);
 
             % predict Yi feature points
-            W = exp(-Mjd(:,2:E+2) ./ (Mjd(:,2) + 1e-8));
+            W = exp(-Mjd(:,2:Knn) ./ (Mjd(:,2) + 1e-8));
             W = W ./ sum(W, 2);
             Ypred = W .* Yinn;
             Ypred = sum(Ypred,2);
 
-            % compare original Yi vs. predicted Yi
-            % if it correlated well, j CCM cause i.
-            Y1 = Y(i, 1+(E-1)*tau:end);
+            % compare original Yi vs. predicted Yi (from shadow manifold j)
+            % if it correlated well, i CCM cause j??
+            Y1 = Y(i, 1+stepAhead:embtLen+stepAhead);
             [CCM(i,j), P(i,j)] = corr(Ypred, Y1');
         end
     end

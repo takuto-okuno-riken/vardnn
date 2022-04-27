@@ -2,6 +2,10 @@
 % https://github.com/danm0nster/xmap
 % and add a path "xmap-master" folder.
 
+% Before using this function, download matlab CCM codes from
+% https://jp.mathworks.com/matlabcentral/fileexchange/52964-convergent-cross-mapping
+% and add a path "CCM_L_M" folder.
+
 function testCCM
     % load signals
     load('test/testTrain-rand500-uniform.mat');
@@ -27,7 +31,8 @@ function testCCM
             disp('error : CCM1 != CCM2 !');
             return;
         end
-        figure; CCM = plotConvCrossMapSubFC(si, exSignal, [], exControl, lags);
+        figure; CCM3 = plotConvCrossMapSubFC(si, exSignal, [], exControl, lags);
+        CCM4 = calcConvCrossMap__(si, exSignal, [], exControl, lags);
         % compare to mvGC
         figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0);
         figure; GC = plotPairwiseGCI(si, exSignal, [], exControl, lags, 0);
