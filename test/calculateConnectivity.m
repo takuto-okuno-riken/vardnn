@@ -361,7 +361,7 @@ function [weights, meanWeights, stdWeights, subweights] = calculateConnectivity(
                     mat = mat2;
                 end
             case 'ccm'
-                mat = calcConvCrossMap(signals{i}, [], [], [], lags);
+                mat = calcConvCrossMap_(signals{i}, [], [], [], lags);
             end
             weights(:,:,i) = mat;
         end

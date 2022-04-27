@@ -8,25 +8,17 @@
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  E            embedding dimension (default:3)
 %  tau          time delay used in the phase-space reconstruction (default:1)
-%  L            library of L points from the shadow manifolds (default:[]);
-%  sampling     'linear' or 'random' (default:'linear')
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-% Before using this function, download xmap codes from
-% https://github.com/danm0nster/xmap
-% and add a path "xmap-master" folder.
-
-function [CCM] = plotConvCrossMap(X, exSignal, nodeControl, exControl, E, tau, L, sampling, isFullNode)
-    if nargin < 9, isFullNode = 0; end
-    if nargin < 8, sampling = 'linear'; end
-    if nargin < 7, L = []; end
+function [CCM] = plotConvCrossMap(X, exSignal, nodeControl, exControl, E, tau, isFullNode)
+    if nargin < 7, isFullNode = 0; end
     if nargin < 6, tau = 1; end
     if nargin < 5, E = 3; end
     if nargin < 4, exControl = []; end
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end
 
-    [CCM] = calcConvCrossMap(X, exSignal, nodeControl, exControl, E, tau, L, sampling, isFullNode);
+    [CCM] = calcConvCrossMap_(X, exSignal, nodeControl, exControl, E, tau, isFullNode);
     clims = [-1,1];
     imagesc(CCM,clims);
     daspect([1 1 1]);

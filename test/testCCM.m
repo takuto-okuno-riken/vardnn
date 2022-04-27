@@ -19,9 +19,14 @@ function testCCM
     si(4,2:end) = si(6,1:sigLen-1); % caution! node 2 & 4 is Multicollinearity case (correlated)
 
     %% test pattern 1 
-    for lags=1:5
+    for lags=1:3
         % show Convergent Cross Mapping
         figure; CCM = plotConvCrossMap(si, exSignal, [], exControl, lags);
+        CCM2 = calcConvCrossMap(si, exSignal, [], exControl, lags);
+        if ~isequaln(CCM,CCM2)
+            disp('error : CCM1 != CCM2 !');
+            return;
+        end
         % compare to mvGC
         figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0);
         figure; GC = plotPairwiseGCI(si, exSignal, [], exControl, lags, 0);
@@ -36,7 +41,12 @@ function testCCM
     si(3,2:end) = exSignal(1,1:sigLen-1);
 
     % show Convergent Cross Mapping
-    figure; CCM = plotConvCrossMap(si, exSignal, [], exControl, lags, 1, [], 'linear', 1);
+    figure; CCM = plotConvCrossMap(si, exSignal, [], exControl, lags, 1, 1);
+    CCM2 = calcConvCrossMap(si, exSignal, [], exControl, lags, 1, [], 'linear', 1);
+    if ~isequaln(CCM,CCM2)
+        disp('error : CCM1 != CCM2 !');
+        return;
+    end
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, nodeControl, exControl, lags, 0, 0, 1);
     figure; GC = plotPairwiseGCI(si, exSignal, nodeControl, exControl, lags, 0, 0, 1);
@@ -56,7 +66,7 @@ function testCCM
     exControl(7,2,2) = 0; % <= comment out and check control effect
 
     % show Convergent Cross Mapping (3D control does not work)
-    figure; CCM = plotConvCrossMap(si, exSignal, nodeControl, exControl, lags, 1, [], 'linear', 1);
+    figure; CCM = plotConvCrossMap(si, exSignal, nodeControl, exControl, lags, 1, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, nodeControl, exControl, lags, 0, 0, 1);
     figure; GC = plotPairwiseGCI(si, exSignal, nodeControl, exControl, lags, 0, 0, 1);
