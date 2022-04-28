@@ -87,6 +87,8 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     rfmiAUC = zeros(1,N);
     ccmAUC = zeros(1,N);
     ccmfAUC = zeros(1,N);
+    ccmpgAUC = zeros(1,N);
+    ccmmgAUC = zeros(1,N);
     rnnROC = cell(N,2);
     linueROC = cell(N,2);
     nnnueROC = cell(N,2);
@@ -126,6 +128,8 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     rfmiROC = cell(N,2);
     ccmROC = cell(N,2);
     ccmfROC = cell(N,2);
+    ccmpgROC = cell(N,2);
+    ccmmgROC = cell(N,2);
     rnnRf = figure;
     linueRf = figure;
     nnnueRf = figure;
@@ -165,6 +169,8 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     rfmiRf = figure;
     ccmRf = figure;
     ccmfRf = figure;
+    ccmpgRf = figure;
+    ccmmgRf = figure;
     
     origf = figure;
     rnnTrial = 8;
@@ -473,6 +479,16 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
             figure(ccmfRf); hold on; [ccmfROC{k,1}, ccmfROC{k,2}, ccmfAUC(k)] = plotROCcurve(CCM, pP.A, 100, 1, Gth); hold off;
             title('subfCCM');
         end
+        % extra tests (CCM pGC & mGC)
+        if isempty(ccmpgROC{k,1})
+            fg = figure; CCM = plotConvCrossMapPGC(y2.', [], [], [], 3); close(fg);
+            figure(ccmpgRf); hold on; [ccmpgROC{k,1}, ccmpgROC{k,2}, ccmpgAUC(k)] = plotROCcurve(CCM, pP.A, 100, 1, Gth); hold off;
+            title('CCM-pGC');
+            % CCM-mGC
+            fg = figure; CCM = plotConvCrossMapMGC(y2.', [], [], [], 3); close(fg);
+            figure(ccmmgRf); hold on; [ccmmgROC{k,1}, ccmmgROC{k,2}, ccmmgAUC(k)] = plotROCcurve(CCM, pP.A, 100, 1, Gth); hold off;
+            title('CCM-mGC');
+        end
     end
     % save result
     save(fname, 'fcAUC','pcAUC','pcpcAUC','plspcAUC','lsopcAUC','wcsAUC','gcAUC','pgcAUC','dlAUC','dlwAUC','dlmAUC','dlgAUC','pcdlAUC','pcdlwAUC','dcmAUC', ...
@@ -481,14 +497,16 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
         'mplsecAUC','mplsgcAUC','pplsecAUC','pplsgcAUC',...
         'plsoecAUC','mlsoecAUC','plsogcAUC','mlsogcAUC','pcgcAUC','dls1AUC','dls3AUC','msvmdiAUC','msvmgcAUC','mgpdiAUC','mgpgcAUC','mgpediAUC',...
         'nvdiAUC','nvmiAUC','trdiAUC','trmiAUC','rfdiAUC','rfmiAUC', ...
-        'svlpcAUC','svgpcAUC','svrpcAUC','gppcAUC','trpcAUC','rfpcAUC','ccmAUC','ccmfAUC', ...
+        'svlpcAUC','svgpcAUC','svrpcAUC','gppcAUC','trpcAUC','rfpcAUC', ...
+        'ccmAUC','ccmfAUC','ccmpgAUC','ccmmgAUC', ...
         'fcROC','pcROC','pcpcROC','plspcROC','lsopcROC','wcsROC','gcROC','pgcROC','dlROC','dlwROC','dlmROC','dlgROC','pcdlROC','pcdlwROC','dcmROC', ...
         'rnnROC','linueROC','nnnueROC','pcsROC','cpcROC','fgesROC','fcaROC','tsfcROC','tsfcaROC', ...
         'mvarecROC','pvarecROC','mpcvarecROC','mpcvargcROC','ppcvarecROC','ppcvargcROC', ...
         'mplsecROC','mplsgcROC','pplsecROC','pplsgcROC', ...
         'plsoecROC','mlsoecROC','plsogcROC','mlsogcROC','pcgcROC','dls1ROC','dls3ROC','msvmdiROC','msvmgcROC','mgpdiROC','mgpgcROC','mgpediROC', ...
         'nvdiROC','nvmiROC','trdiROC','trmiROC','rfdiROC','rfmiROC', ...
-        'svlpcROC','svgpcROC','svrpcROC','gppcROC','trpcROC','rfpcROC','ccmROC','ccmfROC');
+        'svlpcROC','svgpcROC','svrpcROC','gppcROC','trpcROC','rfpcROC', ...
+        'ccmROC','ccmfROC','ccmpgROC','ccmmgROC');
 
     % show all average ROC curves
     figure; 
@@ -530,7 +548,7 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
     plotAverageROCcurve(mlsogcROC, N, '--', [0.9,0.7,0.9],0.8);
     plotAverageROCcurve(pcgcROC, N, '-.', [0.3,0.6,0.6],0.5);
     plotAverageROCcurve(ccmROC, N, '--', [0.9,0.2,0.2],0.8);
-    plotAverageROCcurve(ccmfROC, N, '-.', [0.9,0.2,0.2],0.8);
+    plotAverageROCcurve(ccmpgROC, N, '-.', [0.9,0.2,0.2],0.8);
     plot([0 1], [0 1],':','Color',[0.5 0.5 0.5]);
     hold off;
     ylim([0 1]);

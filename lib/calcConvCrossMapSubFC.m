@@ -34,7 +34,6 @@ function [CCM, Pfc, Pccm] = calcConvCrossMapSubFC(X, exSignal, nodeControl, exCo
 
     for i=1:nodeNum
         for j=1:nodeMax
-            if i==j, continue; end
             if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
             if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
             

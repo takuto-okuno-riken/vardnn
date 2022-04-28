@@ -38,13 +38,13 @@ function [CCM] = calcConvCrossMap__(X, exSignal, nodeControl, exControl, E, tau,
     % calc CCM
     CCM = nan(nodeNum, nodeMax);
     for i=1:nodeNum
-        for j=i+1:nodeMax
+        for j=i:nodeMax
             if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
             if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
 
             [ SugiCorr , SugiR , LM , SugiY , SugiX , origY , origX ] = SugiLM(Y(i,:).', Y(j,:).', tau, E);
             CCM(i,j) = SugiCorr(1);
-            if j<=nodeNum && any(nodeControl(i,j,:),'all')
+            if i~=j && j<=nodeNum && any(nodeControl(i,j,:),'all')
                 CCM(j,i) = SugiCorr(2);
             end
         end

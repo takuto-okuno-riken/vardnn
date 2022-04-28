@@ -1,12 +1,5 @@
-% Before using this function, download xmap codes from
-% https://github.com/danm0nster/xmap
-% and add a path "xmap-master" folder.
 
-% Before using this function, download matlab CCM codes from
-% https://jp.mathworks.com/matlabcentral/fileexchange/52964-convergent-cross-mapping
-% and add a path "CCM_L_M" folder.
-
-function testCCM
+function testCCMGC
     % load signals
     load('test/testTrain-rand500-uniform.mat');
     siOrg = si;
@@ -24,16 +17,9 @@ function testCCM
 
     %% test pattern 1 
     for lags=1:3
-        % show Convergent Cross Mapping
-        figure; [CCM, P] = plotConvCrossMap(si, exSignal, [], exControl, lags);
-        CCM2 = calcConvCrossMap_(si, exSignal, [], exControl, lags);
-        if ~isequaln(CCM,CCM2)
-            disp('error : CCM1 != CCM2 !');
-            return;
-        end
-        figure; CCM3 = plotConvCrossMapSubFC(si, exSignal, [], exControl, lags);
-        CCM4 = calcConvCrossMap__(si, exSignal, [], exControl, lags);
-        figure; plotDcmEC(CCM4);
+        % show Convergent Cross Mapping Pairwise GC
+        figure; [CCM, P] = plotConvCrossMapPGC(si, exSignal, [], exControl, lags, 1, 0);
+        figure; [CCM, P] = plotConvCrossMapMGC(si, exSignal, [], exControl, lags, 1, 0);
         % compare to mvGC
         figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0);
         figure; GC = plotPairwiseGCI(si, exSignal, [], exControl, lags, 0);
@@ -47,14 +33,9 @@ function testCCM
     exControl = ones(nodeNum,exNum);
     si(3,2:end) = exSignal(1,1:sigLen-1);
 
-    % show Convergent Cross Mapping
-    figure; CCM = plotConvCrossMap(si, exSignal, [], exControl, lags, 1, 1);
-    CCM2 = calcConvCrossMap_(si, exSignal, [], exControl, lags, 1, [], 'linear', 1);
-    if ~isequaln(CCM,CCM2)
-        disp('error : CCM1 != CCM2 !');
-        return;
-    end
-    figure; CCM = plotConvCrossMapSubFC(si, exSignal, [], exControl, lags, 1, 1);
+    % show Convergent Cross Mapping GC
+    figure; [CCM, P] = plotConvCrossMapPGC(si, exSignal, [], exControl, lags, 1, 0, 0.05, 1);
+    figure; [CCM, P] = plotConvCrossMapMGC(si, exSignal, [], exControl, lags, 1, 0, 0.05, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, nodeControl, exControl, lags, 0, 0, 1);
     figure; GC = plotPairwiseGCI(si, exSignal, nodeControl, exControl, lags, 0, 0, 1);
@@ -73,11 +54,10 @@ function testCCM
     si(7,3:end) = exSignal(2,1:sigLen-2); % lag=2, this will be blocked by exControl
     exControl(7,2,2) = 0; % <= comment out and check control effect
 
-    % show Convergent Cross Mapping (3D control does not work)
-    figure; CCM = plotConvCrossMap(si, exSignal, nodeControl, exControl, lags, 1, 1);
-    figure; CCM = plotConvCrossMapSubFC(si, exSignal, nodeControl, exControl, lags, 1, 1);
+    % show Convergent Cross Mapping GC (3D control does not work)
+    figure; [CCM, P] = plotConvCrossMapPGC(si, exSignal, nodeControl, exControl, lags, 1, 0, 0.05, 1);
+    figure; [CCM, P] = plotConvCrossMapMGC(si, exSignal, nodeControl, exControl, lags, 1, 0, 0.05, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, nodeControl, exControl, lags, 0, 0, 1);
     figure; GC = plotPairwiseGCI(si, exSignal, nodeControl, exControl, lags, 0, 0, 1);
 end
-

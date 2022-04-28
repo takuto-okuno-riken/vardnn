@@ -45,13 +45,13 @@ function [CCM] = calcConvCrossMap_(X, exSignal, nodeControl, exControl, E, tau, 
     
     CCM = nan(nodeNum, nodeMax);
     for i=1:nodeNum
-        for j=i+1:nodeMax
+        for j=i:nodeMax
             if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
             if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
 
             [ X_MY, Y_MX, X1, Y1] = xmap(Y(i,:), Y(j,:), MYs{i}, MYs{j}, E, tau, L, sampling);
             CCM(i,j) = corr(X_MY, X1');
-            if j<=nodeNum && any(nodeControl(i,j,:),'all')
+            if i~=j && j<=nodeNum && any(nodeControl(i,j,:),'all')
                 CCM(j,i) = corr(Y_MX, Y1');
             end
         end
