@@ -17,10 +17,8 @@ function net = initMvarNetworkWithCoeff(coefficient, nodeNum, exNum, nodeControl
     [~,~,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
 
     b = cell(nodeNum,1);
-    bint = cell(nodeNum,1);
     r = cell(nodeNum,1);
-    rint = cell(nodeNum,1);
-    stats = cell(nodeNum,1);
+    T = cell(nodeNum,1);
 
     % first, calculate vector auto-regression (VAR) without target
     for i=1:nodeNum
@@ -30,8 +28,6 @@ function net = initMvarNetworkWithCoeff(coefficient, nodeNum, exNum, nodeControl
     net.exNum = exNum;
     net.lags = lags;
     net.bvec = b;
-    net.bint = bint;
     net.rvec = r;
-    net.rint = rint;
-    net.stats = stats;
+    net.Tvec = T;
 end
