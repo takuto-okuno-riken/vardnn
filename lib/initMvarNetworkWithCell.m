@@ -7,8 +7,10 @@
 %  exControl       exogenous input control matrix for each node (node x exogenous input) (default:[])
 %  lags            number of lags for autoregression (default:3)
 %  uniqueDecimal   taking unique value from conjuncted time series (option)
+%  verbose         show verbose log (default:false)
 
-function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, lags, uniqueDecimal)
+function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, lags, uniqueDecimal, verbose)
+    if nargin < 7, verbose = false; end
     if nargin < 6, uniqueDecimal = 0; end
     if nargin < 5, lags = 3; end
     if nargin < 4, exControl = []; end
@@ -29,7 +31,7 @@ function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, la
 
     b = cell(nodeNum,1);
     r = cell(nodeNum,1);
-    stats = cell(nodeNum,1);
+    T = cell(nodeNum,1);
 
     % set vector auto-regression (VAR) inputs
     idxs = cell(nodeNum,1);
@@ -51,6 +53,7 @@ function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, la
     % apply the regress function
 %    for n=1:nodeNum
     parfor n=1:nodeNum
+        if verbose, disp(['calc node' num2str(n)]); end
         Xt = single(nan(allInLen,1));
         Xti = single(nan(allInLen,length(idxs{n})));
         xts = 1;
@@ -87,8 +90,8 @@ function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, la
         end
 
         Xti = [Xti, ones(size(Xti,1),1)]; % add bias
-        [b{n},~,r{n},~,stats{n}] = regress(Xt,Xti);
-        b{n} = single(b{n});
+%        [b{n},~,r{n},~,stats{n}] = regress(Xt,Xti);
+        [b{n}, r{n}, T{n}, ~] = regressLinear(Xt,Xti); % this one is 1.5 faster than regress()
     end
     net.nodeNum = nodeNum;
     net.exNum = exNum;
@@ -98,5 +101,5 @@ function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, la
     net.lags = lags;
     net.bvec = b;
     net.rvec = r;
-    net.stats = stats;
+    net.Tvec = T;
 end
