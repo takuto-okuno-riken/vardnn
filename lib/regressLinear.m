@@ -8,12 +8,15 @@
 %  y       response vector
 
 function [b, r, T, P, df, s, se] = regressLinear(y, X)
-    b = (X'*X)\X'*y;
-
-    df = size(X,1) - size(X,2); % degree of freedom
+    X2 = (X'*X);
+    % pinv() is slower than inv().
+    % but it can avoid singular matrix and nearly singular matrix
+    X2i = pinv(X2);
+    b = X2i * X' * y;
     r  = y - X*b;
+    df = size(X,1) - size(X,2); % degree of freedom
     s  = sqrt(sum(r.*r)/df);
-    se = sqrt(diag(inv(X'*X))*s^2);
+    se = sqrt(diag(X2i)*s^2);
     T  = b./se;
     P  = (T>=0).*(1 - tcdf(T,df))*2 + (T<0).*(tcdf(T,df))*2;
 end

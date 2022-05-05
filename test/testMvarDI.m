@@ -22,6 +22,7 @@ function testMvarDI
     figure; pDI = plotPvarDI(si, exSignal, [], exControl, lags, 0);
     figure; mDI = plotMvarDI(netMVAR, [], exControl, 0);
     figure; mMIV = plotMvarMIV(si, exSignal, [], exControl, netMVAR, 0);
+    figure; mTV = plotMvarTVM(netMVAR, [], exControl);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, [], exControl, lags, 0);
     figure; GC = plotPairwiseGCI(si, exSignal, [], exControl, lags, 0);
@@ -41,6 +42,7 @@ function testMvarDI
     figure; pDI = plotPvarDI(si, exSignal, nodeControl, exControl, lags, 0, 1);
     figure; mDI = plotMvarDI(netMVAR, nodeControl, exControl, 0, 1);
     figure; mMIV = plotMvarMIV(si, exSignal, nodeControl, exControl, netMVAR, 0, 1);
+    figure; mTV = plotMvarTVM(netMVAR, nodeControl, exControl, 20, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, nodeControl, exControl, lags, 0, 0, 1);
     figure; GC = plotPairwiseGCI(si, exSignal, nodeControl, exControl, lags, 0, 0, 1);
@@ -66,6 +68,7 @@ function testMvarDI
     figure; pDI = plotPvarDI(si, exSignal, nodeControl, exControl, lags, 0, 1);
     figure; mDI = plotMvarDI(netMVAR, nodeControl, exControl, 0, 1);
     figure; mMIV = plotMvarMIV(si, exSignal, nodeControl, exControl, netMVAR, 0, 1);
+    figure; mTV = plotMvarTVM(netMVAR, nodeControl, exControl, 20, 1);
     % compare to mvGC
     figure; GC = plotMultivariateGCI(si, exSignal, nodeControl, exControl, lags, 0, 0, 1);
     figure; GC = plotPairwiseGCI(si, exSignal, nodeControl, exControl, lags, 0, 0, 1);

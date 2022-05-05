@@ -24,10 +24,8 @@ function net = initMvarNetwork(X, exSignal, nodeControl, exControl, lags)
     [~,~,control] = getControl3DMatrix(nodeControl, exControl, nodeNum, exNum, lags);
 
     b = cell(nodeNum,1);
-    bint = cell(nodeNum,1);
     r = cell(nodeNum,1);
-    rint = cell(nodeNum,1);
-    stats = cell(nodeNum,1);
+    T = cell(nodeNum,1);
 
     % first, calculate vector auto-regression (VAR) without target
     Yj = zeros(sigLen-lags, lags*inputNum);
@@ -41,14 +39,13 @@ function net = initMvarNetwork(X, exSignal, nodeControl, exControl, lags)
         Xt = Y(1:sigLen-lags,i);
         Xti = [Yj(:,idx), ones(sigLen-lags,1)]; % might not be good to add bias
         % apply the regress function
-        [b{i},bint{i},r{i},rint{i},stats{i}] = regress(Xt,Xti);
+%        [b{i},~,r{i},~,T{i}] = regress(Xt,Xti);
+        [b{i},r{i},T{i},~] = regressLinear(Xt,Xti); % 1.5 faster than regress
     end
     net.nodeNum = nodeNum;
     net.exNum = exNum;
     net.lags = lags;
     net.bvec = b;
-    net.bint = bint;
     net.rvec = r;
-    net.rint = rint;
-    net.stats = stats;
+    net.Tvec = T;
 end

@@ -21,6 +21,7 @@ function testMvarCellDI
     
     % show multivaliate VAR-DI
     figure; mDI = plotMvarDI(netMVAR, [], exControl, 0);
+    figure; mTV = plotMvarTVM(netMVAR, [], exControl);
 
     %% test pattern 2
     lags = 3;
@@ -36,6 +37,7 @@ function testMvarCellDI
     
     % show multivaliate MVAR-DI
     figure; mDI = plotMvarDI(netMVAR, nodeControl, exControl, 0, 1);
+    figure; mTV = plotMvarTVM(netMVAR, nodeControl, exControl, 20, 1);
 
     %% test pattern 3
     lags = 3;
@@ -57,5 +59,6 @@ function testMvarCellDI
     
     % show multivaliate MVAR-DI
     figure; mDI = plotMvarDI(netMVAR, nodeControl, exControl, 0, 1);
+    figure; mTV = plotMvarTVM(netMVAR, nodeControl, exControl, 20, 1);
 end
 
