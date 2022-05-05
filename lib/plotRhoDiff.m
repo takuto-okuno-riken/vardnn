@@ -1,6 +1,6 @@
 %%
-% Plot Convergent Cross Mapping - FC (subtract FC)
-% returns CCM causality (CCM), FC p-values (Pfc) and CCM p-values (Pccm).
+% Plot RhoDiff (Convergent Cross Mapping - FC (subtract FC))
+% returns RhoDiff (RD), FC p-values (Pfc) and CCM p-values (Pccm).
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -10,7 +10,7 @@
 %  tau          time delay used in the phase-space reconstruction (default:1)
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [CCM, Pfc, Pccm] = plotConvCrossMapSubFC(X, exSignal, nodeControl, exControl, E, tau, isFullNode)
+function [RD, Pfc, Pccm] = plotRhoDiff(X, exSignal, nodeControl, exControl, E, tau, isFullNode)
     if nargin < 7, isFullNode = 0; end
     if nargin < 6, tau = 1; end
     if nargin < 5, E = 3; end
@@ -18,11 +18,11 @@ function [CCM, Pfc, Pccm] = plotConvCrossMapSubFC(X, exSignal, nodeControl, exCo
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end
 
-    [CCM, Pfc, Pccm] = calcConvCrossMapSubFC(X, exSignal, nodeControl, exControl, E, tau, isFullNode);
+    [RD, Pfc, Pccm] = calcRhoDiff(X, exSignal, nodeControl, exControl, E, tau, isFullNode);
     clims = [-1,1];
-    imagesc(CCM,clims);
+    imagesc(RD,clims);
     daspect([1 1 1]);
-    title(['Convergent Cross Mapping - FC (E=' num2str(E) ', tau=' num2str(tau) ')']);
+    title(['RhoDiff (E=' num2str(E) ', tau=' num2str(tau) ')']);
     xlabel('Source Nodes');
     ylabel('Target Nodes');
     colorbar;

@@ -1,6 +1,6 @@
 %%
-% Caluclate Convergent Cross Mapping - FC (subtract FC)
-% returns CCM causality index (CCM), FC p-values (Pfc) and CCM p-values (Pccm).
+% Caluclate RhoDiff (Convergent Cross Mapping - FC (subtract FC))
+% returns RhoDiff (RD), FC p-values (Pfc) and CCM p-values (Pccm).
 % input:
 %  X            multivariate time series matrix (node x time series)
 %  exSignal     multivariate time series matrix (exogenous input x time series) (optional)
@@ -10,7 +10,7 @@
 %  tau          time delay used in the phase-space reconstruction (default:1)
 %  isFullNode   return both node & exogenous causality matrix (optional)
 
-function [CCM, Pfc, Pccm] = calcConvCrossMapSubFC(X, exSignal, nodeControl, exControl, E, tau, isFullNode)
+function [RD, Pfc, Pccm] = calcRhoDiff(X, exSignal, nodeControl, exControl, E, tau, isFullNode)
     if nargin < 7, isFullNode = 0; end
     if nargin < 6, tau = 1; end
     if nargin < 5, E = 3; end
@@ -37,7 +37,8 @@ function [CCM, Pfc, Pccm] = calcConvCrossMapSubFC(X, exSignal, nodeControl, exCo
             if j<=nodeNum && ~any(nodeControl(i,j,:),'all'), continue; end
             if j>nodeNum && ~any(exControl(i,j-nodeNum,:),'all'), continue; end
             
-            CCM(i,j) = CCM(i,j) - FC(i,j);
+            CCM(i,j) = CCM(i,j) - abs(FC(i,j));
         end
     end
+    RD = CCM;
 end

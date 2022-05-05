@@ -473,11 +473,11 @@ function checkingPattern(N,T,n,prefix,Gth,idx)
             figure(ccmRf); hold on; [ccmROC{k,1}, ccmROC{k,2}, ccmAUC(k)] = plotROCcurve(CCM, pP.A, 100, 1, Gth); hold off;
             title('pwCCM');
         end
-        % extra tests (CCMsubFC)
+        % extra tests (RhoDiff)
         if isempty(ccmfROC{k,1})
-            fg = figure; CCM = plotConvCrossMapSubFC(y2.', [], [], [], 3); close(fg);
+            fg = figure; CCM = plotRhoDiff(y2.', [], [], [], 3); close(fg);
             figure(ccmfRf); hold on; [ccmfROC{k,1}, ccmfROC{k,2}, ccmfAUC(k)] = plotROCcurve(CCM, pP.A, 100, 1, Gth); hold off;
-            title('subfCCM');
+            title('RhoDiff');
         end
         % extra tests (CCM pGC & mGC)
         if isempty(ccmpgROC{k,1})
