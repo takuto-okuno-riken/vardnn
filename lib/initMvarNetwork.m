@@ -39,8 +39,8 @@ function net = initMvarNetwork(X, exSignal, nodeControl, exControl, lags)
         Xt = Y(1:sigLen-lags,i);
         Xti = [Yj(:,idx), ones(sigLen-lags,1)]; % might not be good to add bias
         % apply the regress function
-%        [b{i},~,r{i},~,T{i}] = regress(Xt,Xti);
-        [b{i},r{i},T{i},~] = regressLinear(Xt,Xti); % 1.5 faster than regress
+%        [b{i},~,r{i},~] = regress(Xt,Xti);
+        [b{i},r{i},T{i}] = regressLinear(Xt,Xti);
     end
     net.nodeNum = nodeNum;
     net.exNum = exNum;

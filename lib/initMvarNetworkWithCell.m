@@ -90,8 +90,13 @@ function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, la
         end
 
         Xti = [Xti, ones(size(Xti,1),1)]; % add bias
-%        [b{n},~,r{n},~,stats{n}] = regress(Xt,Xti);
-        [b{n}, r{n}, T{n}, ~] = regressLinear(Xt,Xti); % this one is 1.5 faster than regress()
+        [b{n}, r{n}, T{n}] = regressLinear(Xt,Xti);
+%{        
+        [b2,~,r2,~] = regress(Xt,Xti);
+        db2 = sum(abs(b{n}-b2));
+        dr2 = sum(abs(r{n}-r2));
+        disp(['node=' num2str(n) ', diffB=' num2str(db2) ', diffR=' num2str(dr2)]);
+%}
     end
     net.nodeNum = nodeNum;
     net.exNum = exNum;
