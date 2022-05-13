@@ -18,7 +18,7 @@ function [b, r, T, P, df, s, se] = regressLinear(y, X, Q, R, perm, RiQ, dR2i)
 
     % QR decomposition of X
     [sz1,sz2] = size(X);
-    if isempty(Q)
+    if isempty(R) && isempty(perm) && (isempty(RiQ) || isempty(dR2i))
         [Q,R,perm] = qr(X,0);
         if isempty(R)
             p = 0;
