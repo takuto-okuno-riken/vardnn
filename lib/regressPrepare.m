@@ -28,5 +28,5 @@ function [Q, R, perm, RiQ, dR2i] = regressPrepare(X)
         RiQ = [];
     end
     [Q2, R2] = qr(R'*R, 0);
-    dR2i = diag(Q2' * inv(R2));
+    dR2i = diag(inv(R2) * Q2');
 end

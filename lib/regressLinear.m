@@ -48,7 +48,7 @@ function [b, r, T, P, df, s, se] = regressLinear(y, X, Q, R, perm, RiQ, dR2i)
         if isempty(dR2i)
             % QR decomposition is better accuracy than pinv() or just inv().
             [Q2, R2] = qr(R'*R, 0);
-            dR2i = diag(Q2' * inv(R2));
+            dR2i = diag(inv(R2) * Q2');
             clear Q2;
             clear R2;
         end
