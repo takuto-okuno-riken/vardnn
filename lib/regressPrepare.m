@@ -1,10 +1,10 @@
 %%
 % preparation for linear regression (faster version).
-% returns Q, R, perm, Ri and dR2i
+% returns Q, R, perm, RiQ and dR2i
 % input:
 %  X       observations x regressors matrix
 
-function [Q, R, perm, Ri, dR2i] = regressPrepare(X)
+function [Q, R, perm, RiQ, dR2i] = regressPrepare(X)
     % QR decomposition of X
     if isa(X,'half')
         [Q, R, perm] = qr(single(X), 0);
@@ -23,9 +23,10 @@ function [Q, R, perm, Ri, dR2i] = regressPrepare(X)
         perm = perm(1:p);
     end
     if size(R,1) == size(R,2)
-        Ri = inv(R);
+        RiQ = inv(R) * Q';
     else
-        Ri = [];
+        RiQ = [];
     end
-    dR2i = diag(pinv(R'*R));
+    [Q2, R2] = qr(R'*R, 0);
+    dR2i = diag(Q2' * inv(R2));
 end

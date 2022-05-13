@@ -9,9 +9,9 @@
 %  R       R of QR decomposition of X (optional)
 %  perm    perm of QR decomposition of X (optional)
 
-function [b, r, T, P, df, s, se] = regressLinear(y, X, Q, R, perm, Ri, dR2i)
+function [b, r, T, P, df, s, se] = regressLinear(y, X, Q, R, perm, RiQ, dR2i)
     if nargin < 7, dR2i = []; end
-    if nargin < 6, Ri = []; end
+    if nargin < 6, RiQ = []; end
     if nargin < 5, perm = []; end
     if nargin < 4, R = []; end
     if nargin < 3, Q = []; end
@@ -36,20 +36,21 @@ function [b, r, T, P, df, s, se] = regressLinear(y, X, Q, R, perm, Ri, dR2i)
     b = zeros(sz2,1);
     % this () is important for speed, but it might affect T-value by floating point error
     % b and r are not so affected
-    if isempty(Ri)
+    if isempty(RiQ)
         b(perm) = R \ (Q'*y);
     else
-        b(perm) = Ri * (Q'*y);
+        b(perm) = RiQ *y;
     end
     r  = y - X*b;
 
     % output T-values
     if nargout >= 3
         if isempty(dR2i)
-            % pinv() is slower than inv().
-            % but it can avoid singular matrix and nearly singular matrix.
-            % this calculation might take time in huge matrix.
-            dR2i = diag(pinv(R'*R));
+            % QR decomposition is better accuracy than pinv() or just inv().
+            [Q2, R2] = qr(R'*R, 0);
+            dR2i = diag(Q2' * inv(R2));
+            clear Q2;
+            clear R2;
         end
         dX2i = ones(sz2,1);
         dX2i(perm) = dR2i;
