@@ -28,8 +28,8 @@ function [b, r, T, P, df, s, se] = regressLinear_(y, X, X2i, dX2i)
     b  = X2i * (X' * y);
     r  = y - X*b;
     df = size(X,1) - size(X,2); % degree of freedom
-    s  = sqrt(sum(r.*r)/df);
-    se = sqrt(dX2i*(s*s));
+    s  = sum(r.*r)/df;
+    se = sqrt(dX2i*s);
     T  = b./se;
     dT = single(T); % to avoid 'half' error
     P  = (dT>=0).*(1 - tcdf(dT,df))*2 + (dT<0).*(tcdf(dT,df))*2;

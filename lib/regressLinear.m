@@ -57,8 +57,8 @@ function [b, r, T, P, df, s, se] = regressLinear(y, X, Q, R, perm, RiQ, dR2i)
     
         df = sz1 - sz2; % degree of freedom
         rs = single(r); % 'half' may not enough accurate
-        s  = sqrt(sum(rs.*rs)/df);
-        se = sqrt(dX2i*(s*s));
+        s  = sum(rs.*rs)/df;
+        se = sqrt(dX2i*s);
         T  = b./se;
     end
     % output P-values
