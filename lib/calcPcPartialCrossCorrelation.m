@@ -64,8 +64,9 @@ function [NPCC, lags] = calcPcPartialCrossCorrelation(X, exSignal, nodeControl, 
                 end
             end
             pcXti = [score(:,1:maxComp), ones(sigLen,1)]; % might not be good to add bias
-            [b1,bint1,r1] = regress(x, pcXti);
-            [b2,bint2,r2] = regress(y, pcXti);
+            [Q, R, perm, RiQ] = regressPrepare(pcXti);
+            [~, r1] = regressLinear(x, pcXti, Q, R, perm, RiQ);
+            [~, r2] = regressLinear(y, pcXti, Q, R, perm, RiQ);
 
             [A(j,:), ~] = xcov(r1,r2,maxlag,'normalized');
         end

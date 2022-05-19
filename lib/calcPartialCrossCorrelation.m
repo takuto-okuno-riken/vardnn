@@ -30,33 +30,39 @@ function [NPCC, lags] = calcPartialCrossCorrelation(X, exSignal, nodeControl, ex
     
     NPCC = nan(nodeNum,nodeMax,maxlag*2+1);
     fullIdx = 1:nodeMax;
-    for i=1:nodeNum
+%    for i=1:nodeNum
+    parfor i=1:nodeNum
         if ~isempty(nodeControl), nidx = find(nodeControl(i,:)==0); else nidx = []; end
         if ~isempty(exControl), eidx = find(exControl(i,:)==0); else eidx = []; end
         if ~isempty(eidx), eidx = eidx + nodeNum; end
         nodeIdx = setdiff(fullIdx,[nidx, eidx, i]);
         
+        A = nan(nodeMax,maxlag*2+1);
         for j=i:nodeMax
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
             
             if Ulen(i)==1 && Ulen(j)==1
-                NPCC(i,j,:) = 0;
-                lags = -maxlag:maxlag;
+                A(j,:) = 0;
             else
                 x = Y(i,:).';
                 y = Y(j,:).';
                 idx = setdiff(nodeIdx,j);
                 z = [Y(idx,:).', ones(sigLen,1)];
 
-                [b1,bint1,r1] = regress(x, z);
-                [b2,bint2,r2] = regress(y, z);
+                [Q, R, perm, RiQ] = regressPrepare(z);
+                [~, r1] = regressLinear(x, z, Q, R, perm, RiQ);
+                [~, r2] = regressLinear(y, z, Q, R, perm, RiQ);
 
-                [NPCC(i,j,:), lags] = xcov(r1,r2,maxlag,'normalized');
+                [A(j,:), ~] = xcov(r1,r2,maxlag,'normalized');
             end
-            NPCC(j,i,:) = NPCC(i,j,:);
         end
+        NPCC(i,:,:) = A;
     end
+    for i=1:nodeNum
+        for j=i:nodeMax, NPCC(j,i,:) = NPCC(i,j,:); end
+    end
+    lags = -maxlag:maxlag;
 
     % output control
     NPCC = NPCC(1:nodeNum,:,:);
