@@ -72,7 +72,7 @@ function [PC] = calcPLSPartialCorrelation(X, exSignal, nodeControl, exControl, i
         nodeControl=double(nodeControl); nodeControl(nodeControl==0) = nan;
         PC(:,1:nodeNum) = PC(:,1:nodeNum) .* nodeControl;
     end
-    if ~isempty(exControl) && ~isempty(exControl) && isFullNode > 0
+    if ~isempty(exControl) && isFullNode > 0
         exControl=double(exControl); exControl(exControl==0) = nan;
         PC(:,nodeNum+1:end) = PC(:,nodeNum+1:end) .* exControl;
     end

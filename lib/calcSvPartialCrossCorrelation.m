@@ -97,7 +97,7 @@ function [NPCC, lags] = calcSvPartialCrossCorrelation(X, exSignal, nodeControl, 
         nodeControl=double(nodeControl); nodeControl(nodeControl==0) = nan;
         NPCC(:,1:nodeNum,:) = NPCC(:,1:nodeNum,:) .* nodeControl;
     end
-    if ~isempty(exControl) && ~isempty(exControl) && isFullNode > 0
+    if ~isempty(exControl) && isFullNode > 0
         exControl=double(exControl); exControl(exControl==0) = nan;
         NPCC(:,nodeNum+1:end,:) = NPCC(:,nodeNum+1:end,:) .* exControl;
     end

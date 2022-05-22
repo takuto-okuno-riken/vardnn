@@ -55,7 +55,7 @@ function [NCC, lags] = calcCrossCorrelation(X, exSignal, nodeControl, exControl,
         nodeControl=double(nodeControl); nodeControl(nodeControl==0) = nan;
         NCC(:,1:nodeNum,:) = NCC(:,1:nodeNum,:) .* nodeControl;
     end
-    if ~isempty(exControl) && ~isempty(exControl) && isFullNode > 0
+    if ~isempty(exControl) && isFullNode > 0
         exControl=double(exControl); exControl(exControl==0) = nan;
         NCC(:,nodeNum+1:end,:) = NCC(:,nodeNum+1:end,:) .* exControl;
     end

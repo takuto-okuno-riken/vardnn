@@ -45,7 +45,7 @@ function [FC, P] = calcTimeShiftedCorrelationAbs(X, exSignal, nodeControl, exCon
         FC(:,1:nodeNum) = FC(:,1:nodeNum) .* nodeControl;
         P(:,1:nodeNum) = P(:,1:nodeNum) .* nodeControl;
     end
-    if ~isempty(exControl) && ~isempty(exControl) && isFullNode > 0
+    if ~isempty(exControl) && isFullNode > 0
         exControl=double(exControl); exControl(exControl==0) = nan;
         FC(:,nodeNum+1:end) = FC(:,nodeNum+1:end) .* exControl;
         P(:,nodeNum+1:end) = P(:,nodeNum+1:end) .* exControl;

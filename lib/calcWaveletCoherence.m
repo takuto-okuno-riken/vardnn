@@ -53,7 +53,7 @@ function [mWCS, WCOH, WCS] = calcWaveletCoherence(X, exSignal, nodeControl, exCo
         nodeControl=double(nodeControl); nodeControl(nodeControl==0) = nan;
         mWCS(:,1:nodeNum) = mWCS(:,1:nodeNum) .* nodeControl;
     end
-    if ~isempty(exControl) && ~isempty(exControl) && isFullNode > 0
+    if ~isempty(exControl) && isFullNode > 0
         exControl=double(exControl); exControl(exControl==0) = nan;
         mWCS(:,nodeNum+1:end) = mWCS(:,nodeNum+1:end) .* exControl;
     end

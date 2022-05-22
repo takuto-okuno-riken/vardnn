@@ -64,7 +64,7 @@ function [PC, P] = calcPartialCorrelation(X, exSignal, nodeControl, exControl, i
         PC(:,1:nodeNum) = PC(:,1:nodeNum) .* nodeControl;
         P(:,1:nodeNum) = P(:,1:nodeNum) .* nodeControl;
     end
-    if ~isempty(exControl) && ~isempty(exControl) && isFullNode > 0
+    if ~isempty(exControl) && isFullNode > 0
         exControl=double(exControl); exControl(exControl==0) = nan;
         PC(:,nodeNum+1:end) = PC(:,nodeNum+1:end) .* exControl;
         P(:,nodeNum+1:end) = P(:,nodeNum+1:end) .* exControl;

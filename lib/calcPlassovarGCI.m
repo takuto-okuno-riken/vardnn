@@ -67,7 +67,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPlassovarGCI(X, exSignal, nodeCont
         AIC(:,1:nodeNum) = AIC(:,1:nodeNum) .* nodeControl;
         BIC(:,1:nodeNum) = BIC(:,1:nodeNum) .* nodeControl;
     end
-    if ~isempty(exControl) && ~isempty(exControl) && isFullNode > 0
+    if ~isempty(exControl) && isFullNode > 0
         exControl=double(exControl(:,:,1)); exControl(exControl==0) = nan;
         gcI(:,nodeNum+1:end) = gcI(:,nodeNum+1:end) .* exControl;
         F(:,nodeNum+1:end) = F(:,nodeNum+1:end) .* exControl;
