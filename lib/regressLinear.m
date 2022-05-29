@@ -9,7 +9,7 @@
 %  R       R of QR decomposition of X (optional)
 %  perm    perm of QR decomposition of X (optional)
 
-function [b, r, T, P, df, s, se] = regressLinear(y, X, Q, R, perm, RiQ, dR2i)
+function [b, r, T, P, df, s, se, rsq] = regressLinear(y, X, Q, R, perm, RiQ, dR2i)
     if nargin < 7, dR2i = []; end
     if nargin < 6, RiQ = []; end
     if nargin < 5, perm = []; end
@@ -66,4 +66,12 @@ function [b, r, T, P, df, s, se] = regressLinear(y, X, Q, R, perm, RiQ, dR2i)
         dT = single(T); % to avoid 'half' error
         P  = (dT>=0).*(1 - tcdf(dT,df))*2 + (dT<0).*(tcdf(dT,df))*2;
     end
+    % output R-squared
+    if nargout >= 8
+        SSres = sum(rs.*rs);
+        ydf = y - mean(y);
+        SStot = sum(ydf.*ydf);
+        rsq = 1 - SSres / SStot;
+    end
 end
+
