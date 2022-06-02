@@ -25,10 +25,10 @@ function [NCC, lags] = calcCrossCorrelation(X, exSignal, nodeControl, exControl,
 
     % check all same value or not
     for i=1:nodeMax
-        Ulen(i) = length(unique(Y(i,:)));
+        Ulen(i) = length(unique(single(Y(i,:)))); % 'half' does not support
     end
 
-    NCC = nan(nodeNum,nodeMax,maxlag*2+1);
+    NCC = nan(nodeNum,nodeMax,maxlag*2+1,class(X));
     for i=1:nodeNum
         for j=i:nodeMax
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end

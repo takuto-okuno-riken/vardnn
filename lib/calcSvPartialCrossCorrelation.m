@@ -30,7 +30,7 @@ function [NPCC, lags] = calcSvPartialCrossCorrelation(X, exSignal, nodeControl, 
     % check all same value or not
     uLen = zeros(nodeMax,1);
     for i=1:nodeMax
-        uLen(i) = length(unique(Y(i,:)));
+        uLen(i) = length(unique(single(Y(i,:)))); % 'half' does not support
     end
     
     % each pool have each own gloval value.
@@ -41,7 +41,7 @@ function [NPCC, lags] = calcSvPartialCrossCorrelation(X, exSignal, nodeControl, 
         setSvPCCFlag(false); % init global value for 'parfor'
     end
 %%}
-    NPCC = nan(nodeNum,nodeMax,maxlag*2+1);
+    NPCC = nan(nodeNum,nodeMax,maxlag*2+1,class(X));
     fullIdx = 1:nodeMax;
 %    for i=1:nodeNum
     parfor i=1:nodeNum
@@ -51,7 +51,7 @@ function [NPCC, lags] = calcSvPartialCrossCorrelation(X, exSignal, nodeControl, 
         if ~isempty(eidx), eidx = eidx + nodeNum; end
         nodeIdx = setdiff(fullIdx,[nidx, eidx, i]);
 
-        A = nan(nodeMax,maxlag*2+1);
+        A = nan(nodeMax,maxlag*2+1,class(X));
         for j=i:nodeMax
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
@@ -60,10 +60,10 @@ function [NPCC, lags] = calcSvPartialCrossCorrelation(X, exSignal, nodeControl, 
             if uLen(i)==1 && uLen(j)==1
                 A(j,:) = 0;
             else
-                x = Y(i,:).';
-                y = Y(j,:).';
+                x = single(Y(i,:).'); % 'half' does not support
+                y = single(Y(j,:).'); % 'half' does not support
                 idx = setdiff(nodeIdx,j);
-                z = Y(idx,:).';
+                z = single(Y(idx,:).'); % 'half' does not support
 
                 mdl = fitrsvm(z,x,'KernelFunction',kernel,'KernelScale',kernelScale); %,'Standardize',true); % bias will be calcurated
                 Si = predict(mdl, z);
