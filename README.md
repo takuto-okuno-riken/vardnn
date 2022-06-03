@@ -1,6 +1,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-success.svg)](https://opensource.org/licenses/MIT)
 
-# Vector Auto-Regressive Deep Neural Network (VARDNN) toolbox
+# Vector Auto-Regressive Deep Neural Network (VARDNN) Toolbox
 
 ## Introduction
 VARDNN is a powerful tool of data-driven analysis technique to estimate directed FC (Functional Connectivity).
@@ -21,8 +21,8 @@ then show output of causal relational matrix and save data in csv or mat file.
 
 ## Requirements: software
 * MATLAB R2019a or later
-* Deep Learning toolbox ver12.1 or later
-* Fuzzy Logic toolbox ver2.6 or later
+* Deep Learning Toolbox ver12.1 or later
+* Fuzzy Logic Toolbox ver2.6 or later
 
 ## Command line tool
 ~~~
@@ -65,7 +65,7 @@ usage: vardnn [options] filename.csv ...
 
 ## Command line tool Demo
 This demo inputs 8 nodes random signal and outputs FC, mvGC, VARDNN-GC and VARDNN-DI results csv files and matrix graphs.
-(Copy and paste this command line. Demo data is included in VARDNN toolbox.)
+(Copy and paste this command line. Demo data is included in VARDNN Toolbox.)
 ~~~
 >> vardnn -d -c -f -m --showsig --showmat --transform 1 --epoch 100 data/signal8.csv
 start training
@@ -134,7 +134,7 @@ Example results of causal relation matrix graphs of human fMRI signals (132 ROI)
 <img src="data/figure9b.jpg">
 </div>
 
-## Citing VARDNN toolbox
+## Citing VARDNN Toolbox
 If you find VARDNN useful in your research, please consider citing:  
 Takuto Okuno, Alexander Woodward,
 ["Vector Auto-Regressive Deep Neural Network: A Data-Driven Deep Learning-Based Directed Functional Connectivity Estimation Toolbox"](https://www.frontiersin.org/articles/10.3389/fnins.2021.764796/full), Front. Neurosci. 15:764796. doi: 10.3389/fnins.2021.764796
