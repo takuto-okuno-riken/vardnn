@@ -1,3 +1,5 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-success.svg)](https://opensource.org/licenses/MIT)
+
 # Vector Auto-Regressive Deep Neural Network (VARDNN) toolbox
 
 ## Introduction
@@ -19,8 +21,8 @@ then show output of causal relational matrix and save data in csv or mat file.
 
 ## Requirements: software
 * MATLAB R2019a or later
-* Deep Learning Toolbox ver12.1 or later
-* Fuzzy Logic Toolbox ver2.6 or later
+* Deep Learning toolbox ver12.1 or later
+* Fuzzy Logic toolbox ver2.6 or later
 
 ## Command line tool
 ~~~
