@@ -29,22 +29,28 @@ function [NCC, lags] = calcCrossCorrelation(X, exSignal, nodeControl, exControl,
     end
 
     NCC = nan(nodeNum,nodeMax,maxlag*2+1,class(X));
-    for i=1:nodeNum
+%    for i=1:nodeNum
+    parfor i=1:nodeNum
+        A = nan(nodeMax,maxlag*2+1,class(X));
         for j=i:nodeMax
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
             
             if Ulen(i)==1 && Ulen(j)==1
-                NCC(i,j,:) = 0;
+                A(j,:) = 0;
                 lags = -maxlag:maxlag;
             else
                 x = Y(i,:).';
                 y = Y(j,:).';
-                [NCC(i,j,:), lags] = xcov(x,y,maxlag,'normalized');
+                [A(j,:), lags] = xcov(x,y,maxlag,'normalized');
             end
-            NCC(j,i,:) = NCC(i,j,:);
         end
+        NCC(i,:,:) = A;
     end
+    for i=1:nodeNum
+        for j=i:nodeMax, NCC(j,i,:) = NCC(i,j,:); end
+    end
+    lags = -maxlag:maxlag;
 
     % output control
     NCC = NCC(1:nodeNum,:,:);
