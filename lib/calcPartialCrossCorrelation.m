@@ -8,8 +8,10 @@
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  maxlag       maxlag of normalized cross-correlation [-maxlag, maxlag] (default:5)
 %  isFullNode   return both node & exogenous causality matrix (optional)
+%  usegpu       use gpu calculation (default:false)
 
-function [NPCC, lags] = calcPartialCrossCorrelation(X, exSignal, nodeControl, exControl, maxlag, isFullNode)
+function [NPCC, lags] = calcPartialCrossCorrelation(X, exSignal, nodeControl, exControl, maxlag, isFullNode, usegpu)
+    if nargin < 7, usegpu = false; end
     if nargin < 6, isFullNode = 0; end
     if nargin < 5, maxlag = 5; end
     if nargin < 4, exControl = []; end
@@ -22,6 +24,9 @@ function [NPCC, lags] = calcPartialCrossCorrelation(X, exSignal, nodeControl, ex
 
     % set node input
     Y = [X; exSignal];
+    if usegpu
+        Y = gpuArray(single(Y));
+    end
 
     % check all same value or not
     for i=1:nodeMax
@@ -37,7 +42,11 @@ function [NPCC, lags] = calcPartialCrossCorrelation(X, exSignal, nodeControl, ex
         if ~isempty(eidx), eidx = eidx + nodeNum; end
         nodeIdx = setdiff(fullIdx,[nidx, eidx, i]);
         
+        x = Y(i,:).';
         A = nan(nodeMax,maxlag*2+1,class(X));
+        if usegpu
+            A = gpuArray(single(A));
+        end
         for j=i:nodeMax
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
@@ -45,19 +54,23 @@ function [NPCC, lags] = calcPartialCrossCorrelation(X, exSignal, nodeControl, ex
             if Ulen(i)==1 && Ulen(j)==1
                 A(j,:) = 0;
             else
-                x = Y(i,:).';
-                y = Y(j,:).';
                 idx = setdiff(nodeIdx,j);
                 z = [Y(idx,:).', ones(sigLen,1)];
 
                 [~, ~, perm, RiQ] = regressPrepare(z);
                 [~, r1] = regressLinear(x, z, [], [], perm, RiQ);
-                [~, r2] = regressLinear(y, z, [], [], perm, RiQ);
+                [~, r2] = regressLinear(Y(j,:).', z, [], [], perm, RiQ);
 
                 [A(j,:), ~] = xcov(r1,r2,maxlag,'normalized');
+                z = []; RiQ = []; r1 = []; r2 = []; % clear memory
             end
         end
-        NPCC(i,:,:) = A;
+        if usegpu
+            NPCC(i,:,:) = gather(A);
+        else
+            NPCC(i,:,:) = A;
+        end
+        x = []; A = []; % clear memory (cannot use 'clear' in parfor)
     end
     A = ones(nodeNum,'logical'); A = tril(A,-1);
     idx = find(A==1);

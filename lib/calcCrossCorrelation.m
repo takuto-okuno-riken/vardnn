@@ -8,8 +8,10 @@
 %  exControl    exogenous input control matrix for each node (node x exogenous input) (optional)
 %  maxlag       maxlag of normalized cross-correlation [-maxlag, maxlag] (default:5)
 %  isFullNode   return both node & exogenous causality matrix (optional)
+%  usegpu       use gpu calculation (default:false)
 
-function [NCC, lags] = calcCrossCorrelation(X, exSignal, nodeControl, exControl, maxlag, isFullNode)
+function [NCC, lags] = calcCrossCorrelation(X, exSignal, nodeControl, exControl, maxlag, isFullNode, usegpu)
+    if nargin < 7, usegpu = false; end
     if nargin < 6, isFullNode = 0; end
     if nargin < 5, maxlag = 5; end
     if nargin < 4, exControl = []; end
@@ -22,6 +24,9 @@ function [NCC, lags] = calcCrossCorrelation(X, exSignal, nodeControl, exControl,
 
     % set node input
     Y = [X; exSignal];
+    if usegpu
+        Y = gpuArray(single(Y)); % 'half' does not support
+    end
 
     % check all same value or not
     for i=1:nodeMax
@@ -32,6 +37,10 @@ function [NCC, lags] = calcCrossCorrelation(X, exSignal, nodeControl, exControl,
 %    for i=1:nodeNum
     parfor i=1:nodeNum
         A = nan(nodeMax,maxlag*2+1,class(X));
+        if usegpu
+            A = gpuArray(single(A)); % 'half' does not support
+        end
+        x = Y(i,:).';
         for j=i:nodeMax
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
@@ -39,12 +48,14 @@ function [NCC, lags] = calcCrossCorrelation(X, exSignal, nodeControl, exControl,
             if Ulen(i)==1 && Ulen(j)==1
                 A(j,:) = 0;
             else
-                x = Y(i,:).';
-                y = Y(j,:).';
-                [A(j,:), ~] = xcov(x,y,maxlag,'normalized');
+                [A(j,:), ~] = xcov(x,Y(j,:).',maxlag,'normalized');
             end
         end
-        NCC(i,:,:) = A;
+        if usegpu
+            NCC(i,:,:) = gather(A);
+        else
+            NCC(i,:,:) = A;
+        end
     end
     A = ones(nodeNum,'logical'); A = tril(A,-1);
     idx = find(A==1);
