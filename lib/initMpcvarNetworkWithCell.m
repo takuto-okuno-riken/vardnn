@@ -54,7 +54,7 @@ function net = initMpcvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, 
     Y = [];
     for i=1:cxNum, Y = [Y, CX{i}]; end
     cxM = mean(Y.');
-    cxCov = cov(Y.');
+    cxCov = cov(Y.',1);
     Y = []; % memory clear
 
     % apply the Principal Component Regress function

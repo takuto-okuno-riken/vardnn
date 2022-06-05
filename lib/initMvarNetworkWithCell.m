@@ -47,7 +47,7 @@ function net = initMvarNetworkWithCell(CX, CexSignal, nodeControl, exControl, la
     Y = [];
     for i=1:cxNum, Y = [Y, CX{i}]; end
     cxM = mean(Y.');
-    cxCov = cov(Y.');
+    cxCov = cov(Y.',1);
     Y = []; % memory clear
 
     % apply the regress function

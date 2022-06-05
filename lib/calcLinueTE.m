@@ -72,7 +72,7 @@ function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSign
         %coeff = Xt.'/(Xti.');
         %r = Xt.' - coeff * Xti.';
         [b,bint,r] = regress(Xt,Xti);
-        Hxt = 0.5*log(det(cov(r))); % + 0.5*size(Xt,1)*log(2*pi*exp(1));
+        Hxt = 0.5*log(det(cov(r,1))); % + 0.5*size(Xt,1)*log(2*pi*exp(1));
 
         % AIC and BIC of this node (assuming residuals are gausiann distribution)
         T = len-p;
@@ -92,7 +92,7 @@ function [TE, h, P, F, cvFd, AIC, BIC, nodeAIC, nodeBIC] = calcLinueTE(X, exSign
             %coeff = Xt.'/(Yjs{j}.');
             %r = Xt.' - coeff * Yjs{j}.';
             [b,bint,r] = regress(Xt,Yt);
-            Hyt = 0.5*log(det(cov(r))); % + 0.5*size(Xt,1)*log(2*pi*exp(1));
+            Hyt = 0.5*log(det(cov(r,1))); % + 0.5*size(Xt,1)*log(2*pi*exp(1));
 
             TE(i,j) = Hyt - Hxt;
 
