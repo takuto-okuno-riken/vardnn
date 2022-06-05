@@ -38,17 +38,20 @@ function [NCC, lags] = calcCrossCorrelation(X, exSignal, nodeControl, exControl,
             
             if Ulen(i)==1 && Ulen(j)==1
                 A(j,:) = 0;
-                lags = -maxlag:maxlag;
             else
                 x = Y(i,:).';
                 y = Y(j,:).';
-                [A(j,:), lags] = xcov(x,y,maxlag,'normalized');
+                [A(j,:), ~] = xcov(x,y,maxlag,'normalized');
             end
         end
         NCC(i,:,:) = A;
     end
-    for i=1:nodeNum
-        for j=i:nodeMax, NCC(j,i,:) = NCC(i,j,:); end
+    A = ones(nodeNum,'logical'); A = tril(A,-1);
+    idx = find(A==1);
+    for i=1:size(NCC,3)
+        B = NCC(:,1:nodeNum,i); C = B';
+        B(idx) = C(idx);
+        NCC(:,1:nodeNum,i) = B;
     end
     lags = -maxlag:maxlag;
 

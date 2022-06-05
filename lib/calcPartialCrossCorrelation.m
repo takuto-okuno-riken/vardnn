@@ -59,8 +59,12 @@ function [NPCC, lags] = calcPartialCrossCorrelation(X, exSignal, nodeControl, ex
         end
         NPCC(i,:,:) = A;
     end
-    for i=1:nodeNum
-        for j=i:nodeMax, NPCC(j,i,:) = NPCC(i,j,:); end
+    A = ones(nodeNum,'logical'); A = tril(A,-1);
+    idx = find(A==1);
+    for i=1:size(NPCC,3)
+        B = NPCC(:,1:nodeNum,i); C = B';
+        B(idx) = C(idx);
+        NPCC(:,1:nodeNum,i) = B;
     end
     lags = -maxlag:maxlag;
 
