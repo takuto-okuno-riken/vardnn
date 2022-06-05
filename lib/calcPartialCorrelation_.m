@@ -9,7 +9,7 @@ function [iCov] = calcPartialCorrelation_(X,lambda)
     if nargin < 2
         lambda = 0;
     end
-    sigma = cov(X.');
+    sigma = cov(X.',1);
     n = size(sigma,1);
 %    B = L1precisionBCD(sigma,lambda);
     B = inv(sigma);
