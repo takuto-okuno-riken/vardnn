@@ -55,14 +55,13 @@ function [NPCC, lags] = calcPartialCrossCorrelation(X, exSignal, nodeControl, ex
                 A(j,:) = 0;
             else
                 idx = setdiff(nodeIdx,j);
-                z = [Y(idx,:).', ones(sigLen,1)];
+                z = [Y(idx,:).', ones(sigLen,1)]; % intercept to be close to partialcorr()
 
                 [~, ~, perm, RiQ] = regressPrepare(z);
                 [~, r1] = regressLinear(x, z, [], [], perm, RiQ);
                 [~, r2] = regressLinear(Y(j,:).', z, [], [], perm, RiQ);
 
                 [A(j,:), ~] = xcov(r1,r2,maxlag,'normalized');
-                z = []; RiQ = []; r1 = []; r2 = []; % clear memory
             end
         end
         if usegpu
@@ -70,12 +69,12 @@ function [NPCC, lags] = calcPartialCrossCorrelation(X, exSignal, nodeControl, ex
         else
             NPCC(i,:,:) = A;
         end
-        x = []; A = []; % clear memory (cannot use 'clear' in parfor)
     end
     A = ones(nodeNum,'logical'); A = tril(A,-1);
     idx = find(A==1);
     for i=1:size(NPCC,3)
-        B = NPCC(:,1:nodeNum,i); C = B';
+        B = NPCC(:,1:nodeNum,maxlag*2+2-i); C = B';
+        B = NPCC(:,1:nodeNum,i);
         B(idx) = C(idx);
         NPCC(:,1:nodeNum,i) = B;
     end

@@ -86,7 +86,8 @@ function [NPCC, lags] = calcSvPartialCrossCorrelation(X, exSignal, nodeControl, 
     A = ones(nodeNum,'logical'); A = tril(A,-1);
     idx = find(A==1);
     for i=1:size(NPCC,3)
-        B = NPCC(:,1:nodeNum,i); C = B';
+        B = NPCC(:,1:nodeNum,maxlag*2+2-i); C = B';
+        B = NPCC(:,1:nodeNum,i);
         B(idx) = C(idx);
         NPCC(:,1:nodeNum,i) = B;
     end
