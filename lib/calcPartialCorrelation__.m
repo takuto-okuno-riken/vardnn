@@ -29,18 +29,19 @@ function [PC] = calcPartialCorrelation__(X, exSignal, nodeControl, exControl, is
         if ~isempty(exControl), eidx = find(exControl(i,:)==0); else eidx = []; end
         if ~isempty(eidx), eidx = eidx + nodeNum; end
         nodeIdx = setdiff(fullIdx,[nidx, eidx, i]);
+        x = Y(i,:).';
         
         for j=i:nodeMax
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
             
-            x = Y(i,:).';
-            y = Y(j,:).';
             idx = setdiff(nodeIdx,j);
             z = [Y(idx,:).', ones(sigLen,1)]; % add intercept
 
-            [b1,bint1,r1] = regress(x, z);
-            [b2,bint2,r2] = regress(y, z);
+            [~, ~, perm, RiQ] = regressPrepare(z);
+            [~, r1] = regressLinear(x, z, [], [], perm, RiQ);
+            [~, r2] = regressLinear(Y(j,:).', z, [], [], perm, RiQ);
+
             PC(i,j) = (r1.'*r2) / (sqrt(r1.'*r1)*sqrt(r2.'*r2));
             PC(j,i) = PC(i,j);
         end

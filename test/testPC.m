@@ -19,7 +19,7 @@ pc2 = partialcorr(x,y,z);
 pc3 = (r1.'*r2) / (sqrt(r1.'*r1)*sqrt(r2.'*r2));
 pc4 = corr(r1,r2);
 % invert of cov matrix version
-sigma = cov(X.');
+sigma = cov(X.',1);
 B = inv(sigma);
 pc5 = -B(1,2) / sqrt(B(1,1)*B(2,2));
 
@@ -48,6 +48,11 @@ getCosSimilarity(PNC1+U, PNC2+U)
 PC3 = calcPartialCorrelation__(X);
 Z = PC - PC3;
 figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC3 : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+% invert version
+PC3b = calcPartialCorrelation_(X);
+Z = PC - PC3b;
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC3b : sum err=' num2str(nansum(abs(Z),'all'))]);
 
 PC4 = calcPLSPartialCorrelation(X); % calc PLS PC
 Z = PC - PC4;
