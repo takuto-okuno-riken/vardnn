@@ -20,10 +20,13 @@ function testCrossCorrelation
     figure; plotFunctionalConnectivity(si, exSignal, [], exControl);
     figure; plotPairwiseGCI(si, exSignal, [], exControl, 3);
     figure; [NCC, lags] = plotCrossCorrelation(si, exSignal, [], exControl, 5);
+    [NCC2, lags2] = calcCrossCorrelation_(si, exSignal, [], exControl, 5); % 0, true);
+    sum(abs(NCC-NCC2),'all')
 
     figure; plotPartialCorrelation(si, exSignal, [], exControl);
     figure; [NCC, lags] = plotPartialCrossCorrelation(si, exSignal, [], exControl, 5);
-    
+%    [NCC2, lags] = calcPartialCrossCorrelation_(si, exSignal, [], exControl, 5); % this one is bad
+
     %% test pattern 2
     lags = 3;
     exNum = 2;
