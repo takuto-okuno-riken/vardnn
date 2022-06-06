@@ -36,6 +36,7 @@ function [NCC, lags] = calcCrossCorrelation_(X, exSignal, nodeControl, exControl
     parfor i=1:size(C,1)
         NCC(:,:,i) = reshape(C(i,:),nodeMax,nodeMax)';
     end
+    clear C;
     
     if usegpu
         A = gather(NCC);

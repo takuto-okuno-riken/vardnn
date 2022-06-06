@@ -42,10 +42,12 @@ function PC = calcPartialCorrelation_(X, exSignal, nodeControl, exControl, isFul
     end
     Ci = inv(R) * Q'; % get precision matrix
     P(perm,:) = Ci;
+    clear Q; clear R; clear perm; 
     Dp = diag(P);
     pii = repmat(Dp(:),1,nodeMax);
     pjj = repmat(Dp(:)',nodeMax,1);
     P2 = -P ./ sqrt(pii .* pjj);
+    clear pii; clear pjj;
     P2(eye(nodeMax)==1) = 1; % replace diag elements
     PC(:,:) = P2;
 
