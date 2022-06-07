@@ -22,7 +22,7 @@ function [NCC, lags] = calcCrossCorrelation_(X, exSignal, nodeControl, exControl
     nodeMax = nodeNum + exNum;
 
     % set node input
-    Y = [X; exSignal];
+    Y = [X; exSignal]';
     if usegpu
         Y = gpuArray(single(Y)); % 'half' does not support
     end
@@ -32,7 +32,15 @@ function [NCC, lags] = calcCrossCorrelation_(X, exSignal, nodeControl, exControl
     if usegpu
         NCC = gpuArray(single(NCC)); % 'half' does not support
     end
-    [C, lags] = xcov(Y',maxlag,'normalized');
+    % check all same value or not
+    for i=1:nodeMax
+        if length(unique(single(Y(:,i)))) == 1 % 'half' does not support
+            Y(:,i) = 0; % set zero
+        end
+    end
+    Ym = Y - mean(Y);
+    [C, lags] = xcorrMatSep(Ym,Ym,maxlag,'normalized',ceil(nodeNum/1000));
+    
     parfor i=1:size(C,1)
         NCC(:,:,i) = reshape(C(i,:),nodeMax,nodeMax)';
     end

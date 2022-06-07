@@ -15,7 +15,7 @@ function [NCC, lags] = plotCrossCorrelation(X, exSignal, nodeControl, exControl,
     if nargin < 3, nodeControl = []; end
     if nargin < 2, exSignal = []; end
     
-    [NCC, lags] = calcCrossCorrelation(X, exSignal, nodeControl, exControl, maxlag, isFullNode);
+    [NCC, lags] = calcCrossCorrelation_(X, exSignal, nodeControl, exControl, maxlag, isFullNode);
 
     % show coherence matrix
     fnum = size(NCC,3);

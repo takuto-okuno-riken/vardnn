@@ -19,8 +19,8 @@ function testCrossCorrelation
     %% test pattern 1 
     figure; plotFunctionalConnectivity(si, exSignal, [], exControl);
     figure; plotPairwiseGCI(si, exSignal, [], exControl, 3);
-    figure; [NCC, lags] = plotCrossCorrelation(si, exSignal, [], exControl, 5);
-    [NCC2, lags2] = calcCrossCorrelation_(si, exSignal, [], exControl, 5); % 0, true);
+    figure; [NCC, lags] = plotCrossCorrelation(si, exSignal, [], exControl, 5); % replaced by faster version
+    [NCC2, lags2] = calcCrossCorrelation(si, exSignal, [], exControl, 5); % old version
     sum(abs(NCC-NCC2),'all')
 
     figure; plotPartialCorrelation(si, exSignal, [], exControl);
@@ -38,6 +38,8 @@ function testCrossCorrelation
     figure; FC = plotFunctionalConnectivity(si, exSignal, [], exControl, 1);
     figure; pGC = plotPairwiseGCI(si, exSignal, [], exControl, lags, 10, 0.05, 1);
     figure; [NCC, lags] = plotCrossCorrelation(si, exSignal, [], exControl, 5, 1);
+    [NCC2, lags2] = calcCrossCorrelation(si, exSignal, [], exControl, 5, 1); % old version
+    sum(abs(NCC-NCC2),'all')
 
     figure; plotPartialCorrelation(si, exSignal, [], exControl, 1);
     figure; [NCC, lags] = plotPartialCrossCorrelation(si, exSignal, [], exControl, 5, 1);
@@ -48,6 +50,8 @@ function testCrossCorrelation
     plotTwoSignals(S(:,:,1),S(:,:,2),0,[0, 1]);
     figure; [NCC1, lags] = plotCrossCorrelation(S(:,:,1), [], [], [], 5);
     figure; [NCC2, lags] = plotCrossCorrelation(S(:,:,2), [], [], [], 5);
+    [NCC3, ~] = calcCrossCorrelation(S(:,:,2), [], [], [], 5); % old version
+    sum(abs(NCC3-NCC2),'all') % check diff
     U = tril(nan(n));
     NCC1(:,:,6)=[]; NCC2(:,:,6)=[];
     getCosSimilarity(NCC1+U, NCC2+U)
@@ -60,6 +64,8 @@ function testCrossCorrelation
     plotTwoSignals(S(:,:,1),S(:,:,2),0,[0, 1]);
     figure; [NCC1, lags] = plotCrossCorrelation(S(:,:,1), [], [], [], 5);
     figure; [NCC2, lags] = plotCrossCorrelation(S(:,:,2), [], [], [], 5);
+    [NCC3, ~] = calcCrossCorrelation(S(:,:,2), [], [], [], 5); % old version
+    sum(abs(NCC3-NCC2),'all') % check diff
     U = tril(nan(n));
     NCC1(:,:,6)=[]; NCC2(:,:,6)=[];
     getCosSimilarity(NCC1+U, NCC2+U)
