@@ -30,7 +30,7 @@ function [Q, R, perm, RiQ, dR2i] = regressPrepare(X)
         end
     end
     if nargout >= 5
-        [Q2, R2] = qr(R'*R, 0);
-        dR2i = diag(inv(R2) * Q2');
+        R2i = invQR(R'*R);
+        dR2i = diag(R2i);
     end
 end

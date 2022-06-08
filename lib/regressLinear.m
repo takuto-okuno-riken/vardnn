@@ -47,10 +47,8 @@ function [b, r, T, P, df, s, se, rsq] = regressLinear(y, X, Q, R, perm, RiQ, dR2
     if nargout >= 3
         if isempty(dR2i)
             % QR decomposition is better accuracy than pinv() or just inv().
-            [Q2, R2] = qr(R'*R, 0);
-            dR2i = diag(inv(R2) * Q2');
-            clear Q2;
-            clear R2;
+            R2i = invQR(R'*R);
+            dR2i = diag(R2i);
         end
         dX2i = ones(sz2,1);
         dX2i(perm) = dR2i;

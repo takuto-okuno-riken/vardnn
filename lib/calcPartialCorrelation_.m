@@ -30,19 +30,8 @@ function PC = calcPartialCorrelation_(X, exSignal, nodeControl, exControl, isFul
 
     % using matrix inversion
     PC = nan(nodeMax,nodeMax,class(X));
-    P = zeros(nodeMax,nodeMax);
     C = cov(Y',1);
-    [sz1,sz2] = size(C);
-    [Q,R,perm] = qr(C,0);
-    p = sum(abs(diag(R)) > max(sz1,sz2)*eps(R(1))); % 2 steps differ than zero
-    if p < sz2
-        R = R(1:p,1:p);
-        Q = Q(:,1:p);
-        perm = perm(1:p);
-    end
-    Ci = inv(R) * Q'; % get precision matrix
-    P(perm,:) = Ci;
-    clear Q; clear R; clear perm; 
+    P = invQR(C); % get precision matrix
     Dp = diag(P);
     pii = repmat(Dp(:),1,nodeMax);
     pjj = repmat(Dp(:)',nodeMax,1);
