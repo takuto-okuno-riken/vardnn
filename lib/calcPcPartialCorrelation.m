@@ -35,19 +35,18 @@ function [PC] = calcPcPartialCorrelation(X, exSignal, nodeControl, exControl, ex
 
     fullIdx = 1:nodeMax;
     PC = nan(nodeNum,nodeMax);
-    for i=1:nodeNum
+    parfor i=1:nodeNum
         if ~isempty(nodeControl), nidx = find(nodeControl(i,:)==0); else nidx = []; end
         if ~isempty(exControl), eidx = find(exControl(i,:)==0); else eidx = []; end
         if ~isempty(eidx), eidx = eidx + nodeNum; end
         nodeIdx = setdiff(fullIdx,[nidx, eidx, i]);
-            
+        x = Y(i,:).';
+        
+        A = nan(1,nodeMax,class(X));
         for j=i:nodeMax
-%        parfor j=i:nodeMax
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
             
-            x = Y(i,:).';
-            y = Y(j,:).';
             idx = setdiff(nodeIdx,j);
             z = Y(idx,:).';
 
@@ -64,15 +63,19 @@ function [PC] = calcPcPartialCorrelation(X, exSignal, nodeControl, exControl, ex
                 end
             end
             pcXti = [score(:,1:maxComp), ones(sigLen,1)]; % might not be good to add bias
-            [b1,bint1,r1] = regress(x, pcXti);
-            [b2,bint2,r2] = regress(y, pcXti);
+            [~, ~, perm, RiQ] = regressPrepare(pcXti);
+            [~, r1] = regressLinear(x, pcXti, [], [], perm, RiQ);
+            [~, r2] = regressLinear(Y(j,:).', pcXti, [], [], perm, RiQ);
             
-            PC(i,j) = (r1.'*r2) / (sqrt(r1.'*r1)*sqrt(r2.'*r2));
+            A(j) = (r1.'*r2) / (sqrt(r1.'*r1)*sqrt(r2.'*r2));
         end
+        PC(i,:) = A;
     end
-    for i=1:nodeNum
-        for j=i:nodeMax, PC(j,i) = PC(i,j); end
-    end
+    A = ones(nodeNum,'logical'); A = tril(A,-1);
+    idx = find(A==1);
+    B = PC(:,1:nodeNum); C = B';
+    B(idx) = C(idx);
+    PC(:,1:nodeNum) = B;
     
     % output control
     PC = PC(1:nodeNum,:);
