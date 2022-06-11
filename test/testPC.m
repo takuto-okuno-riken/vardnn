@@ -4,10 +4,10 @@ sigLen = 100; % signal length
 % generate random signals
 %X = rand(nodeNum, sigLen); 
 load('test/testTrain-rand500-uniform.mat');
-X = si(1:8, 1:sigLen);
+X = si(1:nodeNum, 1:sigLen);
 x = X(1,:).';
 y = X(2,:).';
-z = X(3:8,:).';
+z = X(3:nodeNum,:).';
 
 % matlab imprementation
 [PC, P] = partialcorr(X.');
@@ -53,6 +53,11 @@ figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC3 : sum err=' num2str(n
 PC3b = calcPartialCorrelation_(X);
 Z = PC - PC3b;
 figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC3b : sum err=' num2str(nansum(abs(Z),'all'))]);
+
+% zero-lag pcc regression version
+PC3c = calcPartialCrossCorrelation(X,[],[],[],2);
+Z = PC - PC3c(:,:,3);
+figure; clims = [-1 1]; imagesc(Z,clims); title(['PC - PC3c : sum err=' num2str(nansum(abs(Z),'all'))]);
 
 PC4 = calcPLSPartialCorrelation(X); % calc PLS PC
 Z = PC - PC4;

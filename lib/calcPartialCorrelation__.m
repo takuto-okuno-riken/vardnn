@@ -24,13 +24,14 @@ function [PC] = calcPartialCorrelation__(X, exSignal, nodeControl, exControl, is
     
     PC = nan(nodeNum,nodeMax);
     fullIdx = 1:nodeMax;
-    for i=1:nodeNum
+    parfor i=1:nodeNum
         if ~isempty(nodeControl), nidx = find(nodeControl(i,:)==0); else nidx = []; end
         if ~isempty(exControl), eidx = find(exControl(i,:)==0); else eidx = []; end
         if ~isempty(eidx), eidx = eidx + nodeNum; end
         nodeIdx = setdiff(fullIdx,[nidx, eidx, i]);
         x = Y(i,:).';
         
+        A = nan(1,nodeMax,class(X));
         for j=i:nodeMax
             if j<=nodeNum && ~isempty(nodeControl) && nodeControl(i,j) == 0, continue; end
             if j>nodeNum && ~isempty(exControl) && exControl(i,j-nodeNum) == 0, continue; end
@@ -42,10 +43,15 @@ function [PC] = calcPartialCorrelation__(X, exSignal, nodeControl, exControl, is
             [~, r1] = regressLinear(x, z, [], [], perm, RiQ);
             [~, r2] = regressLinear(Y(j,:).', z, [], [], perm, RiQ);
 
-            PC(i,j) = (r1.'*r2) / (sqrt(r1.'*r1)*sqrt(r2.'*r2));
-            PC(j,i) = PC(i,j);
+            A(j) = (r1.'*r2) / (sqrt(r1.'*r1)*sqrt(r2.'*r2));
         end
+        PC(i,:) = A;
     end
+    A = ones(nodeNum,'logical'); A = tril(A,-1);
+    idx = find(A==1);
+    B = PC(:,1:nodeNum); C = B';
+    B(idx) = C(idx);
+    PC(:,1:nodeNum) = B;
 
     % output control
     PC = PC(1:nodeNum,:);

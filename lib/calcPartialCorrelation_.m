@@ -32,11 +32,11 @@ function PC = calcPartialCorrelation_(X, exSignal, nodeControl, exControl, isFul
     PC = nan(nodeMax,nodeMax,class(X));
     C = cov(Y',1);
     P = invQR(C); % get precision matrix
-    Dp = diag(P);
-    pii = repmat(Dp(:),1,nodeMax);
-    pjj = repmat(Dp(:)',nodeMax,1);
-    P2 = -P ./ sqrt(pii .* pjj);
-    clear pii; clear pjj;
+    P2 = calcP2(P, nodeMax);
+    if ~isreal(P2) % complex and totally useless. use pinv instead
+        P = pinv(C);
+        P2 = calcP2(P, nodeMax);
+    end
     P2(eye(nodeMax)==1) = 1; % replace diag elements
     PC(:,:) = P2;
 
@@ -53,4 +53,12 @@ function PC = calcPartialCorrelation_(X, exSignal, nodeControl, exControl, isFul
         exControl=double(exControl); exControl(exControl==0) = nan;
         PC(:,nodeNum+1:end,:) = PC(:,nodeNum+1:end,:) .* exControl;
     end
+end
+
+function P2 = calcP2(P, nodeMax)
+    Dp = diag(P);
+    Dp(Dp==0) = 1e-15; % avoid divide by 0
+    pii = repmat(Dp(:),1,nodeMax);
+    pjj = repmat(Dp(:)',nodeMax,1);
+    P2 = -P ./ sqrt(pii .* pjj);
 end
