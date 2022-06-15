@@ -50,7 +50,7 @@ function [gcI, h, P, F, cvFd, AIC, BIC] = calcPairLassoGrangerCausality(X, Y, p,
 %    [b,bint,Yr2] = regress(Yt,Yti);
     Vyt = var(Yr,1);
     if Vyt == 0
-         Vyt = 1.0e-50; % TODO: dummy to avoid inf return
+         Vyt = 1e-15; % TODO: dummy to avoid inf return
     end
     
     gcI = log(Vxt / Vyt);
