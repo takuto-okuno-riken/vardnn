@@ -1,5 +1,5 @@
 %%
-% Caluclate DNN Partial Correlation
+% Calculate DNN Partial Correlation
 % returns DNN Partial Correlation (PC)
 % input:
 %  X            multivariate time series matrix (node x time series)

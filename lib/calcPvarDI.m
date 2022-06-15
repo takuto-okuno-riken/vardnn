@@ -1,5 +1,5 @@
 %%
-% Caluclate pVAR (pairwise Vector Auto-Regression) DI
+% Calculate pVAR (pairwise Vector Auto-Regression) DI
 % returns pVAR DI matrix (DI) and impaired node signals (DIsub)
 % input:
 %  X            multivariate time series matrix (node x time series)

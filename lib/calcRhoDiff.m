@@ -1,5 +1,5 @@
 %%
-% Caluclate RhoDiff (Convergent Cross Mapping - FC (subtract FC))
+% Calculate RhoDiff (Convergent Cross Mapping - FC (subtract FC))
 % returns RhoDiff (RD), FC p-values (Pfc) and CCM p-values (Pccm).
 % input:
 %  X            multivariate time series matrix (node x time series)

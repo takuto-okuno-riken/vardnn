@@ -1,5 +1,5 @@
 %%
-% Caluclate Z-scores of matrix (outmat)
+% Calculate Z-scores of matrix (outmat)
 % input:
 %  mat    input matrix
 

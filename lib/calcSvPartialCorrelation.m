@@ -1,5 +1,5 @@
 %%
-% Caluclate Support Vector Partial Correlation
+% Calculate Support Vector Partial Correlation
 % returns Support Vector Partial Correlation (PC)
 % input:
 %  X            multivariate time series matrix (node x time series)

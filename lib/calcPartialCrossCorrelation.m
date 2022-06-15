@@ -1,5 +1,5 @@
 %%
-% Caluclate Normalized Partial Cross-Correlation
+% Calculate Normalized Partial Cross-Correlation
 % returns Normalized Partial Cross-Correlation (NPCC)
 % input:
 %  X            multivariate time series matrix (node x time series)

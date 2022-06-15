@@ -1,5 +1,5 @@
 %%
-% Caluclate Functional Connectivity
+% Calculate Functional Connectivity
 % returns Functional Connectivity (FC) and p-values (P)
 % input:
 %  X            multivariate time series matrix (node x time series)

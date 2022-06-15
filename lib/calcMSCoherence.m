@@ -1,5 +1,5 @@
 %%
-% Caluclate magnitude-squared coherence
+% Calculate magnitude-squared coherence
 % returns magnitude-squared coherence matrix (MSC)
 % input:
 %  X            multivariate time series matrix (node x time series)

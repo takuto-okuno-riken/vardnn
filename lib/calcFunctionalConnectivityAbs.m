@@ -1,5 +1,5 @@
 %%
-% Caluclate Functional Connectivity (absolute value)
+% Calculate Functional Connectivity (absolute value)
 % returns Functional Connectivity (FC) and p-values (P)
 % input:
 %  X            multivariate time series matrix (node x time series)

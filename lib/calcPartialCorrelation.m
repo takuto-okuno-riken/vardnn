@@ -1,5 +1,5 @@
 %%
-% Caluclate Partial Correlation
+% Calculate Partial Correlation
 % returns Partial Correlation (PC) and p-values (P)
 % input:
 %  X            multivariate time series matrix (node x time series)

@@ -1,5 +1,5 @@
 %%
-% Caluclate mSvmVAR (multivaliate SVM Vector Auto-Regression) DI
+% Calculate mSvmVAR (multivaliate SVM Vector Auto-Regression) DI
 % returns mSvmVAR DI matrix (DI), impaired node signals (DIsub) and regression
 % coefficient matrix (coeff)
 % input:

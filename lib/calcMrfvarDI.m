@@ -1,5 +1,5 @@
 %%
-% Caluclate mRFVAR (multivaliate Random Forest Vector Auto-Regression) DI
+% Calculate mRFVAR (multivaliate Random Forest Vector Auto-Regression) DI
 % returns mRFVAR DI matrix (DI), impaired node signals (DIsub) and regression
 % coefficient matrix (coeff)
 % input:

@@ -1,5 +1,5 @@
 %%
-% Caluclate ROC curve of X with ground truth G
+% Calculate ROC curve of X with ground truth G
 % returns x, y vectors, AUC value and accuracy vectors
 % input:
 %  X           target matrix (node x node) to get ROC curve

@@ -1,5 +1,5 @@
 %%
-% Caluclate nVARNN Directional Influence matrix (DI) and impaired node signals (DIsub)
+% Calculate nVARNN Directional Influence matrix (DI) and impaired node signals (DIsub)
 % returns nVARNN DI matrix (DI) and impaired node signals (DIsub)
 % input:
 %  net          trained nVARNN network

@@ -1,5 +1,5 @@
 %%
-% Caluclate multivariate VAR DNN Mean Impact Value (MIV)
+% Calculate multivariate VAR DNN Mean Impact Value (MIV)
 % returns multivariate VAR DNN Mean Impact Value matrix (MIV) and Mean Absolute Impact Value matrix (MAIV)
 % input:
 %  X            multivariate time series matrix (node x time series)

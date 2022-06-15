@@ -1,5 +1,5 @@
 %%
-% Caluclate multivariate PC VAR DNN Granger causality
+% Calculate multivariate PC VAR DNN Granger causality
 % returns multivariate PC VAR DNN Granger causality index matrix (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
 % and AIC, BIC (of node vector)

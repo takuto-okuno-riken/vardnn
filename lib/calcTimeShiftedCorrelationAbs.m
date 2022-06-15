@@ -1,5 +1,5 @@
 %%
-% Caluclate time shifted Correlation (Abs) (Functional Connectivity)
+% Calculate time shifted Correlation (Abs) (Functional Connectivity)
 % cross-correlation type signal processing
 % returns Functional Connectivity (FC) and p-values (P)
 % input:

@@ -1,5 +1,5 @@
 %%
-% Caluclate Gaussian Processes Partial Correlation
+% Calculate Gaussian Processes Partial Correlation
 % returns Gaussian Processes Partial Correlation (PC)
 % input:
 %  X            multivariate time series matrix (node x time series)

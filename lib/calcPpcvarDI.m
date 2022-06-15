@@ -1,5 +1,5 @@
 %%
-% Caluclate pPCVAR (pairwise Principal Component Vector Auto-Regression) DI
+% Calculate pPCVAR (pairwise Principal Component Vector Auto-Regression) DI
 % returns pPCVAR DI matrix (DI) and impaired node signals (DIsub)
 % input:
 %  net          pPCVAR network

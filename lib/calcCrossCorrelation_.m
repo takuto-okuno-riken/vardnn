@@ -1,5 +1,5 @@
 %%
-% Caluclate normalized cross-correlation (faster version)
+% Calculate normalized cross-correlation (faster version)
 % returns normalized cross-correlation (NCC)
 % input:
 %  X            multivariate time series matrix (node x time series)

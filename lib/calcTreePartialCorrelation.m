@@ -1,5 +1,5 @@
 %%
-% Caluclate Tree Partial Correlation
+% Calculate Tree Partial Correlation
 % returns Tree Partial Correlation (PC)
 % input:
 %  X            multivariate time series matrix (node x time series)

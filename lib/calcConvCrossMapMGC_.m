@@ -1,5 +1,5 @@
 %%
-% Caluclate Convergent Cross Mapping Multivariate Granger Causality
+% Calculate Convergent Cross Mapping Multivariate Granger Causality
 % returns CCM causality index (CCM) and p-values (P).
 % input:
 %  X            multivariate time series matrix (node x time series)

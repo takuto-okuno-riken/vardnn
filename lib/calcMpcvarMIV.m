@@ -1,5 +1,5 @@
 %%
-% Caluclate mPCVAR (multivaliate Principal Component Vector Auto-Regression) Mean Impact Value (MIV)
+% Calculate mPCVAR (multivaliate Principal Component Vector Auto-Regression) Mean Impact Value (MIV)
 % returns Mean Impact Value matrix (MIV) and Mean Absolute Impact Value matrix (MAIV)
 % input:
 %  X            multivariate time series matrix (node x time series)

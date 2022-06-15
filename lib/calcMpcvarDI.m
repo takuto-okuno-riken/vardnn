@@ -1,5 +1,5 @@
 %%
-% Caluclate mPCVAR (multivaliate Principal Component Vector Auto-Regression) DI
+% Calculate mPCVAR (multivaliate Principal Component Vector Auto-Regression) DI
 % returns mPCVAR DI matrix (DI) and impaired node signals (DIsub)
 % input:
 %  net          mPCVAR network

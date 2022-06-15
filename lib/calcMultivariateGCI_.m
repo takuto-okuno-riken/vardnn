@@ -1,5 +1,5 @@
 %%
-% Caluclate multivariate Granger Causality
+% Calculate multivariate Granger Causality
 % returns Granger causality index matrix (gcI)
 % VAR coefficients (A), VAR residuals (E) and VAR residuals covariance matrix (vE)
 % input:

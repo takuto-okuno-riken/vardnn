@@ -1,5 +1,5 @@
 %%
-% Caluclate mGPVAR (multivaliate Gaussian Processes Vector Auto-Regression) DI
+% Calculate mGPVAR (multivaliate Gaussian Processes Vector Auto-Regression) DI
 % returns mGPVAR DI matrix (DI), impaired node signals (DIsub) and regression
 % coefficient matrix (coeff)
 % input:

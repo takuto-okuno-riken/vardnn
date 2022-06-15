@@ -1,5 +1,5 @@
 %%
-% Caluclate Principal Component normalized Partial Cross-Correlation (PcPCC)
+% Calculate Principal Component normalized Partial Cross-Correlation (PcPCC)
 % returns Principal Component normalized Partial Cross-Correlation (PCC)
 % input:
 %  X            multivariate time series matrix (node x time series)

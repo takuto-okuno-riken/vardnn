@@ -1,5 +1,5 @@
 %%
-% Caluclate multivariate VAR DNN Directional Influence matrix (DI) and impaired node signals (DIsub)
+% Calculate multivariate VAR DNN Directional Influence matrix (DI) and impaired node signals (DIsub)
 % returns mVAR DNN DI matrix (DI) and impaired node signals (DIsub)
 % input:
 %  net          trained multivariate VAR DNN network

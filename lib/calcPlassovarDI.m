@@ -1,5 +1,5 @@
 %%
-% Caluclate pLassoVAR (pairwise Lasso Vector Auto-Regression) DI
+% Calculate pLassoVAR (pairwise Lasso Vector Auto-Regression) DI
 % returns pLassoVAR DI matrix (DI) and impaired node signals (DIsub)
 % input:
 %  X            multivariate time series matrix (node x time series)

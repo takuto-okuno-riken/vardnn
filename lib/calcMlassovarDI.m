@@ -1,5 +1,5 @@
 %%
-% Caluclate mLassoVAR (multivaliate Lasso Vector Auto-Regression) DI
+% Calculate mLassoVAR (multivaliate Lasso Vector Auto-Regression) DI
 % returns mLassoVAR DI matrix (DI), impaired node signals (DIsub) and regression
 % coefficient matrix (coeff)
 % input:

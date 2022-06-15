@@ -1,5 +1,5 @@
 %%
-% Caluclate pairwise VAR DNN-DI
+% Calculate pairwise VAR DNN-DI
 % returns pairwise VAR DNN DI matrix (DI) and impaired node signals (DIsub)
 % input:
 %  net          trained Pairwise VAR DNN network structure

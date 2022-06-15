@@ -1,5 +1,5 @@
 %%
-% Caluclate Lasso Partial Correlation
+% Calculate Lasso Partial Correlation
 % returns Lasso Partial Correlation (PC)
 % input:
 %  X            multivariate time series matrix (node x time series)

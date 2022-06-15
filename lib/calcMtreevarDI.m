@@ -1,5 +1,5 @@
 %%
-% Caluclate mTreeVAR (multivaliate Tree Vector Auto-Regression) DI
+% Calculate mTreeVAR (multivaliate Tree Vector Auto-Regression) DI
 % returns mTreeVAR DI matrix (DI), impaired node signals (DIsub) and regression
 % coefficient matrix (coeff)
 % input:

@@ -1,5 +1,5 @@
 %%
-% Caluclate multivariate VAR DNN Mean Impact Value of 3D matrix (Full Input)
+% Calculate multivariate VAR DNN Mean Impact Value of 3D matrix (Full Input)
 % returns multivariate VAR DNN Mean Impact Value 3D matrix (MIV) and Mean Absolute Impact Value 3D matrix (MAIV)
 % input:
 %  X            multivariate time series matrix (node x time series)

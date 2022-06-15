@@ -1,5 +1,5 @@
 %%
-% Caluclate pairwise PCVAR Granger Causality
+% Calculate pairwise PCVAR Granger Causality
 % returns pairwise PCVAR Granger causality index matrix (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
 % and AIC, BIC (of node vector)

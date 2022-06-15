@@ -1,5 +1,5 @@
 %%
-% Caluclate PLS Partial Correlation
+% Calculate PLS Partial Correlation
 % returns PLS Partial Correlation (PC)
 % input:
 %  X            multivariate time series matrix (node x time series)

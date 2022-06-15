@@ -1,5 +1,5 @@
 %%
-% Caluclate multivariate Tree VAR Mean Impact Value (MIV)
+% Calculate multivariate Tree VAR Mean Impact Value (MIV)
 % returns multivariate Tree VAR Mean Impact Value matrix (MIV) and Mean Absolute Impact Value matrix (MAIV)
 % input:
 %  X            multivariate time series matrix (node x time series)

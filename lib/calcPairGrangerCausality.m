@@ -1,5 +1,5 @@
 %%
-% Caluclate pairwised Granger Causality
+% Calculate pairwised Granger Causality
 % returns Granger causality index (gcI), significance (h=1 or 0)
 % p-values (P), F-statistic (F) and the critical value from the F-distribution (cvFd)
 % and AIC, BIC

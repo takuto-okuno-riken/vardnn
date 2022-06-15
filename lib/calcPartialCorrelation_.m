@@ -1,5 +1,5 @@
 %%
-% Caluclate Partial Correlation by Inverse Covariance
+% Calculate Partial Correlation by Inverse Covariance
 % returns Partial Correlation (PC)
 % input:
 %  X            multivariate time series matrix (node x time series)

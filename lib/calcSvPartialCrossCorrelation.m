@@ -1,5 +1,5 @@
 %%
-% Caluclate Support Vector Normalized Partial Cross-Correlation (SvNPCC)
+% Calculate Support Vector Normalized Partial Cross-Correlation (SvNPCC)
 % returns Support Vector Normalized Partial Cross-Correlation (NPCC)
 % input:
 %  X            multivariate time series matrix (node x time series)

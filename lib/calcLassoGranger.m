@@ -1,5 +1,5 @@
 %%
-% Caluclate LassoGranger
+% Calculate LassoGranger
 % returns estimated causality (cause) and so on.
 % input:
 %  X            multivariate time series matrix (node x time series)

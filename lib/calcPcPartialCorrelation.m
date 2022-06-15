@@ -1,5 +1,5 @@
 %%
-% Caluclate Principal Component Partial Correlation
+% Calculate Principal Component Partial Correlation
 % returns Principal Component Partial Correlation (PC)
 % input:
 %  X            multivariate time series matrix (node x time series)

@@ -1,5 +1,5 @@
 %%
-% Caluclate Discrete Fourier transform
+% Calculate Discrete Fourier transform
 % returns One-sided amplitude spectrum D (node x sampling spectrum)
 % input:
 %  X         multivariate time series matrix (node x time series)

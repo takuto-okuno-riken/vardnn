@@ -1,5 +1,5 @@
 %%
-% Caluclate DirectLiNGAM
+% Calculate DirectLiNGAM
 % returns estimated causality (Aest) and so on.
 % input:
 %  X     multivariate time series matrix (node x time series)

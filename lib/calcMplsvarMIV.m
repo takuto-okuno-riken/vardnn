@@ -1,5 +1,5 @@
 %%
-% Caluclate mPLSVAR (multivaliate PLS Vector Auto-Regression) Mean Impact Value (MIV)
+% Calculate mPLSVAR (multivaliate PLS Vector Auto-Regression) Mean Impact Value (MIV)
 % returns Mean Impact Value matrix (MIV) and Mean Absolute Impact Value matrix (MAIV)
 % input:
 %  X            multivariate time series matrix (node x time series)

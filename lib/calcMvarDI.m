@@ -1,5 +1,5 @@
 %%
-% Caluclate mVAR (multivaliate Vector Auto-Regression) DI
+% Calculate mVAR (multivaliate Vector Auto-Regression) DI
 % returns mVAR DI matrix (DI), impaired node signals (DIsub) and regression
 % coefficient matrix (coeff)
 % input:

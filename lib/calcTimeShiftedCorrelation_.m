@@ -1,5 +1,5 @@
 %%
-% Caluclate time shifted Correlation (Functional Connectivity)
+% Calculate time shifted Correlation (Functional Connectivity)
 % cross-correlation type signal processing
 % returns Functional Connectivity (FC)
 % input:

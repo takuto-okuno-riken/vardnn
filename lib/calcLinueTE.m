@@ -1,5 +1,5 @@
 %%
-% Caluclate LINER-Uniform Embedding Transfer Entropy (LINUE-TE)
+% Calculate LINER-Uniform Embedding Transfer Entropy (LINUE-TE)
 % returns Transfer Entropy matrix (TE), significance (h=1 or 0)
 % p-values (P), F-statistic (F), the critical value from the F-distribution (cvFd)
 % and AIC, BIC (of node vector)

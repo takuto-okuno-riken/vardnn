@@ -1,5 +1,5 @@
 %%
-% Caluclate mVAR (multivaliate Vector Auto-Regression) Mean Impact Value (MIV)
+% Calculate mVAR (multivaliate Vector Auto-Regression) Mean Impact Value (MIV)
 % returns mVAR MIV matrix (MIV)
 % input:
 %  X            multivariate time series matrix (node x time series)

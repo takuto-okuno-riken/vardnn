@@ -1,5 +1,5 @@
 %%
-% Caluclate pPLSVAR (pairwise PLS Vector Auto-Regression) DI
+% Calculate pPLSVAR (pairwise PLS Vector Auto-Regression) DI
 % returns pPLSVAR DI matrix (DI) and impaired node signals (DIsub)
 % input:
 %  net          pPLSVAR network

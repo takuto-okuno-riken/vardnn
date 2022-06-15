@@ -1,5 +1,5 @@
 %%
-% Caluclate multivariate VAR LSTM Directional Influence matrix (DI) and impaired node signals (DIsub)
+% Calculate multivariate VAR LSTM Directional Influence matrix (DI) and impaired node signals (DIsub)
 % returns mVAR LSTM DI matrix (DI) and impaired node signals (DIsub)
 % input:
 %  net          trained multivariate VAR LSTM network

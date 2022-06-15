@@ -1,5 +1,5 @@
 %%
-% Caluclate PartiallyConditionedGrangerCausality
+% Calculate PartiallyConditionedGrangerCausality
 % returns estimated causality (GC)
 % input:
 %  X            multivariate time series matrix (node x time series)

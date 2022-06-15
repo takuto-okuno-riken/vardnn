@@ -1,5 +1,5 @@
 %%
-% Caluclate Partial Magnitude-Squared Coherence (MSC)
+% Calculate Partial Magnitude-Squared Coherence (MSC)
 % returns Partial Magnitude-Squared Coherence matrix (MSC)
 % input:
 %  X            multivariate time series matrix (node x time series)

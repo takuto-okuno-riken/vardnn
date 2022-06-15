@@ -1,5 +1,5 @@
 %%
-% Caluclate Random Forest Partial Correlation
+% Calculate Random Forest Partial Correlation
 % returns Random Forest Partial Correlation (PC)
 % input:
 %  X            multivariate time series matrix (node x time series)

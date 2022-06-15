@@ -1,5 +1,5 @@
 %%
-% Caluclate Partial Correlation by linear regression
+% Calculate Partial Correlation by linear regression
 % returns Partial Correlation (PC)
 % input:
 %  X            multivariate time series matrix (node x time series)

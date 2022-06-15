@@ -1,5 +1,5 @@
 %%
-% Caluclate Wavelet Coherence
+% Calculate Wavelet Coherence
 % returns mean Wavelet Cross Spectrum matrix (mWCS), full set of Wavelet
 % Coherence (WCOH) and Cross Spectrums (WCS)
 % input:
