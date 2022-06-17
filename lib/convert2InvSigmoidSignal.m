@@ -13,7 +13,7 @@ function X = convert2InvSigmoidSignal(Y, sig, c, maxsi, minsi, a)
     if nargin < 6
         a = 1;
     end
-    y2 = real(log(Y ./ (Y-1)) / a);
+    y2 = real(log(Y ./ (1-Y)) / a);
     X = sig * y2 + c;
     % replace inf to original max or min values
     idx = find(isinf(X)&X>0);
