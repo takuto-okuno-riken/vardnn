@@ -24,6 +24,79 @@ then show output of causal relational matrix and save data in csv or mat file.
 * Deep Learning Toolbox ver12.1 or later
 * Fuzzy Logic Toolbox ver2.6 or later
 
+## Installation
+1. Download this [Toolbox](https://github.com/takuto-okuno-riken/vardnn/archive/refs/heads/master.zip) zip file.
+2. Extract zip file under your working directory <work_path>.
+3. Run the MATLAB software, and "Add Path" extracted directories (i.e. <work_path>/vardnn-master).
+4. Move to <work_path>/vardnn-master directory and run the following demos.
+
+## Command line tool Demo
+<b>Demo 1</b><br>
+This demo inputs 8 nodes random signal and outputs FC, mvGC, VARDNN-GC and VARDNN-DI results csv files and matrix graphs.
+(Copy and paste this command line. Demo data is included in VARDNN Toolbox.)
+~~~
+>> vardnn -d -c -f -m --showsig --showmat --transform 1 --epoch 100 data/signal8.csv
+start training
+start training whole multivariate VAR DNN network
+training node 1
+training node 2
+training node 3
+training node 4
+training node 5
+training node 6
+training node 7
+training node 8
+finish training whole multivariate VAR DNN network! t = 8.3578s
+VARDNN training result : rsme=0.16055
+output csv file : results/signal8_vddi.csv
+output csv file : results/signal8_vdgc.csv
+output csv file : results/signal8_mvgc.csv
+output csv file : results/signal8_fc.csv
+~~~
+These are output graphs of vardnn command.
+<div align="center">
+<img src="data/rdmfig1.jpg">
+</div>
+
+___
+<b>Demo 2</b><br>
+VARDNN can take exogenous input signals with control matrix.
+~~~
+>> vardnn -d -c --showmat --epoch 100 --transform 1 --nocache --ex data/signal8ex.csv --ectrl data/ctrleye.csv data/signal8.csv
+...
+output csv file : results/signal8_vddi.csv
+output csv file : results/signal8_vdgc.csv
+~~~
+___
+<b>Demo 3</b><br>
+This demo inputs 32 nodes synthetic neural activity signals of .mat file and outputs FC, PC, mvGC, TE, VARDNN-GC and VARDNN-DI results.
+Result matrices of directed FC, P-value, F-value, AIC and BIC are saved in ww32-1_&lt;algorithm&gt;_all.mat file.
+~~~
+>> vardnn -d -c -f -p -m -t --transform 1 --pval --lag 5 --epoch 500 --l2 0.1 --fval 0.05 --aic --bic --format 2 --roiname data/roi32.csv --showsig --showmat --showcg --showroc data/ww32-1.mat data/ww32-2.mat data/ww32-3.mat data/ww32-4.mat
+start training
+start training whole multivariate VAR DNN network
+training node 1
+training node 2
+...
+training node 31
+training node 32
+finish training whole multivariate VAR DNN network! t = 61.5208s
+VARDNN training result : rsme=0.017795
+~~~
+.mat file includes input data matrices.
+| name | matrix | description |
+|:---|:---|:---|
+|X |&lt;nodes&gt; x &lt;length&gt;(double)|node signals|
+|exSignal|&lt;exogenous nodes&gt; x &lt;length&gt;(double)|exogenous signals|
+|nodeControl|&lt;nodes&gt; x &lt;nodes&gt;(logical)|node connection control matrix|
+|exControl|&lt;nodes&gt; x &lt;exogenous nodes&gt;(logical)|exogenous node connection control matrix|
+|groundTruth|&lt;nodes&gt; x &lt;nodes&gt;(logical)|ground truth of network connection for ROC curve|
+
+Several graphs (node signals, result matrix, circle graph, ROC curve) of each algorithm are shown by vardnn command.
+<div align="center">
+<img src="data/rdmfig2.jpg">
+</div>
+
 ## Command line tool
 ~~~
 >> vardnn -h
@@ -62,70 +135,6 @@ usage: vardnn [options] filename.csv ...
   -v, --version       show version number
   -h, --help          show command line help
 ~~~
-
-## Command line tool Demo
-This demo inputs 8 nodes random signal and outputs FC, mvGC, VARDNN-GC and VARDNN-DI results csv files and matrix graphs.
-(Copy and paste this command line. Demo data is included in VARDNN Toolbox.)
-~~~
->> vardnn -d -c -f -m --showsig --showmat --transform 1 --epoch 100 data/signal8.csv
-start training
-start training whole multivariate VAR DNN network
-training node 1
-training node 2
-training node 3
-training node 4
-training node 5
-training node 6
-training node 7
-training node 8
-finish training whole multivariate VAR DNN network! t = 8.3578s
-VARDNN training result : rsme=0.16055
-output csv file : results/signal8_vddi.csv
-output csv file : results/signal8_vdgc.csv
-output csv file : results/signal8_mvgc.csv
-output csv file : results/signal8_fc.csv
-~~~
-These are output graphs of vardnn command.
-<div align="center">
-<img src="data/rdmfig1.jpg">
-</div>
-
-___
-VARDNN can take exogenous input signals with control matrix.
-~~~
->> vardnn -d -c --showmat --epoch 100 --transform 1 --nocache --ex data/signal8ex.csv --ectrl data/ctrleye.csv data/signal8.csv
-...
-output csv file : results/signal8_vddi.csv
-output csv file : results/signal8_vdgc.csv
-~~~
-___
-This demo inputs 32 nodes synthetic neural activity signals of .mat file and outputs FC, PC, mvGC, TE, VARDNN-GC and VARDNN-DI results.
-Result matrices of directed FC, P-value, F-value, AIC and BIC are saved in ww32-1_&lt;algorithm&gt;_all.mat file.
-~~~
->> vardnn -d -c -f -p -m -t --transform 1 --pval --lag 5 --epoch 500 --l2 0.1 --fval 0.05 --aic --bic --format 2 --roiname data/roi32.csv --showsig --showmat --showcg --showroc data/ww32-1.mat data/ww32-2.mat data/ww32-3.mat data/ww32-4.mat
-start training
-start training whole multivariate VAR DNN network
-training node 1
-training node 2
-...
-training node 31
-training node 32
-finish training whole multivariate VAR DNN network! t = 61.5208s
-VARDNN training result : rsme=0.017795
-~~~
-.mat file includes input data matrices.
-| name | matrix | description |
-|:---|:---|:---|
-|X |&lt;nodes&gt; x &lt;length&gt;(double)|node signals|
-|exSignal|&lt;exogenous nodes&gt; x &lt;length&gt;(double)|exogenous signals|
-|nodeControl|&lt;nodes&gt; x &lt;nodes&gt;(logical)|node connection control matrix|
-|exControl|&lt;nodes&gt; x &lt;exogenous nodes&gt;(logical)|exogenous node connection control matrix|
-|groundTruth|&lt;nodes&gt; x &lt;nodes&gt;(logical)|ground truth of network connection for ROC curve|
-
-Several graphs (node signals, result matrix, circle graph, ROC curve) of each algorithm are shown by vardnn command.
-<div align="center">
-<img src="data/rdmfig2.jpg">
-</div>
 
 ## Example Results
 Example results of causal relation matrix graphs of human fMRI signals (132 ROI).
