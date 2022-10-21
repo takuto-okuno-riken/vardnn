@@ -5,6 +5,7 @@
 ## Introduction
 VARDNN is a powerful tool of data-driven analysis technique to estimate directed FC (Functional Connectivity).
 Based on VARDNN framework, two types of directed FC are defined, such as VARDNN-DI and VARDNN-GC to measure causal relation among multiple time-series data.
+(This is Matlab version. Python version is [here](https://github.com/takuto-okuno-riken/vardnnpy))
 <div align="center">
 <img src="data/figure1.jpg">
 </div>
