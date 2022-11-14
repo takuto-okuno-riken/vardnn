@@ -1,6 +1,7 @@
 %%
 % Calculate Discrete Fourier transform
 % returns One-sided amplitude spectrum D (node x sampling spectrum)
+% (See https://jp.mathworks.com/help/matlab/ref/fft.html about this calculation)
 % input:
 %  X         multivariate time series matrix (node x time series)
 %  n         DFT sampling number (even number) (default: 100)
