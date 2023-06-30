@@ -1,11 +1,11 @@
 %%
-% calculate Auto Correlation of each node
-% returns Auto Correlation (node x AC values)
+% calculate Partial Auto Correlation of each node
+% returns Partial Auto Correlation (node x PAC values)
 % input:
 %  X         multivariate time series matrix (node x time series)
-%  maxlag    maxlag of normalized auto-correlation [0, maxlag] (default:15)
+%  maxlag    maxlag of normalized partial auto-correlation [0, maxlag] (default:15)
 
-function [AC, lags] = calcAutoCorrelation(X, maxlag)
+function [AC, lags] = calcPartialAutoCorrelation(X, maxlag)
     if nargin < 2, maxlag = 15; end
     nodeNum = size(X,1);
 
@@ -18,7 +18,7 @@ function [AC, lags] = calcAutoCorrelation(X, maxlag)
         if ulen==1
             AC(i,:) = 0;
         else
-            AC(i,:) = autocorr(double(x), NumLags=maxlag);
+            AC(i,:) = parcorr(double(x), NumLags=maxlag);
         end
     end
     lags = 0:maxlag;
