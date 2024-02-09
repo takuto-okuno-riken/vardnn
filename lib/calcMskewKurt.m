@@ -15,7 +15,8 @@ function [mskew, mkurto, D] = calcMskewKurt(X, C)
     if isempty(C)
         C = cov(X,1);
     end
-    if det(C) == 0
+    dc = det(C);
+    if dc == 0 || isinf(dc)
         iC = invQR(C);
     else
         iC = inv(C);
