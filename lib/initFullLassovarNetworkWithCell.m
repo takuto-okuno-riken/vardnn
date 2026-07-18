@@ -136,6 +136,7 @@ function net = initFullLassovarNetworkWithCell(CX, CexSignal, lags, DFrate, uniq
     df = size(Xti,1) - size(Xti,2); % degree of freedom
 
 %    for n=1:nodeNum
+    parpool('Threads');
     parfor n=1:nodeNum
         if verbose, disp(['calc node' num2str(n)]); end
 

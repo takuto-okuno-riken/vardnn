@@ -120,6 +120,7 @@ function net = initFullVarNetworkWithCell(CX, CexSignal, lags, uniqueDecimal, us
     T = cell(nodeNum,1);
 
 %    for n=1:nodeNum
+    parpool('Threads');
     parfor n=1:nodeNum
         if verbose, disp(['calc node' num2str(n)]); end
 
