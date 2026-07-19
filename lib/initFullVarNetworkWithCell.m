@@ -120,7 +120,9 @@ function net = initFullVarNetworkWithCell(CX, CexSignal, lags, uniqueDecimal, us
     T = cell(nodeNum,1);
 
 %    for n=1:nodeNum
-    parpool('Threads');
+%    if isempty(gcp('nocreate'))
+%        parpool('Threads');   % this doesn't work well. perhaps, threads are used in chol, inv, etc functions. multi-process is better.
+%    end
     parfor n=1:nodeNum
         if verbose, disp(['calc node' num2str(n)]); end
 
